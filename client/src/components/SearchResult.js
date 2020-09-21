@@ -97,14 +97,7 @@ function SearchResult({ location }) {
   }, []);
   useEffect(() => {
     const query = decodeURIComponent(location.search).replace("?q=", "");
-    const options = {
-      mode: "no-cors",
-    };
-    // fetch("http://localhost:8080/search?q=test", options)
-    //   .then((res) => res.json())
-    //   .then((data) => console.log(data));
-
-    fetch("http://localhost:8080/search?q=test", options)
+    fetch("http://localhost:8080/search?q=test")
       .then((res) => res.json())
       .then((data) => console.log(data))
       .catch((err) => console.log("Error: " + err));
