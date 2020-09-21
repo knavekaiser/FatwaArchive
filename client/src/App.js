@@ -18,8 +18,7 @@ function App() {
           <Route path="/" exact component={LandingPage} />
           <Route path="/search" component={SearchResult} />
           <Route path="/fatwa/:id" component={Fatwa} />
-          <Route path="/admin" exact component={AdminPanel} />
-          <Route path="/admin/:any" exact component={AdminPanel} />
+          <Route path="/admin" component={AdminPanel} />
           <Route path="/" component={FourOFour} />
         </Switch>
         <Footer />

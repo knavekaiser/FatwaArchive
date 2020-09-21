@@ -4,16 +4,16 @@ import { SiteContext } from "../Context";
 import "./CSS/Nav.min.css";
 import Searchbar from "./Searchbar";
 
-function Nav({ history }) {
+function Nav({ location }) {
   const [style, setStyle] = useState({ boxShadow: "none" });
   const { lan, setLan } = useContext(SiteContext);
   useEffect(() => {
-    history.location.pathname !== "/" &&
-      setStyle({
-        boxShadow: "0 5px 5px rgba(0,0,0,0.05)",
-      });
-    console.log("run");
-  }, [history]);
+    if (location.pathname === "/") {
+      setStyle({ boxShadow: "none" });
+    } else {
+      setStyle({ boxShadow: "0 5px 5px rgba(0,0,0,0.05)" });
+    }
+  }, [location]);
   return (
     <div style={style} className="navbar">
       <Route

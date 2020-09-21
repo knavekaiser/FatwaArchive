@@ -13,10 +13,17 @@
       text-align: left;
       thead {
         tr {
-          padding: 1rem 0;
+          padding: 1rem 0.5;
+        }
+      }
+      tbody {
+        tr:hover {
+          background: $light-hover;
+          cursor: pointer;
         }
       }
       tr {
+        padding: 0.8rem 0.5rem;
         max-width: 100%;
         border-bottom: 1px solid $light-border;
         display: grid;
@@ -24,17 +31,23 @@
         align-items: center;
         justify-content: center;
         grid-template-columns: 0.25fr 0.3fr 0.37fr 0.04fr 0.04fr;
-        padding: 1rem 0;
+        border-radius: 8px;
         td {
-          &.expend {
+          &.icon {
             cursor: pointer;
             display: grid;
             place-items: center;
-            font-size: 1.7rem;
+            font-size: 1.4rem;
             border-radius: 8px;
             height: 3rem;
-            &:hover {
-              background: $light-hover;
+            transition: color, 0.2s ease-in-out;
+            &.edit:hover {
+              background: rgba(18, 207, 87, 1);
+              color: white;
+            }
+            &.delete:hover {
+              background: rgba(207, 14, 66, 1);
+              color: white;
             }
           }
         }

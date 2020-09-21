@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter, Route, Link } from "react-router-dom";
+import { Route, Link } from "react-router-dom";
 import TextareaAutosize from "react-textarea-autosize";
 import "./CSS/AdminPanel.min.css";
 
@@ -158,7 +158,7 @@ const Group = ({ id, inputs, clone, setGroupCount }) => {
     </div>
   );
 };
-const MultipleInput = ({ inputs, refInput }) => {
+const MultipleInput = ({ setRef, inputs, refInput }) => {
   const [groupCount, setGroupCount] = useState([]);
   useEffect(() => {
     if (inputs[0][0].value) {
@@ -231,6 +231,17 @@ const MultipleInput = ({ inputs, refInput }) => {
   }, [inputs]);
   return <div className="multipleInput">{final}</div>;
 };
+function getGroupData(multipleInput) {
+  const allData = [];
+  Array.from(multipleInput.children).forEach((group, i) => {
+    const data = {};
+    Array.from(group.children).forEach((input) => {
+      data[input.placeholder.toLowerCase()] = input.value;
+    });
+    data.book !== "" && allData.push(data);
+  });
+  return allData;
+}
 
 const refInput = [
   [
@@ -239,8 +250,13 @@ const refInput = [
     { type: "number", label: "Page" },
   ],
 ];
-function AddFatwaForm() {
+function AddFatwaForm({ match }) {
   const [inputs, setInputs] = useState(refInput);
+  const [title, setTitle] = useState("");
+  const [ques, setQues] = useState("");
+  const [ans, setAns] = useState("");
+  const [ref, setRef] = useState([]);
+  const [img, setImg] = useState([]);
   const itemToEdit = null;
   useEffect(() => {
     if (itemToEdit) {
@@ -255,24 +271,61 @@ function AddFatwaForm() {
       setInputs(inputs);
     }
   }, [itemToEdit]);
+
+  function submit(e) {
+    e.preventDefault();
+    setRef(getGroupData(document.querySelector(".addFatwa .multipleInput")));
+    const data = {
+      title: title,
+      ques: ques,
+      ans: ans,
+      ref: ref,
+      img: img,
+    };
+    fetch("/admin/add", {
+      method: "POST",
+      body: JSON.stringify(data),
+    })
+      .then((res) => res.json())
+      .then((data) => console.log(data));
+    console.log(data);
+  }
+  useEffect(() => {
+    if (match.params.id) {
+      console.log("fetch data & update default values");
+    }
+  }, []);
   return (
     <div>
-      <form className="addFatwa">
+      <form className="addFatwa" onSubmit={submit}>
         <section>
           <p className="label">Title</p>
-          <input type="text" id="title" />
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            type="text"
+            id="title"
+          />
         </section>
         <section>
           <p className="label">Question</p>
-          <TextareaAutosize aria-label="minimum height" />
+          <TextareaAutosize
+            value={ques}
+            onChange={(e) => setQues(e.target.value)}
+            aria-label="minimum height"
+          />
         </section>
         <section>
           <p className="label">Answer</p>
-          <TextareaAutosize aria-label="minimum height" />
+          <TextareaAutosize
+            value={ans}
+            onChange={(e) => setAns(e.target.value)}
+            aria-label="minimum height"
+          />
         </section>
         <section>
           <p className="label">Ref.</p>
-          <MultipleInput inputs={inputs} refInput={refInput} />
+          <MultipleInput setRef={setRef} inputs={inputs} refInput={refInput} />
         </section>
         <section className="btns">
           <Link to="/admin" className="btn">
@@ -287,20 +340,28 @@ function AddFatwaForm() {
   );
 }
 function SingleFatwa({ fatwa }) {
-  const [open, setOpen] = useState(false);
   return (
     <tr>
-      <td>{!open ? fatwa.title.substring(0, 30) + "..." : fatwa.title}</td>
-      <td>{!open ? fatwa.ques.substring(0, 30) + "..." : fatwa.ques}</td>
-      <td>{!open ? fatwa.ans.substring(0, 40) + "..." : fatwa.ans}</td>
-      <td className="expend">
-        <ion-icon name="create-outline"></ion-icon>
+      <td>
+        {fatwa.title.length > 30
+          ? fatwa.title.substring(0, 30) + "..."
+          : fatwa.title}
       </td>
-      <td
-        className="expend"
-        onClick={() => (open ? setOpen(false) : setOpen(true))}
-      >
-        <ion-icon name="chevron-down-outline"></ion-icon>
+      <td>
+        {fatwa.ques.length > 30
+          ? fatwa.ques.substring(0, 30) + "..."
+          : fatwa.ques}
+      </td>
+      <td>
+        {fatwa.ans.length > 30 ? fatwa.ans.substring(0, 40) + "..." : fatwa.ans}
+      </td>
+      <td className="icon edit">
+        <Link to={`/admin/add/${fatwa.id}`}>
+          <ion-icon name="create-outline"></ion-icon>
+        </Link>
+      </td>
+      <td className="icon delete">
+        <ion-icon name="trash-outline"></ion-icon>
       </td>
     </tr>
   );
@@ -331,13 +392,14 @@ function AllFatwa() {
 
 function AdminPanel() {
   return (
-    <BrowserRouter>
-      <div className="main adminPanel">
-        <h2>Admin Panel</h2>
-        <Route path="/admin/add" component={AddFatwaForm} />
-        <Route path="/admin/allfatwa" component={AllFatwa} />
-      </div>
-    </BrowserRouter>
+    <div className="main adminPanel">
+      <h2>Admin Panel</h2>
+      <Link to="/admin/allfatwa">Show all Fatwa</Link>
+      <Link to="/admin/add">Add Fatwa</Link>
+      <Route path="/admin/add" exact component={AddFatwaForm} />
+      <Route path="/admin/add/:id" component={AddFatwaForm} />
+      <Route path="/admin/allfatwa" component={AllFatwa} />
+    </div>
   );
 }
 

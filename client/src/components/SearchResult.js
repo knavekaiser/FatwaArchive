@@ -96,8 +96,8 @@ function SearchResult({ location }) {
     });
   }, []);
   useEffect(() => {
-    const query = decodeURIComponent(location.search).replace("?q=", "");
-    fetch(`/search?q=${query}`)
+    const query = decodeURIComponent(location.search);
+    fetch(`/api/search${query}`)
       .then((res) => res.json())
       .then((data) => console.log(data))
       .catch((err) => console.log("Error: " + err));
