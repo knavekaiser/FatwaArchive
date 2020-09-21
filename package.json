@@ -4,7 +4,8 @@
   "description": "To answer all your questions about Islam and Sharia law.",
   "main": "server.js",
   "scripts": {
-    "start": "nodemon server.js",
+    "start": "node server.js",
+    "dev" : "nodemon server.js"
     "install-client": "cd client && npm install",
     "build": "cd client && npm run build",
     "heroku-postbuild": "npm run install-client && npm run build"
