@@ -282,13 +282,13 @@ function AddFatwaForm({ match }) {
       ref: ref,
       img: img,
     };
+    console.log(data);
     fetch("/admin/add", {
       method: "POST",
       body: JSON.stringify(data),
     })
       .then((res) => res.json())
       .then((data) => console.log(data));
-    console.log(data);
   }
   useEffect(() => {
     if (match.params.id) {
