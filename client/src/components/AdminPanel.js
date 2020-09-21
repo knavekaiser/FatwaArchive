@@ -285,6 +285,9 @@ function AddFatwaForm({ match }) {
     console.log(data);
     fetch("/admin/add", {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify(data),
     })
       .then((res) => console.log(res))
