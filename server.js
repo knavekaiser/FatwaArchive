@@ -1,11 +1,10 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const app = express();
-require("dotenv").config();
 
 const PORT = process.env.PORT || 8080;
 
-const URI = process.env.ATLUS_URI;
+const URI = process.env.ATLAS_URI;
 console.log(URI);
 
 const connectDB = async () => {
