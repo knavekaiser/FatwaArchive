@@ -359,6 +359,7 @@ function AddFatwaForm({ match }) {
   );
 }
 function SingleFatwa({ fatwa }) {
+  console.log(fatwa);
   function deleteFatwa(e) {
     const id = e.target.parentElement.dataset.id;
     fetch(`/api/admin/${id}`, {
@@ -374,7 +375,7 @@ function SingleFatwa({ fatwa }) {
       });
   }
   return (
-    <tr data-id={fatwa.id}>
+    <tr data-id={fatwa._id}>
       <td>
         {fatwa.title.length > 30
           ? fatwa.title.substring(0, 30) + "..."
