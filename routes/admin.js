@@ -20,7 +20,7 @@ router.route("/add").post((req, res) => {
   newFatwa
     .save()
     .then(() => res.json("fatwa Added!"))
-    .catch((err) => res.status(400).json("Error: " + err));
+    .catch((err) => res.status(400).json("Error: " + err + req.body));
 });
 
 module.exports = router;
