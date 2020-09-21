@@ -7,6 +7,18 @@ router.route("/allfatwa").get((req, res) => {
     .catch((err) => res.status(400).json("Error: " + err));
 });
 
+router.route("/:id").delete((req, res) => {
+  Fatwa.findByIdAndDelete(req.params.id)
+    .then(() => res.json("Item Deleted!"))
+    .catch((err) => res.status(400).json("Error: " + err));
+});
+
+router.route("/:d").get((req, res) => {
+  Fatwa.findById(req.params.id)
+    .then((fatwa) => res.json(fatwa))
+    .catch((err) => res.status(400).json("Error: " + err));
+});
+
 router.route("/add").post((req, res) => {
   const newFatwa = new Fatwa({
     added: new Date(),

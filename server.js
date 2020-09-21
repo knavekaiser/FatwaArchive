@@ -21,7 +21,7 @@ app.use(express.json());
 const client = require("./routes/client");
 const admin = require("./routes/admin");
 app.use("/api", client);
-app.use("/admin", admin);
+app.use("/api/admin", admin);
 
 if (process.env.NODE_ENV === "production") {
   app.use(express.static("./client/build"));

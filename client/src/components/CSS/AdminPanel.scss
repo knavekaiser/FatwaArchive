@@ -34,6 +34,9 @@
         border-radius: 8px;
         td {
           &.icon {
+            ion-icon {
+              pointer-events: none;
+            }
             cursor: pointer;
             display: grid;
             place-items: center;

@@ -258,10 +258,24 @@ function AddFatwaForm({ match }) {
   const [ans, setAns] = useState("");
   const [ref, setRef] = useState([]);
   const [img, setImg] = useState([]);
-  const itemToEdit = null;
   useEffect(() => {
-    if (itemToEdit) {
-      let inputs = itemToEdit.products.map((item) => {
+    if (match.params.id) {
+      fetch(`/api/admin/${match.params.id}`)
+        .then((res) => res.json())
+        .then((data) => {
+          console.log(data);
+          setTitle(data.title);
+          setQues(data.ques);
+          setAns(data.ans);
+          setRef(data.ref);
+          setImg(data.img);
+        })
+        .catch((err) => console.log(err));
+    }
+  }, [history]);
+  useEffect(() => {
+    if (ref.length > 0) {
+      let inputs = ref.map((item) => {
         return [
           { type: "text", label: "Book", clone: true, value: item.book },
           { type: "number", label: "Part", value: item.part },
@@ -271,8 +285,7 @@ function AddFatwaForm({ match }) {
       inputs.push(...refInput);
       setInputs(inputs);
     }
-  }, [itemToEdit]);
-
+  }, [ref]);
   function submit(e) {
     e.preventDefault();
     setRef(getGroupData(document.querySelector(".addFatwa .multipleInput")));
@@ -283,15 +296,13 @@ function AddFatwaForm({ match }) {
       ref: ref,
       img: img,
     };
-    console.log(data);
-    fetch("/admin/add", {
+    fetch("/api/admin/add", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
     }).then((res) => {
-      console.log(res);
       if (res.status === 200) {
         history.push("/admin");
         return;
@@ -348,8 +359,22 @@ function AddFatwaForm({ match }) {
   );
 }
 function SingleFatwa({ fatwa }) {
+  function deleteFatwa(e) {
+    const id = e.target.parentElement.dataset.id;
+    fetch(`/api/admin/${id}`, {
+      method: "DELETE",
+    })
+      .then((res) => {
+        if (res.status === "200") {
+          console.log("item deleted");
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
   return (
-    <tr>
+    <tr data-id={fatwa.id}>
       <td>
         {fatwa.title.length > 30
           ? fatwa.title.substring(0, 30) + "..."
@@ -368,14 +393,20 @@ function SingleFatwa({ fatwa }) {
           <ion-icon name="create-outline"></ion-icon>
         </Link>
       </td>
-      <td className="icon delete">
+      <td onClick={deleteFatwa} className="icon delete">
         <ion-icon name="trash-outline"></ion-icon>
       </td>
     </tr>
   );
 }
 function AllFatwa() {
-  const [allFatwa, setAllFatwa] = useState(data);
+  const [allFatwa, setAllFatwa] = useState([]);
+  useEffect(() => {
+    fetch("/api/admin/allfatwa")
+      .then((res) => res.json())
+      .then((data) => setAllFatwa(data))
+      .catch((err) => console.log(err));
+  }, []);
   return (
     <div className="allFatwa">
       <table>
