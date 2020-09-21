@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useHistory } from "react";
 import { Route, Link } from "react-router-dom";
 import TextareaAutosize from "react-textarea-autosize";
 import "./CSS/AdminPanel.min.css";
@@ -289,9 +289,14 @@ function AddFatwaForm({ match }) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
-    })
-      .then((res) => console.log(res))
-      .then((data) => console.log(data));
+    }).then((res) => {
+      console.log(res);
+      if (res.status === 200) {
+        const history = useHistory();
+        history.push("/admin");
+        return;
+      }
+    });
   }
   useEffect(() => {
     if (match.params.id) {
