@@ -97,7 +97,7 @@ function SearchResult({ location }) {
   }, []);
   useEffect(() => {
     const query = decodeURIComponent(location.search).replace("?q=", "");
-    fetch("http://localhost:8080/search?q=test")
+    fetch(`/search?q=${query}`)
       .then((res) => res.json())
       .then((data) => console.log(data))
       .catch((err) => console.log("Error: " + err));
