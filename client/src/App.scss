@@ -1,0 +1,45 @@
+@import "components/CSS/variables";
+@font-face {
+  font-family: "Siyamrupali";
+  src: url(./Siyamrupali.ttf);
+}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.App {
+  letter-spacing: 0.05em;
+  font-family: "Roboto", sans-serif, "Siyamrupali";
+  text-align: center;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: $base-white;
+}
+a {
+  text-decoration: inherit;
+  color: inherit;
+}
+li {
+  list-style: none;
+}
+
+.main {
+  flex: 1;
+}
+
+.fourOFour {
+  h2 {
+    font-size: 4rem;
+    &.ar {
+      font-size: 5rem;
+      line-height: 0.75em;
+    }
+    &.bn {
+      font-family: "Siyamrupali";
+    }
+  }
+  padding-top: 10%;
+}

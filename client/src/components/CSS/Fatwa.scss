@@ -1,0 +1,16 @@
+.fatwa {
+  margin-left: 11rem;
+  text-align: left;
+  max-width: 50rem;
+  padding: 2rem 0.5rem;
+  p {
+    text-align: justify;
+    span {
+      color: rgb(31, 7, 126);
+    }
+  }
+  .ans::first-line,
+  .ques::first-line {
+    text-indent: 2rem;
+  }
+}

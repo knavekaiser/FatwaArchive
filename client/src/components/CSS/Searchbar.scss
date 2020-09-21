@@ -1,0 +1,68 @@
+@import "variables";
+
+#searchbar {
+  display: grid;
+  align-items: center;
+  position: relative;
+  button {
+    border: none;
+    outline: none;
+    background: none;
+    display: grid;
+    place-items: center;
+    position: absolute;
+    right: 0;
+    padding: 0.5rem;
+    top: 0.17rem;
+    margin-right: 0.2rem;
+    font-size: 1.55rem;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: background-color 0.15s ease-in-out;
+    color: $light-border;
+    &:hover {
+      background: #eee;
+      color: #333;
+    }
+  }
+  input {
+    font-family: "Roboto", sans-serif, "Siyamrupali";
+    flex: 1;
+    border-radius: 2rem;
+    padding: 0.75rem 1rem;
+    padding-right: 3rem;
+    background: rgb(252, 252, 252);
+    border: 1px solid $light-border;
+    font-size: 1.05rem;
+    letter-spacing: 0.03em;
+    outline: none;
+    &:focus {
+      box-shadow: 0 5px 8px rgba(0, 0, 0, 0.1);
+      border-color: $light-hover;
+    }
+    &.suggestionVisible {
+      border-radius: 1.5rem 1.5rem 0 0;
+    }
+  }
+  .suggestions {
+    position: absolute;
+    width: 100%;
+    top: 38px;
+    text-align: left;
+    background: rgb(252, 252, 252);
+    border-radius: 0 0 1.5rem 1.5rem;
+    box-shadow: 0 5px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    border: 1px solid $light-hover;
+    li {
+      a {
+        padding: 0.5rem 1rem;
+        display: block;
+        width: 100%;
+        &:hover {
+          background-color: $light-hover;
+        }
+      }
+    }
+  }
+}

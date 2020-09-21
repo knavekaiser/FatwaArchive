@@ -1,0 +1,104 @@
+@import "variables";
+
+.adminPanel {
+  display: grid;
+  justify-content: center;
+  align-items: center;
+  .allFatwa {
+    width: 100vw;
+    max-width: 95%;
+    margin: auto;
+    table {
+      width: 100%;
+      text-align: left;
+      thead {
+        tr {
+          padding: 1rem 0;
+        }
+      }
+      tr {
+        max-width: 100%;
+        border-bottom: 1px solid $light-border;
+        display: grid;
+        grid-column-gap: 1rem;
+        align-items: center;
+        justify-content: center;
+        grid-template-columns: 0.25fr 0.3fr 0.37fr 0.04fr 0.04fr;
+        padding: 1rem 0;
+        td {
+          &.expend {
+            cursor: pointer;
+            display: grid;
+            place-items: center;
+            font-size: 1.7rem;
+            border-radius: 8px;
+            height: 3rem;
+            &:hover {
+              background: $light-hover;
+            }
+          }
+        }
+      }
+    }
+  }
+  .addFatwa {
+    .btn {
+      border: 1px solid $light-border;
+      border-radius: 8px;
+      font-size: 1rem;
+      padding: 0.75rem 0.5rem;
+      text-transform: uppercase;
+      cursor: pointer;
+      outline: none;
+    }
+    .multipleInput {
+      display: grid;
+      grid-row-gap: 1rem;
+      .group {
+        justify-content: space-between;
+        align-items: center;
+        display: grid;
+        grid-auto-flow: column;
+        grid-column-gap: 1rem;
+        grid-template-columns: 0.5fr 0.25fr 0.25fr;
+      }
+    }
+    .label {
+      text-align: left;
+      margin: 0rem 0.5rem;
+    }
+    display: grid;
+    width: 40rem;
+    max-width: 100%;
+    grid-row-gap: 1rem;
+    margin-bottom: 3rem;
+    section {
+      width: 100%;
+      &.btns {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-column-gap: 1rem;
+      }
+    }
+    input,
+    textarea {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid $light-border;
+      background: $base-white;
+      padding: 0.75rem;
+      font-size: 1rem;
+      letter-spacing: 0.05em;
+      line-height: 1.5em;
+      outline: none;
+      overflow: hidden;
+      &:focus {
+        box-shadow: 0 0 0 2px $accent;
+      }
+    }
+    textarea {
+      font-family: "Roboto", sans-serif, "Siyamrupali";
+      resize: none;
+    }
+  }
+}

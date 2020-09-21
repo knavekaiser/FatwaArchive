@@ -1,0 +1,41 @@
+const express = require("express");
+const mongoose = require("mongoose");
+const app = express();
+require("dotenv").config();
+
+const PORT = process.env.PORT || 8080;
+
+const URI = process.env.ATLUS_URI;
+console.log(URI);
+
+const connectDB = async () => {
+  await mongoose.connect(URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
+  console.log("connected to db");
+};
+
+connectDB();
+app.use(express.json());
+
+const client = require("./routes/client");
+const admin = require("./routes/admin");
+app.use("/", client);
+app.use("/admin", admin);
+
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static("./client/build"));
+}
+
+app.get("/api", (req, res) => {
+  const data = {
+    test: "pass",
+    data: true,
+  };
+  res.json(data);
+});
+
+app.listen(PORT, () => {
+  console.log("server just ran");
+});

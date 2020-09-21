@@ -1,0 +1,38 @@
+@import "variables";
+
+.searchResult {
+  text-align: left;
+  margin-left: 11rem;
+  max-width: 50rem;
+  .resultInfo {
+    padding: 0.5rem;
+    padding-top: 1rem;
+    color: $light-text;
+    padding-bottom: 0;
+  }
+  .content {
+    .result {
+      padding: 1rem 0.5rem;
+      .ques {
+        color: #444;
+        font-weight: 600;
+        &:hover {
+          text-decoration: underline;
+          cursor: pointer;
+        }
+      }
+      .ans {
+        padding-top: 0.25rem;
+        cursor: default;
+        color: rgba(0, 0, 0, 0.8);
+        font-size: 0.85rem;
+      }
+    }
+  }
+}
+.noResult {
+  margin: 2rem 0.5rem;
+  font-size: 1.25rem;
+  // font-style: italic;
+  color: $light-text;
+}

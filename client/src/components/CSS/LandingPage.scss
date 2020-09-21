@@ -1,0 +1,21 @@
+.landingPage {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  .content {
+    transform: translateY(20%);
+    padding: 1rem;
+    width: 100%;
+    margin: 0 1rem;
+    max-width: 35rem;
+    .siteTitle {
+      padding: 1rem;
+      color: #2a2a2a;
+      font-weight: lighter;
+      font-family: "Rakkas", cursive;
+      letter-spacing: 0;
+      font-size: 5rem;
+    }
+  }
+}

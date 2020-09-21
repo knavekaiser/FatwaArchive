@@ -4,7 +4,10 @@
   "description": "To answer all your questions about Islam and Sharia law.",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "nodemon server.js",
+    "install-client": "cd client && npm install",
+    "build": "cd client && npm run build",
+    "heroku-postbuild": "npm run install-client && npm run build"
   },
   "repository": {
     "type": "git",
@@ -21,5 +24,14 @@
   "bugs": {
     "url": "https://github.com/knavekaiser/FatwaArchive/issues"
   },
-  "homepage": "https://github.com/knavekaiser/FatwaArchive#readme"
+  "homepage": "https://github.com/knavekaiser/FatwaArchive#readme",
+  "dependencies": {
+    "axois": "0.0.1-security",
+    "express": "^4.17.1",
+    "mongoose": "^5.10.6"
+  },
+  "devDependencies": {
+    "dotenv": "^8.2.0",
+    "nodemon": "^2.0.4"
+  }
 }
