@@ -287,7 +287,7 @@ function AddFatwaForm({ match }) {
       method: "POST",
       body: JSON.stringify(data),
     })
-      .then((res) => res.json())
+      .then((res) => console.log(res))
       .then((data) => console.log(data));
   }
   useEffect(() => {
