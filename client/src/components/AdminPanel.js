@@ -251,6 +251,7 @@ const refInput = [
   ],
 ];
 function AddFatwaForm({ match }) {
+  const history = useHistory();
   const [inputs, setInputs] = useState(refInput);
   const [title, setTitle] = useState("");
   const [ques, setQues] = useState("");
@@ -292,7 +293,6 @@ function AddFatwaForm({ match }) {
     }).then((res) => {
       console.log(res);
       if (res.status === 200) {
-        const history = useHistory();
         history.push("/admin");
         return;
       }
