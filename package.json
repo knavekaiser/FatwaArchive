@@ -1,0 +1,25 @@
+{
+  "name": "fatwaarchive",
+  "version": "1.0.0",
+  "description": "To answer all your questions about Islam and Sharia law.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/knavekaiser/FatwaArchive.git"
+  },
+  "keywords": [
+    "Islam",
+    "Fatwa",
+    "Quran",
+    "Sunnah"
+  ],
+  "author": "Naeem Ahmad",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/knavekaiser/FatwaArchive/issues"
+  },
+  "homepage": "https://github.com/knavekaiser/FatwaArchive#readme"
+}
