@@ -8,7 +8,7 @@ function Fatwa({ match }) {
     ref: [],
   });
   useEffect(() => {
-    fetch(`http://localhost:8080/api/fatwa/${match.params.id}`)
+    fetch(`/api/fatwa/${match.params.id}`)
       .then((res) => res.json())
       .then((data) => setFatwa(data))
       .catch((err) => console.log(err));
@@ -63,3 +63,5 @@ function Fatwa({ match }) {
 }
 
 export default Fatwa;
+
+//1 fetch req           http://localhost:8080
