@@ -12,10 +12,10 @@
     place-items: center;
     position: absolute;
     right: 0;
-    padding: 0.5rem;
-    top: 0.17rem;
-    margin-right: 0.2rem;
-    font-size: 1.55rem;
+    padding: 0.3em;
+    top: 0.1em;
+    margin-right: 0.1em;
+    font-size: 1.55em;
     cursor: pointer;
     border-radius: 50%;
     transition: background-color 0.15s ease-in-out;
@@ -28,9 +28,9 @@
   input {
     font-family: "Roboto", sans-serif, "Siyamrupali";
     flex: 1;
-    border-radius: 2rem;
-    padding: 0.75rem 1rem;
-    padding-right: 3rem;
+    border-radius: 2em;
+    padding: 0.75em 0.8em;
+    padding-right: 3em;
     background: rgb(252, 252, 252);
     border: 1px solid $light-border;
     font-size: 1.05rem;
@@ -69,8 +69,11 @@
 
 @media only screen and (max-width: 480px) {
   #searchbar {
+    button {
+      padding: 0.15em;
+    }
     input {
-      padding: 0rem;
+      padding: 0.5em;
     }
   }
 }
