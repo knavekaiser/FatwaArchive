@@ -1,5 +1,4 @@
 .landingPage {
-  flex: 1;
   display: flex;
   justify-content: center;
   overflow: hidden;
@@ -16,6 +15,15 @@
       font-family: "Rakkas", cursive;
       letter-spacing: 0;
       font-size: 5rem;
+    }
+  }
+}
+@media only screen and (max-width: 480px) {
+  .landingPage {
+    .content {
+      .siteTitle {
+        font-size: 3rem;
+      }
     }
   }
 }

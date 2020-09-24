@@ -11,6 +11,7 @@ const connectDB = async () => {
   await mongoose.connect(URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
+    useCreateIndex: true,
   });
   console.log("connected to db");
 };
@@ -18,10 +19,8 @@ const connectDB = async () => {
 connectDB();
 app.use(express.json());
 
-const client = require("./routes/client");
-const admin = require("./routes/admin");
-app.use("/api", client);
-app.use("/api/admin", admin);
+const api = require("./routes/apis");
+app.use("/api", api);
 
 if (process.env.NODE_ENV === "production") {
   app.use(express.static("./client/build"));

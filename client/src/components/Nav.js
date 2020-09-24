@@ -30,15 +30,7 @@ function Nav({ location }) {
       <div></div>
       <nav>
         <ul>
-          <li>
-            <Link to="/signup">SIGN UP</Link>
-          </li>
-          <li>
-            <Link to="/login">LOG IN</Link>
-          </li>
-          <li onClick={() => (lan === "BN" ? setLan("EN") : setLan("BN"))}>
-            {lan}
-          </li>
+          <li>{lan}</li>
         </ul>
       </nav>
     </div>
@@ -46,3 +38,12 @@ function Nav({ location }) {
 }
 
 export default Nav;
+
+//  lan onClick={() => (lan === "BN" ? setLan("EN") : setLan("BN"))}
+
+// <li>
+// <Link to="/signup">SIGN UP</Link>
+// </li>
+// <li>
+// <Link to="/login">LOG IN</Link>
+// </li>

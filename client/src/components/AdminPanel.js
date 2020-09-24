@@ -3,74 +3,6 @@ import { Route, Link, useHistory } from "react-router-dom";
 import TextareaAutosize from "react-textarea-autosize";
 import "./CSS/AdminPanel.min.css";
 
-// const data = [
-//   {
-//     id: "23541wgtasgaasgaserq432d",
-//     title: "ইমিটেশনের হাকিকত",
-//     ques:
-//       "ইমিটেশনের হাকিকত কী? ইমিটেশনের অলংকার আংটি, চুড়ি, চেইন ইত্যাদি নারীদের জন্য বৈধ বলা হয় এবং নারীরা ব্যাপকভাবে ব্যবহারও করে। অথচ লোহা, পিতল, তামা ইত্যাদি ধাতু দিয়ে তৈরি আংটি পরিধান করা নারীদের জন্যও বৈধ নয়। ইমিটেশনও তো এসকল ধাতু দিয়ে তৈরি। তাহলে আসল ফরকটা কোথায়? ২. এলার্জির জন্য পিতলের তৈরি আংটি ব্যবহার করা জায়েয আছে কি ?",
-//     ans:
-//       "ইমিটেশন মূলত তামা, পিতল ও ব্রোঞ্জ ইত্যাদির মিশ্রণে তৈরী এক প্রকারের অলংকার। যার মধ্যে বিভিন্ন কেমিক্যাল প্রক্রিয়াজাত করে সোনালি কালারের প্রলেপ দেওয়া হয়। আর নিরেট লোহা, তামা কিংবা পিতলের আংটি ইত্যাদি মেয়েদের জন্য ব্যবহার করা নিষেধ হলেও এসবের ওপর যদি অন্য কোনো কিছুর  প্রলেপ থাকে তাহলে তা ব্যবহার করা যাবে। সেমতে নারীদের জন্য সোনা-রুপা ছাড়াও সাজ-সজ্জা হিসাবে লোহা, পিতল, তামা, কাচ-হীরা ইত্যাদি ধাতু দ্বারা তৈরী অলংকার পরিধান করা বৈধ । এলার্জির অযুহাতে নিরেট পিতলের আংটি ব্যবহার করা বৈধ নয়। তবে তার উপর যদি রুপার প্রলেপ থাকে তাহলে নারী-পুরুষ উভয়ে ব্যবহার করতে পারবে। আর স্বর্ণের প্রলেপ থাকলে শুধু নারীদের জন্য বৈধ হবে।",
-//     img: [],
-//     date: "2020-03-21",
-//     ref: [
-//       "আবু দাঊদ-৪/৯০",
-//       " এ’লাউস সুনান-১৭/৩১২",
-//       "মুসান্নাফে ইবনে আবী শায়বাহ-৫/১৯৪",
-//       " হেদায়া-৪/৩৬৭",
-//       " শামী-৬/৩৫৬",
-//       " আল-মুহীতুল বুরহানী-৫/৩৪৯",
-//       " ইমদাদুল ফাতাওয়া-৪/১৩৫; মাহমুদিয়া-১৪/৪২১",
-//     ],
-//   },
-//   {
-//     id: "23541wgt34523432d",
-//     title: "ভ্রু-প্লাক করার বিধান",
-//     ques: "ভ্রু-প্লাক করার বিধান কী?",
-//     ans:
-//       "ভ্রু যদি অতিরিক্ত বেশি হয়ে যায় যে দেখতে খারাপ দেখা যায়। তাহলে তা কেটে স্বাভাবিক অবস্থায় রাখা জায়েয আছে। তবে শুধুমাত্র ফ্যাশনের জন্য ভ্রু-প্লাক করা জায়েয নেই ।",
-//     img: [],
-//     date: "2020-03-21",
-//     ref: [
-//       "আবু দাঊদ-৪/৯০",
-//       " এ’লাউস সুনান-১৭/৩১২",
-//       "মুসান্নাফে ইবনে আবী শায়বাহ-৫/১৯৪",
-//       " হেদায়া-৪/৩৬৭",
-//       " শামী-৬/৩৫৬",
-//       " আল-মুহীতুল বুরহানী-৫/৩৪৯",
-//       " ইমদাদুল ফাতাওয়া-৪/১৩৫; মাহমুদিয়া-১৪/৪২১",
-//     ],
-//   },
-//   {
-//     id: "125143wgasdgaasgaserq432d",
-//     title: "মেসেজের মাধ্যমে তালাক",
-//     ques:
-//       "যদি কোন স্বামী তার স্ত্রীকে মেসেজের মাধ্যমে বলে ফেলে যে, ‘‘আজ থেকে তুই স্বাধীন” মানে তোর মনে যা চায়, তুই তাই কর। এখানে স্বামীর তালাকের কোন নিয়ত নেই তাহলে এটা কী হতে পারে?",
-//     ans:
-//       "স্বামী তার স্ত্রীকে “তুই স্বাধীন” বলার ক্ষেত্রে তালাকের নিয়ত না থাকলে স্ত্রীর উপর কোন তালাক পতিত হবেনা ।",
-//     img: [],
-//     date: "2020-03-21",
-//     ref: ["সহিহ্ বুখারী-৭/৪৩", "হিদায়া-২/৩৭৩", "মাউসূআতুল ফিকহিয়্যাহ-৩৫/১৩৮"],
-//   },
-//   {
-//     id: "afsdhawq3423sgaasgaserq432d",
-//     title: "সুন্নত কিংবা নফলের কাযা",
-//     ques:
-//       "হযরতের কাছে আমার জানার বিষয় হলো, যেসব ফরজ নামাযের কাযা পড়া হয় ঐসব নামাযের সুন্নত কিংবা নফলের কাযা আছে ? বিস্তারিত জানিয়ে বাধিত করবেন।",
-//     ans:
-//       "সুন্নত এবং নফলের কাযা আদায় করতে হয় না। তবে ফজরের সুন্নত এক্ষেত্রে ব্যতিক্রম। কখনো ফজরের সুন্নত নামায ফরজসহ কাযা হয়ে গেলে ওই দিন সূর্যোদয়ের পর থেকে দ্বিপ্রহরের পূর্বে কাযা পড়লে ফজরের সাথে সুন্নতও আদায় করে নিবে। আর শুধুমাত্র সুন্নত কাযা হয়ে গেলে সূর্যোদয়ের পর থেকে দ্বিপ্রহরের পূর্বে আদায় করে নেওয়া উত্তম ।",
-//     img: [],
-//     date: "2020-03-21",
-//     ref: [
-//       "বাদায়েউস সানায়ে ১/৬৪৩",
-//       "ফাতাওয়ায়ে তাতারখানিয়া ২/৩০২",
-//       "মআল বাহরুর রায়েক ২/১৩২",
-//       "রদ্দুল মুহতার ২/৫১৩",
-//       "সুনানে তিরমিযি, হাদিস ১৮৩",
-//     ],
-//   },
-// ];
-
 const ID = (length) => {
   var result = "";
   var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -260,10 +192,9 @@ function AddFatwaForm({ match }) {
   const [img, setImg] = useState([]);
   useEffect(() => {
     if (match.params.id) {
-      fetch(`/api/admin/${match.params.id}`)
+      fetch(`/api/fatwa/${match.params.id}`)
         .then((res) => res.json())
         .then((data) => {
-          console.log(data);
           setTitle(data.title);
           setQues(data.ques);
           setAns(data.ans);
@@ -272,7 +203,7 @@ function AddFatwaForm({ match }) {
         })
         .catch((err) => console.log(err));
     }
-  }, [history]);
+  }, []);
   useEffect(() => {
     if (ref.length > 0) {
       let inputs = ref.map((item) => {
@@ -288,16 +219,18 @@ function AddFatwaForm({ match }) {
   }, [ref]);
   function submit(e) {
     e.preventDefault();
-    setRef(getGroupData(document.querySelector(".addFatwa .multipleInput")));
     const data = {
       title: title,
       ques: ques,
       ans: ans,
-      ref: ref,
+      ref: getGroupData(document.querySelector(".addFatwa .multipleInput")),
       img: img,
     };
-    fetch("/api/admin/add", {
-      method: "POST",
+    const url = !match.params.id
+      ? "/api/fatwa/add"
+      : `/api/fatwa/add/${match.params.id}`;
+    fetch(url, {
+      method: "PATCH",
       headers: {
         "Content-Type": "application/json",
       },
@@ -309,11 +242,6 @@ function AddFatwaForm({ match }) {
       }
     });
   }
-  useEffect(() => {
-    if (match.params.id) {
-      console.log("fetch data & update default values");
-    }
-  }, []);
   return (
     <div>
       <form className="addFatwa" onSubmit={submit}>
@@ -359,10 +287,9 @@ function AddFatwaForm({ match }) {
   );
 }
 function SingleFatwa({ fatwa }) {
-  console.log(fatwa);
   function deleteFatwa(e) {
     const id = e.target.parentElement.dataset.id;
-    fetch(`/api/admin/${id}`, {
+    fetch(`/api/fatwa/${id}`, {
       method: "DELETE",
     })
       .then((res) => {
@@ -377,9 +304,11 @@ function SingleFatwa({ fatwa }) {
   return (
     <tr data-id={fatwa._id}>
       <td>
-        {fatwa.title.length > 30
-          ? fatwa.title.substring(0, 30) + "..."
-          : fatwa.title}
+        <Link to={`/fatwa/${fatwa._id}`}>
+          {fatwa.title.length > 30
+            ? fatwa.title.substring(0, 30) + "..."
+            : fatwa.title}
+        </Link>
       </td>
       <td>
         {fatwa.ques.length > 30
@@ -390,7 +319,7 @@ function SingleFatwa({ fatwa }) {
         {fatwa.ans.length > 30 ? fatwa.ans.substring(0, 40) + "..." : fatwa.ans}
       </td>
       <td className="icon edit">
-        <Link to={`/admin/add/${fatwa.id}`}>
+        <Link to={`/admin/add/${fatwa._id}`}>
           <ion-icon name="create-outline"></ion-icon>
         </Link>
       </td>
@@ -403,9 +332,11 @@ function SingleFatwa({ fatwa }) {
 function AllFatwa() {
   const [allFatwa, setAllFatwa] = useState([]);
   useEffect(() => {
-    fetch("/api/admin/allfatwa")
+    fetch("/api/allfatwa")
       .then((res) => res.json())
-      .then((data) => setAllFatwa(data))
+      .then((data) => {
+        setAllFatwa(data);
+      })
       .catch((err) => console.log(err));
   }, []);
   return (
@@ -422,7 +353,7 @@ function AllFatwa() {
         </thead>
         <tbody>
           {allFatwa.map((fatwa) => (
-            <SingleFatwa key={fatwa.id} fatwa={fatwa} />
+            <SingleFatwa key={fatwa._id} fatwa={fatwa} />
           ))}
         </tbody>
       </table>
@@ -444,3 +375,7 @@ function AdminPanel() {
 }
 
 export default AdminPanel;
+
+// delete fatwa -
+// allfatwa fetch -            http://localhost:8080
+// allfatwa form 3 -
