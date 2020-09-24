@@ -10,11 +10,13 @@ function Searchbar() {
   const history = useHistory();
   function submit(e) {
     e.preventDefault();
-    searchInput !== "" &&
+    if (searchInput !== "") {
       history.push({
         pathname: "/search",
         search: "?" + new URLSearchParams({ q: searchInput }).toString(),
       });
+      setShowSuggestion(false);
+    }
   }
 
   function change(e) {
@@ -57,7 +59,6 @@ function Searchbar() {
               : "suggestionVisible"
           }
           onChange={change}
-          // onBlur={() => setShowSuggestion(false)}
           type="text"
           placeholder="প্রশ্ন বা বিষয়বস্তু..."
           value={searchInput}
