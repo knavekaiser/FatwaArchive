@@ -19,15 +19,14 @@ function Nav({ location }) {
       <Route
         path="/:other"
         render={() => (
-          <div className="logoNSearch">
+          <>
             <Link className="logo" to="/">
-              Fatwa Archive
+              FATWA ARCHIVE
             </Link>
             <Searchbar />
-          </div>
+          </>
         )}
       />
-      <div></div>
       <nav>
         <ul>
           <li>{lan}</li>

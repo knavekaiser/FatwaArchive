@@ -1,32 +1,23 @@
 @import "variables";
 
 .navbar {
+  width: 100vw;
   padding: 1rem 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  .logoNSearch {
-    max-width: 55rem;
-    margin-right: 1rem;
-    flex: 1;
-    display: flex;
-    .logo {
-      font-size: 1.3rem;
-      margin-right: 1rem;
-    }
-    width: 100%;
-    align-items: center;
-    & > div:not(:first-child) {
-      flex: 1;
-    }
+  display: grid;
+  grid-template-columns: 180px 1fr auto;
+  grid-template-areas: "lg sr nv";
+  .logo {
+    font-size: 1.3rem;
+    white-space: nowrap;
   }
+  align-items: center;
   #searchbar {
+    max-width: 55rem;
     font-size: 1rem;
-    width: 100%;
     button {
-      top: 0.1rem;
-      right: -0.03rem;
-      padding: 0.3rem;
+      top: 0.05em;
+      right: -0.1em;
+      padding: 0.2em;
     }
     input {
       font-size: 1rem;
@@ -35,8 +26,8 @@
     }
   }
   nav {
+    grid-area: nv;
     ul {
-      grid-column-end: 3;
       display: grid;
       grid-auto-flow: column;
       grid-column-gap: 1rem;
@@ -57,8 +48,17 @@
 @media only screen and (max-width: 480px) {
   .navbar {
     padding: 0.5rem 1rem;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: 1fr 1fr;
+    grid-template-areas: "lg lg" "sr nv";
     .logo {
-      display: none;
+      grid-area: lg;
+    }
+    #searchbar {
+      margin-left: 0;
+    }
+    nav {
+      margin-left: 0.5rem;
     }
   }
 }

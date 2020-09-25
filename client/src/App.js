@@ -6,6 +6,7 @@ import Footer from "./components/Footer";
 import FourOFour from "./components/FourOFour";
 import SearchResult from "./components/SearchResult";
 import Fatwa from "./components/Fatwa";
+import About from "./components/About";
 import AdminPanel from "./components/AdminPanel";
 import "./App.min.css";
 
@@ -19,6 +20,7 @@ function App() {
           <Route path="/search" component={SearchResult} />
           <Route path="/fatwa/:id" component={Fatwa} />
           <Route path="/admin" component={AdminPanel} />
+          <Route path="/about" component={About} />
           <Route path="/" component={FourOFour} />
         </Switch>
         <Footer />

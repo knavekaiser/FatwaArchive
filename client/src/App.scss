@@ -28,6 +28,7 @@ li {
 
 .main {
   flex: 1;
+  padding: 2rem 1rem;
 }
 
 .main:not(.landingPage):not(.adminPanel) {
@@ -41,7 +42,7 @@ li {
 
 @media only screen and (max-width: 480px) {
   .main:not(.landingPage):not(.adminPanel) {
-    margin: auto 1rem;
+    margin: auto 0;
   }
 }
 
