@@ -49,36 +49,32 @@ function Searchbar() {
     };
   }, []);
   return (
-    <div>
-      <form id="searchbar" onSubmit={submit}>
-        <input
-          onFocus={(e) => e.target.value !== "" && setShowSuggestion(true)}
-          className={
-            suggestions.length === 0 || !showSuggestion
-              ? ""
-              : "suggestionVisible"
-          }
-          onChange={change}
-          type="text"
-          placeholder="প্রশ্ন বা বিষয়বস্তু..."
-          value={searchInput}
-        />
-        <button type="submit">
-          <ion-icon name="search-outline"></ion-icon>
-        </button>
-        {showSuggestion && suggestions.length > 0 && (
-          <div className="suggestions">
-            <ul>
-              {suggestions.map((item) => (
-                <li key={item._id}>
-                  <Link to={`/fatwa/${item._id}`}>{item.title}</Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </form>
-    </div>
+    <form id="searchbar" onSubmit={submit}>
+      <input
+        onFocus={(e) => e.target.value !== "" && setShowSuggestion(true)}
+        className={
+          suggestions.length === 0 || !showSuggestion ? "" : "suggestionVisible"
+        }
+        onChange={change}
+        type="text"
+        placeholder="প্রশ্ন বা বিষয়বস্তু..."
+        value={searchInput}
+      />
+      <button type="submit">
+        <ion-icon name="search-outline"></ion-icon>
+      </button>
+      {showSuggestion && suggestions.length > 0 && (
+        <div className="suggestions">
+          <ul>
+            {suggestions.map((item) => (
+              <li key={item._id}>
+                <Link to={`/fatwa/${item._id}`}>{item.title}</Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </form>
   );
 }
 
