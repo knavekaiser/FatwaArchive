@@ -3,6 +3,7 @@ import { Link, Route } from "react-router-dom";
 import { SiteContext } from "../Context";
 import "./CSS/Nav.min.css";
 import Searchbar from "./Searchbar";
+import logo from "../logo.png";
 
 function Nav({ location }) {
   const [style, setStyle] = useState({ boxShadow: "none" });
@@ -20,8 +21,8 @@ function Nav({ location }) {
         path="/:other"
         render={() => (
           <>
-            <Link className="logo" to="/">
-              FATWA ARCHIVE
+            <Link to="/">
+              <img className="logo" src={logo} alt="Fatwa Archive logo" />
             </Link>
             <Searchbar />
           </>

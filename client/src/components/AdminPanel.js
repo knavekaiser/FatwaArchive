@@ -51,7 +51,7 @@ const Input = ({
 };
 const Group = ({ id, inputs, clone, setGroupCount }) => {
   const [value, setValue] = useState("");
-  useEffect(() => {
+  function handleMount() {
     setGroupCount((prev) => {
       const newGroup = [...prev];
       newGroup.push(`${id}:${inputs[0].value || ""}`);
@@ -62,7 +62,8 @@ const Group = ({ id, inputs, clone, setGroupCount }) => {
         return prev.filter((item) => item.split(":")[0] !== id);
       });
     };
-  }, []);
+  }
+  useEffect(handleMount, []);
   function handleChange(e) {
     clone(e);
     setValue(e.value);
@@ -145,7 +146,7 @@ const MultipleInput = ({ setRef, inputs, refInput }) => {
     });
   }
   const [final, setFinal] = useState([]);
-  useEffect(() => {
+  function handleInputChange() {
     setFinal(
       inputs.map((input) => {
         return (
@@ -160,7 +161,8 @@ const MultipleInput = ({ setRef, inputs, refInput }) => {
         );
       })
     );
-  }, [inputs]);
+  }
+  useEffect(handleInputChange, [inputs]);
   return <div className="multipleInput">{final}</div>;
 };
 function getGroupData(multipleInput) {
@@ -190,7 +192,7 @@ function AddFatwaForm({ match }) {
   const [ans, setAns] = useState("");
   const [ref, setRef] = useState([]);
   const [img, setImg] = useState([]);
-  useEffect(() => {
+  function handleMount() {
     if (match.params.id) {
       fetch(`/api/fatwa/${match.params.id}`)
         .then((res) => res.json())
@@ -203,7 +205,8 @@ function AddFatwaForm({ match }) {
         })
         .catch((err) => console.log(err));
     }
-  }, []);
+  }
+  useEffect(handleMount, []);
   useEffect(() => {
     if (ref.length > 0) {
       let inputs = ref.map((item) => {

@@ -8,6 +8,11 @@
     width: 100%;
     margin: 0 1rem;
     max-width: 35rem;
+    .logo {
+      width: 80%;
+      height: 10rem;
+      object-fit: cover;
+    }
     .siteTitle {
       padding: 1rem;
       color: #2a2a2a;
@@ -21,6 +26,9 @@
 @media only screen and (max-width: 480px) {
   .landingPage {
     .content {
+      .logo {
+        height: 6rem;
+      }
       .siteTitle {
         font-size: 3rem;
       }

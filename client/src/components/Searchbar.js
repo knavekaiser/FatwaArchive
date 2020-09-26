@@ -20,6 +20,12 @@ function Searchbar() {
   }
 
   function change(e) {
+    const validator = new RegExp("[a-z0-9~!@#$%^&*()_-{}|:;]", "i");
+    if (validator.test(e.target.value)) {
+      e.target.parentElement.classList.add("wrong");
+    } else {
+      e.target.parentElement.classList.remove("wrong");
+    }
     setSearchInput(e.target.value);
   }
 
@@ -60,6 +66,7 @@ function Searchbar() {
         placeholder="প্রশ্ন বা বিষয়বস্তু..."
         value={searchInput}
       />
+      <span className="warning">বাংলা লিখুন</span>
       <button type="submit">
         <ion-icon name="search-outline"></ion-icon>
       </button>

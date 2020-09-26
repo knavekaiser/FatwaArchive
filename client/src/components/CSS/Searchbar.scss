@@ -4,6 +4,27 @@
   display: grid;
   align-items: center;
   position: relative;
+  &.wrong {
+    input {
+      border-color: rgb(215, 123, 1) !important;
+      &:focus + .warning {
+        display: block;
+      }
+    }
+  }
+  .warning {
+    border-radius: 2rem;
+    z-index: 10;
+    pointer-events: none;
+    background: white;
+    padding: 0.2rem 0.5rem;
+    color: rgb(215, 123, 1);
+    position: absolute;
+    right: 0.1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: none;
+  }
   button {
     border: none;
     outline: none;
