@@ -14,7 +14,7 @@ const SS = {
 export const JamiaRegister = () => {
   const { locale } = useContext(SiteContext);
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const [success, setSuccess] = useState(true);
   const [idIsValid, setIdIsValid] = useState(null);
   const validateId = () => {
     if (SS.get("reg-id").length >= 8 && idIsValid === null) {
@@ -31,7 +31,7 @@ export const JamiaRegister = () => {
   };
   useEffect(() => {
     validateId();
-    $(".reg #id input").addEventListener("blur", validateId);
+    // $(".reg #id input").addEventListener("blur", validateId);
     return () => {
       setSuccess(false);
     };

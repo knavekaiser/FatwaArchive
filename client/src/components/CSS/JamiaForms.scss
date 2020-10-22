@@ -25,15 +25,15 @@
     margin: auto;
     max-width: 24rem;
     h2 {
+      font-family: "Roboto", SolaimanLipi;
       font-size: 2.3rem;
       text-align: right;
       margin: 1rem 0;
       margin-bottom: 2rem;
-      font-family: "Rakkas", cursive, SolaimanLipi;
-      font-weight: lighter;
       letter-spacing: normal;
       position: relative;
       &::after {
+        font-weight: lighter;
         content: attr(data-bn);
         display: block;
         font-size: 0.35em;
@@ -42,6 +42,12 @@
         max-width: 80%;
         position: absolute;
         right: 0;
+      }
+    }
+    &.login {
+      h2 {
+        font-family: "Rakkas", "Roboto", SolaimanLipi;
+        font-weight: lighter;
       }
     }
     div.label {
@@ -164,21 +170,21 @@
     }
   }
   &.success {
-    div {
+    .successPromt {
       padding: 1.5rem 1.5rem 1rem 1rem;
       margin: auto;
       box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.1);
       max-width: 30rem;
       display: grid;
-      grid-template-columns: 2rem 1fr;
+      grid-template-columns: auto 1fr;
       align-items: center;
-      grid-column-gap: 2rem;
+      grid-column-gap: 1rem;
       grid-row-gap: 0.5rem;
       border-radius: 8px;
       background: white;
       ion-icon {
         grid-row: 1/3;
-        font-size: 3rem;
+        font-size: 5rem;
         color: $accent;
       }
       a {
@@ -206,6 +212,19 @@
       h2 {
         margin: 1rem 0;
         margin-bottom: 0rem;
+      }
+    }
+    &.success {
+      padding: 1rem;
+      width: 100%;
+      .successPromt {
+        grid-template-columns: 1fr;
+        grid-row-gap: 1rem;
+        place-items: center;
+        margin: auto;
+        a {
+          margin: auto;
+        }
       }
     }
   }
