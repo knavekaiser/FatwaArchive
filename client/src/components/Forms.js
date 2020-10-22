@@ -14,7 +14,7 @@ const SS = {
 export const JamiaRegister = () => {
   const { locale } = useContext(SiteContext);
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(true);
+  const [success, setSuccess] = useState(false);
   const [idIsValid, setIdIsValid] = useState(null);
   const validateId = () => {
     if (SS.get("reg-id").length >= 8 && idIsValid === null) {
