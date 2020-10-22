@@ -10,6 +10,7 @@
   "form.addFatwa.refAayat": "Aayat",
   "form.addFatwa.submit": "Submit",
   "form.login.id": "Jamia-ID",
+  "form.admin.login.id": "Username",
   "form.login.password": "Password",
   "form.login.passwordRepeat": "Confirm Password",
   "form.login.submit": "Login",

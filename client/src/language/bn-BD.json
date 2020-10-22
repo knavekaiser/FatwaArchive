@@ -10,6 +10,7 @@
   "form.addFatwa.refAayat": "আয়াত",
   "form.addFatwa.submit": "সাবমিট করুন",
   "form.login.id": "জামিয়ার আইডি",
+  "form.admin.login.id": "ইউজারনেম",
   "form.login.password": "পাসওয়ার্ড",
   "form.login.passwordRepeat": "পাসওয়ার্ড নিশ্চিত করুন",
   "form.login.submit": "লগইন",

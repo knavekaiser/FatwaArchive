@@ -8,7 +8,7 @@ import FourOFour from "./components/FourOFour";
 import SearchResult from "./components/SearchResult";
 import Fatwa from "./components/Fatwa";
 import About from "./components/About";
-import { JamiaLogin, JamiaRegister } from "./components/Forms";
+import { JamiaLogin, JamiaRegister, AdminLogin } from "./components/Forms";
 import AdminPanel from "./components/AdminPanel";
 import JamiaProfile from "./components/JamiaProfile";
 import { SiteContext } from "./Context";
@@ -16,12 +16,12 @@ import Enlish from "./language/en-US.json";
 import Bangali from "./language/bn-BD.json";
 import "./App.min.css";
 
-function ProtectedRoute({ component: Component, children, ...rest }) {
+function ProtectedRoute({ component: Component, redirect, children, ...rest }) {
   const { user } = useContext(SiteContext);
   return user ? (
     <Route {...rest}>{children ? children : <Component />}</Route>
   ) : (
-    <Redirect to="/login" />
+    <Redirect to={redirect} />
   );
 }
 
@@ -71,9 +71,18 @@ function App() {
           <Route path="/fatwa/:id" component={Fatwa} />
           <Route path="/about" component={About} />
           <Route path="/login" component={JamiaLogin} />
+          <Route path="/adminLogin" component={AdminLogin} />
           <Route path="/register" component={JamiaRegister} />
-          <ProtectedRoute path="/jamia" component={JamiaProfile} />
-          <Route path="/admin" component={AdminPanel} />
+          <ProtectedRoute
+            path="/jamia"
+            redirect="/login"
+            component={JamiaProfile}
+          />
+          <ProtectedRoute
+            path="/admin"
+            redirect="/adminLogin"
+            component={AdminPanel}
+          />
           <Route path="/" component={FourOFour} />
         </Switch>
         <Route path={/^\/(?!admin)(?!jamia)/} component={Footer} />

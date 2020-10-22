@@ -300,12 +300,9 @@
 }
 
 form {
-  &.login {
-    button {
-      //---------------------------------------------------
-      margin: auto;
-      margin-right: 0;
-    }
+  button[type="submit"] {
+    margin: auto;
+    margin-right: 0;
   }
   button {
     text-transform: uppercase;

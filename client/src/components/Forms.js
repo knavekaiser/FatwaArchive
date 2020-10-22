@@ -369,10 +369,73 @@ export const JamiaLogin = () => {
           - بلغوا عني ولو آية
         </h2>
         <Input
+          required={true}
           type="text"
           label=<FormattedMessage
             id="form.login.id"
             defaultMessage="Jamia-ID"
+          />
+          validation={/^[a-zA-Z0-9]+$/}
+          onChange={(target) => setUserId(target.value)}
+        />
+        <PasswordInput
+          dataId="pass"
+          onChange={(target) => setPass(target.value)}
+          label=<FormattedMessage
+            id="form.login.password"
+            defaultMessage="Password"
+          />
+        />
+        <button type="submit" disabled={loading}>
+          <FormattedMessage id="form.login.submit" defaultMessage="Login" />
+          {loading && <span className="loading"></span>}
+        </button>
+      </form>
+    </div>
+  );
+};
+
+export const AdminLogin = () => {
+  const [invalidCredentials, setInvalidCredentials] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const history = useHistory();
+  const { setUser, setIsAuthenticated, locale } = useContext(SiteContext);
+  const [userId, setUserId] = useState("");
+  const [pass, setPass] = useState("");
+  function submit(e) {
+    e.preventDefault();
+    setLoading(true);
+    fetch(`/api/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username: userId, password: pass, role: "admin" }),
+    })
+      .then((res) => {
+        setLoading(false);
+        if (res.status === 401) {
+          setInvalidCredentials(true);
+        }
+        return res.json();
+      })
+      .then((data) => {
+        setIsAuthenticated(data.isAuthenticated);
+        setUser(data.user);
+        history.push("/jamia/profile");
+        console.log(data);
+      });
+  }
+  return (
+    <div className={`main jamiaForms ${locale === "bn-BD" ? "bn-BD" : ""}`}>
+      <form className="adminLogin" onSubmit={submit}>
+        <h2 data-bn="This part is only for Admins.">Admin</h2>
+        <Input
+          required={true}
+          type="text"
+          label=<FormattedMessage
+            id="form.admin.login.id"
+            defaultMessage="Username"
           />
           validation={/^[a-zA-Z0-9]+$/}
           onChange={(target) => setUserId(target.value)}
