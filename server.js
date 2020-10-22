@@ -15,9 +15,9 @@ const app = express();
 
 //---------------------------------------------- dev stuff -
 
-require("dotenv").config();
-const morgan = require("morgan");
-app.use(morgan("dev"));
+// require("dotenv").config();
+// const morgan = require("morgan");
+// app.use(morgan("dev"));
 
 //----------------------------------------------------------
 
@@ -43,8 +43,8 @@ app.use("/api", require("./routes/general"));
 app.use("/api/jamia", require("./routes/jamia"));
 app.use("/api/admin", require("./routes/admin"));
 
-// if (process.env.NODE_ENV === "production")
-app.use(express.static("./client/build"));
+if (process.env.NODE_ENV === "production")
+  app.use(express.static("./client/build"));
 
 app.get("/*", (req, res) => res.send("what up? "));
 
