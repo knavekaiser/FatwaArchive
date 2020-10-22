@@ -95,7 +95,11 @@
         font-size: 1.6em;
         margin-left: 0.25rem;
         padding: 0.3rem;
-        &[name="checkmark-circle-outline"] {
+        &[name="reload-outline"] {
+          color: pink;
+          animation: validatingId 1s linear infinite;
+        }
+        &[name="close-circle-outline"] {
           color: red;
         }
         &[name="checkmark-circle-outline"] {
@@ -385,6 +389,14 @@ form {
   }
   100% {
     transform: translate(250%, -50%) rotate(10deg);
+  }
+}
+@keyframes validatingId {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
   }
 }
 

@@ -16,10 +16,13 @@ export const JamiaRegister = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [idIsValid, setIdIsValid] = useState(null);
+  const [validatingId, setValidatingId] = useState(false);
   const validateId = () => {
     if (SS.get("reg-id").length >= 8 && idIsValid === null) {
+      setValidatingId(true);
       fetch(`/api/validateId/${SS.get("reg-id")}`)
         .then((res) => {
+          setValidatingId(false);
           if (res.status === 200) {
             setIdIsValid(true);
           } else {
@@ -31,7 +34,7 @@ export const JamiaRegister = () => {
   };
   useEffect(() => {
     validateId();
-    // $(".reg #id input").addEventListener("blur", validateId);
+    $(".reg #id input").addEventListener("blur", validateId);
     return () => {
       setSuccess(false);
     };
@@ -229,6 +232,7 @@ export const JamiaRegister = () => {
           {idIsValid === false && (
             <ion-icon name="close-circle-outline"></ion-icon>
           )}
+          {validatingId && <ion-icon name="reload-outline"></ion-icon>}
           {idIsValid && <ion-icon name="checkmark-circle-outline"></ion-icon>}
         </Input>
         <PasswordInput
