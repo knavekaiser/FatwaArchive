@@ -1,7 +1,75 @@
+@import "variables";
+
 .fatwa {
   text-align: left;
   max-width: 50rem;
   padding: 2rem 0.5rem;
+  &.loading {
+    display: grid;
+    grid-gap: 2rem;
+    div {
+      border-radius: 3rem;
+      width: 100%;
+      background: $light-hover;
+      animation: fadeInOut 2s infinite;
+    }
+    .h1 {
+      max-width: 22rem;
+      height: 2.25rem;
+    }
+    .ques {
+      height: 1.75rem;
+      max-width: 18rem;
+      animation-delay: 100ms;
+    }
+    .ans {
+      height: 1.5rem;
+      max-width: 25rem;
+      animation-delay: 200ms;
+    }
+  }
+  h3 {
+    position: relative;
+    text-align: center;
+    font-size: 1.3rem;
+    z-index: 1;
+    display: grid;
+    align-items: center;
+    &::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: -3;
+      display: block;
+      background: orange;
+      height: 2px;
+      width: 100%;
+    }
+    &::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: -1;
+      display: block;
+      background: $base-white;
+      height: 100%;
+      width: 5rem;
+    }
+    &.sub {
+      text-align: left;
+      text-indent: 1rem;
+      &::before {
+        display: none;
+      }
+      &::after {
+        height: 80%;
+        width: 0.5rem;
+      }
+    }
+  }
   p {
     text-align: justify;
     span {
@@ -11,5 +79,52 @@
   .ans::first-line,
   .ques::first-line {
     text-indent: 2rem;
+  }
+  .dis {
+    font-size: 0.75em;
+    color: $light-text;
+    a {
+      text-decoration: underline;
+    }
+  }
+  .ref {
+    span {
+      font-weight: 600;
+    }
+  }
+  .jamia {
+    font-size: 1.25rem;
+    &:hover {
+      text-decoration: underline;
+    }
+    span {
+      color: $light-text;
+      font-weight: lighter;
+      font-size: 0.7em;
+      text-decoration: none !important;
+      &:hover {
+      }
+    }
+  }
+  .cla {
+    border: 1px solid $light-border;
+    border-radius: 5px;
+    padding: 5px 10px;
+    color: $light-text;
+    &:hover {
+      background: $light-hover;
+    }
+  }
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
   }
 }

@@ -9,6 +9,8 @@
     "decode-uri-component": "^0.2.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
+    "react-helmet": "^6.1.0",
+    "react-intl": "^5.8.3",
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.3",
     "react-textarea-autosize": "^8.2.0"
@@ -33,5 +35,6 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "proxy": "http://localhost:8080"
 }

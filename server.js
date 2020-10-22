@@ -1,35 +1,51 @@
-const express = require("express");
-const mongoose = require("mongoose");
+global.express = require("express");
+global.router = require("express").Router();
+global.mongoose = require("mongoose");
+global.Schema = mongoose.Schema;
+global.bcrypt = require("bcryptjs");
+global.passport = require("passport");
+global.LocalStrategy = require("passport-local").Strategy;
+global.JwtStrategy = require("passport-jwt").Strategy;
+global.ExtractJwt = require("passport-jwt").ExtractJwt;
+global.jwt = require("jsonwebtoken");
+
+const cookieParser = require("cookie-parser");
+
 const app = express();
-const path = require("path");
+
+//---------------------------------------------- dev stuff -
+
+require("dotenv").config();
+const morgan = require("morgan");
+app.use(morgan("dev"));
+
+//----------------------------------------------------------
 
 const PORT = process.env.PORT || 8080;
-
 const URI = process.env.ATLAS_URI;
 
-const connectDB = async () => {
-  await mongoose.connect(URI, {
+mongoose
+  .connect(URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useCreateIndex: true,
-  });
-  console.log("connected to db");
-};
+    useFindAndModify: false,
+  })
+  .then(() => console.log("connected to db"));
 
-connectDB();
 app.use(express.json());
+app.use(cookieParser());
 
-const api = require("./routes/apis");
-app.use("/api", api);
+require("./config/passport");
+app.use(passport.initialize());
 
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static("./client/build"));
-}
+app.use("/api", require("./routes/general"));
+app.use("/api/jamia", require("./routes/jamia"));
+app.use("/api/admin", require("./routes/admin"));
 
-app.get("/*", (req, res) => {
-  res.sendFile("index.html", { root: "./client/build" });
-});
+// if (process.env.NODE_ENV === "production")
+app.use(express.static("./client/build"));
 
-app.listen(PORT, () => {
-  console.log("server just ran");
-});
+app.get("/*", (req, res) => res.send("what up? "));
+
+app.listen(PORT, () => console.log("server just ran at " + PORT));

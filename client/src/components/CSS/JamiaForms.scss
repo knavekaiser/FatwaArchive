@@ -1,0 +1,510 @@
+@import "variables";
+
+.jamiaForms {
+  padding: 2rem 0;
+  display: grid;
+  height: 0rem;
+  .ps {
+    font-size: 0.75rem;
+    padding: 1rem;
+    color: $light-text;
+    span {
+      color: rgba(0, 0, 255, 0.6);
+      text-decoration: underline;
+      cursor: pointer;
+    }
+  }
+  form {
+    border-radius: 0.5rem;
+    display: grid;
+    width: 100%;
+    grid-row-gap: 3rem;
+    padding: 2.5rem 2rem;
+    background: $base-white;
+    box-shadow: 0 0 80px -30px rgba(0, 0, 0, 0.4);
+    margin: auto;
+    max-width: 24rem;
+    h2 {
+      font-size: 2.3rem;
+      text-align: right;
+      margin: 1rem 0;
+      margin-bottom: 2rem;
+      font-family: "Rakkas", cursive, SolaimanLipi;
+      font-weight: lighter;
+      letter-spacing: normal;
+      position: relative;
+      &::after {
+        content: attr(data-bn);
+        display: block;
+        font-size: 0.35em;
+        color: $light-text;
+        font-family: "SolaimanLipi";
+        max-width: 80%;
+        position: absolute;
+        right: 0;
+      }
+    }
+    div.label {
+      width: 60%;
+      margin: 0.5rem auto;
+      border: none;
+      white-space: nowrap;
+      width: min-content;
+      position: relative;
+      z-index: 1;
+      font-size: 1.2rem;
+      color: rgba($blue, 0.6);
+      &::after,
+      &::before {
+        background: $base-white;
+        content: "";
+        display: block;
+        position: absolute;
+        width: 120%;
+        height: 100%;
+        z-index: -1;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+      }
+      &::after {
+        background: rgba($blue, 0.2);
+        z-index: -2;
+        width: 250%;
+        height: 2px;
+      }
+    }
+    .checkbox {
+      opacity: 0.5;
+      label {
+        font-size: 0.7rem;
+        a {
+          text-decoration: underline;
+        }
+      }
+    }
+    #id {
+      display: flex;
+      ion-icon {
+        font-size: 1.6em;
+        margin-left: 0.25rem;
+        padding: 0.3rem;
+        &[name="checkmark-circle-outline"] {
+          color: red;
+        }
+        &[name="checkmark-circle-outline"] {
+          color: $accent;
+        }
+      }
+    }
+    #pass,
+    #confirmPass {
+      position: relative;
+      display: flex;
+      align-items: center;
+      flex: 1;
+      input {
+        max-height: 34px;
+        font-size: 1rem;
+        &[type="password"] {
+          font-size: 1.7em;
+        }
+      }
+      ion-icon {
+        font-size: 1.4em;
+        margin-left: 0.25rem;
+        padding: 0.5rem;
+        cursor: pointer;
+        &:hover {
+          background: $light-border;
+          color: white;
+        }
+      }
+      .passwordStrength,
+      .passwordConfirm {
+        position: absolute;
+        background: red;
+        height: 2px;
+        width: 0;
+        transition: width 0.2s ease-in-out;
+        bottom: 2px;
+      }
+      .passwordConfirm {
+        width: 100%;
+      }
+    }
+    &.reg {
+      h2 {
+        text-align: center;
+        font-family: roboto, SolaimanLipi, sans-serif;
+        font-weight: bold;
+        margin: 0;
+      }
+      #pass {
+        input {
+          &:focus {
+            border-color: rgba($light-border, 0.3);
+          }
+        }
+      }
+    }
+  }
+  &.bn {
+    form {
+      .input {
+        label {
+          font-size: 0.85rem;
+          transform: translateY(-160%);
+          &.active {
+            font-size: 1rem;
+            transform: translateY(-50%);
+          }
+        }
+      }
+    }
+  }
+  &.success {
+    div {
+      padding: 1.5rem 1.5rem 1rem 1rem;
+      margin: auto;
+      box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.1);
+      max-width: 30rem;
+      display: grid;
+      grid-template-columns: 2rem 1fr;
+      align-items: center;
+      grid-column-gap: 2rem;
+      grid-row-gap: 0.5rem;
+      border-radius: 8px;
+      background: white;
+      ion-icon {
+        grid-row: 1/3;
+        font-size: 3rem;
+        color: $accent;
+      }
+      a {
+        margin: auto;
+        margin-right: 0;
+        color: $blue;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        &:hover {
+          background: $light-hover;
+        }
+      }
+    }
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .main.jamiaForms {
+    padding: 0;
+    form {
+      padding: 2rem 1.5rem;
+      grid-row-gap: 3rem;
+      box-shadow: none;
+      margin-top: 0;
+      h2 {
+        margin: 1rem 0;
+        margin-bottom: 2rem;
+      }
+    }
+  }
+}
+
+@media (min-width: 50rem) {
+  form {
+    &.reg {
+      position: relative;
+      max-width: 48rem;
+      grid-template-columns: 1fr 1fr;
+      grid-column-gap: 2.5rem;
+      grid-template-rows: min-content;
+      grid-template-areas:
+        "head head"
+        "jamiaDetailLabel loginLabel"
+        "name id"
+        "nameEn pass"
+        "founder passRepeat"
+        "est applicantLabel"
+        "address applicantName"
+        "contact applicantDesignation"
+        "about applicantMobile";
+      h2 {
+        grid-area: head;
+      }
+      .jamiaDetail {
+        grid-area: jamiaDetailLabel;
+      }
+      #name {
+        grid-area: name;
+      }
+      #nameEn {
+        grid-area: nameEn;
+      }
+      #founder {
+        grid-area: founder;
+      }
+      #est {
+        grid-area: est;
+      }
+      #add {
+        grid-area: address;
+      }
+      #contact {
+        grid-area: contact;
+      }
+      #dscr {
+        grid-area: about;
+      }
+      .login {
+        grid-area: loginLabel;
+      }
+      #id {
+        grid-area: id;
+      }
+      #pass {
+        grid-area: pass;
+      }
+      #confirmPass {
+        grid-area: passRepeat;
+      }
+      .applicant {
+        grid-area: applicantLabel;
+      }
+      #applicant {
+        grid-area: applicantName;
+      }
+      #applicantDesignation {
+        grid-area: applicantDesignation;
+      }
+      #applicantMobile {
+        grid-area: applicantMobile;
+      }
+      button {
+        margin: auto;
+        margin-right: 0;
+      }
+      &::after {
+        content: "";
+        display: block;
+        height: 80%;
+        width: 1px;
+        background: $light-hover;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+      }
+    }
+  }
+}
+
+form {
+  &.login {
+    button {
+      margin: auto;
+      margin-right: 0;
+    }
+  }
+  button {
+    text-transform: uppercase;
+    white-space: nowrap;
+    width: min-content;
+    padding: 0.65rem 1.5rem;
+    border: 2px solid $accent;
+    color: white;
+    border-radius: 3rem;
+    background: $accent;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    transition: background, color, width, 0.2s ease-in-out;
+    outline: none;
+    &:hover {
+      background: $base-white;
+      color: $accent;
+    }
+    &:disabled {
+      color: $light-text;
+      border-color: $light-text;
+      background: $light-hover;
+      pointer-events: none;
+    }
+    .loading {
+      z-index: -1;
+      height: 120%;
+      width: 1rem;
+      background: $accent;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      animation: loading 1s ease-in-out infinite;
+    }
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+  }
+}
+
+@keyframes button {
+  0% {
+    width: 0;
+  }
+  25% {
+    width: 50%;
+  }
+  50% {
+    width: 75%;
+  }
+  75% {
+    width: 95%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+@keyframes loading {
+  0% {
+    transform: translate(calc(-250% - 1rem), -50%) rotate(10deg);
+  }
+  100% {
+    transform: translate(250%, -50%) rotate(10deg);
+  }
+}
+
+.input,
+.combobox {
+  height: min-content;
+  width: 100%;
+  position: relative;
+  &.invalid {
+    label {
+      color: orange;
+    }
+  }
+  &.textarea {
+    label {
+      top: 1.25rem;
+    }
+  }
+  &.disabled {
+    label {
+      color: $light-border !important;
+    }
+    input {
+      border-color: $light-hover;
+      color: $light-border;
+    }
+  }
+  label {
+    pointer-events: none;
+    font-size: 0.9rem;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-180%);
+    left: 0rem;
+    color: $light-border;
+    transition: font-size, transform, 0.2s ease-in-out;
+    &.active {
+      color: $light-text;
+      font-size: 1rem;
+      transform: translateY(-50%);
+    }
+  }
+  input,
+  textarea {
+    font-size: 1.05rem;
+    width: 100%;
+    background: rgba(0, 0, 0, 0);
+    outline: none;
+    padding: 0.5rem 0;
+    padding-bottom: 0.25rem;
+    border: none;
+    border-bottom: 2px solid $light-border;
+    transition: border-color 0.2s ease-in-out;
+    &:focus {
+      border-bottom: 2px solid $blue;
+    }
+  }
+}
+.textarea {
+  textarea {
+    border-right: 2px solid $light-border;
+    border-radius: 0 0 0.5rem 0;
+    line-height: 1.5em;
+    letter-spacing: 0.05em;
+    &:focus {
+      border-right: 2px solid $blue;
+    }
+  }
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  .charLimit {
+    position: absolute;
+    bottom: -1.2rem;
+    right: 0;
+    pointer-events: none;
+    font-size: 0.9rem;
+    color: $light-text;
+    text-align: right;
+  }
+}
+.combobox {
+  input {
+    pointer-events: none;
+  }
+  ion-icon {
+    cursor: pointer;
+    color: $light-text;
+    font-size: 1.75em;
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    &:hover {
+      color: $font-color;
+    }
+  }
+  .options {
+    cursor: default;
+    background: $base-white;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 0 0 0.5rem 0.5rem;
+    transition: height, 0.4s ease-in-out;
+    .option {
+      padding: 0.3rem;
+      &.selected {
+        background: $light-border;
+      }
+      &:hover {
+        background: $light-hover;
+      }
+    }
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+    &::-webkit-scrollbar-thumb {
+      width: 8px;
+      background: $light-border;
+      border-radius: 5rem;
+    }
+  }
+}
+.checkbox {
+  white-space: nowrap;
+  width: min-content;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1rem;
+  input {
+    font-size: 1em;
+    width: 1.1em;
+    height: 1.1em;
+  }
+  label {
+    text-transform: uppercase;
+    font-size: 1.3em;
+    margin-left: 0.5rem;
+  }
+}

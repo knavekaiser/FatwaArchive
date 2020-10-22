@@ -1,7 +1,7 @@
 import React from "react";
 import "./CSS/LandingPage.min.css";
 import Searchbar from "./Searchbar";
-import logo from "../logo.png";
+import logo from "../logo.svg";
 
 function LandingPage() {
   return (
@@ -15,5 +15,3 @@ function LandingPage() {
 }
 
 export default LandingPage;
-
-// <h1 className="siteTitle">فتوي اركيب</h1>

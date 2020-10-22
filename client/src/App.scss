@@ -1,51 +1,63 @@
 @import "components/CSS/variables";
-@font-face {
-  font-family: "Siyamrupali";
-  src: url(./Siyamrupali.ttf);
-}
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .App {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   letter-spacing: 0.05em;
-  font-family: "Roboto", sans-serif, "Siyamrupali";
-  text-align: center;
+  font-family: "Roboto", sans-serif, "SolaimanLipi";
+  // text-align: center;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   background-color: $base-white;
+  color: $font-color;
+  input {
+    color: $font-color;
+    font-family: "Roboto", sans-serif, "SolaimanLipi";
+  }
+  a {
+    text-decoration: inherit;
+    color: inherit;
+  }
+  li {
+    list-style: none;
+  }
+  textarea {
+    font-family: "Roboto", sans-serif, "SolaimanLipi";
+    resize: none;
+  }
+  button {
+    font-family: "Roboto", sans-serif, "SolaimanLipi";
+  }
 }
-a {
-  text-decoration: inherit;
-  color: inherit;
-}
-li {
-  list-style: none;
-}
-
 .main {
   flex: 1;
-  padding: 2rem 1rem;
 }
 
-.main:not(.landingPage):not(.adminPanel) {
+.main:not(.landingPage):not(.adminPanel):not(.jamiaForms):not(.jamiaProfile) {
   margin-left: 11rem;
 }
 @media only screen and (max-width: 720px) {
-  .main:not(.landingPage):not(.adminPanel) {
+  .main:not(.landingPage):not(.adminPanel):not(.jamiaForms):not(.jamiaProfile) {
     margin: auto 2rem;
   }
 }
 
 @media only screen and (max-width: 480px) {
-  .main:not(.landingPage):not(.adminPanel) {
+  .main:not(.landingPage):not(.adminPanel):not(.jamiaForms):not(.jamiaProfile) {
     margin: auto 0;
   }
 }
 
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
 .fourOFour {
   h2 {
     font-size: 4rem;
@@ -54,8 +66,54 @@ li {
       line-height: 0.75em;
     }
     &.bn {
-      font-family: "Siyamrupali";
+      font-family: "SolaimanLipi";
     }
   }
   padding-top: 10%;
+}
+
+.backdrop {
+  position: fixed;
+  height: 100vh;
+  width: 100vw;
+  background: rgba(0, 0, 0, 0);
+  cursor: default;
+  top: 0;
+  left: 0;
+}
+.actions {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 8px;
+  white-space: nowrap;
+  &:hover {
+    background: $base-white;
+  }
+  &:active {
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
+  }
+  ion-icon {
+    font-size: 2rem;
+    // pointer-events: none;
+  }
+  ul {
+    overflow: hidden;
+    border-radius: 5px;
+    z-index: 100;
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: $base-white;
+    box-shadow: 0 2px 0.5rem rgba(0, 0, 0, 0.2);
+    transition: height 0.3s ease-in-out;
+    li {
+      padding: 0.5rem 1rem;
+      &:hover {
+        background: $light-hover;
+      }
+    }
+  }
 }

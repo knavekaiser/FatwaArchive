@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { Link, useHistory } from "react-router-dom";
 import { SiteContext } from "../Context";
 import "./CSS/Searchbar.min.css";
@@ -6,8 +6,10 @@ import "./CSS/Searchbar.min.css";
 function Searchbar() {
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestion, setShowSuggestion] = useState(false);
-  const { searchInput, setSearchInput } = useContext(SiteContext);
+  const { searchInput, setSearchInput, locale } = useContext(SiteContext);
   const history = useHistory();
+  const form = useRef(null);
+  const input = useRef(null);
   function submit(e) {
     e.preventDefault();
     if (searchInput !== "") {
@@ -22,9 +24,9 @@ function Searchbar() {
   function change(e) {
     const validator = new RegExp("[a-z0-9~!@#$%^&*()_-{}|:;]", "i");
     if (validator.test(e.target.value)) {
-      e.target.parentElement.classList.add("wrong");
+      form.current.classList.add("wrong");
     } else {
-      e.target.parentElement.classList.remove("wrong");
+      form.current.classList.remove("wrong");
     }
     setSearchInput(e.target.value);
   }
@@ -32,22 +34,30 @@ function Searchbar() {
   useEffect(() => {
     suggestions.length > 0 && setShowSuggestion(true);
   }, [suggestions]);
-
+  const abortController = new AbortController();
+  const signal = abortController.signal;
   useEffect(() => {
+    if (form.current.classList.contains("wrong")) {
+      return;
+    }
     if (searchInput !== "") {
-      fetch(`/api/search?q=${searchInput}`)
+      fetch(`/api/search?q=${searchInput}`, {
+        method: "GET",
+        headers: { "Accept-Language": locale },
+        signal: signal,
+      })
         .then((res) => res.json())
         .then((data) => {
           setSuggestions(data);
         })
         .catch((err) => console.log("Error: " + err));
     }
+    return () => abortController.abort();
   }, [searchInput]);
 
   useEffect(() => {
     const outsideClick = (e) => {
-      !e.path.includes(document.querySelector("#searchbar input")) &&
-        setShowSuggestion(false);
+      !e.path.includes(input.current) && setShowSuggestion(false);
     };
     document.addEventListener("click", outsideClick);
     return () => {
@@ -55,8 +65,9 @@ function Searchbar() {
     };
   }, []);
   return (
-    <form id="searchbar" onSubmit={submit}>
+    <form ref={form} id="searchbar" onSubmit={submit}>
       <input
+        ref={input}
         onFocus={(e) => e.target.value !== "" && setShowSuggestion(true)}
         className={
           suggestions.length === 0 || !showSuggestion ? "" : "suggestionVisible"
@@ -86,5 +97,3 @@ function Searchbar() {
 }
 
 export default Searchbar;
-
-//1 fetch req           http://localhost:8080

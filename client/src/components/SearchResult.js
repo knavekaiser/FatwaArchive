@@ -47,5 +47,3 @@ function SearchResult({ location }) {
 }
 
 export default SearchResult;
-
-//1 fetch req           http://localhost:8080

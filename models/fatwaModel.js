@@ -1,14 +1,60 @@
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
-const fatwaSchema = new Schema({
-  title: { type: String, required: true, trim: true, unique: true },
-  ques: { type: String, required: true, trim: true, unique: true },
-  ans: { type: String, required: true, trim: true, unique: true },
+const fatwa = new Schema({
+  link: {
+    "en-US": { type: String, require: true, unique: true },
+    "bn-BD": { type: String, require: true, unique: true },
+  },
+  topic: {
+    "en-US": { type: String, required: true },
+    "bn-BD": { type: String, required: true },
+  },
+  title: {
+    "en-US": { type: String, required: true, trim: true, unique: true },
+    "bn-BD": { type: String, required: true, trim: true, unique: true },
+  },
+  ques: {
+    "en-US": { type: String, required: true, trim: true, unique: true },
+    "bn-BD": { type: String, required: true, trim: true, unique: true },
+  },
+  ans: {
+    "en-US": { type: String, required: true, trim: true, unique: true },
+    "bn-BD": { type: String, required: true, trim: true, unique: true },
+  },
   ref: { type: Array, required: true },
   img: { type: Array, require: true },
+  jamia: { type: String, required: true },
   added: { type: Date, default: Date.now },
-  updated: { type: Date, default: Date.now },
+  translation: { type: String, required: true },
+});
+const fatwaSubmitions = new Schema({
+  link: {
+    "en-US": { type: String, require: true, unique: true },
+    "bn-BD": { type: String, require: true, unique: true },
+  },
+  topic: {
+    "en-US": { type: String, required: true },
+    "bn-BD": { type: String, required: true },
+  },
+  title: {
+    "en-US": { type: String, required: true, trim: true, unique: true },
+    "bn-BD": { type: String, required: true, trim: true, unique: true },
+  },
+  ques: {
+    "en-US": { type: String, required: true, trim: true, unique: true },
+    "bn-BD": { type: String, required: true, trim: true, unique: true },
+  },
+  ans: {
+    "en-US": { type: String, required: true, trim: true, unique: true },
+    "bn-BD": { type: String, required: true, trim: true, unique: true },
+  },
+  ref: { type: Array, required: true },
+  img: { type: Array, require: true },
+  jamia: { type: String, required: true },
+  submitted: { type: Date, default: Date.now },
+  translation: { type: String, required: true },
 });
 
-const Fatwa = mongoose.model("Fatwa", fatwaSchema);
-module.exports = Fatwa;
+const Fatwa = mongoose.model("Fatwa", fatwa);
+const FatwaSubmitions = mongoose.model("FatwaSubmitions", fatwaSubmitions);
+
+exports.Fatwa = Fatwa;
+exports.FatwaSubmitions = FatwaSubmitions;

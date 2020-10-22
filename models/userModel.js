@@ -1,0 +1,14 @@
+const userModel = new Schema({
+  firstName: { type: String, required: true, trim: true },
+  lastName: { type: String, required: true, trim: true },
+  id: { type: String, required: true, unique: true },
+  email: { type: String, required: true, unique: true },
+  mobile: { type: String, required: true, unique: true },
+  password: { type: String, require: true },
+  role: { type: String, required: true },
+  isDeleted: { type: Boolean, default: false },
+});
+
+const User = mongoose.model("User", userModel);
+
+exports.User = User;

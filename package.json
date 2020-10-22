@@ -21,16 +21,24 @@
     "Sunnah"
   ],
   "author": "Naeem Ahmad",
-  "license": "ISC",
+  "license": "copyright fatwaarchive.com",
   "bugs": {
     "url": "https://github.com/knavekaiser/FatwaArchive/issues"
   },
   "homepage": "https://github.com/knavekaiser/FatwaArchive#readme",
   "dependencies": {
-    "axois": "0.0.1-security",
-    "cors": "^2.8.5",
+    "@google-cloud/translate": "^6.0.3",
+    "bcryptjs": "^2.4.3",
+    "connect-mongo": "^3.2.0",
+    "cookie-parser": "^1.4.5",
     "express": "^4.17.1",
-    "mongoose": "^5.10.6"
+    "express-session": "^1.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.10.6",
+    "node-fetch": "^2.6.1",
+    "passport": "^0.4.1",
+    "passport-jwt": "^4.0.0",
+    "passport-local": "^1.0.0"
   },
   "devDependencies": {
     "dotenv": "^8.2.0",

@@ -1,303 +1,40 @@
-import React, { useState, useEffect } from "react";
-import { Route, Link, useHistory } from "react-router-dom";
-import TextareaAutosize from "react-textarea-autosize";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { Link, Route, Switch, useHistory } from "react-router-dom";
+import { SiteContext } from "../Context.js";
 import "./CSS/AdminPanel.min.css";
+import {
+  Input,
+  Textarea,
+  ComboboxMulti,
+  Combobox,
+  MultipleInput,
+  PasswordInput,
+  Checkbox,
+  topics,
+  ID,
+  $,
+} from "./FormElements";
+import { Tabs, Actions, Sidebar, View } from "./TableElements";
+import {
+  FormattedDate,
+  FormattedDateParts,
+  FormattedMessage,
+  FormattedNumber,
+} from "react-intl";
 
-const ID = (length) => {
-  var result = "";
-  var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-  var charactersLength = characters.length;
-  result += characters.charAt(
-    Math.floor(Math.random() * charactersLength - 10)
-  );
-  for (var i = 0; i < length; i++) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));
-  }
-  return result;
-};
-const Input = ({
-  defaultValue,
-  type,
-  label,
-  required,
-  style,
-  onChange,
-  id,
-  disabled,
-  min,
-}) => {
-  const [value, setValue] = useState("");
-  useEffect(() => {
-    if (defaultValue) {
-      setValue(defaultValue);
-    }
-  }, [defaultValue]);
-  const changeHandler = (e) => {
-    setValue(e.target.value);
-    onChange && onChange(e.target);
-  };
-  return (
-    <input
-      value={value}
-      required={required}
-      type={type}
-      onChange={changeHandler}
-      id={id ? id : ID(8)}
-      disabled={disabled}
-      min={min}
-      placeholder={label}
-    />
-  );
-};
-const Group = ({ id, inputs, clone, setGroupCount }) => {
-  const [value, setValue] = useState("");
-  function handleMount() {
-    setGroupCount((prev) => {
-      const newGroup = [...prev];
-      newGroup.push(`${id}:${inputs[0].value || ""}`);
-      return newGroup;
-    });
-    return () => {
-      setGroupCount((prev) => {
-        return prev.filter((item) => item.split(":")[0] !== id);
-      });
-    };
-  }
-  useEffect(handleMount, []);
-  function handleChange(e) {
-    clone(e);
-    setValue(e.value);
-  }
-  return (
-    <div className="group">
-      {inputs.map((input) => {
-        return (
-          <React.Fragment key={input.label}>
-            <Input
-              warning={"Letters & numbers only!"}
-              defaultValue={input.value}
-              required={input.clone ? false : true}
-              type={input.type}
-              label={input.label}
-              id={input.clone ? id : ""}
-              onChange={input.clone && handleChange}
-              disabled={
-                input.clone ? false : input.value ? false : value === ""
-              }
-            />
-          </React.Fragment>
-        );
-      })}
-    </div>
-  );
-};
-const MultipleInput = ({ setRef, inputs, refInput }) => {
-  const [groupCount, setGroupCount] = useState([]);
-  useEffect(() => {
-    if (inputs[0][0].value) {
-      setGroupCount([]);
-    }
-  }, [inputs]);
-  useEffect(() => {}, [groupCount]);
-  function clone(e) {
-    setGroupCount((prev) => {
-      const newGroup = [...prev];
-      let current = 0;
-      for (var i = 0; i < newGroup.length; i++) {
-        if (newGroup[i].split(":")[0] === e.id) {
-          newGroup.splice(i, 1);
-          current = i;
-          break;
-        }
-      }
-      newGroup.splice(current, 0, `${e.id}:${e.value}`);
-      const currentValue = newGroup[current].split(":")[1];
-      const nextGroup = newGroup[current + 1];
-      if (currentValue.length >= 1 && nextGroup === undefined) {
-        setFinal((prev) => {
-          const newFinal = [...prev];
-          newFinal.push(
-            <Group
-              id={ID(8)}
-              key={ID(8)}
-              inputs={refInput[0]}
-              clone={clone}
-              groupCount={groupCount}
-              setGroupCount={setGroupCount}
-            />
-          );
-          return newFinal;
-        });
-      } else if (currentValue.length === 0) {
-        setFinal((prev) => {
-          const newFinal = [...prev];
-          for (var i = 0; i < newGroup.length; i++) {
-            const value = newGroup[i].split(":")[1];
-            if (value === "" && i < current) {
-              newFinal.splice(i, 1);
-            } else if (value === "" && i > current) {
-              newFinal.splice(i, 1);
-            }
-          }
-          return newFinal;
-        });
-      }
-      return newGroup;
-    });
-  }
-  const [final, setFinal] = useState([]);
-  function handleInputChange() {
-    setFinal(
-      inputs.map((input) => {
-        return (
-          <Group
-            id={ID(8)}
-            key={ID(8)}
-            inputs={input}
-            clone={clone}
-            groupCount={groupCount}
-            setGroupCount={setGroupCount}
-          />
-        );
-      })
-    );
-  }
-  useEffect(handleInputChange, [inputs]);
-  return <div className="multipleInput">{final}</div>;
-};
-function getGroupData(multipleInput) {
-  const allData = [];
-  Array.from(multipleInput.children).forEach((group, i) => {
-    const data = {};
-    Array.from(group.children).forEach((input) => {
-      data[input.placeholder.toLowerCase()] = input.value;
-    });
-    data.book !== "" && allData.push(data);
-  });
-  return allData;
-}
-
-const refInput = [
-  [
-    { type: "text", label: "Book", clone: true },
-    { type: "number", label: "Part" },
-    { type: "number", label: "Page" },
-  ],
-];
-function AddFatwaForm({ match }) {
+function SingleFatwa({ data, setData }) {
+  const fatwa = data;
   const history = useHistory();
-  const [inputs, setInputs] = useState(refInput);
-  const [title, setTitle] = useState("");
-  const [ques, setQues] = useState("");
-  const [ans, setAns] = useState("");
-  const [ref, setRef] = useState([]);
-  const [img, setImg] = useState([]);
-  function handleMount() {
-    if (match.params.id) {
-      fetch(`/api/fatwa/${match.params.id}`)
-        .then((res) => res.json())
-        .then((data) => {
-          setTitle(data.title);
-          setQues(data.ques);
-          setAns(data.ans);
-          setRef(data.ref);
-          setImg(data.img);
-        })
-        .catch((err) => console.log(err));
-    }
-  }
-  useEffect(handleMount, []);
-  useEffect(() => {
-    if (ref.length > 0) {
-      let inputs = ref.map((item) => {
-        return [
-          { type: "text", label: "Book", clone: true, value: item.book },
-          { type: "number", label: "Part", value: item.part },
-          { type: "number", label: "Page", value: item.page },
-        ];
-      });
-      inputs.push(...refInput);
-      setInputs(inputs);
-    }
-  }, [ref]);
-  function submit(e) {
-    e.preventDefault();
-    const data = {
-      title: title,
-      ques: ques,
-      ans: ans,
-      ref: getGroupData(document.querySelector(".addFatwa .multipleInput")),
-      img: img,
-    };
-    const url = !match.params.id
-      ? "/api/fatwa/add"
-      : `/api/fatwa/add/${match.params.id}`;
-    fetch(url, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    }).then((res) => {
-      if (res.status === 200) {
-        history.push("/admin");
-        return;
-      }
-    });
-  }
-  return (
-    <div>
-      <form className="addFatwa" onSubmit={submit}>
-        <section>
-          <p className="label">Title</p>
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            type="text"
-            id="title"
-          />
-        </section>
-        <section>
-          <p className="label">Question</p>
-          <TextareaAutosize
-            value={ques}
-            onChange={(e) => setQues(e.target.value)}
-            aria-label="minimum height"
-          />
-        </section>
-        <section>
-          <p className="label">Answer</p>
-          <TextareaAutosize
-            value={ans}
-            onChange={(e) => setAns(e.target.value)}
-            aria-label="minimum height"
-          />
-        </section>
-        <section>
-          <p className="label">Ref.</p>
-          <MultipleInput setRef={setRef} inputs={inputs} refInput={refInput} />
-        </section>
-        <section className="btns">
-          <Link to="/admin" className="btn">
-            Cancel
-          </Link>
-          <button type="submit" className="btn">
-            Add Fatwa
-          </button>
-        </section>
-      </form>
-    </div>
-  );
-}
-function SingleFatwa({ fatwa }) {
-  function deleteFatwa(e) {
-    const id = e.target.parentElement.dataset.id;
+  const editFatwa = (path) => history.push(path);
+  function deleteFatwa(id) {
     fetch(`/api/fatwa/${id}`, {
       method: "DELETE",
     })
       .then((res) => {
-        if (res.status === "200") {
-          console.log("item deleted");
+        if (res.status === 200) {
+          setData((prev) => {
+            return prev.filter((item) => item._id !== id);
+          });
         }
       })
       .catch((err) => {
@@ -307,59 +44,864 @@ function SingleFatwa({ fatwa }) {
   return (
     <tr data-id={fatwa._id}>
       <td>
-        <Link to={`/fatwa/${fatwa._id}`}>
+        <Link
+          title={`Show all Fatwa from ${fatwa.jamia}`}
+          to={`/jamia/${fatwa.jamia}`}
+        >
+          {fatwa.jamia}
+        </Link>
+      </td>
+      <td>
+        <Link
+          title={`Show all Fatwa about ${fatwa.topic}`}
+          to={`/tableOfContent/${fatwa.topic}`}
+        >
+          {fatwa.topic}
+        </Link>
+      </td>
+      <td>{fatwa.translation.split(" ")[0]}</td>
+      <td>
+        <FormattedDate
+          value={new Date(fatwa.added)}
+          day="numeric"
+          month="numeric"
+          year="numeric"
+        />
+      </td>
+      <td>
+        <Link target="_blank" title="Show Fatwa" to={`/fatwa/${fatwa.link}`}>
           {fatwa.title.length > 30
-            ? fatwa.title.substring(0, 30) + "..."
+            ? fatwa.title.substring(0, 40) + "..."
             : fatwa.title}
         </Link>
       </td>
       <td>
-        {fatwa.ques.length > 30
-          ? fatwa.ques.substring(0, 30) + "..."
-          : fatwa.ques}
-      </td>
-      <td>
-        {fatwa.ans.length > 30 ? fatwa.ans.substring(0, 40) + "..." : fatwa.ans}
-      </td>
-      <td className="icon edit">
-        <Link to={`/admin/add/${fatwa._id}`}>
-          <ion-icon name="create-outline"></ion-icon>
-        </Link>
-      </td>
-      <td onClick={deleteFatwa} className="icon delete">
-        <ion-icon name="trash-outline"></ion-icon>
+        <Actions
+          id={ID(8)}
+          actions={[
+            {
+              action: () => editFatwa(`/admin/addFatwa/${fatwa._id}`),
+              option: "Edit",
+            },
+            { action: () => deleteFatwa(fatwa._id), option: "Delete" },
+          ]}
+        />
       </td>
     </tr>
   );
 }
-function AllFatwa() {
-  const [allFatwa, setAllFatwa] = useState([]);
-  useEffect(() => {
-    fetch("/api/allfatwa")
-      .then((res) => res.json())
-      .then((data) => {
-        setAllFatwa(data);
+
+function AllFatwa({ history, location, match }) {
+  return (
+    <div className="view">
+      <h1 className="viewTitle">Fatwa</h1>
+      <Tabs page="/admin/fatwa/" tabs={["Live", "Submitions"]} />
+      <Switch>
+        <Route path="/admin/fatwa" exact>
+          <View
+            Element={SingleFatwa}
+            id="allFatwa"
+            api="api/admin/allfatwa/filter?"
+            categories={[
+              {
+                name: "topic",
+                input: (
+                  <ComboboxMulti
+                    id={ID(8)}
+                    maxHeight={300}
+                    label="topic"
+                    data={topics}
+                    required={true}
+                  />
+                ),
+              },
+              {
+                name: "title",
+                input: <Input label="Title" type="text" required={true} />,
+              },
+              {
+                name: "question",
+                input: <Input label="Question" type="text" required={true} />,
+              },
+              {
+                name: "answer",
+                input: <Input label="Answer" type="text" required={true} />,
+              },
+              {
+                name: "jamia",
+                input: (
+                  <Combobox
+                    id={ID(8)}
+                    maxHeight={500}
+                    label="jamia"
+                    data={["jamia 1", "jamia 2", "jamia 3"]}
+                    required={true}
+                  />
+                ),
+              },
+              {
+                name: "translation",
+                input: (
+                  <Combobox
+                    id={ID(8)}
+                    maxHeight={500}
+                    label="jamia"
+                    data={["Generated", "Manual"]}
+                    required={true}
+                  />
+                ),
+              },
+            ]}
+            columns={[
+              { column: "jamia", sort: true, colCode: "jamia" },
+              { column: "topic", sort: true, colCode: "topic" },
+              { column: "translation", sort: false, colCode: "translation" },
+              { column: "date", sort: true, colCode: "added" },
+              { column: "title", sort: false, colCode: "title" },
+            ]}
+            defaultSort={{ column: "added", order: "des" }}
+          />
+        </Route>
+        <Route path="/admin/fatwa/live">
+          <View
+            Element={SingleFatwa}
+            id="allFatwa"
+            api="api/admin/allfatwa/filter?"
+            categories={[
+              {
+                name: "topic",
+                input: (
+                  <ComboboxMulti
+                    id={ID(8)}
+                    maxHeight={300}
+                    label="topic"
+                    data={topics}
+                    required={true}
+                  />
+                ),
+              },
+              {
+                name: "title",
+                input: <Input label="Title" type="text" required={true} />,
+              },
+              {
+                name: "question",
+                input: <Input label="Question" type="text" required={true} />,
+              },
+              {
+                name: "answer",
+                input: <Input label="Answer" type="text" required={true} />,
+              },
+              {
+                name: "jamia",
+                input: (
+                  <Combobox
+                    id={ID(8)}
+                    maxHeight={500}
+                    label="jamia"
+                    data={["jamia 1", "jamia 2", "jamia 3"]}
+                    required={true}
+                  />
+                ),
+              },
+              {
+                name: "translation",
+                input: (
+                  <Combobox
+                    id={ID(8)}
+                    maxHeight={500}
+                    label="jamia"
+                    data={["Generated", "Manual"]}
+                    required={true}
+                  />
+                ),
+              },
+            ]}
+            columns={[
+              { column: "jamia", sort: true, colCode: "jamia" },
+              { column: "topic", sort: true, colCode: "topic" },
+              { column: "translation", sort: false, colCode: "translation" },
+              { column: "date", sort: true, colCode: "added" },
+              { column: "title", sort: false, colCode: "title" },
+            ]}
+            defaultSort={{ column: "added", order: "des" }}
+          />
+        </Route>
+        <Route path="/admin/fatwa/submitions">
+          <View
+            Element={SingleFatwa}
+            id="fatwaSubmitions"
+            api="api/admin/fatwaSubmitions/filter?"
+            categories={[
+              {
+                name: "topic",
+                input: (
+                  <ComboboxMulti
+                    id={ID(8)}
+                    maxHeight={300}
+                    label="topic"
+                    data={topics}
+                    required={true}
+                  />
+                ),
+              },
+              {
+                name: "title",
+                input: <Input label="Title" type="text" required={true} />,
+              },
+              {
+                name: "question",
+                input: <Input label="Question" type="text" required={true} />,
+              },
+              {
+                name: "answer",
+                input: <Input label="Answer" type="text" required={true} />,
+              },
+              {
+                name: "jamia",
+                input: (
+                  <Combobox
+                    id={ID(8)}
+                    maxHeight={500}
+                    label="jamia"
+                    data={["jamia 1", "jamia 2", "jamia 3"]}
+                    required={true}
+                  />
+                ),
+              },
+              {
+                name: "translation",
+                input: (
+                  <Combobox
+                    id={ID(8)}
+                    maxHeight={500}
+                    label="jamia"
+                    data={["Generated", "Manual"]}
+                    required={true}
+                  />
+                ),
+              },
+            ]}
+            columns={[
+              { column: "date", sort: true },
+              { column: "topic", sort: true },
+              { column: "jamia", sort: true },
+              { column: "title", sort: false },
+            ]}
+            defaultSort={{ column: "added", order: "des" }}
+          />
+        </Route>
+      </Switch>
+    </div>
+  );
+}
+function SingleJamiaSubmition({ data, setData }) {
+  const jamia = data;
+  const { locale } = useContext(SiteContext);
+  const [showFull, setShowFull] = useState(false);
+  function accept(_id) {
+    fetch(`/api/admin/jamia/accept/${_id}`, {
+      method: "POST",
+    })
+      .then((res) => {
+        if (res.status === 200) {
+          setData((prev) => {
+            return prev.filter((submitions) => submitions._id !== _id);
+          });
+        }
       })
       .catch((err) => console.log(err));
-  }, []);
+  }
+  function reject(_id) {
+    fetch(`/api/admin/jamia/reject/${_id}`, {
+      method: "DELETE",
+    })
+      .then((res) => {
+        if (res.status === 200) {
+          setData((prev) => {
+            return prev.filter((submitions) => submitions._id !== _id);
+          });
+        }
+      })
+      .catch((err) => console.log(err));
+  }
+  return !showFull ? (
+    <tr onClick={() => (showFull ? setShowFull(false) : setShowFull(true))}>
+      <td>
+        <FormattedDate
+          value={new Date(jamia.submitted)}
+          day="numeric"
+          month="numeric"
+          year="2-digit"
+        />
+      </td>
+      <td>
+        {jamia.name[locale]}
+        <span>{jamia.address}</span>
+      </td>
+      <td>
+        {jamia.founder}
+        <span>
+          <FormattedDateParts value={new Date(jamia.est)}>
+            {(parts) => <>{parts[4].value}</>}
+          </FormattedDateParts>
+        </span>
+      </td>
+      <td>
+        <a href={`tel:${jamia.contact}`}>{jamia.contact.replace("+88", "")}</a>
+      </td>
+    </tr>
+  ) : (
+    <tr
+      className="fullDetail"
+      onClick={() => (showFull ? setShowFull(false) : setShowFull(true))}
+    >
+      <td className="label">Submitted</td>
+      <td className="data">
+        <FormattedDate
+          value={new Date(jamia.submitted)}
+          day="numeric"
+          month="numeric"
+          year="2-digit"
+        />
+      </td>
+      <td className="label">ID</td>
+      <td className="data">{jamia.id}</td>
+      <td className="label">Name (Bangla)</td>
+      <td className="data">{jamia.name["bn-BD"]}</td>
+      <td className="label">Name (English)</td>
+      <td className="data">{jamia.name["en-US"]}</td>
+      <td className="label">Founder</td>
+      <td className="data">{jamia.founder}</td>
+      <td className="label">Est</td>
+      <td className="data">{jamia.est}</td>
+      <td className="label">Address</td>
+      <td className="data">{jamia.address}</td>
+      <td className="label">Contact</td>
+      <td className="data">
+        <a href={`tel:${jamia.contact}`}>{jamia.contact.replace("+88", "")}</a>
+      </td>
+      <td className="label">About</td>
+      <td className="data">{jamia.about}</td>
+      <td className="label">Applicant's Name</td>
+      <td className="data">{jamia.applicant.name}</td>
+      <td className="label">Applicant's designation</td>
+      <td className="data">{jamia.applicant.designation}</td>
+      <td className="label">Applicant's mobile</td>
+      <td className="data">
+        <a href={`tel:${jamia.applicant.mobile}`}>
+          {jamia.applicant.mobile.replace("+88", "")}
+        </a>
+      </td>
+      <td className="btns">
+        <button className="accept" onClick={() => accept(jamia._id)}>
+          <ion-icon name="checkmark-outline"></ion-icon>Accept
+        </button>
+        <button className="reject" onClick={() => reject(jamia._id)}>
+          <ion-icon name="close-outline"></ion-icon>Reject
+        </button>
+      </td>
+    </tr>
+  );
+}
+
+function DataEditForm({
+  Element,
+  defaultValue,
+  validation,
+  max,
+  tel,
+  api,
+  fieldCode,
+}) {
+  const form = useRef();
+  const [edit, setEdit] = useState(false);
+  const [newValue, setNewValue] = useState(defaultValue);
+  function cancel() {
+    if (newValue !== defaultValue) {
+      if (window.confirm("Discard Changes?")) {
+        setNewValue(defaultValue);
+        setEdit(false);
+      }
+    } else {
+      setEdit(false);
+    }
+  }
+  function save(e) {
+    e.preventDefault();
+    if (newValue === defaultValue) {
+      setEdit(false);
+      // form.current.querySelector("input").blur();
+    } else {
+      fetch(api, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ [fieldCode]: newValue }),
+      })
+        .then((res) => {
+          if (res.status === 200) {
+            // form.current.querySelector("input").blur();
+            setEdit(false);
+          } else {
+            alert("Something went wrong!");
+          }
+        })
+        .catch((err) => console.log(err));
+    }
+  }
   return (
-    <div className="allFatwa">
-      <table>
-        <thead>
-          <tr>
-            <th>Title</th>
-            <th>Question</th>
-            <th>Answer</th>
-            <th></th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {allFatwa.map((fatwa) => (
-            <SingleFatwa key={fatwa._id} fatwa={fatwa} />
-          ))}
-        </tbody>
-      </table>
+    <form ref={form} className={edit ? "edit" : ""} onSubmit={save}>
+      {tel && !edit && (
+        <a href={`tel:${newValue}`}>{newValue.replace("+88", "")}</a>
+      )}
+      {(!tel || (tel && edit)) && (
+        <Element
+          required={true}
+          type="text"
+          defaultValue={newValue}
+          validation={validation}
+          max={max}
+          onChange={(target) => setNewValue(target.value)}
+        />
+      )}
+      {!edit && (
+        <ion-icon
+          onClick={() => setEdit(true)}
+          name="create-outline"
+        ></ion-icon>
+      )}
+      {edit && (
+        <>
+          <button type="submit">
+            <ion-icon name="save-outline"></ion-icon>
+          </button>
+          <button type="button" onClick={cancel}>
+            <ion-icon name="close-outline"></ion-icon>
+          </button>
+        </>
+      )}
+    </form>
+  );
+}
+function PasswordEditForm({ api }) {
+  const form = useRef();
+  const [edit, setEdit] = useState(false);
+  const [pass, setPass] = useState({ oldPass: "", newPass: "", confirm: "" });
+  function setPassword(pass, value) {
+    setPass((prev) => {
+      const newSet = { ...prev };
+      newSet[pass] = value;
+      return newSet;
+    });
+  }
+  function save(e) {
+    e.preventDefault();
+    if (pass.newPass === pass.confirm) {
+      fetch(api, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(pass),
+      })
+        .then((res) => {
+          if (res.status === 200) {
+            setEdit(false);
+            form.current.querySelector("input").blur();
+          } else {
+            alert("Something went wrong!");
+          }
+          return res.json();
+        })
+        .then((data) => console.log(data));
+    } else {
+      alert("password did not match");
+    }
+  }
+  return (
+    <form
+      ref={form}
+      className={`password ${edit ? "edit" : ""}`}
+      onSubmit={save}
+    >
+      {!edit ? (
+        <Input type="text" defaultValue="••••••••" />
+      ) : (
+        <section>
+          <PasswordInput
+            placeholder="Old password"
+            match=".reg #confirmPass input"
+            dataId="oldPass"
+            onChange={(target) => setPassword("oldPass", target.value)}
+          />
+          <PasswordInput
+            placeholder="New password"
+            match=".data #confirmPass input"
+            passwordStrength={true}
+            dataId="pass"
+            onChange={(target) => setPassword("newPass", target.value)}
+          />
+          <PasswordInput
+            placeholder="Confirm password"
+            match=".data #pass input"
+            dataId="confirmPass"
+            onChange={(target) => setPassword("confirm", target.value)}
+          />
+        </section>
+      )}
+      {!edit && (
+        <ion-icon
+          onClick={() => setEdit(true)}
+          name="create-outline"
+        ></ion-icon>
+      )}
+      {edit && (
+        <>
+          <button type="submit">
+            <ion-icon name="save-outline"></ion-icon>
+          </button>
+          <button type="button" onClick={() => setEdit(false)}>
+            <ion-icon name="close-outline"></ion-icon>
+          </button>
+        </>
+      )}
+    </form>
+  );
+}
+function SingleJamia({ data, setData }) {
+  const jamia = data;
+  const { locale } = useContext(SiteContext);
+  const [showFull, setShowFull] = useState(false);
+  function ghost(_id) {
+    console.log(_id);
+  }
+  function remove(_id) {
+    console.log(_id);
+  }
+  const patchApi = `/api/admin/jamia/edit/${jamia._id}`;
+  return !showFull ? (
+    <tr onClick={() => setShowFull(true)}>
+      <td>{jamia.id}</td>
+      <td>
+        <Link title="View Jamia" to={`/jamia/${jamia.id}`} target="_black">
+          {jamia.name[locale]}
+          <ion-icon name="open-outline"></ion-icon>
+        </Link>
+        <span>{jamia.address}</span>
+      </td>
+      <td>
+        {jamia.founder}
+        <span title="Est.">
+          <FormattedDateParts value={new Date(jamia.est)}>
+            {(parts) => <>{parts[4].value}</>}
+          </FormattedDateParts>
+        </span>
+      </td>
+      <td>
+        <FormattedDate
+          value={new Date(jamia.joined)}
+          day="numeric"
+          month="numeric"
+          year="2-digit"
+        />
+      </td>
+      <td>
+        <FormattedNumber value={new Date(jamia.fatwa)} />
+      </td>
+      <td>
+        <a title="Call Jamia" href={`tel:${jamia.contact}`}>
+          {jamia.contact.replace("+88", "")}
+        </a>
+      </td>
+    </tr>
+  ) : (
+    <tr className="fullDetail">
+      <td className="label">Joined</td>
+      <td className="data">
+        <FormattedDate
+          value={new Date(jamia.joined)}
+          day="numeric"
+          month="numeric"
+          year="2-digit"
+        />
+      </td>
+      <td className="label">Fatwa</td>
+      <td className="data">
+        <FormattedNumber value={jamia.fatwa} />
+      </td>
+      <td className="label">ID</td>
+      <td className="data">{jamia.id}</td>
+      <td className="label">Password</td>
+      <td className="data">
+        <PasswordEditForm api={patchApi} />
+      </td>
+      <td className="label">Name (Bangla)</td>
+      <td className="data">
+        <DataEditForm
+          api={patchApi}
+          defaultValue={jamia.name["bn-BD"]}
+          Element={Input}
+          validation={/^[ঀ-৾\s(),]+$/}
+          fieldCode="name.bn-BD"
+        />
+      </td>
+      <td className="label">Name (English)</td>
+      <td className="data">
+        <DataEditForm
+          defaultValue={jamia.name["en-US"]}
+          Element={Input}
+          validation={/^[a-zA-Z0-9\s(),]+$/}
+          fieldCode="name.en-US"
+          api={patchApi}
+        />
+      </td>
+      <td className="label">Founder</td>
+      <td className="data">
+        <DataEditForm
+          defaultValue={jamia.founder}
+          Element={Input}
+          validation={/^[ঀ-ৣৰ-৾a-zA-Z\s(),-]+$/}
+          fieldCode="founder"
+          api={patchApi}
+        />
+      </td>
+      <td className="label">Est</td>
+      <td className="data">
+        <DataEditForm
+          defaultValue={jamia.est}
+          Element={Input}
+          validation={/^[\d]+$/}
+          fieldCode="est"
+          api={patchApi}
+        />
+      </td>
+      <td className="label">Address</td>
+      <td className="data">
+        <DataEditForm
+          defaultValue={jamia.address}
+          Element={Textarea}
+          max={200}
+          fieldCode="address"
+          api={patchApi}
+        />
+      </td>
+      <td className="label">Contact</td>
+      <td className="data">
+        <DataEditForm
+          defaultValue={jamia.contact}
+          Element={Input}
+          validation={/^\+8801\d{0,9}$/}
+          tel={true}
+          fieldCode="contact"
+          api={patchApi}
+        />
+      </td>
+      <td className="label">About</td>
+      <td className="data">
+        <DataEditForm
+          defaultValue={jamia.about}
+          Element={Textarea}
+          validation={/^[ঀ-ৣৰ-৾a-zA-Z\s(),-]+$/}
+          fieldCode="about"
+          api={patchApi}
+        />
+      </td>
+      <td className="label">Applicant's Name</td>
+      <td className="data">
+        <DataEditForm
+          defaultValue={jamia.applicant.name}
+          Element={Input}
+          validation={/^[ঀ-ৣৰ-৾a-zA-Z\s(),-]+$/}
+          fieldCode="applicant.name"
+          api={patchApi}
+        />
+      </td>
+      <td className="label">Applicant's designation</td>
+      <td className="data">
+        <DataEditForm
+          defaultValue={jamia.applicant.designation}
+          Element={Input}
+          validation={/^[ঀ-ৣৰ-৾a-zA-Z\s(),-]+$/}
+          fieldCode="applicant.designation"
+          api={patchApi}
+        />
+      </td>
+      <td className="label">Applicant's mobile</td>
+      <td className="data">
+        <DataEditForm
+          defaultValue={jamia.applicant.mobile}
+          Element={Input}
+          validation={/^\+8801\d{0,9}$/}
+          tel={true}
+          fieldCode="applicant.mobile"
+          api={patchApi}
+        />
+      </td>
+      <td className="btns">
+        <button className="ghost" onClick={() => ghost(jamia._id)}>
+          <ion-icon name="skull-outline"></ion-icon>Ghost
+        </button>
+        <button className="hideDetail" onClick={() => setShowFull(false)}>
+          <ion-icon name="chevron-up-outline"></ion-icon>Hide Detail
+        </button>
+        <button className="remove" onClick={() => remove(jamia._id)}>
+          <ion-icon name="trash-outline"></ion-icon>Remove
+        </button>
+      </td>
+    </tr>
+  );
+}
+function AllJamia() {
+  return (
+    <div className="view">
+      <h1 className="viewTitle">Jamia</h1>
+      <Tabs page="/admin/jamia/" tabs={["Active", "Submitions"]} />
+      <Switch>
+        <Route path="/admin/jamia" exact>
+          <View
+            Element={SingleJamia}
+            defaultSort={{ column: "joined", order: "des" }}
+            id="allJamia"
+            api="api/admin/jamia/active/filter?"
+            columns={[
+              { column: "id", sort: false, colCode: "id" },
+              { column: "name", sort: false, colCode: "name" },
+              { column: "founder", sort: false, colCode: "founder" },
+              { column: "joined", sort: true, colCode: "joined" },
+              { column: "fatwa", sort: true, colCode: "fatwa" },
+              { column: "contact", sort: false, colCode: "contact" },
+            ]}
+          />
+        </Route>
+        <Route path="/admin/jamia/active">
+          <View
+            Element={SingleJamia}
+            defaultSort={{ column: "joined", order: "des" }}
+            id="allJamia"
+            api="api/admin/jamia/active/filter?"
+            columns={[
+              { column: "id", sort: false, colCode: "id" },
+              { column: "name", sort: false, colCode: "name" },
+              { column: "founder", sort: false, colCode: "founder" },
+              { column: "joined", sort: true, colCode: "joined" },
+              { column: "fatwa", sort: true, colCode: "fatwa" },
+              { column: "contact", sort: false, colCode: "contact" },
+            ]}
+          />
+        </Route>
+        <Route path="/admin/jamia/submitions">
+          <View
+            Element={SingleJamiaSubmition}
+            defaultSort={{ column: "submitted", order: "des" }}
+            id="jamiaSubmitions"
+            api="api/admin/jamia/submitions/filter?"
+            columns={[
+              { column: "submitted", sort: true, colCode: "submitted" },
+              { column: "name & address", sort: false, colCode: "name" },
+              { column: "founder & est", sort: true, colCode: "founder" },
+              { column: "contact", sort: false, colCode: "contact" },
+            ]}
+          />
+        </Route>
+      </Switch>
+    </div>
+  );
+}
+
+function SinglePatreon() {
+  return (
+    <tr>
+      <td>Make patreon rows</td>
+    </tr>
+  );
+}
+function Patreons() {
+  return (
+    <div className="view">
+      <h1>Patreons</h1>
+      <Tabs page="/admin/patreons/" tabs={["All"]} />
+      <Switch>
+        <Route path="/admin/patreons">
+          <View
+            Element={SinglePatreon}
+            defaultSort={{ column: "date", order: "des" }}
+            id="allPatreons"
+            api="api/admin/patreons/filter?"
+            categories={[]}
+            columns={[
+              { column: "name", sort: false, colCode: "name" },
+              { column: "amount", sort: true, colCode: "amount" },
+              { column: "date", sort: true, colCode: "date" },
+            ]}
+          />
+        </Route>
+      </Switch>
+    </div>
+  );
+}
+
+function SingleUserReview() {
+  return (
+    <tr>
+      <td>Make user review rows</td>
+    </tr>
+  );
+}
+function UserReview() {
+  //this will have 3 tabs. 1) user submitted question, 2) review, 3) report
+  return (
+    <div className="view">
+      <h1>User Review</h1>
+      <Tabs
+        page="/admin/userReview/"
+        tabs={["Review", "Questions", "report"]}
+      />
+      <Switch>
+        <Route path="/admin/userReview">
+          <View
+            Element={SingleUserReview}
+            defaultSort={{ column: "date", order: "des" }}
+            id="allPatreons"
+            api="api/admin/userReview/filter?"
+            categories={[]}
+            columns={[
+              { column: "name", sort: false, colCode: "name" },
+              { column: "date", sort: true, colCode: "date" },
+              { column: "message", sort: false, colCode: "message" },
+            ]}
+          />
+        </Route>
+        <Route path="/admin/questions">
+          <View
+            Element={SingleUserReview}
+            defaultSort={{ column: "date", order: "des" }}
+            id="allPatreons"
+            api="api/admin/userReview/filter?"
+            categories={[]}
+            columns={[
+              { column: "name", sort: false, colCode: "name" },
+              { column: "date", sort: true, colCode: "date" },
+              { column: "message", sort: false, colCode: "message" },
+            ]}
+          />
+        </Route>
+        <Route path="/admin/report">
+          <View
+            Element={SingleUserReview}
+            defaultSort={{ column: "date", order: "des" }}
+            id="allPatreons"
+            api="api/admin/userReview/filter?"
+            categories={[]}
+            columns={[
+              { column: "name", sort: false, colCode: "name" },
+              { column: "date", sort: true, colCode: "date" },
+              { column: "message", sort: false, colCode: "message" },
+            ]}
+          />
+        </Route>
+      </Switch>
     </div>
   );
 }
@@ -367,18 +909,34 @@ function AllFatwa() {
 function AdminPanel() {
   return (
     <div className="main adminPanel">
-      <h2>Admin Panel</h2>
-      <Link to="/admin/allfatwa">Show all Fatwa</Link>
-      <Link to="/admin/add">Add Fatwa</Link>
-      <Route path="/admin/add" exact component={AddFatwaForm} />
-      <Route path="/admin/add/:id" component={AddFatwaForm} />
-      <Route path="/admin/allfatwa" component={AllFatwa} />
+      <Sidebar
+        views={[
+          { label: "Jamia", path: "/admin/jamia", icon: "book" },
+          { label: "Fatwa", path: "/admin/fatwa", icon: "reader" },
+          {
+            label: "Patreons",
+            path: "/admin/patreons",
+            icon: "umbrella",
+          },
+          {
+            label: "User Review",
+            path: "/admin/userreview",
+            icon: "people",
+          },
+        ]}
+      >
+        <div className="profile">
+          <h2>A</h2>
+        </div>
+      </Sidebar>
+      <Switch>
+        <Route path="/admin/jamia" component={AllJamia} />
+        <Route path="/admin/fatwa/:filter?" component={AllFatwa} />
+        <Route path="/admin/patreons" component={Patreons} />
+        <Route path="/admin/userReview" component={UserReview} />
+      </Switch>
     </div>
   );
 }
 
 export default AdminPanel;
-
-// delete fatwa -
-// allfatwa fetch -            http://localhost:8080
-// allfatwa form 3 -
