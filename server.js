@@ -10,7 +10,7 @@ global.ExtractJwt = require("passport-jwt").ExtractJwt;
 global.jwt = require("jsonwebtoken");
 
 const cookieParser = require("cookie-parser");
-
+const path = require("path");
 const app = express();
 
 //---------------------------------------------- dev stuff -
@@ -43,9 +43,10 @@ app.use("/api", require("./routes/general"));
 app.use("/api/jamia", require("./routes/jamia"));
 app.use("/api/admin", require("./routes/admin"));
 
-if (process.env.NODE_ENV === "production")
-  app.use(express.static("./client/build"));
-
-app.get("/*", (req, res) => res.send("what up? "));
+// if (process.env.NODE_ENV === "production")
+app.use(express.static(path.join(__dirname, "client/build")));
+app.get("*", (req, res) => {
+  return res.sendFile(path.join(__dirname, "/client/build/index.html"));
+});
 
 app.listen(PORT, () => console.log("server just ran at " + PORT));
