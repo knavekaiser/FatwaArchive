@@ -79,6 +79,7 @@ export const JamiaRegister = () => {
       },
       body: JSON.stringify(data),
     };
+    setLoading(true);
     fetch("/api/jamia/new", options)
       .then((res) => {
         setLoading(false);

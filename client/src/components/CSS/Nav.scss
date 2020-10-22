@@ -56,6 +56,10 @@
     grid-template-columns: 1fr auto;
     grid-template-rows: 1fr 1fr;
     grid-template-areas: "lg nv" "sr sr";
+    &.mini {
+      grid-template-areas: "lg nv";
+      grid-template-rows: 1fr;
+    }
     #searchbar {
       grid-area: sr;
     }

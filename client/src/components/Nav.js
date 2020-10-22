@@ -55,7 +55,7 @@ function Nav({ location }) {
       });
   }
   return (
-    <div style={style} className="navbar">
+    <div style={style} className={`navbar ${setShowSearchbar ? "mini" : ""}`}>
       <Route
         path="/:other"
         render={() => (
@@ -102,10 +102,3 @@ function Nav({ location }) {
 }
 
 export default Nav;
-
-// <li>
-// <Link to="/signup">SIGN UP</Link>
-// </li>
-// <li>
-// <Link to="/login">LOG IN</Link>
-// </li>
