@@ -1,12 +1,6 @@
 const { Fatwa, FatwaSubmitions } = require("../models/fatwaModel");
 const { Jamia, JamiaSubmitions } = require("../models/jamiaModel");
 const { User } = require("../models/userModel");
-const { Translate } = require("@google-cloud/translate").v2;
-const CREDENTIALS = JSON.parse(process.env.GOOGLE_API_CREDENTIAL);
-const translate = new Translate({
-  credentials: CREDENTIALS,
-  project_id: CREDENTIALS.project_id,
-});
 
 router.route("/fatwa/add").post((req, res) => {
   const { title, ques, ans } = req.body;

@@ -369,7 +369,6 @@ export const View = ({
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   function fetchData() {
-    data !== [] && setData([]);
     !loading && setLoading(true);
     const query = encodeURL(filters);
     const sortOrder = encodeURL(sort);
@@ -387,7 +386,7 @@ export const View = ({
       });
     return () => abortController.abort();
   }
-  useEffect(fetchData, [filters, sort, api]);
+  useEffect(fetchData, [filters, sort]);
   return (
     <>
       {categories && (

@@ -6,7 +6,7 @@ const userModel = new Schema({
   mobile: { type: String, required: true, unique: true },
   password: { type: String, require: true },
   role: { type: String, required: true },
-  isDeleted: { type: Boolean, default: false },
+  ghost: { type: Boolean, default: false },
 });
 
 const User = mongoose.model("User", userModel);

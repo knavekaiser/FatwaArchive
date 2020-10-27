@@ -140,6 +140,7 @@ export const PasswordInput = ({
   match,
   placeholder,
   onChange,
+  defaultValue,
 }) => {
   const [showPass, setShowPass] = useState(false);
   const [style, setStyle] = useState({ width: 0 });
@@ -190,6 +191,7 @@ export const PasswordInput = ({
   }
   return (
     <Input
+      defaultValue={defaultValue}
       validation={/./}
       min={8}
       dataId={dataId}

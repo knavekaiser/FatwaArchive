@@ -9,20 +9,28 @@ global.JwtStrategy = require("passport-jwt").Strategy;
 global.ExtractJwt = require("passport-jwt").ExtractJwt;
 global.jwt = require("jsonwebtoken");
 
+const { Translate } = require("@google-cloud/translate").v2;
+
 const cookieParser = require("cookie-parser");
 const path = require("path");
 const app = express();
 
 //---------------------------------------------- dev stuff -
 
-// require("dotenv").config();
-// const morgan = require("morgan");
-// app.use(morgan("dev"));
+require("dotenv").config();
+const morgan = require("morgan");
+app.use(morgan("dev"));
 
 //----------------------------------------------------------
 
 const PORT = process.env.PORT || 8080;
 const URI = process.env.ATLAS_URI;
+
+const CREDENTIALS = JSON.parse(process.env.GOOGLE_API_CREDENTIAL);
+global.translate = new Translate({
+  credentials: CREDENTIALS,
+  project_id: CREDENTIALS.project_id,
+});
 
 mongoose
   .connect(URI, {
@@ -43,7 +51,6 @@ app.use("/api", require("./routes/general"));
 app.use("/api/jamia", require("./routes/jamia"));
 app.use("/api/admin", require("./routes/admin"));
 
-// if (process.env.NODE_ENV === "production")
 app.use(express.static(path.join(__dirname, "client/build")));
 app.get("*", (req, res) => {
   return res.sendFile(path.join(__dirname, "/client/build/index.html"));

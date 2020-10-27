@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
-import { Link, useHistory } from "react-router-dom";
+import { Link, useHistory, Redirect } from "react-router-dom";
 import { SiteContext } from "../Context";
 import "./CSS/JamiaForms.min.css";
 import { Input, Textarea, Checkbox, PasswordInput, $ } from "./FormElements";
@@ -10,11 +10,232 @@ const SS = {
   get: (key) => sessionStorage.getItem(key) || "",
   remove: (key) => sessionStorage.removeItem(key),
 };
+// <section>
+// <div className="label login">
+// <FormattedMessage
+// id="form.jamiaReg.label.loginDetail"
+// defaultMessage="LOGIN DETAIL"
+// />
+// </div>
+// </section>
+
+function JamiaDetail() {
+  return (
+    <>
+      <Input
+        defaultValue={SS.get("reg-name")}
+        onChange={(target) => {
+          SS.set("reg-name", target.value);
+          $("#name .emptyFeildWarning") &&
+            $("#name .emptyFeildWarning").remove();
+        }}
+        dataId="name"
+        required={true}
+        type="text"
+        validation={/^[ঀ-৾a-zA-Z\s(),]+$/}
+        warning="Bangla"
+        label=<FormattedMessage
+          id="form.jamiaReg.name"
+          defaultMessage="Jamia's Name (Bangla)"
+        />
+      />
+      <Textarea
+        defaultValue={SS.get("reg-add")}
+        onChange={(target) => {
+          SS.set("reg-add", target.value);
+          $("#add .emptyFeildWarning") && $("#add .emptyFeildWarning").remove();
+        }}
+        dataId="add"
+        required={true}
+        label=<FormattedMessage
+          id="form.jamiaReg.add"
+          defaultMessage="Address"
+        />
+        max={200}
+      />
+      <Input
+        defaultValue={SS.get("reg-contact") || "+8801"}
+        onChange={(target) => {
+          SS.set("reg-contact", target.value);
+          $("#contact .emptyFeildWarning") &&
+            $("#contact .emptyFeildWarning").remove();
+        }}
+        required={true}
+        dataId="contact"
+        type="text"
+        validation={/^\+8801\d{0,9}$/}
+        warning="+8801***"
+        max={14}
+        min={14}
+        label=<FormattedMessage
+          id="form.jamiaReg.contact"
+          defaultMessage="Contact"
+        />
+      />
+      <Input
+        defaultValue={SS.get("reg-primeMufti")}
+        onChange={(target) => {
+          SS.set("reg-primeMufti", target.value);
+          $("#primeMufti .emptyFeildWarning") &&
+            $("#primeMufti .emptyFeildWarning").remove();
+        }}
+        dataId="primeMufti"
+        required={true}
+        label=<FormattedMessage
+          id="form.jamiaReg.primeMufti"
+          defaultMessage="Prime Mufti"
+        />
+      />
+    </>
+  );
+}
+function LoginDetail({ idIsValid, validatingId, setIdIsValid }) {
+  return (
+    <>
+      <Input
+        defaultValue={SS.get("reg-id")}
+        onChange={(target) => {
+          SS.set("reg-id", target.value);
+          setIdIsValid(null);
+        }}
+        required={true}
+        dataId="id"
+        type="text"
+        min={8}
+        max={20}
+        label=<FormattedMessage
+          id="form.login.id"
+          defaultMessage="Jamia's ID"
+        />
+        validation={/^[a-zA-Z0-9]+$/}
+        warning=<FormattedMessage
+          id="form.jamiaReg.warning.invalidChar"
+          defaultMessage="Invalid Character!"
+        />
+      >
+        {idIsValid === false && (
+          <ion-icon name="close-circle-outline"></ion-icon>
+        )}
+        {validatingId && idIsValid === null && (
+          <ion-icon
+            title="id is already taken"
+            name="reload-outline"
+          ></ion-icon>
+        )}
+        {idIsValid === true && (
+          <ion-icon
+            title="id is valid"
+            name="checkmark-circle-outline"
+          ></ion-icon>
+        )}
+      </Input>
+      <PasswordInput
+        match=".reg #confirmPass input"
+        passwordStrength={true}
+        dataId="pass"
+        label=<FormattedMessage
+          id="form.login.password"
+          defaultMessage="Password"
+        />
+        onChange={(target) => {
+          SS.set("reg-pass", target.value);
+          $("#pass .emptyFeildWarning") &&
+            $("#pass .emptyFeildWarning").remove();
+        }}
+      />
+      <PasswordInput
+        match=".reg #pass input"
+        dataId="confirmPass"
+        onChange={() => {
+          $("#confirmPass .emptyFeildWarning") &&
+            $("#confirmPass .emptyFeildWarning").remove();
+        }}
+        label=<FormattedMessage
+          id="form.login.passwordRepeat"
+          defaultMessage="Confirm Password"
+        />
+      />
+    </>
+  );
+}
+function ApplicantDetail() {
+  return (
+    <>
+      <Input
+        defaultValue={SS.get("reg-applicant")}
+        onChange={(target) => SS.set("reg-applicant", target.value)}
+        required={true}
+        dataId="applicant"
+        type="text"
+        validation={/^[ঀ-ৣৰ-৾a-zA-Z\s(),-]+$/}
+        label=<FormattedMessage
+          id="form.jamiaReg.applicant"
+          defaultMessage="Applicant's Name"
+        />
+      />
+      <Input
+        defaultValue={SS.get("reg-applicantDesignation")}
+        onChange={(target) => SS.set("reg-applicantDesignation", target.value)}
+        required={true}
+        dataId="applicantDesignation"
+        type="text"
+        label=<FormattedMessage
+          id="form.jamiaReg.applicantDesignation"
+          defaultMessage="Applicant's designation in Jamia"
+        />
+      />
+      <Input
+        defaultValue={SS.get("reg-applicantMobile") || "+8801"}
+        onChange={(target) => SS.set("reg-applicantMobile", target.value)}
+        required={true}
+        dataId="applicantMobile"
+        type="text"
+        validation={/^\+8801\d{0,9}$/}
+        warning="+8801***"
+        max={14}
+        min={14}
+        label=<FormattedMessage
+          id="form.jamiaReg.applicantContact"
+          defaultMessage="Applicant's Mobile"
+        />
+      />
+    </>
+  );
+}
+function StepProgress({ step }) {
+  return (
+    <section className="pageNumber">
+      <div className="dots">
+        <span className={`current`}></span>
+      </div>
+      <div className="line">
+        <span className={`${step > 1 ? "current" : ""}`}></span>
+      </div>
+      <div className="dots">
+        <span className={`${step > 1 ? "current" : ""}`}></span>
+      </div>
+      <div className="line">
+        <span className={`${step > 2 ? "current" : ""}`}></span>
+      </div>
+      <div className="dots">
+        <span className={`${step > 2 ? "current" : ""}`}></span>
+      </div>
+    </section>
+  );
+}
 
 export const JamiaRegister = () => {
-  const { locale } = useContext(SiteContext);
-  const [loading, setLoading] = useState(false);
+  const { locale, user } = useContext(SiteContext);
+  const [step, setStep] = useState(1);
   const [success, setSuccess] = useState(false);
+  const history = useHistory();
+  useEffect(() => {
+    user && history.push("/");
+    return () => {
+      setSuccess(false);
+    };
+  }, []);
+  const [loading, setLoading] = useState(false);
   const [idIsValid, setIdIsValid] = useState(null);
   const [validatingId, setValidatingId] = useState(false);
   const validateId = () => {
@@ -32,49 +253,102 @@ export const JamiaRegister = () => {
         .catch((err) => console.log(err));
     }
   };
+  function leftButton() {
+    if (step === 2) {
+      setStep(1);
+    } else if (step === 3) {
+      setStep(2);
+    }
+  }
+  function emptyFeildWarning(selector, inputType, warning) {
+    const emptyFeildWarning = document.createElement("p");
+    emptyFeildWarning.classList.add("emptyFeildWarning");
+    emptyFeildWarning.textContent = warning;
+    if ($(`${selector} .emptyFeildWarning`) === null) {
+      $(`${selector}`).appendChild(emptyFeildWarning);
+    }
+    $(`${selector} ${inputType}`).focus();
+  }
+  function rightButton() {
+    if (step === 1) {
+      if (SS.get("reg-name").length < 5) {
+        emptyFeildWarning("#name", "input", "Add a valid jamia");
+        return;
+      }
+      if (SS.get("reg-add").length < 10) {
+        emptyFeildWarning("#add", "textarea", "Add a valid address");
+        return;
+      }
+      if (SS.get("reg-contact").length < 14) {
+        emptyFeildWarning("#contact", "input", "Add a valid mobile number.");
+        return;
+      }
+      if (SS.get("reg-primeMufti").length < 4) {
+        emptyFeildWarning("#primeMufti", "input", "Add a valid jamia");
+        return;
+      }
+      setStep(2);
+    } else if (step === 2) {
+      if (SS.get("reg-id").length < 8) {
+        emptyFeildWarning("#id", "input", "Add a valid id");
+        return;
+      }
+      if ($(".reg #pass input").value.length < 7) {
+        emptyFeildWarning("#pass", "input", "Add a password");
+        return;
+      }
+      if ($(".reg #confirmPass input").value.length < 7) {
+        emptyFeildWarning("#confirmPass", "input", "confirm password");
+        return;
+      }
+      if ($(".reg #pass input").value !== $(".reg #confirmPass input").value) {
+        emptyFeildWarning("#confirmPass", "input", "Password did not match");
+        return;
+      }
+      if (!idIsValid) {
+        emptyFeildWarning("#id", "input", "id is already taken");
+        return;
+      }
+      setStep(3);
+    }
+  }
   useEffect(() => {
+    if (step !== 2) return;
     validateId();
     $(".reg #id input").addEventListener("blur", validateId);
-    return () => {
-      setSuccess(false);
-    };
-  }, []);
+  }, [step]);
   function submit(e) {
     e.preventDefault();
-    if (!idIsValid) {
-      $("#id input").focus();
+    if (SS.get("reg-applicant").length < 5) {
+      emptyFeildWarning("#applicant", "input", "Add a valid name");
       return;
     }
-    if ($("#pass input").value !== $("#confirmPass input").value) {
-      $("#confirmPass input").focus();
+    if (SS.get("reg-applicantDesignation").length < 5) {
+      emptyFeildWarning("#applicantDesignation", "input", "Add a valid title.");
       return;
     }
-    if ($("#contact input").value.length !== 14) {
-      $("#contact input").focus();
-      return;
-    }
-    if ($("#applicantMobile input").value.length !== 14) {
-      $("#applicantMobile input").focus();
+    if (SS.get("reg-applicantMobile").length < 14) {
+      emptyFeildWarning(
+        "#applicantMobile",
+        "input",
+        "Add a valid mobile number"
+      );
       return;
     }
     const data = {
-      name: {
-        "bn-BD": $(".reg #name input").value,
-        "en-US": $(".reg #nameEn input").value,
-      },
-      founder: $(".reg #founder textarea").value,
-      est: $(".reg #est input").value,
-      address: $(".reg #add textarea").value,
-      contact: $(".reg #contact input").value,
-      primeMufti: $(".reg #primeMufti input").value,
-      id: $(".reg #id input").value,
-      password: $(".reg #pass input").value,
+      name: SS.get("reg-name"),
+      address: SS.get("reg-add"),
+      contact: SS.get("reg-contact"),
+      primeMufti: SS.get("reg-primeMufti"),
+      id: SS.get("reg-id"),
+      password: SS.get("reg-pass"),
       applicant: {
-        name: $(".reg #applicant input").value,
-        designation: $(".reg #applicantDesignation input").value,
-        mobile: $(".reg #applicantMobile input").value,
+        name: SS.get("reg-applicant"),
+        designation: SS.get("reg-applicantDesignation"),
+        mobile: SS.get("reg-applicantMobile"),
       },
     };
+    console.log(data);
     const options = {
       method: "POST",
       headers: {
@@ -88,13 +362,11 @@ export const JamiaRegister = () => {
         setLoading(false);
         if (res.status === 200) {
           SS.remove("reg-name");
-          SS.remove("reg-nameEn");
-          SS.remove("reg-founder");
-          SS.remove("reg-est");
           SS.remove("reg-add");
           SS.remove("reg-contact");
           SS.remove("reg-primeMufti");
           SS.remove("reg-id");
+          SS.remove("reg-pass");
           SS.remove("reg-applicantDesignation");
           SS.remove("reg-applicant");
           SS.remove("reg-applicantMobile");
@@ -105,6 +377,7 @@ export const JamiaRegister = () => {
   }
   return !success ? (
     <div className={`main jamiaForms ${locale === "bn-BD" ? "bn-BD" : ""}`}>
+      {user && <Redirect to="/" />}
       <form className="reg" onSubmit={submit}>
         <h2>
           <FormattedMessage
@@ -112,213 +385,51 @@ export const JamiaRegister = () => {
             defaultMessage="REGISTRATION"
           />
         </h2>
-        <div className="label jamiaDetail">
-          <FormattedMessage
-            id="form.jamiaReg.label.jamiaDetail"
-            defaultMessage="JAMIA"
+        <StepProgress step={step} />
+        {step === 1 && <JamiaDetail />}
+        {step === 2 && (
+          <LoginDetail
+            idIsValid={idIsValid}
+            validatingId={validatingId}
+            setIdIsValid={setIdIsValid}
           />
-        </div>
-        <Input
-          defaultValue={SS.get("reg-name")}
-          onChange={(target) => SS.set("reg-name", target.value)}
-          dataId="name"
-          required={true}
-          type="text"
-          validation={/^[ঀ-৾\s(),]+$/}
-          warning="Bangla"
-          label=<FormattedMessage
-            id="form.jamiaReg.name"
-            defaultMessage="Jamia's Name (Bangla)"
-          />
-        />
-        <Input
-          defaultValue={SS.get("reg-nameEn")}
-          onChange={(target) => SS.set("reg-nameEn", target.value)}
-          dataId="nameEn"
-          required={true}
-          type="text"
-          validation={/^[a-zA-Z0-9\s(),]+$/}
-          warning="English"
-          label=<FormattedMessage
-            id="form.jamiaReg.nameEn"
-            defaultMessage="Jamia's Name (English)"
-          />
-        />
-        <Textarea
-          defaultValue={SS.get("reg-founder")}
-          onChange={(target) => SS.set("reg-founder", target.value)}
-          dataId="founder"
-          required={true}
-          validation={/^[ঀ-ৣৰ-৾a-zA-Z\s(),-]+$/}
-          type="text"
-          label=<FormattedMessage
-            id="form.jamiaReg.founder"
-            defaultMessage="Founder"
-          />
-          max={150}
-        />
-        <Input
-          defaultValue={SS.get("reg-est")}
-          onChange={(target) => SS.set("reg-est", target.value)}
-          dataId="est"
-          required={true}
-          type="text"
-          validation={/^[\d]{0,4}$/}
-          label=<FormattedMessage id="form.jamiaReg.est" defaultMessage="EST" />
-        />
-        <Textarea
-          defaultValue={SS.get("reg-add")}
-          onChange={(target) => SS.set("reg-add", target.value)}
-          dataId="add"
-          required={true}
-          label=<FormattedMessage
-            id="form.jamiaReg.add"
-            defaultMessage="Address"
-          />
-          max={200}
-        />
-        <Input
-          defaultValue={SS.get("reg-contact") || "+8801"}
-          onChange={(target) => SS.set("reg-contact", target.value)}
-          required={true}
-          dataId="contact"
-          type="text"
-          validation={/^\+8801\d{0,9}$/}
-          warning="+8801***"
-          max={14}
-          min={14}
-          label=<FormattedMessage
-            id="form.jamiaReg.contact"
-            defaultMessage="Contact"
-          />
-        />
-        <Input
-          defaultValue={SS.get("reg-primeMufti")}
-          onChange={(target) => SS.set("reg-primeMufti", target.value)}
-          dataId="primeMufti"
-          required={true}
-          label=<FormattedMessage
-            id="form.jamiaReg.primeMufti"
-            defaultMessage="Prime Mufti"
-          />
-        />
-        <div className="label login">
-          <FormattedMessage
-            id="form.jamiaReg.label.loginDetail"
-            defaultMessage="LOGIN DETAIL"
-          />
-        </div>
-        <Input
-          defaultValue={SS.get("reg-id")}
-          onChange={(target) => {
-            SS.set("reg-id", target.value);
-            setIdIsValid(null);
-          }}
-          required={true}
-          dataId="id"
-          type="text"
-          min={8}
-          max={20}
-          label=<FormattedMessage
-            id="form.login.id"
-            defaultMessage="Jamia's ID"
-          />
-          validation={/^[a-zA-Z0-9]+$/}
-          warning=<FormattedMessage
-            id="form.jamiaReg.warning.invalidChar"
-            defaultMessage="Invalid Character!"
-          />
-        >
-          {idIsValid === false && (
-            <ion-icon name="close-circle-outline"></ion-icon>
-          )}
-          {validatingId && <ion-icon name="reload-outline"></ion-icon>}
-          {idIsValid && <ion-icon name="checkmark-circle-outline"></ion-icon>}
-        </Input>
-        <PasswordInput
-          match=".reg #confirmPass input"
-          passwordStrength={true}
-          dataId="pass"
-          label=<FormattedMessage
-            id="form.login.password"
-            defaultMessage="Password"
-          />
-        />
-        <PasswordInput
-          match=".reg #pass input"
-          dataId="confirmPass"
-          label=<FormattedMessage
-            id="form.login.passwordRepeat"
-            defaultMessage="Confirm Password"
-          />
-        />
-        <div className="label applicant">
-          <FormattedMessage
-            id="form.jamiaReg.label.applicantDetail"
-            defaultMessage="APPLICANT"
-          />
-        </div>
-        <Input
-          defaultValue={SS.get("reg-applicant")}
-          onChange={(target) => SS.set("reg-applicant", target.value)}
-          required={true}
-          dataId="applicant"
-          type="text"
-          validation={/^[ঀ-ৣৰ-৾a-zA-Z\s(),-]+$/}
-          label=<FormattedMessage
-            id="form.jamiaReg.applicant"
-            defaultMessage="Applicant's Name"
-          />
-        />
-        <Input
-          defaultValue={SS.get("reg-applicantDesignation")}
-          onChange={(target) =>
-            SS.set("reg-applicantDesignation", target.value)
-          }
-          required={true}
-          dataId="applicantDesignation"
-          type="text"
-          label=<FormattedMessage
-            id="form.jamiaReg.applicantDesignation"
-            defaultMessage="Applicant's designation in Jamia"
-          />
-        />
-        <Input
-          defaultValue={SS.get("reg-applicantMobile") || "+8801"}
-          onChange={(target) => SS.set("reg-applicantMobile", target.value)}
-          required={true}
-          dataId="applicantMobile"
-          type="text"
-          validation={/^\+8801\d{0,9}$/}
-          warning="+8801***"
-          max={14}
-          min={14}
-          label=<FormattedMessage
-            id="form.jamiaReg.applicantContact"
-            defaultMessage="Applicant's Mobile"
-          />
-        />
-        <Checkbox required={true}>
-          {locale === "en-US" && (
-            <>
-              I accept all{" "}
-              <Link to="/terms&conditions">Terms and conditions.</Link>
-            </>
-          )}
-          {locale === "bn-BD" && (
-            <>
-              আমি ফাতোয়া আর্কাইভের সকল{" "}
-              <Link to="/terms&conditions">শর্ত সমূহ</Link> মেনে নিলাম ।
-            </>
-          )}
-        </Checkbox>
-        <button type="submit" disabled={loading}>
-          <FormattedMessage
-            id="form.jamiaReg.submit"
-            defaultMessage="Register"
-          />
-          {loading && <span className="loading"></span>}
-        </button>
+        )}
+        {step === 3 && <ApplicantDetail />}
+        {step === 3 && (
+          <Checkbox required={true}>
+            {locale === "en-US" && (
+              <>
+                I accept all{" "}
+                <Link to="/terms&conditions">Terms and conditions.</Link>
+              </>
+            )}
+            {locale === "bn-BD" && (
+              <>
+                আমি ফাতোয়া আর্কাইভের সকল{" "}
+                <Link to="/terms&conditions">শর্ত সমূহ</Link> মেনে নিলাম ।
+              </>
+            )}
+          </Checkbox>
+        )}
+        {(step === 2 || step === 3) && (
+          <button type="button" className="left" onClick={leftButton}>
+            back
+          </button>
+        )}
+        {(step === 1 || step === 2) && (
+          <button type="button" className="right" onClick={rightButton}>
+            next
+          </button>
+        )}
+        {step === 3 && (
+          <button type="submit" disabled={loading}>
+            <FormattedMessage
+              id="form.jamiaReg.submit"
+              defaultMessage="Register"
+            />
+            {loading && <span className="loading"></span>}
+          </button>
+        )}
       </form>
     </div>
   ) : (
@@ -339,6 +450,7 @@ export const JamiaLogin = () => {
   const [invalidCredentials, setInvalidCredentials] = useState(null);
   const [loading, setLoading] = useState(false);
   const history = useHistory();
+  const { user } = useContext(SiteContext);
   const { setUser, setIsAuthenticated, locale } = useContext(SiteContext);
   const [userId, setUserId] = useState("");
   const [pass, setPass] = useState("");
@@ -368,6 +480,7 @@ export const JamiaLogin = () => {
   }
   return (
     <div className={`main jamiaForms ${locale === "bn-BD" ? "bn-BD" : ""}`}>
+      {user && <Redirect to="/" />}
       <form className="login" onSubmit={submit}>
         <h2 data-bn="আমার থেকে একটি বাক্য হলেও পৌঁছে দাও ।">
           - بلغوا عني ولو آية
@@ -403,7 +516,7 @@ export const AdminLogin = () => {
   const [invalidCredentials, setInvalidCredentials] = useState(null);
   const [loading, setLoading] = useState(false);
   const history = useHistory();
-  const { setUser, setIsAuthenticated, locale } = useContext(SiteContext);
+  const { setUser, setIsAuthenticated, locale, user } = useContext(SiteContext);
   const [userId, setUserId] = useState("");
   const [pass, setPass] = useState("");
   function submit(e) {
@@ -426,12 +539,13 @@ export const AdminLogin = () => {
       .then((data) => {
         setIsAuthenticated(data.isAuthenticated);
         setUser(data.user);
-        history.push("/jamia/profile");
+        history.push("/admin");
         console.log(data);
       });
   }
   return (
     <div className={`main jamiaForms ${locale === "bn-BD" ? "bn-BD" : ""}`}>
+      {user && <Redirect to="/" />}
       <form className="adminLogin" onSubmit={submit}>
         <h2 data-bn="This part is only for Admins.">Admin</h2>
         <Input

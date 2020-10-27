@@ -5,8 +5,8 @@ const jamia = new Schema({
     "en-US": { type: String, required: true, trim: true },
     "bn-BD": { type: String, required: true, trim: true },
   },
-  founder: { type: String, required: true, trim: true },
-  est: { type: String, required: true, trim: true },
+  founder: { type: String, default: "", trim: true },
+  est: { type: String, default: "", trim: true },
   address: { type: String, required: true, trim: true },
   contact: { type: String, required: true, trim: true },
   about: { type: String, default: "", trim: true },
@@ -21,16 +21,12 @@ const jamia = new Schema({
     designation: { type: String, required: true, trim: true },
     mobile: { type: String, required: true, trim: true },
   },
+  ghost: { type: Boolean, default: false },
 });
 
 const jamiaSubmitions = new Schema({
   submitted: { type: Date, default: Date.now },
-  name: {
-    "en-US": { type: String, required: true, trim: true },
-    "bn-BD": { type: String, required: true, trim: true },
-  },
-  founder: { type: String, required: true, trim: true },
-  est: { type: String, required: true, trim: true },
+  name: { type: String, required: true, trim: true },
   address: { type: String, required: true, trim: true },
   contact: { type: String, required: true, trim: true },
   primeMufti: { type: String, required: true, trim: true },

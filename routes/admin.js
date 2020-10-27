@@ -7,6 +7,12 @@ const fetch = require("node-fetch");
 //   "http://66.45.237.70/api.php?username=knavekaiser&password=8H43ME25&number=8801989479749&message=$text"
 // ).then((res) => console.log(res));
 
+function getLan(str) {
+  return (str.match(/[a-z\s]/gi) || []).length > (str.length / 8) * 6
+    ? "en-US"
+    : "bn-BD";
+}
+
 router.route("/allfatwa").get((req, res) => {
   const locale = req.headers["accept-language"];
   if (locale.length > 5) {
@@ -121,11 +127,9 @@ router.route("/jamia/submitions/filter").get((req, res) => {
             _id: jamia._id,
             submitted: jamia.submitted,
             name: jamia.name,
-            founder: jamia.founder,
-            est: jamia.est,
+            primeMufti: jamia.primeMufti,
             address: jamia.address,
             contact: jamia.contact,
-            about: jamia.about,
             id: jamia.id,
             applicant: jamia.applicant,
           };
@@ -142,22 +146,45 @@ router.route("/jamia/submitions/filter").get((req, res) => {
     .catch((err) => res.status(400).json(err));
 });
 router.route("/jamia/accept/:_id").post((req, res) => {
+  const name = {};
+  const primeMufti = {};
+  let newJamia = {};
   JamiaSubmitions.findById(req.params._id)
     .then((jamia) => {
-      const newJamia = new Jamia({
+      newJamia = jamia;
+      return Promise.all([
+        translate
+          .translate(jamia.name, getLan(jamia.name) === "bn-BD" ? "en" : "bn")
+          .then((translation) => {
+            name[getLan(jamia.name)] = jamia.name;
+            name[getLan(jamia.name) === "bn-BD" ? "en-US" : "bn-BD"] =
+              translation[0];
+          }),
+        translate
+          .translate(
+            jamia.primeMufti,
+            getLan(jamia.primeMufti) === "bn-BD" ? "en" : "bn"
+          )
+          .then((translation) => {
+            primeMufti[getLan(jamia.primeMufti)] = jamia.primeMufti;
+            primeMufti[
+              getLan(jamia.primeMufti) === "bn-BD" ? "en-US" : "bn-BD"
+            ] = translation[0];
+          }),
+      ]);
+    })
+    .then(() => {
+      return new Jamia({
         joined: new Date(),
         fatwa: 0,
-        name: jamia.name,
-        founder: jamia.founder,
-        est: jamia.est,
-        address: jamia.address,
-        contact: jamia.contact,
-        about: jamia.about,
-        id: jamia.id,
-        password: jamia.password,
-        applicant: jamia.applicant,
+        name,
+        primeMufti,
+        address: newJamia.address,
+        contact: newJamia.contact,
+        id: newJamia.id,
+        password: newJamia.password,
+        applicant: newJamia.applicant,
       });
-      return newJamia;
     })
     .then((jamiaToBeAdded) => jamiaToBeAdded.save())
     .then(() => JamiaSubmitions.findByIdAndDelete(req.params._id))
@@ -178,6 +205,7 @@ router.route("/jamia/active/filter").get((req, res) => {
           fatwa: jamia.fatwa,
           name: jamia.name,
           founder: jamia.founder,
+          primeMufti: jamia.primeMufti,
           est: jamia.est,
           address: jamia.address,
           contact: jamia.contact,

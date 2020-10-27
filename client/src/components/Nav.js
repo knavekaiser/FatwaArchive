@@ -1,16 +1,38 @@
 import React, { useEffect, useState, useContext } from "react";
 import { Link, Route, useHistory } from "react-router-dom";
 import { SiteContext } from "../Context";
+import { Actions } from "./TableElements";
 import "./CSS/Nav.min.css";
 import Searchbar from "./Searchbar";
 import logo from "../logo.svg";
 
 function Avatar() {
-  const { locale, user } = useContext(SiteContext);
+  const { locale, user, setUser, setIsAuthenticated } = useContext(SiteContext);
+  const history = useHistory();
+  function showDashboard() {
+    history.push("/admin/jamia");
+  }
+  function logout() {
+    fetch("/api/logout")
+      .then((res) => res.json())
+      .then((data) => {
+        setUser(data.user);
+        setIsAuthenticated(data.isAuthenticated);
+        history.push("/");
+      });
+  }
   return (
-    <div className="avatar">
+    <li className="avatar">
       {user.role === "jamia" && user.name[locale].slice(0, 1)}
-    </div>
+      {user.role === "admin" && user.firstName.slice(0, 1)}
+      <Actions
+        id="avatarActions"
+        actions={[
+          { option: "Dashboard", action: showDashboard },
+          { option: "Logout", action: logout },
+        ]}
+      />
+    </li>
   );
 }
 
@@ -45,15 +67,6 @@ function Nav({ location }) {
       setStyle({ boxShadow: "0 5px 5px rgba(0,0,0,0.05)" });
     }
   }, [location, showSearchbar]);
-  function logout() {
-    fetch("/api/logout")
-      .then((res) => res.json())
-      .then((data) => {
-        setUser(data.user);
-        setIsAuthenticated(data.isAuthenticated);
-        history.push("/");
-      });
-  }
   return (
     <div style={style} className={`navbar ${setShowSearchbar ? "mini" : ""}`}>
       <Route
@@ -70,9 +83,7 @@ function Nav({ location }) {
       <nav>
         <ul>
           {user ? (
-            <li>
-              <Avatar />
-            </li>
+            <Avatar />
           ) : (
             <>
               {!(history.location.pathname === "/login") && (

@@ -16,9 +16,15 @@ import Enlish from "./language/en-US.json";
 import Bangali from "./language/bn-BD.json";
 import "./App.min.css";
 
-function ProtectedRoute({ component: Component, redirect, children, ...rest }) {
+function ProtectedRoute({
+  component: Component,
+  redirect,
+  role,
+  children,
+  ...rest
+}) {
   const { user } = useContext(SiteContext);
-  return user ? (
+  return user && user.role === role ? (
     <Route {...rest}>{children ? children : <Component />}</Route>
   ) : (
     <Redirect to={redirect} />
@@ -77,11 +83,13 @@ function App() {
             path="/jamia"
             redirect="/login"
             component={JamiaProfile}
+            role="jamia"
           />
           <ProtectedRoute
             path="/admin"
             redirect="/adminLogin"
             component={AdminPanel}
+            role="admin"
           />
           <Route path="/" component={FourOFour} />
         </Switch>

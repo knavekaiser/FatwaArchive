@@ -297,6 +297,7 @@ function AllFatwa({ history, location, match }) {
 }
 function SingleJamiaSubmition({ data, setData }) {
   const jamia = data;
+  // console.log(jamia);
   const { locale } = useContext(SiteContext);
   const [showFull, setShowFull] = useState(false);
   function accept(_id) {
@@ -336,17 +337,10 @@ function SingleJamiaSubmition({ data, setData }) {
         />
       </td>
       <td>
-        {jamia.name[locale]}
+        {jamia.name}
         <span>{jamia.address}</span>
       </td>
-      <td>
-        {jamia.founder}
-        <span>
-          <FormattedDateParts value={new Date(jamia.est)}>
-            {(parts) => <>{parts[4].value}</>}
-          </FormattedDateParts>
-        </span>
-      </td>
+      <td>{jamia.primeMufti}</td>
       <td>
         <a href={`tel:${jamia.contact}`}>{jamia.contact.replace("+88", "")}</a>
       </td>
@@ -367,22 +361,16 @@ function SingleJamiaSubmition({ data, setData }) {
       </td>
       <td className="label">ID</td>
       <td className="data">{jamia.id}</td>
-      <td className="label">Name (Bangla)</td>
-      <td className="data">{jamia.name["bn-BD"]}</td>
-      <td className="label">Name (English)</td>
-      <td className="data">{jamia.name["en-US"]}</td>
-      <td className="label">Founder</td>
-      <td className="data">{jamia.founder}</td>
-      <td className="label">Est</td>
-      <td className="data">{jamia.est}</td>
+      <td className="label">Name</td>
+      <td className="data">{jamia.name}</td>
+      <td className="label">Prime Mufti</td>
+      <td className="data">{jamia.primeMufti}</td>
       <td className="label">Address</td>
       <td className="data">{jamia.address}</td>
       <td className="label">Contact</td>
       <td className="data">
         <a href={`tel:${jamia.contact}`}>{jamia.contact.replace("+88", "")}</a>
       </td>
-      <td className="label">About</td>
-      <td className="data">{jamia.about}</td>
       <td className="label">Applicant's Name</td>
       <td className="data">{jamia.applicant.name}</td>
       <td className="label">Applicant's designation</td>
@@ -571,6 +559,7 @@ function PasswordEditForm({ api }) {
   );
 }
 function SingleJamia({ data, setData }) {
+  // console.log(data);
   const jamia = data;
   const { locale } = useContext(SiteContext);
   const [showFull, setShowFull] = useState(false);
@@ -593,11 +582,7 @@ function SingleJamia({ data, setData }) {
       </td>
       <td>
         {jamia.founder}
-        <span title="Est.">
-          <FormattedDateParts value={new Date(jamia.est)}>
-            {(parts) => <>{parts[4].value}</>}
-          </FormattedDateParts>
-        </span>
+        <span title="Est."></span>
       </td>
       <td>
         <FormattedDate
@@ -647,13 +632,33 @@ function SingleJamia({ data, setData }) {
           fieldCode="name.bn-BD"
         />
       </td>
-      <td className="label">Name (English)</td>
+      <td className="label">Name (Enlish)</td>
       <td className="data">
         <DataEditForm
+          api={patchApi}
           defaultValue={jamia.name["en-US"]}
           Element={Input}
-          validation={/^[a-zA-Z0-9\s(),]+$/}
+          validation={/^[a-zA-Z\s(),]+$/}
           fieldCode="name.en-US"
+        />
+      </td>
+      <td className="label">Prime Mufti (Bangla)</td>
+      <td className="data">
+        <DataEditForm
+          defaultValue={jamia.primeMufti["bn-BD"]}
+          Element={Input}
+          max={200}
+          fieldCode="primeMufti.bn-BD"
+          api={patchApi}
+        />
+      </td>
+      <td className="label">Prime Mufti (English)</td>
+      <td className="data">
+        <DataEditForm
+          defaultValue={jamia.primeMufti["en-US"]}
+          Element={Input}
+          max={200}
+          fieldCode="primeMufti.en-US"
           api={patchApi}
         />
       </td>
@@ -661,19 +666,9 @@ function SingleJamia({ data, setData }) {
       <td className="data">
         <DataEditForm
           defaultValue={jamia.founder}
-          Element={Input}
-          validation={/^[ঀ-ৣৰ-৾a-zA-Z\s(),-]+$/}
+          Element={Textarea}
+          max={200}
           fieldCode="founder"
-          api={patchApi}
-        />
-      </td>
-      <td className="label">Est</td>
-      <td className="data">
-        <DataEditForm
-          defaultValue={jamia.est}
-          Element={Input}
-          validation={/^[\d]+$/}
-          fieldCode="est"
           api={patchApi}
         />
       </td>
@@ -753,6 +748,7 @@ function SingleJamia({ data, setData }) {
     </tr>
   );
 }
+
 function AllJamia() {
   return (
     <div className="view">
@@ -761,6 +757,7 @@ function AllJamia() {
       <Switch>
         <Route path="/admin/jamia" exact>
           <View
+            key="allJamia"
             Element={SingleJamia}
             defaultSort={{ column: "joined", order: "des" }}
             id="allJamia"
@@ -777,6 +774,7 @@ function AllJamia() {
         </Route>
         <Route path="/admin/jamia/active">
           <View
+            key="allActiveJamia"
             Element={SingleJamia}
             defaultSort={{ column: "joined", order: "des" }}
             id="allJamia"
@@ -793,6 +791,7 @@ function AllJamia() {
         </Route>
         <Route path="/admin/jamia/submitions">
           <View
+            key="allSubmittedJamia"
             Element={SingleJamiaSubmition}
             defaultSort={{ column: "submitted", order: "des" }}
             id="jamiaSubmitions"
@@ -800,7 +799,7 @@ function AllJamia() {
             columns={[
               { column: "submitted", sort: true, colCode: "submitted" },
               { column: "name & address", sort: false, colCode: "name" },
-              { column: "founder & est", sort: true, colCode: "founder" },
+              { column: "prime mufti", sort: false, colCode: "primeMufti" },
               { column: "contact", sort: false, colCode: "contact" },
             ]}
           />
@@ -930,6 +929,7 @@ function AdminPanel() {
         </div>
       </Sidebar>
       <Switch>
+        <Route path="/admin" exact component={AllJamia} />
         <Route path="/admin/jamia" component={AllJamia} />
         <Route path="/admin/fatwa/:filter?" component={AllFatwa} />
         <Route path="/admin/patreons" component={Patreons} />

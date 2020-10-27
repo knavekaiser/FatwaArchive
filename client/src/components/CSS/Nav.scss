@@ -32,6 +32,15 @@
   nav {
     grid-area: nv;
     margin-left: 2rem;
+    .avatar {
+      text-transform: uppercase;
+      background: $blue;
+      color: white;
+      width: 2.2rem;
+      height: 2.2rem;
+      display: grid;
+      place-items: center;
+    }
     ul {
       display: grid;
       grid-auto-flow: column;

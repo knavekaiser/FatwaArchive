@@ -111,24 +111,33 @@ router
     passport.authenticate("local", { session: false }),
     (req, res, next) => {
       if (req.isAuthenticated()) {
-        let user = {};
+        const user = {};
+        let role;
         if (req.body.role === "jamia") {
-          user = {
-            name: req.user.name,
-            applicant: req.user.applicant,
-            fatwa: req.user.fatwa,
-            _id: req.user._id,
-            joined: req.user.joined,
-            founder: req.user.founder,
-            est: req.user.est,
-            address: req.user.address,
-            contact: req.user.contact,
-            about: req.user.about,
-            id: req.user.id,
-            role: "jamia",
-          };
+          user.name = req.user.name;
+          user.applicant = req.user.applicant;
+          user.fatwa = req.user.fatwa;
+          user._id = req.user._id;
+          user.joined = req.user.joined;
+          user.founder = req.user.founder;
+          user.est = req.user.est;
+          user.address = req.user.address;
+          user.contact = req.user.contact;
+          user.about = req.user.about;
+          user.id = req.user.id;
+          user.role = "jamia";
+          role = "jamia";
         }
-        const token = signToken(req.user.id, req.body.role);
+        if (req.body.role === "admin") {
+          user._id = req.user._id;
+          user.firstName = req.user.firstName;
+          user.lastName = req.user.lastName;
+          user.email = req.user.email;
+          user.mobile = req.user.mobile;
+          user.role = req.user.role;
+          role = "admin";
+        }
+        const token = signToken(req.user.id, role);
         res.cookie("access_token", token, { httpOnly: true, sameSite: true });
         res.status(200).json({ isAuthenticated: true, user });
       }
@@ -145,22 +154,28 @@ router
 
 router.route("/authenticate").get(passport.authenticate("jwt"), (req, res) => {
   if (req.isAuthenticated()) {
-    let user = {};
-    if (req.user.est) {
-      user = {
-        name: req.user.name,
-        applicant: req.user.applicant,
-        fatwa: req.user.fatwa,
-        _id: req.user._id,
-        joined: req.user.joined,
-        founder: req.user.founder,
-        est: req.user.est,
-        address: req.user.address,
-        contact: req.user.contact,
-        about: req.user.about,
-        id: req.user.id,
-        role: "jamia",
-      };
+    const user = {};
+    console.log(req.user);
+    if (req.user.role === "jamia") {
+      user.name = req.user.name;
+      user.applicant = req.user.applicant;
+      user.fatwa = req.user.fatwa;
+      user._id = req.user._id;
+      user.joined = req.user.joined;
+      user.founder = req.user.founder;
+      user.est = req.user.est;
+      user.address = req.user.address;
+      user.contact = req.user.contact;
+      user.about = req.user.about;
+      user.id = req.user.id;
+      user.role = "jamia";
+    } else if (req.user.role === "admin") {
+      user._id = req.user._id;
+      user.firstName = req.user.firstName;
+      user.lastName = req.user.lastName;
+      user.email = req.user.email;
+      user.mobile = req.user.mobile;
+      user.role = req.user.role;
     }
     res.status(200).json({ isAuthenticated: true, user });
   } else {
