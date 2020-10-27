@@ -96,6 +96,7 @@ function LoginDetail({ idIsValid, validatingId, setIdIsValid }) {
         defaultValue={SS.get("reg-id")}
         onChange={(target) => {
           SS.set("reg-id", target.value);
+          $("#id .emptyFeildWarning") && $("#id .emptyFeildWarning").remove();
           setIdIsValid(null);
         }}
         required={true}
@@ -163,8 +164,11 @@ function ApplicantDetail() {
     <>
       <Input
         defaultValue={SS.get("reg-applicant")}
-        onChange={(target) => SS.set("reg-applicant", target.value)}
-        required={true}
+        onChange={(target) => {
+          SS.set("reg-applicant", target.value);
+          $("#applicant .emptyFeildWarning") &&
+            $("#applicant .emptyFeildWarning").remove();
+        }}
         dataId="applicant"
         type="text"
         validation={/^[ঀ-ৣৰ-৾a-zA-Z\s(),-]+$/}
@@ -175,8 +179,11 @@ function ApplicantDetail() {
       />
       <Input
         defaultValue={SS.get("reg-applicantDesignation")}
-        onChange={(target) => SS.set("reg-applicantDesignation", target.value)}
-        required={true}
+        onChange={(target) => {
+          SS.set("reg-applicantDesignation", target.value);
+          $("#applicantDesignation .emptyFeildWarning") &&
+            $("#applicantDesignation .emptyFeildWarning").remove();
+        }}
         dataId="applicantDesignation"
         type="text"
         label=<FormattedMessage
@@ -186,14 +193,15 @@ function ApplicantDetail() {
       />
       <Input
         defaultValue={SS.get("reg-applicantMobile") || "+8801"}
-        onChange={(target) => SS.set("reg-applicantMobile", target.value)}
-        required={true}
+        onChange={(target) => {
+          SS.set("reg-applicantMobile", target.value);
+          $("#applicantMobile .emptyFeildWarning") &&
+            $("#applicantMobile .emptyFeildWarning").remove();
+        }}
         dataId="applicantMobile"
         type="text"
         validation={/^\+8801\d{0,9}$/}
         warning="+8801***"
-        max={14}
-        min={14}
         label=<FormattedMessage
           id="form.jamiaReg.applicantContact"
           defaultMessage="Applicant's Mobile"
