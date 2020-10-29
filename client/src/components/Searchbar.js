@@ -14,6 +14,7 @@ function Searchbar({ onFocus, children }) {
   const input = useRef(null);
   function submit(e) {
     e.preventDefault();
+    input.current.blur();
     if (searchInput !== "") {
       history.push({
         pathname: "/search",
@@ -49,10 +50,6 @@ function Searchbar({ onFocus, children }) {
   const signal = abortController.signal;
   useEffect(() => {
     if (searchInput !== "" && !form.current.classList.contains("wrong")) {
-      console.log(
-        "fetch initiated",
-        searchInput !== "" && form.current.classList.contains("wrong")
-      );
       fetch(`/api/searchSuggestions?q=${searchInput}`, {
         method: "GET",
         headers: { "Accept-Language": locale },

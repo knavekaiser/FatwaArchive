@@ -485,7 +485,7 @@ export const JamiaRegister = () => {
 };
 
 export const JamiaLogin = () => {
-  const [invalidCredentials, setInvalidCredentials] = useState(null);
+  const [setInvalidCredentials] = useState(null);
   const [loading, setLoading] = useState(false);
   const history = useHistory();
   const { user } = useContext(SiteContext);
@@ -552,7 +552,7 @@ export const JamiaLogin = () => {
 };
 
 export const AdminLogin = () => {
-  const [invalidCredentials, setInvalidCredentials] = useState(null);
+  const [setInvalidCredentials] = useState(null);
   const [loading, setLoading] = useState(false);
   const history = useHistory();
   const { setUser, setIsAuthenticated, locale, user } = useContext(SiteContext);
@@ -618,7 +618,7 @@ export const AdminLogin = () => {
 export const AddFatwaForm = ({ match }) => {
   const [loading, setLoading] = useState(false);
   const history = useHistory();
-  const { user, fatwaToEdit, setFatwaToEdit, locale } = useContext(SiteContext);
+  const { user, fatwaToEdit, setFatwaToEdit } = useContext(SiteContext);
   const [preFill, setPreFill] = useState({
     translate: false,
     inputBooks: refInputBook,
@@ -793,7 +793,6 @@ export const AddFatwaForm = ({ match }) => {
             return newPrefill;
           })
         }
-        defaultValue={preFill.translate}
       />
       <Input
         defaultValue={preFill.title || SS.get("newFatwa-title")}

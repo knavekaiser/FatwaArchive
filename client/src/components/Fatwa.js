@@ -20,9 +20,9 @@ function Fatwa({ match }) {
   const history = useHistory();
   const [loading, setLoading] = useState(true);
   const [fatwa, setFatwa] = useState({});
-  useEffect(() => {
+  const fixUrlOnLocaleChange = () =>
     fatwa.link && history.push(`/fatwa/${fatwa.link[locale]}`);
-  }, [locale]);
+  useEffect(fixUrlOnLocaleChange, [locale]);
   const abortController = new AbortController();
   const signal = abortController.signal;
   const options = { headers: { "Accept-Language": locale }, signal: signal };

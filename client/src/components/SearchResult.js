@@ -4,7 +4,6 @@ import decodeURIComponent from "decode-uri-component";
 import { Link, useHistory } from "react-router-dom";
 import "./CSS/SearchResult.min.css";
 
-let maxChar = window.innerWidth > 480 ? 180 : 70;
 function SearchResult() {
   const { locale } = useContext(SiteContext);
   const history = useHistory();
@@ -21,7 +20,7 @@ function SearchResult() {
         setResults(data);
       })
       .catch((err) => console.log("Error: " + err));
-  }, [history.location]);
+  }, [history, locale]);
   return (
     <div className="main searchResult">
       {results.length > 0 && (
@@ -42,7 +41,10 @@ function SearchResult() {
             );
           })
         ) : (
-          <p>You can always submit question.</p>
+          <p className="noResult">
+            Nothing found. but soon you will be able to submit questions. Stay
+            tuned.
+          </p>
         )}
       </div>
     </div>

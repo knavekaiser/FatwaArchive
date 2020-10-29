@@ -10,9 +10,6 @@ function Avatar() {
   const { locale, user, setUser, setIsAuthenticated } = useContext(SiteContext);
   const [open, setOpen] = useState(false);
   const history = useHistory();
-  function showDashboard() {
-    history.push("/admin/jamia");
-  }
   function logout() {
     fetch("/api/logout")
       .then((res) => res.json())
@@ -45,15 +42,7 @@ function Nav({ location }) {
   const { sidebarSize, setSidebarSize } = useContext(SiteContext);
   const [style, setStyle] = useState({ boxShadow: "none" });
   const [showSearchbar, setShowSearchbar] = useState(true);
-  const {
-    lan,
-    setLan,
-    locale,
-    setLocale,
-    user,
-    setUser,
-    setIsAuthenticated,
-  } = useContext(SiteContext);
+  const { lan, setLan, locale, setLocale, user } = useContext(SiteContext);
   useEffect(() => {
     if (
       location.pathname.startsWith("/about") ||
@@ -64,7 +53,7 @@ function Nav({ location }) {
     ) {
       setShowSearchbar(false);
     } else {
-      !showSearchbar && setShowSearchbar(true);
+      setShowSearchbar(true);
     }
     if (location.pathname === "/") {
       setStyle({ boxShadow: "none" });
@@ -76,7 +65,7 @@ function Nav({ location }) {
     sidebarSize === "full" ? setSidebarSize("mini") : setSidebarSize("full");
   }
   return (
-    <div style={style} className={`navbar ${setShowSearchbar ? "mini" : ""}`}>
+    <div style={style} className={`navbar ${!showSearchbar ? "mini" : ""}`}>
       <Route
         path="/admin"
         render={() => (
@@ -93,17 +82,12 @@ function Nav({ location }) {
           </div>
         )}
       />
-      <Route
-        path="/:other"
-        render={() => (
-          <>
-            <Link to="/">
-              <img className="logo" src={logo} alt="Fatwa Archive logo" />
-            </Link>
-            {showSearchbar && <Searchbar key="navSearch" />}
-          </>
-        )}
-      />
+      <Route path="/:other">
+        <Link to="/">
+          <img className="logo" src={logo} alt="Fatwa Archive logo" />
+        </Link>
+        {showSearchbar && <Searchbar key="navSearch" />}
+      </Route>
       <nav>
         <ul>
           {user ? (

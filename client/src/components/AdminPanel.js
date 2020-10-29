@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useRef } from "react";
+import React, { useState, useContext } from "react";
 import { Link, Route, Switch, useHistory } from "react-router-dom";
 import { SiteContext } from "../Context.js";
 import "./CSS/AdminPanel.min.css";
@@ -7,21 +7,12 @@ import {
   Textarea,
   ComboboxMulti,
   Combobox,
-  MultipleInput,
-  PasswordInput,
-  Checkbox,
   topics,
   ID,
-  $,
 } from "./FormElements";
 import { DataEditForm, PasswordEditForm } from "./Forms";
 import { Tabs, Actions, Sidebar, View } from "./TableElements";
-import {
-  FormattedDate,
-  FormattedDateParts,
-  FormattedMessage,
-  FormattedNumber,
-} from "react-intl";
+import { FormattedDate, FormattedNumber } from "react-intl";
 
 function SingleFatwa({ data, setData }) {
   const fatwa = data;

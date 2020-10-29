@@ -6,15 +6,8 @@ import { camelize } from "./FormElements";
 export const Sidebar = ({ views, children }) => {
   const { sidebarSize, setSidebarSize } = useContext(SiteContext);
   const history = useHistory();
-  const [size, setSize] = useState(sidebarSize);
-  const [mini, setMini] = useState(false);
-  function onResize() {
-    if (window.innerWidth <= 1080) {
-      setMini(true);
-    } else {
-      setMini(false);
-    }
-  }
+  const onResize = () =>
+    window.innerWidth <= 1080 ? setSidebarSize("mini") : setSidebarSize("full");
   useEffect(() => {
     onResize();
     window.addEventListener("resize", onResize);

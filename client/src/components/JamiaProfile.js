@@ -1,26 +1,21 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext } from "react";
 import { Route, Switch, Link, useHistory } from "react-router-dom";
 import { SiteContext } from "../Context";
-import { Tabs, View, Sidebar, Actions } from "./TableElements";
+import { Tabs, View, Sidebar } from "./TableElements";
 import {
   ID,
   Input,
   Combobox,
   Textarea,
   ComboboxMulti,
-  Checkbox,
-  MultipleInput,
   topics,
-  $,
-  GetGroupData,
 } from "./FormElements";
 import "./CSS/JamiaProfile.min.css";
-import { FormattedDate, FormattedMessage, FormattedNumber } from "react-intl";
+import { FormattedDate, FormattedNumber } from "react-intl";
 import { AddFatwaForm, DataEditForm, PasswordEditForm } from "./Forms";
 
 function Profile() {
   const { user } = useContext(SiteContext);
-  const [edit, setEdit] = useState(false);
   const patchApi = `/api/jamia/edit/${user._id}`;
   return (
     <div className="view">
