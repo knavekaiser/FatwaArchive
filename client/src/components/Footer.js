@@ -13,9 +13,9 @@ function Footer() {
         <li>
           <Link to="/admin">Admin</Link>
         </li>
-        <li>
-          <Link to="/jamia">Jamia Profile</Link>
-        </li>
+      </ul>
+      <ul>
+        <li>&copy; Naeem Ahmad 2020</li>
       </ul>
     </div>
   );

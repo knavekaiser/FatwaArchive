@@ -27,6 +27,9 @@ export const Sidebar = ({ views, children }) => {
         {views.map((view) => {
           return (
             <li
+              onClick={() =>
+                window.innerWidth <= 1080 && setSidebarSize("mini")
+              }
               key={view.label}
               className={
                 history.location.pathname.startsWith(view.path) ? "active" : ""

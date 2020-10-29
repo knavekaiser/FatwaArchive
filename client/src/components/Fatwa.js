@@ -150,5 +150,3 @@ function Fatwa({ match }) {
 }
 
 export default Fatwa;
-
-//1 fetch req           http://localhost:8080
