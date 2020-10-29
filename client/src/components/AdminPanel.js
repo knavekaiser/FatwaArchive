@@ -214,6 +214,7 @@ function SingleFatwaSubmition({ data, setData }) {
         />
       </td>
       <td>{fatwa.topic[locale]}</td>
+      <td>{fatwa.jamia}</td>
       <td>{fatwa.title[locale]}</td>
     </tr>
   );
@@ -413,9 +414,9 @@ function AllFatwa({ history, location, match }) {
               },
             ]}
             columns={[
-              { column: "date", sort: true },
-              { column: "topic", sort: true },
-              { column: "jamia", sort: true },
+              { column: "date", sort: true, colCode: "submitted" },
+              { column: "topic", sort: true, colCode: "topic" },
+              { column: "jamia", sort: true, colCode: "jamia" },
               { column: "title", sort: false },
             ]}
             defaultSort={{ column: "added", order: "des" }}

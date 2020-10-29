@@ -340,7 +340,7 @@ function JamiaAllFatwa() {
             key="jamiaAllFatwa"
             Element={SingleFatwa}
             id="allFatwa"
-            api="api/jamia/fatwaLive/filter?"
+            api="api/jamia/allFatwa/filter?"
             categories={[
               {
                 name: "topic",
@@ -406,7 +406,7 @@ function JamiaAllFatwa() {
             key="jamiaAllFatwa"
             Element={SingleFatwa}
             id="allFatwa"
-            api="api/jamia/fatwaLive/filter?"
+            api="api/jamia/allFatwa/filter?"
             categories={[
               {
                 name: "topic",

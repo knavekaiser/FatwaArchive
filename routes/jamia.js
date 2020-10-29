@@ -66,6 +66,60 @@ router
       .catch((err) => res.status(400).json(err));
   });
 
+router
+  .route("/jamia/allfatwa/filter")
+  .get(passport.authenticate("jwt"), (req, res) => {
+    const locale = req.headers["accept-language"];
+    const query = { jamia: req.user.id };
+    const sort = { column: req.query.column, order: req.query.order };
+    req.query.title && (query[`title.${locale}`] = regEx(req.query.title));
+    req.query.question && (query[`ques.${locale}`] = regEx(req.query.question));
+    req.query.answer && (query[`ans.${locale}`] = regEx(req.query.answer));
+    req.query.topic && (query[`topic.${locale}`] = req.query.topic);
+    req.query.jamia && (query.jamia = req.query.jamia);
+    if (locale.length > 5) {
+      res.status(400).json("No language selected or formation is wrong");
+      return;
+    }
+    Fatwa.find(query)
+      .then((fatwas) => {
+        if (fatwas.length === 0) {
+          res.json([]);
+          return;
+        }
+        if (fatwas[0].link[locale] === undefined) {
+          res.status(404).json("nothing found in given language");
+          return;
+        }
+        const data = fatwas
+          .map((fatwa) => {
+            return {
+              _id: fatwa._id,
+              added: fatwa.added,
+              link: fatwa.link[locale],
+              topic: fatwa.topic[locale],
+              title: fatwa.title[locale],
+              ques: fatwa.ques[locale],
+              ans: fatwa.ans[locale],
+              jamia: fatwa.jamia,
+              translation: fatwa.translation,
+            };
+          })
+          .sort((a, b) => {
+            if (a[sort.column] < b[sort.column]) {
+              return sort.order === "des" ? 1 : -1;
+            } else {
+              return sort.order === "des" ? -1 : 1;
+            }
+          });
+        res.json(data);
+      })
+      .catch((err) => {
+        res.status(400).json("Error: " + err);
+        console.log(err);
+      });
+  });
+
 router.route("/fatwa/:id").get((req, res) => {
   Fatwa.findById(req.params.id)
     .then((fatwa) => res.json(fatwa))
