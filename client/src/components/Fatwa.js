@@ -27,7 +27,7 @@ function Fatwa({ match }) {
   const signal = abortController.signal;
   const options = { headers: { "Accept-Language": locale }, signal: signal };
   const fetchData = () => {
-    fetch(`http://localhost:8080/api/fatwa/${match.params.id}`, options)
+    fetch(`/api/fatwa/${match.params.id}`, options)
       .then((res) => {
         setLoading(false);
         return res.json();
