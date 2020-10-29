@@ -33,7 +33,7 @@ function SearchResult() {
           results.map((item) => {
             return (
               <div key={item.ans.substring(0, 10)} className="result">
-                <Link to={`/fatwa/${item.link[locale]}`}>
+                <Link to={`/fatwa/${item.link}`}>
                   <p className="ques">{item.ques}</p>
                 </Link>
                 <p className="ans">{item.ans}</p>

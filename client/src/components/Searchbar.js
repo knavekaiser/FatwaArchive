@@ -14,13 +14,13 @@ function Searchbar({ onFocus, children }) {
   const input = useRef(null);
   function submit(e) {
     e.preventDefault();
-    input.current.blur();
     if (searchInput !== "") {
+      input.current.blur();
+      setShowSuggestion(false);
       history.push({
         pathname: "/search",
         search: "?" + new URLSearchParams({ q: searchInput }).toString(),
       });
-      setShowSuggestion(false);
     }
   }
   function handleFocus(e) {
