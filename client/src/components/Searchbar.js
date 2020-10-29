@@ -3,7 +3,9 @@ import { Link, useHistory } from "react-router-dom";
 import { SiteContext } from "../Context";
 import "./CSS/Searchbar.min.css";
 
-function Searchbar() {
+const defaultValidation = /^[ঀ-৾ا-ﻰa-zA-Z0-9\s:;"',.।?-]+$/;
+
+function Searchbar({ onFocus, children }) {
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestion, setShowSuggestion] = useState(false);
   const { searchInput, setSearchInput, locale } = useContext(SiteContext);
@@ -20,6 +22,10 @@ function Searchbar() {
       setShowSuggestion(false);
     }
   }
+  function handleFocus(e) {
+    e.target.value !== "" && setShowSuggestion(true);
+    onFocus && onFocus(e.target);
+  }
 
   function change(e) {
     const validator = new RegExp("[a-z0-9~!@#$%^&*()_-{}|:;]", "i");
@@ -28,7 +34,12 @@ function Searchbar() {
     } else {
       form.current.classList.remove("wrong");
     }
-    setSearchInput(e.target.value);
+    if (
+      e.target.value === "" ||
+      defaultValidation.exec(e.target.value) !== null
+    ) {
+      setSearchInput(e.target.value);
+    }
   }
 
   useEffect(() => {
@@ -37,11 +48,12 @@ function Searchbar() {
   const abortController = new AbortController();
   const signal = abortController.signal;
   useEffect(() => {
-    if (form.current.classList.contains("wrong")) {
-      return;
-    }
-    if (searchInput !== "") {
-      fetch(`/api/search?q=${searchInput}`, {
+    if (searchInput !== "" && !form.current.classList.contains("wrong")) {
+      console.log(
+        "fetch initiated",
+        searchInput !== "" && form.current.classList.contains("wrong")
+      );
+      fetch(`/api/searchSuggestions?q=${searchInput}`, {
         method: "GET",
         headers: { "Accept-Language": locale },
         signal: signal,
@@ -66,9 +78,10 @@ function Searchbar() {
   }, []);
   return (
     <form ref={form} id="searchbar" onSubmit={submit}>
+      {children}
       <input
         ref={input}
-        onFocus={(e) => e.target.value !== "" && setShowSuggestion(true)}
+        onFocus={handleFocus}
         className={
           suggestions.length === 0 || !showSuggestion ? "" : "suggestionVisible"
         }
@@ -84,9 +97,9 @@ function Searchbar() {
       {showSuggestion && suggestions.length > 0 && (
         <div className="suggestions">
           <ul>
-            {suggestions.map((item) => (
-              <li key={item._id}>
-                <Link to={`/fatwa/${item._id}`}>{item.title}</Link>
+            {suggestions.map((item, i) => (
+              <li key={i}>
+                <Link to={`/fatwa/${item.link}`}>{item.title}</Link>
               </li>
             ))}
           </ul>

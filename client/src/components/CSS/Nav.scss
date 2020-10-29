@@ -1,7 +1,7 @@
 @import "variables";
 
 .navbar {
-  z-index: 10;
+  z-index: 20;
   position: sticky;
   top: 0;
   padding: 0.5rem 2rem;
@@ -9,6 +9,24 @@
   grid-template-columns: 180px 1fr auto;
   grid-template-areas: "lg sr nv";
   background: $base-white;
+  .sidebarToggleBtn {
+    display: flex;
+    align-items: center;
+    font-size: 2rem;
+    ion-icon {
+      border-radius: 3px;
+      cursor: pointer;
+      opacity: 0.8;
+      display: block;
+      &:hover {
+        opacity: 0.6;
+      }
+      &:active {
+        background: white;
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+      }
+    }
+  }
   .logo {
     width: 90%;
     height: 2.5rem;
@@ -19,7 +37,6 @@
     max-width: 50rem;
     font-size: 1rem;
     button {
-      top: 0.05em;
       right: -0.1em;
       padding: 0.2em;
     }
@@ -97,10 +114,11 @@
       position: absolute;
       transform: translateY(-50%);
       left: 0;
-      width: 50%;
+      width: 70%;
       height: 2.5rem;
       grid-area: lg;
       text-align: left;
+      display: none;
     }
     nav {
       margin-left: 0.5rem;

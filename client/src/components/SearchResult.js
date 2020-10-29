@@ -1,18 +1,27 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
+import { SiteContext } from "../Context";
 import decodeURIComponent from "decode-uri-component";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import "./CSS/SearchResult.min.css";
 
 let maxChar = window.innerWidth > 480 ? 180 : 70;
-function SearchResult({ location }) {
+function SearchResult() {
+  const { locale } = useContext(SiteContext);
+  const history = useHistory();
   const [results, setResults] = useState([]);
   useEffect(() => {
-    const query = decodeURIComponent(location.search);
-    fetch(`/api/search${query}`)
+    if (history.location.search === "") return history.push("/");
+    const query = decodeURIComponent(history.location.search);
+    fetch(`/api/search${query}`, {
+      method: "GET",
+      headers: { "Accept-Language": locale },
+    })
       .then((res) => res.json())
-      .then((data) => setResults(data))
+      .then((data) => {
+        setResults(data);
+      })
       .catch((err) => console.log("Error: " + err));
-  }, [location]);
+  }, [history.location]);
   return (
     <div className="main searchResult">
       {results.length > 0 && (
@@ -25,16 +34,10 @@ function SearchResult({ location }) {
           results.map((item) => {
             return (
               <div key={item.ans.substring(0, 10)} className="result">
-                <Link to={`/fatwa/${item._id}`} className="ques">
-                  {item.ques.length < maxChar
-                    ? item.ques
-                    : item.ques.substring(0, maxChar) + "..."}
+                <Link to={`/fatwa/${item.link[locale]}`}>
+                  <p className="ques">{item.ques}</p>
                 </Link>
-                <p className="ans">
-                  {item.ans.length < maxChar
-                    ? item.ans
-                    : item.ans.substring(0, maxChar) + "..."}
-                </p>
+                <p className="ans">{item.ans}</p>
               </div>
             );
           })

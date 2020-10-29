@@ -4,7 +4,9 @@ import { Link, useHistory } from "react-router-dom";
 import { camelize } from "./FormElements";
 
 export const Sidebar = ({ views, children }) => {
+  const { sidebarSize, setSidebarSize } = useContext(SiteContext);
   const history = useHistory();
+  const [size, setSize] = useState(sidebarSize);
   const [mini, setMini] = useState(false);
   function onResize() {
     if (window.innerWidth <= 1080) {
@@ -26,7 +28,7 @@ export const Sidebar = ({ views, children }) => {
     e.target.classList.add("active");
   }
   return (
-    <div className={`sidebar ${mini ? "mini" : ""}`}>
+    <div className={`sidebar ${sidebarSize}`}>
       {children}
       <ul className="viewList">
         {views.map((view) => {

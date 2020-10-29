@@ -28,6 +28,23 @@
       animation-delay: 200ms;
     }
   }
+  .jamia {
+    font-size: 0.95rem;
+    font-weight: 400;
+    color: $light-text;
+    &:hover {
+      text-decoration: underline;
+    }
+    span {
+      display: none;
+      color: $light-text;
+      font-weight: lighter;
+      font-size: 0.7em;
+      text-decoration: none !important;
+      &:hover {
+      }
+    }
+  }
   h3 {
     position: relative;
     text-align: center;
@@ -92,20 +109,6 @@
       font-weight: 600;
     }
   }
-  .jamia {
-    font-size: 1.25rem;
-    &:hover {
-      text-decoration: underline;
-    }
-    span {
-      color: $light-text;
-      font-weight: lighter;
-      font-size: 0.7em;
-      text-decoration: none !important;
-      &:hover {
-      }
-    }
-  }
   .cla {
     border: 1px solid $light-border;
     border-radius: 5px;
@@ -126,5 +129,18 @@
   }
   100% {
     opacity: 0;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .fatwa {
+    padding: 1rem;
+    h1 {
+      font-size: 2rem;
+    }
+    .ans::first-line,
+    .ques::first-line {
+      text-indent: 1rem;
+    }
   }
 }

@@ -8,6 +8,9 @@ export const Provider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [lan, setLan] = useState("bn");
   const [fatwaToEdit, setFatwaToEdit] = useState(null);
+  const [sidebarSize, setSidebarSize] = useState(() =>
+    window.innerWidth <= 1080 ? "mini" : "full"
+  );
   return (
     <SiteContext.Provider
       value={{
@@ -23,6 +26,8 @@ export const Provider = ({ children }) => {
         setIsAuthenticated,
         fatwaToEdit,
         setFatwaToEdit,
+        sidebarSize,
+        setSidebarSize,
       }}
     >
       {children}

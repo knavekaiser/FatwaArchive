@@ -290,6 +290,7 @@
   }
 }
 .sidebar {
+  overflow-x: hidden;
   width: 14rem;
   align-items: center;
   height: 100%;
@@ -669,6 +670,41 @@
   place-items: center;
   border-radius: 8px;
   transition: color, 0.2s ease-in-out;
+}
+
+@media only screen and (max-width: 1080px) {
+  .adminPanel {
+    grid-template-columns: 64px 1fr;
+  }
+  .view {
+    grid-column: 2/3;
+  }
+  .sidebar {
+    &.full {
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+      background: $base-white;
+      z-index: 15;
+    }
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .adminPanel {
+    grid-template-columns: 0 1fr;
+  }
+  .view {
+    grid-column: 2/3;
+  }
+  .sidebar {
+    &.mini {
+      width: 0;
+    }
+    &.full {
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+      background: $base-white;
+      z-index: 15;
+    }
+  }
 }
 
 @keyframes loadingColumn {

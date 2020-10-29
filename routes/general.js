@@ -15,30 +15,44 @@ const signToken = (id, role) => {
 
 router.route("/fatwa/:link").get((req, res) => {
   const locale = req.headers["accept-language"];
-  locale === null;
+  if (locale.length > 5) return res.status(400).json("No language selected.");
   const key = `link.${locale}`;
+  let result = null;
   Fatwa.findOne({ [key]: req.params.link })
     .then((fatwa) => {
       if (fatwa === null) {
         res.json("nothing found");
         return;
       }
-      const data = {
+      result = {
         _id: fatwa._id,
         added: fatwa.added,
         link: fatwa.link,
-        topic: fatwa.topic[locale],
-        title: fatwa.title[locale],
-        ques: fatwa.ques[locale],
-        ans: fatwa.ans[locale],
+        topic: fatwa.topic,
+        title: fatwa.title,
+        ques: fatwa.ques,
+        ans: fatwa.ans,
         jamia: fatwa.jamia,
         ref: fatwa.ref,
         img: fatwa.img,
         translation: fatwa.translation,
       };
+    })
+    .then(() => Jamia.findOne({ id: result.jamia }))
+    .then((jamia) => {
+      const data = {
+        ...result,
+        jamia: {
+          name: jamia.name,
+          id: jamia.id,
+        },
+      };
       res.json(data);
     })
-    .catch((err) => res.status(400).json("Error: " + err));
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json("Error: " + err);
+    });
 });
 router.route("/search").get((req, res) => {
   const locale = req.headers["accept-language"];
@@ -46,9 +60,9 @@ router.route("/search").get((req, res) => {
     const query = new RegExp(req.query.q.replace(" ", ".+"), "gi");
     Fatwa.find({
       $or: [
-        { ["title"[locale]]: query },
-        { ["ques"[locale]]: query },
-        { ["ans"[locale]]: query },
+        { [`title.${locale}`]: query },
+        { [`ques.${locale}`]: query },
+        { [`ans.${locale}`]: query },
       ],
     })
       .then((fatwas) => {
@@ -81,7 +95,47 @@ router.route("/search").get((req, res) => {
         res.json(err);
       });
   } else {
-    res.json("nope");
+    res.status(400).json("nope");
+  }
+});
+router.route("/searchSuggestions").get((req, res) => {
+  const locale = req.headers["accept-language"];
+  if (req.query.q && req.query.q.length > 0) {
+    const query = new RegExp(req.query.q.replace(" ", ".+"), "gi");
+    Fatwa.find({
+      $or: [
+        { [`title.${locale}`]: query },
+        { [`ques.${locale}`]: query },
+        { [`ans.${locale}`]: query },
+      ],
+    })
+      .then((fatwas) => {
+        const dataToReturn = fatwas.sort((a, b) => {
+          let c = 0;
+          let d = 0;
+          `${a.title[locale]} ${a.ques[locale]} ${a.ans[locale]}`
+            .split(" ")
+            .forEach((word) => req.query.q.includes(word) && (c += 1));
+          `${b.title[locale]} ${b.ques[locale]} ${b.ans[locale]}`
+            .split(" ")
+            .forEach((word) => req.query.q.includes(word) && (d += 1));
+          return c > d ? -1 : 1;
+        });
+        dataToReturn.length > 8 && (dataToReturn.length = 8);
+        const dataToSend = dataToReturn.map((item) => {
+          return {
+            link: item.link[locale],
+            title: item.title[locale],
+          };
+        });
+        res.json(dataToSend);
+      })
+      .catch((err) => {
+        console.log(err);
+        res.json(err);
+      });
+  } else {
+    res.status(400).json("nope");
   }
 });
 

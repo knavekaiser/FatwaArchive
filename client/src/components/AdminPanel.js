@@ -729,7 +729,7 @@ function AllJamia() {
             columns={[
               { column: "id", sort: false, colCode: "id" },
               { column: "name", sort: false, colCode: "name" },
-              { column: "founder", sort: false, colCode: "founder" },
+              { column: "prime mufti", sort: false, colCode: "primeMufti" },
               { column: "joined", sort: true, colCode: "joined" },
               { column: "fatwa", sort: true, colCode: "fatwa" },
               { column: "contact", sort: false, colCode: "contact" },

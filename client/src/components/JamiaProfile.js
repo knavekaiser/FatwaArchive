@@ -182,23 +182,7 @@ function SingleFatwa({ data, setData }) {
   }
   return (
     <tr data-id={fatwa._id}>
-      <td>
-        <Link
-          title={`Show all Fatwa from ${fatwa.jamia}`}
-          to={`/jamia/${fatwa.jamia}`}
-        >
-          {fatwa.jamia}
-        </Link>
-      </td>
-      <td>
-        <Link
-          title={`Show all Fatwa about ${fatwa.topic}`}
-          to={`/tableOfContent/${fatwa.topic}`}
-        >
-          {fatwa.topic}
-        </Link>
-      </td>
-      <td>{fatwa.translation.split(" ")[0]}</td>
+      <td>{fatwa.topic}</td>
       <td>
         <FormattedDate
           value={new Date(fatwa.added)}
@@ -212,18 +196,7 @@ function SingleFatwa({ data, setData }) {
           {fatwa.title}
         </Link>
       </td>
-      <td>
-        <Actions
-          id={ID(8)}
-          actions={[
-            {
-              action: () => editFatwa(`/jamia/addFatwa/${fatwa._id}`),
-              option: "Edit",
-            },
-            { action: () => deleteFatwa(fatwa._id), option: "Delete" },
-          ]}
-        />
-      </td>
+      <td>{fatwa.translation.split(" ")[0]}</td>
     </tr>
   );
 }
@@ -367,18 +340,6 @@ function JamiaAllFatwa() {
                 input: <Input label="Answer" type="text" required={true} />,
               },
               {
-                name: "jamia",
-                input: (
-                  <Combobox
-                    id={ID(8)}
-                    maxHeight={500}
-                    label="jamia"
-                    data={["jamia 1", "jamia 2", "jamia 3"]}
-                    required={true}
-                  />
-                ),
-              },
-              {
                 name: "translation",
                 input: (
                   <Combobox
@@ -392,11 +353,10 @@ function JamiaAllFatwa() {
               },
             ]}
             columns={[
-              { column: "jamia", sort: true, colCode: "jamia" },
               { column: "topic", sort: true, colCode: "topic" },
-              { column: "translation", sort: false, colCode: "translation" },
               { column: "date", sort: true, colCode: "added" },
               { column: "title", sort: false, colCode: "title" },
+              { column: "translation", sort: true, colCode: "translation" },
             ]}
             defaultSort={{ column: "added", order: "des" }}
           />
@@ -433,18 +393,6 @@ function JamiaAllFatwa() {
                 input: <Input label="Answer" type="text" required={true} />,
               },
               {
-                name: "jamia",
-                input: (
-                  <Combobox
-                    id={ID(8)}
-                    maxHeight={500}
-                    label="jamia"
-                    data={["jamia 1", "jamia 2", "jamia 3"]}
-                    required={true}
-                  />
-                ),
-              },
-              {
                 name: "translation",
                 input: (
                   <Combobox
@@ -458,11 +406,10 @@ function JamiaAllFatwa() {
               },
             ]}
             columns={[
-              { column: "jamia", sort: true, colCode: "jamia" },
               { column: "topic", sort: true, colCode: "topic" },
-              { column: "translation", sort: false, colCode: "translation" },
               { column: "date", sort: true, colCode: "added" },
               { column: "title", sort: false, colCode: "title" },
+              { column: "translation", sort: true, colCode: "translation" },
             ]}
             defaultSort={{ column: "added", order: "des" }}
           />

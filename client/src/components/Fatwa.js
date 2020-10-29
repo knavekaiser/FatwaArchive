@@ -1,5 +1,5 @@
 import React, { useEffect, Fragment, useState, useContext } from "react";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { SiteContext } from "../Context";
 import "./CSS/Fatwa.min.css";
 import { FormattedNumber } from "react-intl";
@@ -17,20 +17,22 @@ function Loading() {
 
 function Fatwa({ match }) {
   const { locale } = useContext(SiteContext);
+  const history = useHistory();
   const [loading, setLoading] = useState(true);
-  const [fatwa, setFatwa] = useState({
-    ques: "",
-    ans: "",
-    ref: [],
-  });
+  const [fatwa, setFatwa] = useState({});
+  useEffect(() => {
+    fatwa.link && history.push(`/fatwa/${fatwa.link[locale]}`);
+  }, [locale]);
   const abortController = new AbortController();
   const signal = abortController.signal;
   const options = { headers: { "Accept-Language": locale }, signal: signal };
   const fetchData = () => {
     fetch(`http://localhost:8080/api/fatwa/${match.params.id}`, options)
-      .then((res) => res.json())
-      .then((data) => {
+      .then((res) => {
         setLoading(false);
+        return res.json();
+      })
+      .then((data) => {
         setFatwa(data);
       })
       .catch((err) => console.log(err));
@@ -41,21 +43,32 @@ function Fatwa({ match }) {
     <div className={`main fatwa ${loading ? "loading" : ""}`}>
       <Helmet>
         <meta charSet="utf-8" />
-        <title>{fatwa.title}</title>
+        <title>{fatwa.title && fatwa.title[locale]}</title>
         <meta
           name="description"
-          content={fatwa.ans && fatwa.ans.substring(200)}
+          content={fatwa.ans && fatwa.ans[locale].substring(200)}
         />
       </Helmet>
-      {loading && <Loading />}
-      {!loading && (
+      {loading ? (
+        <Loading />
+      ) : fatwa.title ? (
         <>
-          <h1>{fatwa.title}</h1>
+          <h1>{fatwa.title[locale]}</h1>
+          <h4 className="jamia">
+            <Link
+              title={`Show other fatwas from ${fatwa.jamia.id}`}
+              to={`/jamia/${fatwa.jamia}`}
+            >
+              {fatwa.jamia.name[locale]}
+            </Link>
+            <br />
+            <span>Mohammadpur, Dhaka, Bangladesh</span>
+          </h4>
           <br />
           <br />
           <h3>প্রশ্ন</h3>
           <br />
-          {fatwa.ques.split("\n").map((para, i) => {
+          {fatwa.ques[locale].split("\n").map((para, i) => {
             return (
               <Fragment key={i}>
                 <p className="ques">{para}</p>
@@ -66,7 +79,7 @@ function Fatwa({ match }) {
           <br />
           <h3>উত্তর</h3>
           <br />
-          {fatwa.ans.split("\n").map((para, i) => {
+          {fatwa.ans[locale].split("\n").map((para, i) => {
             return (
               <Fragment key={i}>
                 <p className="ans">{para}</p>
@@ -96,35 +109,29 @@ function Fatwa({ match }) {
           <br />
           {fatwa.ref.length > 0 && (
             <ul className="ref">
-              {fatwa.ref.map((ref, i) => (
-                <li key={i}>
-                  <span>{ref.book}</span>, পৃষ্ঠা{" "}
-                  <span>
-                    <FormattedNumber value={ref.part} />
-                  </span>
-                  , খন্ড{" "}
-                  <span>
-                    <FormattedNumber value={ref.page} />
-                  </span>
-                </li>
-              ))}
+              {fatwa.ref.map((ref, i) =>
+                ref.book ? (
+                  <li key={i}>
+                    <span>{ref.book}</span>, পৃষ্ঠা{" "}
+                    <span>
+                      <FormattedNumber value={ref.part} />
+                    </span>
+                    , খন্ড{" "}
+                    <span>
+                      <FormattedNumber value={ref.page} />
+                    </span>
+                  </li>
+                ) : (
+                  <li key={i}>
+                    <span>{ref.sura}</span>, আয়াতঃ{" "}
+                    <span>
+                      <FormattedNumber value={ref.aayat} />
+                    </span>
+                  </li>
+                )
+              )}
             </ul>
           )}
-          <br />
-          <br />
-          <br />
-          <h3 className="sub">ফতোয়া' উৎস</h3>
-          <br />
-          <h4 className="jamia">
-            <Link
-              title={`Show other fatwas from ${fatwa.jamia}`}
-              to={`/jamia/${fatwa.jamia}`}
-            >
-              জামিয়া রাহমানিয়া আরাবিয়া
-            </Link>
-            <br />
-            <span>Mohammadpur, Dhaka, Bangladesh</span>
-          </h4>
           <br />
           <br />
           <br />
@@ -135,6 +142,8 @@ function Fatwa({ match }) {
           <br />
           <br />
         </>
+      ) : (
+        <>Fatwa did not found.</>
       )}
     </div>
   );

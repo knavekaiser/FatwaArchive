@@ -42,6 +42,7 @@ function Avatar() {
 
 function Nav({ location }) {
   const history = useHistory();
+  const { sidebarSize, setSidebarSize } = useContext(SiteContext);
   const [style, setStyle] = useState({ boxShadow: "none" });
   const [showSearchbar, setShowSearchbar] = useState(true);
   const {
@@ -71,8 +72,27 @@ function Nav({ location }) {
       setStyle({ boxShadow: "0 5px 5px rgba(0,0,0,0.05)" });
     }
   }, [location, showSearchbar]);
+  function toggleSidebar() {
+    sidebarSize === "full" ? setSidebarSize("mini") : setSidebarSize("full");
+  }
   return (
     <div style={style} className={`navbar ${setShowSearchbar ? "mini" : ""}`}>
+      <Route
+        path="/admin"
+        render={() => (
+          <div className="sidebarToggleBtn">
+            <ion-icon onClick={toggleSidebar} name="menu-outline"></ion-icon>
+          </div>
+        )}
+      />
+      <Route
+        path="/jamia"
+        render={() => (
+          <div className="sidebarToggleBtn">
+            <ion-icon onClick={toggleSidebar} name="menu-outline"></ion-icon>
+          </div>
+        )}
+      />
       <Route
         path="/:other"
         render={() => (
@@ -80,7 +100,7 @@ function Nav({ location }) {
             <Link to="/">
               <img className="logo" src={logo} alt="Fatwa Archive logo" />
             </Link>
-            {showSearchbar && <Searchbar />}
+            {showSearchbar && <Searchbar key="navSearch" />}
           </>
         )}
       />

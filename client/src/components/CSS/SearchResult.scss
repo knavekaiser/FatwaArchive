@@ -7,12 +7,22 @@
     padding: 0.5rem;
     padding-top: 1rem;
     color: $light-text;
-    padding-bottom: 0;
+    padding-bottom: 0rem;
   }
   .content {
     .result {
       padding: 1rem 0.5rem;
+      p {
+        display: -webkit-box;
+        line-height: 1rem;
+        max-height: 2.2rem;
+        overflow: hidden;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+      }
       .ques {
+        line-height: 18px;
+        max-height: 2.4rem;
         color: #444;
         font-weight: 600;
         &:hover {
@@ -33,4 +43,30 @@
   margin: 2rem 0.5rem;
   font-size: 1.25rem;
   color: $light-text;
+}
+
+@media only screen and (max-width: 480px) {
+  .searchResult {
+    .resultInfo {
+      padding-bottom: 0.75rem;
+    }
+    .content {
+      padding: 0 0.5rem;
+      .result {
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        background: white;
+        box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+        .ques {
+          -webkit-line-clamp: 3;
+          max-height: 3.3rem;
+        }
+        .ans {
+          -webkit-line-clamp: 4;
+          max-height: 4.2rem;
+        }
+        margin-bottom: 0.5rem;
+      }
+    }
+  }
 }
