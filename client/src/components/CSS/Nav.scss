@@ -40,6 +40,23 @@
       height: 2.2rem;
       display: grid;
       place-items: center;
+      position: relative;
+      &:hover {
+        background: rgba($blue, 0.7);
+      }
+      .avatarOptions {
+        position: absolute;
+        top: 35px;
+        right: 0;
+        display: grid;
+        grid-auto-flow: row;
+        background: $base-white;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        li {
+          display: block;
+        }
+      }
     }
     ul {
       display: grid;

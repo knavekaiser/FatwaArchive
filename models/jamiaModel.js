@@ -21,6 +21,7 @@ const jamia = new Schema({
     designation: { type: String, required: true, trim: true },
     mobile: { type: String, required: true, trim: true },
   },
+  role: { type: String, default: "jamia" },
   ghost: { type: Boolean, default: false },
 });
 

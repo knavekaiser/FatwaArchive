@@ -7,6 +7,7 @@ export const Provider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [lan, setLan] = useState("bn");
+  const [fatwaToEdit, setFatwaToEdit] = useState(null);
   return (
     <SiteContext.Provider
       value={{
@@ -20,6 +21,8 @@ export const Provider = ({ children }) => {
         setUser,
         isAuthenticated,
         setIsAuthenticated,
+        fatwaToEdit,
+        setFatwaToEdit,
       }}
     >
       {children}

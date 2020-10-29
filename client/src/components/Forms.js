@@ -1,8 +1,18 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useRef } from "react";
 import { Link, useHistory, Redirect } from "react-router-dom";
 import { SiteContext } from "../Context";
 import "./CSS/JamiaForms.min.css";
-import { Input, Textarea, Checkbox, PasswordInput, $ } from "./FormElements";
+import {
+  Input,
+  Textarea,
+  Checkbox,
+  GetGroupData,
+  ComboboxMulti,
+  MultipleInput,
+  topics,
+  PasswordInput,
+  $,
+} from "./FormElements";
 import { FormattedMessage } from "react-intl";
 
 const SS = {
@@ -10,6 +20,29 @@ const SS = {
   get: (key) => sessionStorage.getItem(key) || "",
   remove: (key) => sessionStorage.removeItem(key),
 };
+const refInputBook = [
+  [
+    {
+      id: "book",
+      type: "text",
+      label: { en: "Book", bn: "কিতাব" },
+      clone: true,
+    },
+    { id: "part", type: "number", label: { en: "Part", bn: "খন্ড" } },
+    { id: "page", type: "number", label: { en: "Page", bn: "পৃষ্ঠা" } },
+  ],
+];
+const refInputSura = [
+  [
+    {
+      id: "sura",
+      type: "text",
+      label: { en: "Sura", bn: "সূরা" },
+      clone: true,
+    },
+    { id: "aayat", type: "number", label: { en: "Aayat", bn: "আয়াত" } },
+  ],
+];
 // <section>
 // <div className="label login">
 // <FormattedMessage
@@ -109,10 +142,7 @@ function LoginDetail({ idIsValid, validatingId, setIdIsValid }) {
           defaultMessage="Jamia's ID"
         />
         validation={/^[a-zA-Z0-9]+$/}
-        warning=<FormattedMessage
-          id="form.jamiaReg.warning.invalidChar"
-          defaultMessage="Invalid Character!"
-        />
+        warning="a-z, A-Z, 0-9"
       >
         {idIsValid === false && (
           <ion-icon name="close-circle-outline"></ion-icon>
@@ -502,6 +532,7 @@ export const JamiaLogin = () => {
           />
           validation={/^[a-zA-Z0-9]+$/}
           onChange={(target) => setUserId(target.value)}
+          warning="a-z, A-Z, 0-9"
         />
         <PasswordInput
           dataId="pass"
@@ -547,7 +578,7 @@ export const AdminLogin = () => {
       .then((data) => {
         setIsAuthenticated(data.isAuthenticated);
         setUser(data.user);
-        history.push("/admin");
+        history.push("/admin/jamia/active");
         console.log(data);
       });
   }
@@ -565,6 +596,7 @@ export const AdminLogin = () => {
           />
           validation={/^[a-zA-Z0-9]+$/}
           onChange={(target) => setUserId(target.value)}
+          warning="a-z, A-Z, 0-9"
         />
         <PasswordInput
           dataId="pass"
@@ -580,5 +612,428 @@ export const AdminLogin = () => {
         </button>
       </form>
     </div>
+  );
+};
+
+export const AddFatwaForm = ({ match }) => {
+  const [loading, setLoading] = useState(false);
+  const history = useHistory();
+  const { user, fatwaToEdit, setFatwaToEdit, locale } = useContext(SiteContext);
+  const [preFill, setPreFill] = useState({
+    translate: false,
+    inputBooks: refInputBook,
+    inputSura: refInputSura,
+    topic: "",
+    title: "",
+    titleEn: "",
+    ques: "",
+    quesEn: "",
+    ans: "",
+    ansEn: "",
+    ref: [],
+    img: [],
+  });
+  function handleMount() {
+    if (fatwaToEdit === null) return;
+    setPreFill((prev) => {
+      let inputBooks = [];
+      let inputSura = [];
+      if (fatwaToEdit.ref.length > 0) {
+        fatwaToEdit.ref.forEach((item) => {
+          if (item.book) {
+            inputBooks.push([
+              {
+                id: "book",
+                type: "text",
+                label: { en: "Book", bn: "কিতাব" },
+                clone: true,
+                value: item.book,
+              },
+              {
+                id: "part",
+                type: "number",
+                label: { en: "Part", bn: "খন্ড" },
+                value: item.part,
+              },
+              {
+                id: "page",
+                type: "number",
+                label: { en: "Page", bn: "পৃষ্ঠা" },
+                value: item.page,
+              },
+            ]);
+          } else {
+            inputSura.push([
+              {
+                id: "sura",
+                type: "text",
+                label: { en: "Sura", bn: "সূরা" },
+                clone: true,
+                value: item.sura,
+              },
+              {
+                id: "aayat",
+                type: "number",
+                label: { en: "Aayat", bn: "আয়াত" },
+                value: item.aayat,
+              },
+            ]);
+          }
+        });
+        inputBooks.push(...refInputBook);
+        inputSura.push(...refInputSura);
+      }
+      console.log(fatwaToEdit);
+      return {
+        ...prev,
+        ...(fatwaToEdit.ref.length > 0 && {
+          inputBooks: [...inputBooks],
+          inputSura: [...inputSura],
+        }),
+        translate: fatwaToEdit.title["en-US"] && true,
+        topic: fatwaToEdit.topic,
+        title: fatwaToEdit.title["bn-BD"],
+        titleEn: fatwaToEdit.title["en-US"],
+        ques: fatwaToEdit.ques["bn-BD"],
+        quesEn: fatwaToEdit.ques["en-US"],
+        ans: fatwaToEdit.ans["bn-BD"],
+        ansEn: fatwaToEdit.ans["en-US"],
+        ref: fatwaToEdit.ref,
+        img: fatwaToEdit.img,
+      };
+    });
+  }
+  useEffect(handleMount, []);
+  function submit(e) {
+    e.preventDefault();
+    const data = {
+      topicEn: $(".addFatwa #topic input").dataset.en,
+      topic: $(".addFatwa #topic input").dataset.bn,
+      title: SS.get("newFatwa-title"),
+      ...(preFill.translate && {
+        titleEn: SS.get("newFatwa-titleEn"),
+      }),
+      ques: SS.get("newFatwa-ques"),
+      ...(preFill.translate && {
+        quesEn: SS.get("newFatwa-quesEn"),
+      }),
+      ans: SS.get("newFatwa-ans"),
+      ...(preFill.translate && { ansEn: SS.get("newFatwa-ansEn") }),
+      ref: [
+        ...GetGroupData($(".addFatwa #books.multipleInput")),
+        ...GetGroupData($(".addFatwa #sura.multipleInput")),
+      ],
+      img: preFill.img,
+      jamia: user.id,
+    };
+    console.log(data);
+    const url = !match.params.id
+      ? `/api/${user.role === "jamia" ? "jamia" : "admin"}/fatwa/new`
+      : `/api/${user.role === "jamia" ? "jamia" : "admin"}/fatwa/edit/${
+          match.params.id
+        }`;
+    const options = {
+      method: match.params.id ? "PATCH" : "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    };
+    setLoading(true);
+    fetch(url, options)
+      .then((res) => {
+        setLoading(false);
+        if (res.status === 200) {
+          history.push("/jamia/fatwa/submitions");
+          SS.remove("newFatwa-ansEn");
+          SS.remove("newFatwa-topic");
+          SS.remove("newFatwa-ques");
+          SS.remove("newFatwa-quesEn");
+          SS.remove("newFatwa-title");
+          SS.remove("newFatwa-titleEn");
+          SS.remove("newFatwa-ans");
+          setFatwaToEdit(null);
+          return;
+        } else {
+          alert("something went wrong!");
+        }
+      })
+      .catch((err) => {
+        alert("something went wrong");
+        console.log(err);
+      });
+  }
+  return (
+    <form
+      className={`addFatwa ${preFill.translate ? "translate" : ""}`}
+      onSubmit={submit}
+    >
+      <ComboboxMulti
+        defaultValue={
+          preFill.topic ||
+          (SS.get("newFatwa-topic") && JSON.parse(SS.get("newFatwa-topic")))
+        }
+        label=<FormattedMessage
+          id="form.addFatwa.topic"
+          defaultMessage="Topic"
+        />
+        id="topic"
+        data={topics}
+        maxHeight="15rem"
+        required={true}
+        onChange={(target) => SS.set("newFatwa-topic", JSON.stringify(target))}
+      />
+      <Checkbox
+        label=<ion-icon name="language-outline"></ion-icon>
+        defaultValue={preFill.translate}
+        onChange={(target) =>
+          setPreFill((prev) => {
+            const newPrefill = { ...prev };
+            newPrefill.translate = target.checked;
+            return newPrefill;
+          })
+        }
+        defaultValue={preFill.translate}
+      />
+      <Input
+        defaultValue={preFill.title || SS.get("newFatwa-title")}
+        required={true}
+        dataId="title"
+        label=<FormattedMessage
+          id="form.addFatwa.title"
+          defaultMessage="Title"
+        />
+        max={200}
+        onChange={(target) => SS.set("newFatwa-title", target.value)}
+      />
+      {preFill.translate && (
+        <Input
+          defaultValue={preFill.titleEn || SS.get("newFatwa-titleEn")}
+          required={true}
+          dataId="titleEn"
+          label="Title in English"
+          max={200}
+          onChange={(target) => SS.set("newFatwa-titleEn", target.value)}
+        />
+      )}
+      <Textarea
+        defaultValue={preFill.ques || SS.get("newFatwa-ques")}
+        onChange={(target) => SS.set("newFatwa-ques", target.value)}
+        required={true}
+        dataId="ques"
+        label=<FormattedMessage
+          id="form.addFatwa.ques"
+          defaultMessage="Question"
+        />
+      />
+      {preFill.translate && (
+        <Textarea
+          defaultValue={preFill.quesEn || SS.get("newFatwa-quesEn")}
+          onChange={(target) => SS.set("newFatwa-quesEn", target.value)}
+          required={true}
+          dataId="quesEn"
+          label="Question in English"
+        />
+      )}
+      <Textarea
+        defaultValue={preFill.ans || SS.get("newFatwa-ans")}
+        onChange={(target) => SS.set("newFatwa-ans", target.value)}
+        required={true}
+        dataId="ans"
+        label=<FormattedMessage
+          id="form.addFatwa.ans"
+          defaultMessage="Answer"
+        />
+      />
+      {preFill.translate && (
+        <Textarea
+          defaultValue={preFill.ansEn || SS.get("newFatwa-ansEn")}
+          onChange={(target) => SS.set("newFatwa-ansEn", target.value)}
+          required={true}
+          dataId="ansEn"
+          label="Answer in Enlish"
+        />
+      )}
+      <MultipleInput
+        id="books"
+        inputs={preFill.inputBooks}
+        refInput={refInputBook}
+      />
+      <MultipleInput
+        id="sura"
+        inputs={preFill.inputSura}
+        refInput={refInputSura}
+      />
+      <button disabled={loading} type="submit" className="btn">
+        <FormattedMessage id="form.addFatwa.submit" defaultMessage="Submit" />
+        {loading && <span className="spinner"></span>}
+      </button>
+    </form>
+  );
+};
+
+export const DataEditForm = ({
+  Element,
+  defaultValue,
+  validation,
+  max,
+  tel,
+  api,
+  fieldCode,
+}) => {
+  const form = useRef();
+  const [edit, setEdit] = useState(false);
+  const [newValue, setNewValue] = useState(defaultValue);
+  function cancel() {
+    if (newValue !== defaultValue) {
+      if (window.confirm("Discard Changes?")) {
+        setNewValue(defaultValue);
+        setEdit(false);
+      }
+    } else {
+      setEdit(false);
+    }
+  }
+  function save(e) {
+    e.preventDefault();
+    if (newValue === defaultValue) {
+      setEdit(false);
+      // form.current.querySelector("input").blur();
+    } else {
+      fetch(api, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ [fieldCode]: newValue }),
+      })
+        .then((res) => {
+          if (res.status === 200) {
+            // form.current.querySelector("input").blur();
+            setEdit(false);
+          } else {
+            alert("Something went wrong!");
+          }
+        })
+        .catch((err) => console.log(err));
+    }
+  }
+  return (
+    <form ref={form} className={edit ? "edit" : ""} onSubmit={save}>
+      {tel && !edit && (
+        <a href={`tel:${newValue}`}>{newValue.replace("+88", "")}</a>
+      )}
+      {(!tel || (tel && edit)) && (
+        <Element
+          required={true}
+          type="text"
+          defaultValue={newValue}
+          validation={validation}
+          max={max}
+          onChange={(target) => setNewValue(target.value)}
+        />
+      )}
+      {!edit && (
+        <ion-icon
+          onClick={() => setEdit(true)}
+          name="create-outline"
+        ></ion-icon>
+      )}
+      {edit && (
+        <>
+          <button type="submit">
+            <ion-icon name="save-outline"></ion-icon>
+          </button>
+          <button type="button" onClick={cancel}>
+            <ion-icon name="close-outline"></ion-icon>
+          </button>
+        </>
+      )}
+    </form>
+  );
+};
+export const PasswordEditForm = ({ api }) => {
+  const form = useRef();
+  const [edit, setEdit] = useState(false);
+  const [pass, setPass] = useState({ oldPass: "", newPass: "", confirm: "" });
+  function setPassword(pass, value) {
+    setPass((prev) => {
+      const newSet = { ...prev };
+      newSet[pass] = value;
+      return newSet;
+    });
+  }
+  function save(e) {
+    e.preventDefault();
+    if (pass.newPass === pass.confirm) {
+      fetch(api, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(pass),
+      })
+        .then((res) => {
+          if (res.status === 200) {
+            setEdit(false);
+            form.current.querySelector("input").blur();
+          } else {
+            alert("Something went wrong!");
+          }
+          return res.json();
+        })
+        .then((data) => console.log(data));
+    } else {
+      alert("password did not match");
+    }
+  }
+  return (
+    <form
+      ref={form}
+      className={`password ${edit ? "edit" : ""}`}
+      onSubmit={save}
+    >
+      {!edit ? (
+        <Input type="text" defaultValue="••••••••" />
+      ) : (
+        <section>
+          <PasswordInput
+            placeholder="Old password"
+            match=".reg #confirmPass input"
+            dataId="oldPass"
+            onChange={(target) => setPassword("oldPass", target.value)}
+          />
+          <PasswordInput
+            placeholder="New password"
+            match=".data #confirmPass input"
+            passwordStrength={true}
+            dataId="pass"
+            onChange={(target) => setPassword("newPass", target.value)}
+          />
+          <PasswordInput
+            placeholder="Confirm password"
+            match=".data #pass input"
+            dataId="confirmPass"
+            onChange={(target) => setPassword("confirm", target.value)}
+          />
+        </section>
+      )}
+      {!edit && (
+        <ion-icon
+          onClick={() => setEdit(true)}
+          name="create-outline"
+        ></ion-icon>
+      )}
+      {edit && (
+        <>
+          <button type="submit">
+            <ion-icon name="save-outline"></ion-icon>
+          </button>
+          <button type="button" onClick={() => setEdit(false)}>
+            <ion-icon name="close-outline"></ion-icon>
+          </button>
+        </>
+      )}
+    </form>
   );
 };

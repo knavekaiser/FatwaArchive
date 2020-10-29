@@ -15,292 +15,148 @@ import {
   GetGroupData,
 } from "./FormElements";
 import "./CSS/JamiaProfile.min.css";
-import { FormattedDate, FormattedMessage } from "react-intl";
-
-const refInputBook = [
-  [
-    {
-      id: "book",
-      type: "text",
-      label: { en: "Book", bn: "কিতাব" },
-      clone: true,
-    },
-    { id: "part", type: "number", label: { en: "Part", bn: "খন্ড" } },
-    { id: "page", type: "number", label: { en: "Page", bn: "পৃষ্ঠা" } },
-  ],
-];
-const refInputSura = [
-  [
-    {
-      id: "sura",
-      type: "text",
-      label: { en: "Sura", bn: "সূরা" },
-      clone: true,
-    },
-    { id: "aayat", type: "number", label: { en: "Aayat", bn: "আয়াত" } },
-  ],
-];
-function AddFatwaForm({ match }) {
-  const [loading, setLoading] = useState(false);
-  const history = useHistory();
-  const { jamia } = useContext(SiteContext);
-  const [preFill, setPreFill] = useState({
-    translate: false,
-    inputBooks: refInputBook,
-    inputSura: refInputSura,
-    topic: "",
-    title: "",
-    titleEn: "",
-    ques: "",
-    quesEn: "",
-    ans: "",
-    ansEn: "",
-    ref: [],
-    img: [],
-  });
-  function handleMount() {
-    if (match.params && match.params.id) {
-      fetch(`/api/fatwa/add/${match.params.id}`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (data === null) {
-            return;
-          }
-          setPreFill((prev) => {
-            let inputBooks = [];
-            let inputSura = [];
-            if (data.ref.length > 0) {
-              data.ref.forEach((item) => {
-                if (item.book) {
-                  inputBooks.push([
-                    {
-                      id: "book",
-                      type: "text",
-                      label: { en: "Book", bn: "কিতাব" },
-                      clone: true,
-                      value: item.book,
-                    },
-                    {
-                      id: "part",
-                      type: "number",
-                      label: { en: "Part", bn: "খন্ড" },
-                      value: item.part,
-                    },
-                    {
-                      id: "page",
-                      type: "number",
-                      label: { en: "Page", bn: "পৃষ্ঠা" },
-                      value: item.page,
-                    },
-                  ]);
-                } else {
-                  inputSura.push([
-                    {
-                      id: "sura",
-                      type: "text",
-                      label: { en: "Sura", bn: "সূরা" },
-                      clone: true,
-                      value: item.sura,
-                    },
-                    {
-                      id: "aayat",
-                      type: "number",
-                      label: { en: "Aayat", bn: "আয়াত" },
-                      value: item.aayat,
-                    },
-                  ]);
-                }
-              });
-              inputBooks.push(...refInputBook);
-              inputSura.push(...refInputSura);
-            }
-            return {
-              ...prev,
-              ...(data.ref.length > 0 && {
-                inputBooks: [...inputBooks],
-                inputSura: [...inputSura],
-              }),
-              translate: true,
-              topic: data.topic,
-              title: data.title["bn-BD"],
-              titleEn: data.title["en-US"],
-              ques: data.ques["bn-BD"],
-              quesEn: data.ques["en-US"],
-              ans: data.ans["bn-BD"],
-              ansEn: data.ans["en-US"],
-              ref: data.ref,
-              img: data.img,
-            };
-          });
-        })
-        .catch((err) => console.log(err));
-    }
-  }
-  useEffect(handleMount, []);
-  function submit(e) {
-    e.preventDefault();
-    const data = {
-      topicEn: $(".addFatwa #topic input").dataset.en,
-      topic: $(".addFatwa #topic input").dataset.bn,
-      title: $(".addFatwa #title input").value,
-      ...(preFill.translate && {
-        titleEn: $(".addFatwa #titleEn input").value,
-      }),
-      ques: $(".addFatwa #ques textarea").value,
-      ...(preFill.translate && {
-        quesEn: $(".addFatwa #quesEn textarea").value,
-      }),
-      ans: $(".addFatwa #ans textarea").value,
-      ...(preFill.translate && { ansEn: $(".addFatwa #ansEn textarea").value }),
-      ref: [
-        ...GetGroupData($(".addFatwa .multipleInput#books")),
-        ...GetGroupData($(".addFatwa .multipleInput#sura")),
-      ],
-      img: preFill.img,
-      jamia: jamia.id,
-    };
-    const url = !match.params.id
-      ? "/api/fatwa/add"
-      : `/api/fatwa/add/${match.params.id}`;
-    const options = {
-      method: match.params.id ? "PATCH" : "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    };
-    setLoading(true);
-    fetch(url, options)
-      .then((res) => {
-        if (res.status === 200) {
-          setLoading(false);
-          history.push("/admin/allfatwa");
-          return;
-        }
-      })
-      .catch((err) => console.log(err));
-  }
-  return (
-    <form
-      className={`addFatwa ${preFill.translate ? "translate" : ""}`}
-      onSubmit={submit}
-    >
-      <ComboboxMulti
-        defaultValue={preFill.topic}
-        label=<FormattedMessage
-          id="form.addFatwa.topic"
-          defaultMessage="Topic"
-        />
-        id="topic"
-        data={topics}
-        maxHeight="15rem"
-        required={true}
-      />
-      <Checkbox
-        label=<ion-icon name="language-outline"></ion-icon>
-        change={() =>
-          setPreFill((prev) => {
-            const newPrefill = { ...prev };
-            newPrefill.translate = !newPrefill.translate;
-            return newPrefill;
-          })
-        }
-        defaultValue={preFill.translate}
-      />
-      <Input
-        defaultValue={preFill.title}
-        required={true}
-        dataId="title"
-        label=<FormattedMessage
-          id="form.addFatwa.title"
-          defaultMessage="Title"
-        />
-        max={200}
-      />
-      {preFill.translate && (
-        <Input
-          defaultValue={preFill.titleEn}
-          required={true}
-          dataId="titleEn"
-          label="Title in English"
-          max={200}
-        />
-      )}
-      <Textarea
-        defaultValue={preFill.ques}
-        required={true}
-        dataId="ques"
-        label=<FormattedMessage
-          id="form.addFatwa.ques"
-          defaultMessage="Question"
-        />
-      />
-      {preFill.translate && (
-        <Textarea
-          defaultValue={preFill.quesEn}
-          required={true}
-          dataId="quesEn"
-          label="Question in English"
-        />
-      )}
-      <Textarea
-        defaultValue={preFill.ans}
-        required={true}
-        dataId="ans"
-        label=<FormattedMessage
-          id="form.addFatwa.ans"
-          defaultMessage="Answer"
-        />
-      />
-      {preFill.translate && (
-        <Textarea
-          defaultValue={preFill.ansEn}
-          required={true}
-          dataId="ansEn"
-          label="Answer in Enlish"
-        />
-      )}
-      <MultipleInput
-        id="books"
-        inputs={preFill.inputBooks}
-        refInput={refInputBook}
-      />
-      <MultipleInput
-        id="sura"
-        inputs={preFill.inputSura}
-        refInput={refInputSura}
-      />
-      <button disabled={loading} type="submit" className="btn">
-        <FormattedMessage id="form.addFatwa.submit" defaultMessage="Submit" />
-        {loading && <span className="spinner"></span>}
-      </button>
-    </form>
-  );
-}
+import { FormattedDate, FormattedMessage, FormattedNumber } from "react-intl";
+import { AddFatwaForm, DataEditForm, PasswordEditForm } from "./Forms";
 
 function Profile() {
-  const { jamia } = useContext(SiteContext);
+  const { user } = useContext(SiteContext);
   const [edit, setEdit] = useState(false);
+  const patchApi = `/api/jamia/edit/${user._id}`;
   return (
-    <div>
-      <div id="profileInfo">
-        asdg
-        <p className="label">Jamia :</p>
-        <p className="info">{jamia.name}</p>
-        <p className="label">Est. :</p>
-        <p className="info">{jamia.est}</p>
-        <p className="label">Address :</p>
-        <p className="info">
-          {`${jamia.add.address}, ${jamia.add.area}, ${jamia.add.city}, ${jamia.add.region}`}
-        </p>
-        <p className="label">Phone :</p>
-        <p className="info">{jamia.phone}</p>
-        <p className="label">About :</p>
-        <p className="info">{jamia.about}</p>
-      </div>
-      <button disabled={edit} onClick={() => setEdit(!edit)}>
-        edit
-      </button>
+    <div className="view">
+      <ul id="profileInfo">
+        <li className="label">Joined</li>
+        <li className="data">
+          <FormattedDate
+            value={new Date(user.joined)}
+            day="numeric"
+            month="numeric"
+            year="2-digit"
+          />
+        </li>
+        <li className="label">Fatwa</li>
+        <li className="data">
+          <FormattedNumber value={user.fatwa} />
+        </li>
+        <li className="label">ID</li>
+        <li className="data">{user.id}</li>
+        <li className="label">Password</li>
+        <li className="data">
+          <PasswordEditForm api={patchApi} />
+        </li>
+        <li className="label">Name (Bangla)</li>
+        <li className="data">
+          <DataEditForm
+            api={patchApi}
+            defaultValue={user.name["bn-BD"]}
+            Element={Input}
+            validation={/^[ঀ-৾\s(),]+$/}
+            fieldCode="name.bn-BD"
+          />
+        </li>
+        <li className="label">Name (Enlish)</li>
+        <li className="data">
+          <DataEditForm
+            api={patchApi}
+            defaultValue={user.name["en-US"]}
+            Element={Input}
+            validation={/^[a-zA-Z\s(),]+$/}
+            fieldCode="name.en-US"
+          />
+        </li>
+        <li className="label">Prime Mufti (Bangla)</li>
+        <li className="data">
+          <DataEditForm
+            defaultValue={user.primeMufti["bn-BD"]}
+            Element={Input}
+            max={200}
+            fieldCode="primeMufti.bn-BD"
+            api={patchApi}
+          />
+        </li>
+        <li className="label">Prime Mufti (English)</li>
+        <li className="data">
+          <DataEditForm
+            defaultValue={user.primeMufti["en-US"]}
+            Element={Input}
+            max={200}
+            fieldCode="primeMufti.en-US"
+            api={patchApi}
+          />
+        </li>
+        <li className="label">Founder</li>
+        <li className="data">
+          <DataEditForm
+            defaultValue={user.founder}
+            Element={Textarea}
+            max={200}
+            fieldCode="founder"
+            api={patchApi}
+          />
+        </li>
+        <li className="label">Address</li>
+        <li className="data">
+          <DataEditForm
+            defaultValue={user.address}
+            Element={Textarea}
+            max={200}
+            fieldCode="address"
+            api={patchApi}
+          />
+        </li>
+        <li className="label">Contact</li>
+        <li className="data">
+          <DataEditForm
+            defaultValue={user.contact}
+            Element={Input}
+            validation={/^\+8801\d{0,9}$/}
+            tel={true}
+            fieldCode="contact"
+            api={patchApi}
+          />
+        </li>
+        <li className="label">About</li>
+        <li className="data">
+          <DataEditForm
+            defaultValue={user.about}
+            Element={Textarea}
+            validation={/^[ঀ-ৣৰ-৾a-zA-Z\s(),-]+$/}
+            fieldCode="about"
+            api={patchApi}
+          />
+        </li>
+        <li className="label">Applicant's Name</li>
+        <li className="data">
+          <DataEditForm
+            defaultValue={user.applicant.name}
+            Element={Input}
+            validation={/^[ঀ-ৣৰ-৾a-zA-Z\s(),-]+$/}
+            fieldCode="applicant.name"
+            api={patchApi}
+          />
+        </li>
+        <li className="label">Applicant's designation</li>
+        <li className="data">
+          <DataEditForm
+            defaultValue={user.applicant.designation}
+            Element={Input}
+            validation={/^[ঀ-ৣৰ-৾a-zA-Z\s(),-]+$/}
+            fieldCode="applicant.designation"
+            api={patchApi}
+          />
+        </li>
+        <li className="label">Applicant's mobile</li>
+        <li className="data">
+          <DataEditForm
+            defaultValue={user.applicant.mobile}
+            Element={Input}
+            validation={/^\+8801\d{0,9}$/}
+            tel={true}
+            fieldCode="applicant.mobile"
+            api={patchApi}
+          />
+        </li>
+      </ul>
     </div>
   );
 }
@@ -353,9 +209,7 @@ function SingleFatwa({ data, setData }) {
       </td>
       <td>
         <Link target="_blank" title="Show Fatwa" to={`/fatwa/${fatwa.link}`}>
-          {fatwa.title.length > 30
-            ? fatwa.title.substring(0, 40) + "..."
-            : fatwa.title}
+          {fatwa.title}
         </Link>
       </td>
       <td>
@@ -373,7 +227,108 @@ function SingleFatwa({ data, setData }) {
     </tr>
   );
 }
-
+function JamiaSingleFatwaSubmition({ data, setData }) {
+  const { locale, setFatwaToEdit } = useContext(SiteContext);
+  const [open, setOpen] = useState(false);
+  const fatwa = data;
+  const history = useHistory();
+  const editFatwa = (path) => history.push(path);
+  function edit() {
+    setFatwaToEdit(fatwa);
+    history.push("/jamia/add");
+  }
+  function removeSubmition(id) {
+    fetch(`/api/fatwa/${id}`, {
+      method: "DELETE",
+    })
+      .then((res) => {
+        if (res.status === 200) {
+          setData((prev) => {
+            return prev.filter((item) => item._id !== id);
+          });
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+  return open ? (
+    <tr data-id={fatwa._id} className="full">
+      <td className="label">Submitted</td>
+      <td>
+        <FormattedDate
+          value={new Date(fatwa.submitted)}
+          day="numeric"
+          month="numeric"
+          year="numeric"
+        />
+      </td>
+      <td className="label">topic</td>
+      <td>{fatwa.topic[locale]}</td>
+      <td className="label">title (Bangla)</td>
+      <td>{fatwa.title["bn-BD"]}</td>
+      {fatwa.title["en-US"] && (
+        <>
+          <td className="label">title (English)</td>
+          <td>{fatwa.title["en-US"]}</td>
+        </>
+      )}
+      <td className="label">question (Bangla)</td>
+      <td>{fatwa.ques["bn-BD"]}</td>
+      {fatwa.ques["en-US"] && (
+        <>
+          <td className="label">question (English)</td>
+          <td>{fatwa.ques["en-US"]}</td>
+        </>
+      )}
+      <td className="label">answer (Bangla)</td>
+      <td>{fatwa.ans["bn-BD"]}</td>
+      {fatwa.ans["en-US"] && (
+        <>
+          <td className="label">answer (English)</td>
+          <td>{fatwa.ans["en-US"]}</td>
+        </>
+      )}
+      <td className="label">Ref.</td>
+      <td>
+        <ul>
+          {fatwa.ref.map((item, i) =>
+            item.book ? (
+              <li key={item.book + item.part + item.page}>
+                book: {item.book}, part: {item.part}, page: {item.page}
+              </li>
+            ) : (
+              <li key={item.sura + item.aayat}>
+                sura: {item.sura}, aayat: {item.aayat}
+              </li>
+            )
+          )}
+        </ul>
+      </td>
+      <td className="btns">
+        <button onClick={() => setOpen(false)}>
+          <ion-icon name="chevron-up-outline"></ion-icon> Hide Detail
+        </button>
+        <button onClick={edit}>
+          <ion-icon name="pencil-outline"></ion-icon> Edit
+        </button>
+      </td>
+    </tr>
+  ) : (
+    <tr data-id={fatwa._id} onClick={() => setOpen(true)}>
+      <td>
+        <FormattedDate
+          value={new Date(fatwa.submitted)}
+          day="numeric"
+          month="numeric"
+          year="numeric"
+        />
+      </td>
+      <td>{fatwa.topic[locale]}</td>
+      <td>{fatwa.title[locale]}</td>
+    </tr>
+  );
+}
 function JamiaAllFatwa() {
   return (
     <div className="view">
@@ -382,9 +337,10 @@ function JamiaAllFatwa() {
       <Switch>
         <Route path="/jamia/fatwa" exact>
           <View
+            key="jamiaAllFatwa"
             Element={SingleFatwa}
             id="allFatwa"
-            api="api/allfatwa/filter?"
+            api="api/jamia/fatwaLive/filter?"
             categories={[
               {
                 name: "topic",
@@ -447,9 +403,10 @@ function JamiaAllFatwa() {
         </Route>
         <Route path="/jamia/fatwa/live">
           <View
+            key="jamiaAllFatwa"
             Element={SingleFatwa}
             id="allFatwa"
-            api="api/allfatwa/filter?"
+            api="api/jamia/fatwaLive/filter?"
             categories={[
               {
                 name: "topic",
@@ -512,9 +469,10 @@ function JamiaAllFatwa() {
         </Route>
         <Route path="/jamia/fatwa/submitions">
           <View
-            Element={SingleFatwa}
+            key="jamiaAllFatwaSubmition"
+            Element={JamiaSingleFatwaSubmition}
             id="fatwaSubmitions"
-            api="api/fatwaSubmitions/filter?"
+            api="api/jamia/fatwaSubmitions/filter?"
             categories={[
               {
                 name: "topic",
@@ -566,9 +524,8 @@ function JamiaAllFatwa() {
               },
             ]}
             columns={[
-              { column: "date", sort: true },
-              { column: "topic", sort: true },
-              { column: "jamia", sort: true },
+              { column: "date", sort: true, colCode: "submitted" },
+              { column: "topic", sort: true, colCode: "topic" },
               { column: "title", sort: false },
             ]}
             defaultSort={{ column: "added", order: "des" }}
@@ -585,12 +542,13 @@ function JamiaProfile() {
       <Sidebar
         views={[
           { label: "New Fatwa", path: "/jamia/add", icon: "add" },
-          { label: "Fatwa", path: "/jamia/fatwa", icon: "book" },
-          { label: "About", path: "/jamia/about", icon: "ribbon" },
+          { label: "Fatwa", path: "/jamia/fatwa", icon: "reader" },
         ]}
       >
         <div className="profile">
-          <h2>M</h2>
+          <Link to="/jamia/profile">
+            <h2>M</h2>
+          </Link>
         </div>
       </Sidebar>
       <Switch>
@@ -604,7 +562,7 @@ function JamiaProfile() {
         />
         <Route path="/jamia" exact component={JamiaAllFatwa} />
         <Route path="/jamia/fatwa" component={JamiaAllFatwa} />
-        <Route path="/jamia/about" component={Profile} />
+        <Route path="/jamia/profile" component={Profile} />
       </Switch>
     </div>
   );

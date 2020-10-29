@@ -13,18 +13,25 @@
     min-width: 830px;
     tr {
       grid-template-columns: 0.3fr 0.5fr 0.25fr 75px 55px 108px;
-      cursor: default;
-      a[title="View Jamia"] {
-        white-space: nowrap;
-        width: min-content;
-        display: flex;
-        align-items: center;
-        ion-icon {
-          margin-left: 0.5rem;
-          display: none;
-        }
-        &:hover ion-icon {
-          display: inline-block;
+      td {
+        overflow-x: hidden;
+        cursor: default;
+        &.jamiaName {
+          a {
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: inline-block;
+            align-items: center;
+            ion-icon {
+              margin-left: 0.5rem;
+              display: none;
+            }
+            &:hover ion-icon {
+              display: inline-block;
+            }
+          }
         }
       }
     }
@@ -43,7 +50,8 @@
     }
   }
   #allJamia .fullDetail,
-  #jamiaSubmitions .fullDetail {
+  #jamiaSubmitions .fullDetail,
+  #fatwaSubmitions .full {
     grid-template-columns: 0.25fr 0.8fr;
     grid-row-gap: 1rem;
     grid-column-gap: 0;
@@ -201,6 +209,18 @@
     }
     &:hover {
       background: none;
+    }
+  }
+  #fatwaSubmitions .full {
+    .label {
+      align-self: flex-start;
+    }
+    .btns {
+      button {
+        ion-icon {
+          color: orange;
+        }
+      }
     }
   }
 }

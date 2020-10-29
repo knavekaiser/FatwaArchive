@@ -26,24 +26,20 @@ const fatwa = new Schema({
   translation: { type: String, required: true },
 });
 const fatwaSubmitions = new Schema({
-  link: {
-    "en-US": { type: String, require: true, unique: true },
-    "bn-BD": { type: String, require: true, unique: true },
-  },
   topic: {
     "en-US": { type: String, required: true },
     "bn-BD": { type: String, required: true },
   },
   title: {
-    "en-US": { type: String, required: true, trim: true, unique: true },
+    "en-US": { type: String, default: "", trim: true },
     "bn-BD": { type: String, required: true, trim: true, unique: true },
   },
   ques: {
-    "en-US": { type: String, required: true, trim: true, unique: true },
+    "en-US": { type: String, default: "", trim: true },
     "bn-BD": { type: String, required: true, trim: true, unique: true },
   },
   ans: {
-    "en-US": { type: String, required: true, trim: true, unique: true },
+    "en-US": { type: String, default: "", trim: true },
     "bn-BD": { type: String, required: true, trim: true, unique: true },
   },
   ref: { type: Array, required: true },

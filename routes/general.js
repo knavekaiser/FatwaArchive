@@ -117,26 +117,25 @@ router
           user.name = req.user.name;
           user.applicant = req.user.applicant;
           user.fatwa = req.user.fatwa;
-          user._id = req.user._id;
           user.joined = req.user.joined;
           user.founder = req.user.founder;
           user.est = req.user.est;
           user.address = req.user.address;
           user.contact = req.user.contact;
           user.about = req.user.about;
-          user.id = req.user.id;
-          user.role = "jamia";
+          user.primeMufti = req.user.primeMufti;
           role = "jamia";
         }
         if (req.body.role === "admin") {
-          user._id = req.user._id;
           user.firstName = req.user.firstName;
           user.lastName = req.user.lastName;
           user.email = req.user.email;
           user.mobile = req.user.mobile;
-          user.role = req.user.role;
           role = "admin";
         }
+        user.id = req.user.id;
+        user._id = req.user._id;
+        user.role = req.user.role;
         const token = signToken(req.user.id, role);
         res.cookie("access_token", token, { httpOnly: true, sameSite: true });
         res.status(200).json({ isAuthenticated: true, user });
@@ -147,7 +146,6 @@ router
 router
   .route("/logout")
   .get(passport.authenticate("jwt", { session: false }), (req, res) => {
-    console.log("this was called");
     res.clearCookie("access_token");
     res.json({ user: null, success: true });
   });
@@ -155,31 +153,28 @@ router
 router.route("/authenticate").get(passport.authenticate("jwt"), (req, res) => {
   if (req.isAuthenticated()) {
     const user = {};
-    console.log(req.user);
     if (req.user.role === "jamia") {
       user.name = req.user.name;
       user.applicant = req.user.applicant;
       user.fatwa = req.user.fatwa;
-      user._id = req.user._id;
       user.joined = req.user.joined;
       user.founder = req.user.founder;
       user.est = req.user.est;
       user.address = req.user.address;
       user.contact = req.user.contact;
+      user.primeMufti = req.user.primeMufti;
       user.about = req.user.about;
-      user.id = req.user.id;
-      user.role = "jamia";
     } else if (req.user.role === "admin") {
-      user._id = req.user._id;
       user.firstName = req.user.firstName;
       user.lastName = req.user.lastName;
       user.email = req.user.email;
       user.mobile = req.user.mobile;
-      user.role = req.user.role;
     }
+    user.id = req.user.id;
+    user._id = req.user._id;
+    user.role = req.user.role;
     res.status(200).json({ isAuthenticated: true, user });
   } else {
-    console.log("things went to shit", req.isAuthenticated());
     res.status(500).json("something went wrong!");
   }
 });

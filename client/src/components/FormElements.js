@@ -40,6 +40,7 @@ export const GetGroupData = (multipleInput) => {
   }
   return allData;
 };
+const defaultValidation = /^[ঀ-৾ا-ﻰa-zA-Z0-9\s():;"',.।?/\\-]+$/;
 
 export const ID = (length) => {
   var result = "";
@@ -88,7 +89,7 @@ export const Input = ({
   }, [defaultValue]);
   const changeHandler = (e) => {
     if (type === "text" || type === "password") {
-      const regex = validation || /^[ঀ-৾a-zA-Z0-9\s():;"'\-,.।?/\\]+$/;
+      const regex = validation || defaultValidation;
       if (e.target.value === "" || regex.exec(e.target.value) !== null) {
         setValue(e.target.value);
         onChange && onChange(e.target);
@@ -255,7 +256,7 @@ export const Textarea = ({
     setShowLimit(false);
   };
   function change(e) {
-    const regex = validation || /^[ঀ-৾a-zA-Z0-9\s():;"',.।?/\\]+$/;
+    const regex = validation || defaultValidation;
     if (e.target.value === "" || regex.exec(e.target.value) !== null) {
       setValue(e.target.value);
       onChange && onChange(e.target);
@@ -320,6 +321,7 @@ const Group = ({ id, inputs, clone, setGroupCount }) => {
       {inputs.map((input) => {
         return (
           <Input
+            dataId={input.id}
             key={lan === "en" ? input.label.en : input.label.bn}
             warning={"Letters & numbers only!"}
             defaultValue={input.value}
@@ -327,7 +329,6 @@ const Group = ({ id, inputs, clone, setGroupCount }) => {
             type={input.type}
             label={lan === "en" ? input.label.en : input.label.bn}
             id={input.clone ? id : ""}
-            className={input.id}
             onChange={input.clone && handleChange}
             disabled={input.clone ? false : input.value ? false : value === ""}
           />
@@ -421,15 +422,20 @@ export const ComboboxMulti = ({
   id,
   maxHeight,
   required,
+  onChange,
 }) => {
   const { locale } = useContext(SiteContext);
-  const [value, setValue] = useState(defaultValue || { [locale]: "" });
+  const [value, setValue] = useState({ [locale]: "" });
   const [open, setOpen] = useState(false);
+  useEffect(() => {
+    defaultValue && setValue(defaultValue);
+  }, [defaultValue]);
   function handleClick(e) {
     Array.from(e.target.parentElement.children).forEach((item, i) => {
       if (item === e.target) {
         item.classList.add("selected");
         setValue(data[i]);
+        onChange && onChange(data[i]);
       } else {
         item.classList.remove("selected");
       }
@@ -545,18 +551,15 @@ export const Combobox = ({
 };
 export const Checkbox = ({
   label,
-  change,
+  onChange,
   defaultValue,
   required,
   children,
 }) => {
-  const [checked, setChecked] = useState();
-  useEffect(() => {
-    setChecked(defaultValue);
-  }, [defaultValue]);
-  function handleChange() {
+  const [checked, setChecked] = useState(defaultValue);
+  function handleChange(e) {
     setChecked(!checked);
-    change && change();
+    onChange && onChange(e.target);
   }
   return (
     <section className={`checkbox ${checked ? "checked" : ""}`}>

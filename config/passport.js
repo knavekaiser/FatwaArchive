@@ -14,8 +14,9 @@ passport.use(
     {
       jwtFromRequest: cookieExtractor,
       secretOrKey: process.env.JWT_SECRET,
+      passReqToCallback: true,
     },
-    (payload, done) => {
+    (req, payload, done) => {
       let Model = null;
       payload.role === "jamia" && (Model = Jamia);
       (payload.role === "admin" || payload.role === "mod") && (Model = User);
@@ -23,7 +24,7 @@ passport.use(
         if (err) return done(err, false);
         if (model && model.ghost) return done(null, false);
         if (model) {
-          model.role = payload.role;
+          req.role = payload.role;
           return done(null, model);
         } else return done(null, false);
       });

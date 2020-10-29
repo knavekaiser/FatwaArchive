@@ -4,7 +4,210 @@
   display: grid;
   grid-template-columns: auto 1fr;
   grid-template-rows: 100%;
+  align-items: center;
   .view {
-    // padding: 2rem;
+    #profileInfo {
+      padding: 1rem;
+      display: grid;
+      grid-template-columns: 0.25fr 0.75fr;
+      grid-row-gap: 1rem;
+      .label {
+        align-self: center;
+        font-size: 0.8rem;
+        color: $light-text;
+        position: relative;
+        &::after {
+          content: ":";
+          display: inline-block;
+          position: absolute;
+          right: 0;
+        }
+      }
+      .data {
+        padding-left: 1rem;
+        &:has(form) {
+          background: $light-hover;
+        }
+        form {
+          display: grid;
+          grid-auto-flow: column;
+          grid-template-columns: 1fr min-content;
+          align-items: center;
+          a {
+            width: min-content;
+          }
+          button {
+            color: $light-text;
+            border: none;
+            padding: 0;
+            border-radius: 0;
+            margin-left: 0.5rem;
+            &:hover {
+              background: none;
+              color: inherit;
+            }
+            ion-icon {
+              font-size: 1.5rem;
+            }
+          }
+          .input {
+            pointer-events: none;
+            label {
+              display: none;
+            }
+            input {
+              font-size: 1rem;
+              background: none;
+              outline: none;
+              border: none;
+              padding: 0;
+              transition: background, padding, 0.2s ease-in-out;
+            }
+            textarea {
+              border: none;
+              transition: background, padding, 0.2s ease-in-out;
+            }
+          }
+          ion-icon {
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0;
+            margin-left: 0.25rem;
+            background: white;
+            padding: 0.33rem 0.5rem;
+            box-shadow: inset 0 0 0 1px $light-border;
+            border-radius: 5px;
+            &:hover {
+              background: $light-hover;
+            }
+            &:active {
+              background: $light-border;
+            }
+          }
+          &:hover {
+            ion-icon {
+              opacity: 1;
+            }
+          }
+          &.edit {
+            .input {
+              pointer-events: all;
+              input {
+                border-radius: 5px;
+                background: white;
+                padding: 0.5rem;
+                box-shadow: inset 0 0 0 1px $light-border;
+              }
+              textarea {
+                border-radius: 5px;
+                background: white;
+                padding: 0.5rem;
+                box-shadow: inset 0 0 0 1px $light-border;
+              }
+            }
+            &.password {
+              align-items: flex-start;
+              & > section {
+                max-width: 20rem;
+                display: grid;
+                grid-template-columns: 1fr;
+                grid-auto-flow: row;
+                grid-row-gap: 0.5rem;
+                section {
+                  display: flex;
+                  align-items: center;
+                  span {
+                    height: 2px;
+                    position: absolute;
+                    left: 0;
+                    bottom: 0;
+                  }
+                }
+              }
+            }
+            ion-icon {
+              opacity: 1;
+            }
+          }
+        }
+      }
+      .btns {
+        width: min-content;
+        grid-column: 2;
+        display: grid;
+        grid-auto-flow: column;
+        grid-gap: 0.5rem;
+        button {
+          cursor: pointer;
+          text-transform: uppercase;
+          padding: 0.25rem 0.5rem;
+          display: grid;
+          grid-auto-flow: column;
+          align-items: center;
+          white-space: nowrap;
+          ion-icon {
+            font-size: 1.5em;
+            margin-right: 0.25rem;
+            color: $accent;
+          }
+          &.reject,
+          &.remove {
+            ion-icon {
+              color: red;
+            }
+          }
+          &.ghost,
+          &.hideDetail {
+            ion-icon {
+              color: orange;
+            }
+          }
+        }
+      }
+    }
+    .addFatwa {
+      padding: 2rem;
+    }
+    #fatwaSubmitions {
+      tr {
+        grid-template-columns: 6rem 0.2fr 0.8fr;
+        &.full {
+          grid-template-columns: 10rem 1fr;
+          grid-row-gap: 1rem;
+          .label {
+            font-size: 0.8rem;
+            color: $light-text;
+            position: relative;
+            &::after {
+              content: ":";
+              display: inline-block;
+              position: absolute;
+              right: 0;
+            }
+          }
+          .btns {
+            width: min-content;
+            grid-column: 2;
+            display: grid;
+            grid-auto-flow: column;
+            grid-gap: 0.5rem;
+            button {
+              cursor: pointer;
+              text-transform: uppercase;
+              padding: 0.25rem 0.5rem;
+              display: grid;
+              grid-auto-flow: column;
+              align-items: center;
+              white-space: nowrap;
+              ion-icon {
+                font-size: 1.5em;
+                margin-right: 0.25rem;
+                color: orange;
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }

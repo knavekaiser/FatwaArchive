@@ -386,7 +386,7 @@ export const View = ({
       });
     return () => abortController.abort();
   }
-  useEffect(fetchData, [filters, sort]);
+  useEffect(fetchData, [filters, sort, api]);
   return (
     <>
       {categories && (

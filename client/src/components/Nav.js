@@ -1,13 +1,14 @@
 import React, { useEffect, useState, useContext } from "react";
 import { Link, Route, useHistory } from "react-router-dom";
 import { SiteContext } from "../Context";
-import { Actions } from "./TableElements";
+import { OutsideClick } from "./TableElements";
 import "./CSS/Nav.min.css";
 import Searchbar from "./Searchbar";
 import logo from "../logo.svg";
 
 function Avatar() {
   const { locale, user, setUser, setIsAuthenticated } = useContext(SiteContext);
+  const [open, setOpen] = useState(false);
   const history = useHistory();
   function showDashboard() {
     history.push("/admin/jamia");
@@ -22,16 +23,19 @@ function Avatar() {
       });
   }
   return (
-    <li className="avatar">
+    <li className="avatar" onClick={() => setOpen(true)}>
       {user.role === "jamia" && user.name[locale].slice(0, 1)}
       {user.role === "admin" && user.firstName.slice(0, 1)}
-      <Actions
-        id="avatarActions"
-        actions={[
-          { option: "Dashboard", action: showDashboard },
-          { option: "Logout", action: logout },
-        ]}
-      />
+      {open && (
+        <OutsideClick open={open} setOpen={setOpen}>
+          <ul className="avatarOptions" onClick={() => setOpen(false)}>
+            <li>
+              <Link to={`/admin/jamia/active`}>Dashboard</Link>
+            </li>
+            <li onClick={logout}>Logout</li>
+          </ul>
+        </OutsideClick>
+      )}
     </li>
   );
 }

@@ -14,6 +14,7 @@ import {
   ID,
   $,
 } from "./FormElements";
+import { DataEditForm, PasswordEditForm } from "./Forms";
 import { Tabs, Actions, Sidebar, View } from "./TableElements";
 import {
   FormattedDate,
@@ -90,7 +91,133 @@ function SingleFatwa({ data, setData }) {
     </tr>
   );
 }
-
+function SingleFatwaSubmition({ data, setData }) {
+  const { locale, setFatwaToEdit } = useContext(SiteContext);
+  const [open, setOpen] = useState(false);
+  const fatwa = data;
+  const history = useHistory();
+  const editFatwa = (path) => history.push(path);
+  function editFatwaSubmition(id) {
+    setFatwaToEdit(fatwa);
+    history.push("/admin/add");
+  }
+  function acceptFatwa() {
+    fetch(`/api/admin/fatwaSubmitions/accept/${fatwa._id}`, { method: "POST" })
+      .then((res) => {
+        if (res.status === 200) {
+          setData((prev) => {
+            return prev.filter((item) => item._id !== fatwa._id);
+          });
+        } else {
+          alert("something went wrong");
+        }
+      })
+      .catch((err) => {
+        alert("something went wrong!");
+        console.log(err);
+      });
+  }
+  function removeSubmition() {
+    fetch(`/api/admin/fatwaSubmitions/remove/${fatwa._id}`, {
+      method: "DELETE",
+    })
+      .then((res) => {
+        if (res.status === 200) {
+          setData((prev) => {
+            return prev.filter((item) => item._id !== fatwa._id);
+          });
+        } else {
+          alert("something went wrong!");
+        }
+      })
+      .catch((err) => {
+        alert("something went wrong!");
+        console.log(err);
+      });
+  }
+  return open ? (
+    <tr data-id={fatwa._id} className="full">
+      <td className="label">Submitted</td>
+      <td className="data">
+        <FormattedDate
+          value={new Date(fatwa.submitted)}
+          day="numeric"
+          month="numeric"
+          year="numeric"
+        />
+      </td>
+      <td className="label">topic</td>
+      <td className="data">{fatwa.topic[locale]}</td>
+      <td className="label">title (Bangla)</td>
+      <td className="data">{fatwa.title["bn-BD"]}</td>
+      {fatwa.title["en-US"] && (
+        <>
+          <td className="label">title (English)</td>
+          <td className="data">{fatwa.title["en-US"]}</td>
+        </>
+      )}
+      <td className="label">question (Bangla)</td>
+      <td className="data">{fatwa.ques["bn-BD"]}</td>
+      {fatwa.ques["en-US"] && (
+        <>
+          <td className="label">question (English)</td>
+          <td className="data">{fatwa.ques["en-US"]}</td>
+        </>
+      )}
+      <td className="label">answer (Bangla)</td>
+      <td className="data">{fatwa.ans["bn-BD"]}</td>
+      {fatwa.ans["en-US"] && (
+        <>
+          <td className="label">answer (English)</td>
+          <td className="data">{fatwa.ans["en-US"]}</td>
+        </>
+      )}
+      <td className="label">Ref.</td>
+      <td className="data">
+        <ul>
+          {fatwa.ref.map((item, i) =>
+            item.book ? (
+              <li key={item.book + item.part + item.page}>
+                book: {item.book}, part: {item.part}, page: {item.page}
+              </li>
+            ) : (
+              <li key={item.sura + item.aayat}>
+                sura: {item.sura}, aayat: {item.aayat}
+              </li>
+            )
+          )}
+        </ul>
+      </td>
+      <td className="btns data">
+        <button onClick={acceptFatwa}>
+          <ion-icon name="checkmark-outline"></ion-icon> Accept
+        </button>
+        <button onClick={() => setOpen(false)}>
+          <ion-icon name="chevron-up-outline"></ion-icon> Hide Detail
+        </button>
+        <button onClick={editFatwaSubmition}>
+          <ion-icon name="pencil-outline"></ion-icon> Edit
+        </button>
+        <button onClick={removeSubmition}>
+          <ion-icon name="trash-outline"></ion-icon> Delete
+        </button>
+      </td>
+    </tr>
+  ) : (
+    <tr data-id={fatwa._id} onClick={() => setOpen(true)}>
+      <td>
+        <FormattedDate
+          value={new Date(fatwa.submitted)}
+          day="numeric"
+          month="numeric"
+          year="numeric"
+        />
+      </td>
+      <td>{fatwa.topic[locale]}</td>
+      <td>{fatwa.title[locale]}</td>
+    </tr>
+  );
+}
 function AllFatwa({ history, location, match }) {
   return (
     <div className="view">
@@ -99,6 +226,7 @@ function AllFatwa({ history, location, match }) {
       <Switch>
         <Route path="/admin/fatwa" exact>
           <View
+            key="allFatwa"
             Element={SingleFatwa}
             id="allFatwa"
             api="api/admin/allfatwa/filter?"
@@ -164,6 +292,7 @@ function AllFatwa({ history, location, match }) {
         </Route>
         <Route path="/admin/fatwa/live">
           <View
+            key="allFatwa"
             Element={SingleFatwa}
             id="allFatwa"
             api="api/admin/allfatwa/filter?"
@@ -229,7 +358,8 @@ function AllFatwa({ history, location, match }) {
         </Route>
         <Route path="/admin/fatwa/submitions">
           <View
-            Element={SingleFatwa}
+            key="allFatwaSubmition"
+            Element={SingleFatwaSubmition}
             id="fatwaSubmitions"
             api="api/admin/fatwaSubmitions/filter?"
             categories={[
@@ -295,9 +425,9 @@ function AllFatwa({ history, location, match }) {
     </div>
   );
 }
+
 function SingleJamiaSubmition({ data, setData }) {
   const jamia = data;
-  // console.log(jamia);
   const { locale } = useContext(SiteContext);
   const [showFull, setShowFull] = useState(false);
   function accept(_id) {
@@ -392,174 +522,7 @@ function SingleJamiaSubmition({ data, setData }) {
     </tr>
   );
 }
-
-function DataEditForm({
-  Element,
-  defaultValue,
-  validation,
-  max,
-  tel,
-  api,
-  fieldCode,
-}) {
-  const form = useRef();
-  const [edit, setEdit] = useState(false);
-  const [newValue, setNewValue] = useState(defaultValue);
-  function cancel() {
-    if (newValue !== defaultValue) {
-      if (window.confirm("Discard Changes?")) {
-        setNewValue(defaultValue);
-        setEdit(false);
-      }
-    } else {
-      setEdit(false);
-    }
-  }
-  function save(e) {
-    e.preventDefault();
-    if (newValue === defaultValue) {
-      setEdit(false);
-      // form.current.querySelector("input").blur();
-    } else {
-      fetch(api, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ [fieldCode]: newValue }),
-      })
-        .then((res) => {
-          if (res.status === 200) {
-            // form.current.querySelector("input").blur();
-            setEdit(false);
-          } else {
-            alert("Something went wrong!");
-          }
-        })
-        .catch((err) => console.log(err));
-    }
-  }
-  return (
-    <form ref={form} className={edit ? "edit" : ""} onSubmit={save}>
-      {tel && !edit && (
-        <a href={`tel:${newValue}`}>{newValue.replace("+88", "")}</a>
-      )}
-      {(!tel || (tel && edit)) && (
-        <Element
-          required={true}
-          type="text"
-          defaultValue={newValue}
-          validation={validation}
-          max={max}
-          onChange={(target) => setNewValue(target.value)}
-        />
-      )}
-      {!edit && (
-        <ion-icon
-          onClick={() => setEdit(true)}
-          name="create-outline"
-        ></ion-icon>
-      )}
-      {edit && (
-        <>
-          <button type="submit">
-            <ion-icon name="save-outline"></ion-icon>
-          </button>
-          <button type="button" onClick={cancel}>
-            <ion-icon name="close-outline"></ion-icon>
-          </button>
-        </>
-      )}
-    </form>
-  );
-}
-function PasswordEditForm({ api }) {
-  const form = useRef();
-  const [edit, setEdit] = useState(false);
-  const [pass, setPass] = useState({ oldPass: "", newPass: "", confirm: "" });
-  function setPassword(pass, value) {
-    setPass((prev) => {
-      const newSet = { ...prev };
-      newSet[pass] = value;
-      return newSet;
-    });
-  }
-  function save(e) {
-    e.preventDefault();
-    if (pass.newPass === pass.confirm) {
-      fetch(api, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(pass),
-      })
-        .then((res) => {
-          if (res.status === 200) {
-            setEdit(false);
-            form.current.querySelector("input").blur();
-          } else {
-            alert("Something went wrong!");
-          }
-          return res.json();
-        })
-        .then((data) => console.log(data));
-    } else {
-      alert("password did not match");
-    }
-  }
-  return (
-    <form
-      ref={form}
-      className={`password ${edit ? "edit" : ""}`}
-      onSubmit={save}
-    >
-      {!edit ? (
-        <Input type="text" defaultValue="••••••••" />
-      ) : (
-        <section>
-          <PasswordInput
-            placeholder="Old password"
-            match=".reg #confirmPass input"
-            dataId="oldPass"
-            onChange={(target) => setPassword("oldPass", target.value)}
-          />
-          <PasswordInput
-            placeholder="New password"
-            match=".data #confirmPass input"
-            passwordStrength={true}
-            dataId="pass"
-            onChange={(target) => setPassword("newPass", target.value)}
-          />
-          <PasswordInput
-            placeholder="Confirm password"
-            match=".data #pass input"
-            dataId="confirmPass"
-            onChange={(target) => setPassword("confirm", target.value)}
-          />
-        </section>
-      )}
-      {!edit && (
-        <ion-icon
-          onClick={() => setEdit(true)}
-          name="create-outline"
-        ></ion-icon>
-      )}
-      {edit && (
-        <>
-          <button type="submit">
-            <ion-icon name="save-outline"></ion-icon>
-          </button>
-          <button type="button" onClick={() => setEdit(false)}>
-            <ion-icon name="close-outline"></ion-icon>
-          </button>
-        </>
-      )}
-    </form>
-  );
-}
 function SingleJamia({ data, setData }) {
-  // console.log(data);
   const jamia = data;
   const { locale } = useContext(SiteContext);
   const [showFull, setShowFull] = useState(false);
@@ -572,19 +535,20 @@ function SingleJamia({ data, setData }) {
   const patchApi = `/api/admin/jamia/edit/${jamia._id}`;
   return !showFull ? (
     <tr onClick={() => setShowFull(true)}>
-      <td>{jamia.id}</td>
-      <td>
-        <Link title="View Jamia" to={`/jamia/${jamia.id}`} target="_black">
+      <td className="jamiaId">{jamia.id}</td>
+      <td className="jamiaName">
+        <Link
+          title={`view ${jamia.name["en-US"]}`}
+          to={`/jamia/${jamia.id}`}
+          target="_black"
+        >
           {jamia.name[locale]}
           <ion-icon name="open-outline"></ion-icon>
         </Link>
         <span>{jamia.address}</span>
       </td>
-      <td>
-        {jamia.founder}
-        <span title="Est."></span>
-      </td>
-      <td>
+      <td className="jamiaPrimeMufti">{jamia.primeMufti[locale]}</td>
+      <td className="jamiaJoined">
         <FormattedDate
           value={new Date(jamia.joined)}
           day="numeric"
@@ -592,10 +556,10 @@ function SingleJamia({ data, setData }) {
           year="2-digit"
         />
       </td>
-      <td>
+      <td className="jamiaFatwaCount">
         <FormattedNumber value={new Date(jamia.fatwa)} />
       </td>
-      <td>
+      <td className="jamiaContact">
         <a title="Call Jamia" href={`tel:${jamia.contact}`}>
           {jamia.contact.replace("+88", "")}
         </a>
@@ -748,7 +712,6 @@ function SingleJamia({ data, setData }) {
     </tr>
   );
 }
-
 function AllJamia() {
   return (
     <div className="view">
