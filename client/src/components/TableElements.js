@@ -43,6 +43,7 @@ export const Sidebar = ({ views, children }) => {
           );
         })}
       </ul>
+      <div className="backdrop" onClick={() => setSidebarSize("mini")}></div>
     </div>
   );
 };

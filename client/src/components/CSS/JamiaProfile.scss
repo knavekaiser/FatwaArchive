@@ -322,6 +322,35 @@
         }
       }
     }
+    .view {
+      #profileInfo {
+        grid-template-columns: 1fr;
+        grid-gap: 0.5rem;
+        .label {
+          white-space: nowrap;
+          padding-right: 0.5rem;
+          width: min-content;
+        }
+        .data {
+          padding-left: 0;
+          margin-bottom: 1rem;
+          form {
+            ion-icon {
+              opacity: 1;
+              &[name="create-outline"] {
+                background: $base-white;
+                box-shadow: none;
+                color: $light-text;
+              }
+            }
+          }
+          &:nth-child(2) {
+            display: inline-block;
+            width: min-content;
+          }
+        }
+      }
+    }
   }
   .adminPanel {
     .view {

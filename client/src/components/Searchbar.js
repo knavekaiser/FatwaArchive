@@ -87,7 +87,9 @@ function Searchbar({ onFocus, children }) {
         }
         onChange={change}
         type="text"
-        placeholder="প্রশ্ন বা বিষয়বস্তু..."
+        placeholder={
+          locale === "bn-BD" ? "প্রশ্ন বা বিষয়বস্তু..." : "Question or topic..."
+        }
         value={searchInput}
       />
       <span className="warning">

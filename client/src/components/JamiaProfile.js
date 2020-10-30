@@ -495,6 +495,7 @@ function JamiaAllFatwa() {
 }
 
 function JamiaProfile() {
+  const { user, locale } = useContext(SiteContext);
   return (
     <div className="main jamiaProfile">
       <Sidebar
@@ -505,7 +506,7 @@ function JamiaProfile() {
       >
         <div className="profile">
           <Link to="/jamia/profile">
-            <h2>M</h2>
+            <h2>{user.name[locale][0]}</h2>
           </Link>
         </div>
       </Sidebar>

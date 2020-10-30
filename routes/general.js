@@ -56,7 +56,6 @@ router.route("/fatwa/:link").get((req, res) => {
 });
 router.route("/search").get((req, res) => {
   const locale = req.headers["accept-language"];
-  console.log(locale);
   if (req.query.q && req.query.q.length > 0) {
     const query = new RegExp(req.query.q.replace(" ", ".+"), "gi");
     Fatwa.find({

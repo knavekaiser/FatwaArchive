@@ -28,7 +28,6 @@ router.route("/fatwa/new").post(passport.authenticate("jwt"), (req, res) => {
     updated: new Date(),
     translation: req.body.titleEn ? "manual" : "google translate",
   });
-  console.log(newFatwaSubmition);
   newFatwaSubmition
     .save()
     .then(() => res.send("fatwa added"))

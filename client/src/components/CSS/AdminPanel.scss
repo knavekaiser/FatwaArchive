@@ -304,6 +304,12 @@
   height: 100%;
   text-align: left;
   border-right: 1px solid $light-border;
+  .backdrop {
+    background: rgba(0, 0, 0, 0.2);
+    width: calc(100vw - 14rem);
+    margin-left: 14rem;
+    z-index: -10;
+  }
   .profile {
     display: grid;
     place-items: center;
@@ -312,6 +318,7 @@
     h2 {
       font-size: 5rem;
       background: $blue;
+      font-weight: lighter;
       border-radius: 50%;
       padding: 1rem;
       width: 7rem;

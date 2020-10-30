@@ -40,7 +40,7 @@ export const GetGroupData = (multipleInput) => {
   }
   return allData;
 };
-const defaultValidation = /^[ঀ-৾ا-ﻰa-zA-Z0-9\s():;"',.।?/\\-]+$/;
+const defaultValidation = /^[ঀ-৾؀-ۿa-zA-Z0-9\s():;"',.।?/\\-]+$/;
 
 export const ID = (length) => {
   var result = "";

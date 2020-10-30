@@ -51,11 +51,17 @@ function SingleFatwa({ data, setData }) {
       <td className="label">topic</td>
       <td className="data">{fatwa.topic[locale]}</td>
       <td className="label">title (Bangla)</td>
-      <td className="data">{fatwa.title["bn-BD"]}</td>
+      <td className="data">
+        <Link to={`/fatwa/${fatwa.link["bn-BD"]}`}>{fatwa.title["bn-BD"]}</Link>
+      </td>
       {fatwa.title["en-US"] && (
         <>
           <td className="label">title (English)</td>
-          <td className="data">{fatwa.title["en-US"]}</td>
+          <td className="data">
+            <Link to={`/fatwa/${fatwa.link["en-US"]}`}>
+              {fatwa.title["en-US"]}
+            </Link>
+          </td>
         </>
       )}
       <td className="label">question (Bangla)</td>
@@ -544,8 +550,25 @@ function SingleJamia({ data, setData }) {
   function ghost(_id) {
     console.log(_id);
   }
-  function remove(_id) {
-    console.log(_id);
+  function remove() {
+    if (window.confirm("You want to delete this jamia")) {
+      fetch(`/api/admin/jamia/${jamia._id}`, {
+        method: "DELETE",
+      })
+        .then((res) => {
+          if (res.status === 200) {
+            setData((prev) => {
+              return prev.filter((item) => item._id !== jamia._id);
+            });
+          } else {
+            alert("something went wrong");
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+          alert("something went wrong");
+        });
+    }
   }
   const patchApi = `/api/admin/jamia/edit/${jamia._id}`;
   return !showFull ? (
@@ -713,7 +736,7 @@ function SingleJamia({ data, setData }) {
         <button className="hideDetail" onClick={() => setShowFull(false)}>
           <ion-icon name="chevron-up-outline"></ion-icon>Hide Detail
         </button>
-        <button className="remove" onClick={() => remove(jamia._id)}>
+        <button className="remove" onClick={remove}>
           <ion-icon name="trash-outline"></ion-icon>Remove
         </button>
       </td>
