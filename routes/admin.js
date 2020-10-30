@@ -74,11 +74,11 @@ router.route("/admin/allfatwa/filter").get((req, res) => {
           return {
             _id: fatwa._id,
             added: fatwa.added,
-            link: fatwa.link[locale],
-            topic: fatwa.topic[locale],
-            title: fatwa.title[locale],
-            ques: fatwa.ques[locale],
-            ans: fatwa.ans[locale],
+            link: fatwa.link,
+            topic: fatwa.topic,
+            title: fatwa.title,
+            ques: fatwa.ques,
+            ans: fatwa.ans,
             jamia: fatwa.jamia,
             translation: fatwa.translation,
           };

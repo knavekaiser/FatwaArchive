@@ -15,17 +15,19 @@ import { Tabs, Actions, Sidebar, View } from "./TableElements";
 import { FormattedDate, FormattedNumber } from "react-intl";
 
 function SingleFatwa({ data, setData }) {
+  const { locale } = useContext(SiteContext);
+  const [open, setOpen] = useState(false);
   const fatwa = data;
   const history = useHistory();
   const editFatwa = (path) => history.push(path);
-  function deleteFatwa(id) {
-    fetch(`/api/fatwa/${id}`, {
+  function deleteFatwa() {
+    fetch(`/api/fatwa/${fatwa._id}`, {
       method: "DELETE",
     })
       .then((res) => {
         if (res.status === 200) {
           setData((prev) => {
-            return prev.filter((item) => item._id !== id);
+            return prev.filter((item) => item._id !== fatwa._id);
           });
         }
       })
@@ -33,8 +35,73 @@ function SingleFatwa({ data, setData }) {
         console.log(err);
       });
   }
-  return (
-    <tr data-id={fatwa._id}>
+  return open ? (
+    <tr data-id={fatwa._id} className={`${open ? "full" : ""}`}>
+      <td className="label">Added</td>
+      <td className="data">
+        <FormattedDate
+          value={new Date(fatwa.added)}
+          day="numeric"
+          month="numeric"
+          year="numeric"
+        />
+      </td>
+      <td className="label">jamia</td>
+      <td className="data">{fatwa.jamia}</td>
+      <td className="label">topic</td>
+      <td className="data">{fatwa.topic[locale]}</td>
+      <td className="label">title (Bangla)</td>
+      <td className="data">{fatwa.title["bn-BD"]}</td>
+      {fatwa.title["en-US"] && (
+        <>
+          <td className="label">title (English)</td>
+          <td className="data">{fatwa.title["en-US"]}</td>
+        </>
+      )}
+      <td className="label">question (Bangla)</td>
+      <td className="data">{fatwa.ques["bn-BD"]}</td>
+      {fatwa.ques["en-US"] && (
+        <>
+          <td className="label">question (English)</td>
+          <td className="data">{fatwa.ques["en-US"]}</td>
+        </>
+      )}
+      <td className="label">answer (Bangla)</td>
+      <td className="data">{fatwa.ans["bn-BD"]}</td>
+      {fatwa.ans["en-US"] && (
+        <>
+          <td className="label">answer (English)</td>
+          <td className="data">{fatwa.ans["en-US"]}</td>
+        </>
+      )}
+      <td className="label">Ref.</td>
+      <td className="data">
+        <ul>
+          {fatwa.ref &&
+            fatwa.ref.map((item, i) =>
+              item.book ? (
+                <li key={item.book + item.part + item.page}>
+                  book: {item.book}, part: {item.part}, page: {item.page}
+                </li>
+              ) : (
+                <li key={item.sura + item.aayat}>
+                  sura: {item.sura}, aayat: {item.aayat}
+                </li>
+              )
+            )}
+        </ul>
+      </td>
+      <td className="btns data">
+        <button onClick={() => setOpen(false)}>
+          <ion-icon name="chevron-up-outline"></ion-icon> Hide Detail
+        </button>
+        <button onClick={deleteFatwa}>
+          <ion-icon name="trash-outline"></ion-icon> Delete
+        </button>
+      </td>
+    </tr>
+  ) : (
+    <tr data-id={fatwa._id} onClick={() => setOpen(true)}>
       <td>
         <Link
           title={`Show all Fatwa from ${fatwa.jamia}`}
@@ -45,10 +112,10 @@ function SingleFatwa({ data, setData }) {
       </td>
       <td>
         <Link
-          title={`Show all Fatwa about ${fatwa.topic}`}
-          to={`/tableOfContent/${fatwa.topic}`}
+          title={`Show all Fatwa about ${fatwa.topic[locale]}`}
+          to={`/tableOfContent/${fatwa.topic[locale]}`}
         >
-          {fatwa.topic}
+          {fatwa.topic[locale]}
         </Link>
       </td>
       <td>{fatwa.translation.split(" ")[0]}</td>
@@ -61,23 +128,13 @@ function SingleFatwa({ data, setData }) {
         />
       </td>
       <td>
-        <Link target="_blank" title="Show Fatwa" to={`/fatwa/${fatwa.link}`}>
-          {fatwa.title.length > 30
-            ? fatwa.title.substring(0, 40) + "..."
-            : fatwa.title}
+        <Link
+          target="_blank"
+          title="Show Fatwa"
+          to={`/fatwa/${fatwa.link[locale]}`}
+        >
+          {fatwa.title[locale]}
         </Link>
-      </td>
-      <td>
-        <Actions
-          id={ID(8)}
-          actions={[
-            {
-              action: () => editFatwa(`/admin/addFatwa/${fatwa._id}`),
-              option: "Edit",
-            },
-            { action: () => deleteFatwa(fatwa._id), option: "Delete" },
-          ]}
-        />
       </td>
     </tr>
   );
@@ -391,18 +448,6 @@ function AllFatwa({ history, location, match }) {
                   />
                 ),
               },
-              {
-                name: "translation",
-                input: (
-                  <Combobox
-                    id={ID(8)}
-                    maxHeight={500}
-                    label="jamia"
-                    data={["Generated", "Manual"]}
-                    required={true}
-                  />
-                ),
-              },
             ]}
             columns={[
               { column: "date", sort: true, colCode: "submitted" },
@@ -410,7 +455,7 @@ function AllFatwa({ history, location, match }) {
               { column: "jamia", sort: true, colCode: "jamia" },
               { column: "title", sort: false },
             ]}
-            defaultSort={{ column: "added", order: "des" }}
+            defaultSort={{ column: "submitted", order: "des" }}
           />
         </Route>
       </Switch>

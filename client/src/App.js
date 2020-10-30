@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState, useEffect, useRef } from "react";
 import { Route, Switch, useHistory, Redirect } from "react-router-dom";
 import { IntlProvider } from "react-intl";
 import LandingPage from "./components/LandingPage";
@@ -35,7 +35,7 @@ function App() {
   const { setUser, setIsAuthenticated } = useContext(SiteContext);
   const { locale, setLocale } = useContext(SiteContext);
   const history = useHistory();
-  // const link = useRef(history.location.pathname);
+  const link = useRef(history.location.pathname);
   const setLan = () => {
     if (history.location.pathname.startsWith("/fatwa/")) {
       let path = history.location.pathname.replace("/fatwa/", "");
@@ -57,7 +57,7 @@ function App() {
       .then((data) => {
         setIsAuthenticated(data.isAuthenticated);
         setUser(data.user);
-        // history.push(link.current);
+        history.push(link.current);
       })
       .catch((err) => 66);
   };

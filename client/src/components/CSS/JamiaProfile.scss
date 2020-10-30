@@ -262,12 +262,18 @@
 }
 
 @media only screen and (max-width: 480px) {
-  .jamiaProfile {
+  .jamiaProfile,
+  .adminPanel {
     grid-template-columns: 0 1fr;
     .view {
       #allFatwa,
       #fatwaSubmitions {
         tr {
+          &.full {
+            .data {
+              padding-left: 0;
+            }
+          }
           grid-template-columns: 6rem 1fr;
           &.full {
             grid-template-columns: 1fr;
@@ -283,33 +289,101 @@
           }
         }
       }
+    }
+  }
+  .jamiaProfile {
+    #allFatwa {
+      &.thead {
+        tr {
+          th:nth-child(4),
+          th:nth-child(1) {
+            display: none;
+          }
+        }
+      }
+      tr:not(.full) {
+        td:nth-child(4),
+        td:nth-child(1) {
+          display: none;
+        }
+      }
+    }
+    #fatwaSubmitions {
+      &.thead {
+        tr {
+          th:nth-child(2) {
+            display: none;
+          }
+        }
+      }
+      tr:not(.full) {
+        td:nth-child(2) {
+          display: none;
+        }
+      }
+    }
+  }
+  .adminPanel {
+    .view {
+      #fatwaSubmitions {
+        &.thead {
+          tr {
+            th:nth-child(2),
+            th:nth-child(3) {
+              display: none;
+            }
+          }
+        }
+        tr:not(.full) {
+          grid-template-columns: 6rem 1fr;
+          td:nth-child(3) {
+            grid-column: 1/2;
+            grid-row: 1/2;
+            font-size: 0.8rem;
+            color: $light-text;
+          }
+          td:nth-child(2) {
+            grid-column: 2/3;
+            grid-row: 1/2;
+            color: $light-text;
+            font-size: 0.8rem;
+          }
+          td:nth-child(4) {
+            grid-column: 2/3;
+            grid-row: 2/3;
+          }
+        }
+      }
       #allFatwa {
         &.thead {
           tr {
-            th:nth-child(4),
+            th:nth-child(3),
+            th:nth-child(2),
             th:nth-child(1) {
               display: none;
             }
           }
         }
         tr:not(.full) {
-          td:nth-child(4),
+          td:nth-child(3) {
+            display: none;
+          }
           td:nth-child(1) {
-            display: none;
+            grid-column: 1/2;
+            grid-row: 1/2;
+            color: $light-text;
+            font-size: 0.8rem;
           }
-        }
-      }
-      #fatwaSubmitions {
-        &.thead {
-          tr {
-            th:nth-child(2) {
-              display: none;
-            }
+          td:nth-child(4) {
+            grid-column: 1/2;
           }
-        }
-        tr:not(.full) {
           td:nth-child(2) {
-            display: none;
+            grid-row: 1/2;
+            color: $light-text;
+            font-size: 0.8rem;
+          }
+          td:nth-child(5) {
+            grid-column: 2/3;
           }
         }
       }

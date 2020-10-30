@@ -512,8 +512,7 @@ export const JamiaLogin = () => {
       .then((data) => {
         setIsAuthenticated(data.isAuthenticated);
         setUser(data.user);
-        history.push("/jamia/profile");
-        console.log(data);
+        history.push("/jamia/fatwa");
       });
   }
   return (
@@ -590,7 +589,6 @@ export const AdminLogin = () => {
         setIsAuthenticated(data.isAuthenticated);
         setUser(data.user);
         history.push("/admin/jamia/active");
-        console.log(data);
       });
   }
   return (

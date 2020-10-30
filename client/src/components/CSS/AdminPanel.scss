@@ -6,7 +6,7 @@
   grid-template-rows: 100%;
   #allFatwa {
     tr {
-      grid-template-columns: 0.3fr 0.25fr 0.2fr 0.2fr 1fr 3rem;
+      grid-template-columns: 8rem 8rem 5rem 6rem 1fr;
     }
   }
   #allJamia {
@@ -49,9 +49,15 @@
       top: 43px;
     }
   }
+  #fatwaSubmitions {
+    tr {
+      grid-template-columns: 6rem 8rem 8rem 1fr;
+    }
+  }
   #allJamia .fullDetail,
   #jamiaSubmitions .fullDetail,
-  #fatwaSubmitions .full {
+  #fatwaSubmitions .full,
+  #allFatwa .full {
     grid-template-columns: 0.25fr 0.8fr;
     grid-row-gap: 1rem;
     grid-column-gap: 0;
@@ -175,11 +181,10 @@
       }
     }
     .btns {
-      width: min-content;
       grid-column: 2;
-      display: grid;
-      grid-auto-flow: column;
+      display: flex;
       grid-gap: 0.5rem;
+      flex-wrap: wrap;
       button {
         cursor: pointer;
         text-transform: uppercase;
@@ -706,7 +711,6 @@
         max-width: calc(100vw - 6rem);
         li {
           max-width: 100%;
-          // text-overflow: ellipsis;
           padding: 0.75rem 1rem;
         }
       }
