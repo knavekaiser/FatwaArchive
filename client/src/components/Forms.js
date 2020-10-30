@@ -485,7 +485,7 @@ export const JamiaRegister = () => {
 };
 
 export const JamiaLogin = () => {
-  const [setInvalidCredentials] = useState(null);
+  const [invalidCred, setInvalidCred] = useState(true);
   const [loading, setLoading] = useState(false);
   const history = useHistory();
   const { user } = useContext(SiteContext);
@@ -505,7 +505,7 @@ export const JamiaLogin = () => {
       .then((res) => {
         setLoading(false);
         if (res.status === 401) {
-          setInvalidCredentials(true);
+          setInvalidCred(true);
         }
         return res.json();
       })
@@ -519,7 +519,10 @@ export const JamiaLogin = () => {
   return (
     <div className={`main jamiaForms ${locale === "bn-BD" ? "bn-BD" : ""}`}>
       {user && <Redirect to="/" />}
-      <form className="login" onSubmit={submit}>
+      <form
+        className={`login ${invalidCred ? "invalidCred" : ""}`}
+        onSubmit={submit}
+      >
         <h2 data-bn="আমার থেকে একটি বাক্য হলেও পৌঁছে দাও ।">
           - بلغوا عني ولو آية
         </h2>
@@ -531,12 +534,20 @@ export const JamiaLogin = () => {
             defaultMessage="Jamia-ID"
           />
           validation={/^[a-zA-Z0-9]+$/}
-          onChange={(target) => setUserId(target.value)}
+          onChange={(target) => {
+            setUserId(target.value);
+            setInvalidCred(false);
+          }}
           warning="a-z, A-Z, 0-9"
-        />
+        >
+          {invalidCred && <p className="warning">Wrong Id or password</p>}
+        </Input>
         <PasswordInput
           dataId="pass"
-          onChange={(target) => setPass(target.value)}
+          onChange={(target) => {
+            setPass(target.value);
+            setInvalidCred(false);
+          }}
           label=<FormattedMessage
             id="form.login.password"
             defaultMessage="Password"
@@ -683,7 +694,6 @@ export const AddFatwaForm = ({ match }) => {
         inputBooks.push(...refInputBook);
         inputSura.push(...refInputSura);
       }
-      console.log(fatwaToEdit);
       return {
         ...prev,
         ...(fatwaToEdit.ref.length > 0 && {
@@ -702,6 +712,7 @@ export const AddFatwaForm = ({ match }) => {
         img: fatwaToEdit.img,
       };
     });
+    return () => setFatwaToEdit(null);
   }
   useEffect(handleMount, []);
   function submit(e) {
@@ -726,7 +737,6 @@ export const AddFatwaForm = ({ match }) => {
       img: preFill.img,
       jamia: user.id,
     };
-    console.log(data);
     const url = !match.params.id
       ? `/api/${user.role === "jamia" ? "jamia" : "admin"}/fatwa/new`
       : `/api/${user.role === "jamia" ? "jamia" : "admin"}/fatwa/edit/${

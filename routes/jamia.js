@@ -65,6 +65,11 @@ router
       })
       .catch((err) => res.status(400).json(err));
   });
+router.route("/fatwaSubmitions/:_id").delete((req, res) => {
+  FatwaSubmitions.findByIdAndDelete(req.params._id)
+    .then(() => res.json("successfully deleted"))
+    .catch((err) => res.status(400).json("Error: " + err));
+});
 
 router
   .route("/jamia/allfatwa/filter")
@@ -96,12 +101,13 @@ router
             return {
               _id: fatwa._id,
               added: fatwa.added,
-              link: fatwa.link[locale],
-              topic: fatwa.topic[locale],
-              title: fatwa.title[locale],
-              ques: fatwa.ques[locale],
-              ans: fatwa.ans[locale],
+              link: fatwa.link,
+              topic: fatwa.topic,
+              title: fatwa.title,
+              ques: fatwa.ques,
+              ans: fatwa.ans,
               jamia: fatwa.jamia,
+              ref: fatwa.ref,
               translation: fatwa.translation,
             };
           })
@@ -158,6 +164,11 @@ router.route("/fatwa/edit/:id").patch((req, res) => {
   });
   // .then(() => res.json("fatwa updated"))
   // .catch((err) => res.status(400).json("Error: " + err));
+});
+router.route("/fatwa/:_id").delete((req, res) => {
+  Fatwa.findByIdAndDelete(req.params._id)
+    .then(() => res.json("successfully deleted"))
+    .catch((err) => res.status(400).json("Error: " + err));
 });
 
 router

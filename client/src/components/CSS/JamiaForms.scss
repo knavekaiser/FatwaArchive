@@ -49,6 +49,25 @@
         font-family: "Rakkas", "Roboto", SolaimanLipi;
         font-weight: lighter;
       }
+      .warning {
+        position: absolute;
+        margin: auto;
+        color: white;
+        border: 1px solid rgba(255, 0, 0, 0.5);
+        left: 50%;
+        white-space: nowrap;
+        transform: translate(-50%, -300%);
+        padding: 0.3rem 0.7rem;
+        border-radius: 8px;
+        background: rgba(255, 0, 0, 1);
+      }
+    }
+    &.invalidCred {
+      .input {
+        input {
+          border-color: red;
+        }
+      }
     }
     div.label {
       width: 60%;

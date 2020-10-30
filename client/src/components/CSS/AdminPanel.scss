@@ -455,7 +455,7 @@
       }
       .chips {
         font-size: 0.9rem;
-        white-space: nowrap;
+        // white-space: nowrap;
         display: flex;
         flex-wrap: wrap;
         padding: 0.5rem 0.75rem;
@@ -463,15 +463,16 @@
         width: 100%;
         .chip {
           margin: 0.25rem;
-          max-height: 2rem;
+          min-height: 2rem;
           background: $light-hover;
           padding: 0.5rem 0.75rem;
           padding-right: 0.5rem;
-          border-radius: 3rem;
+          border-radius: 1rem;
           display: flex;
           align-items: center;
           cursor: pointer;
           ion-icon {
+            flex-shrink: 0;
             color: $light-hover;
             background: $light-text;
             border-radius: 50%;
@@ -694,6 +695,22 @@
   }
   .view {
     grid-column: 2/3;
+    .tableFilter {
+      form {
+        & > ion-icon {
+          padding: 0 0.5rem;
+        }
+      }
+      .filterSuggestions {
+        overflow-wrap: break-word;
+        max-width: calc(100vw - 6rem);
+        li {
+          max-width: 100%;
+          // text-overflow: ellipsis;
+          padding: 0.75rem 1rem;
+        }
+      }
+    }
   }
   .sidebar {
     &.mini {

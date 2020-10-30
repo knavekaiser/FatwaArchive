@@ -25,9 +25,15 @@ function Avatar() {
       {user.role === "admin" && user.firstName.slice(0, 1)}
       {open && (
         <OutsideClick open={open} setOpen={setOpen}>
-          <ul className="avatarOptions" onClick={() => setOpen(false)}>
+          <ul
+            className="avatarOptions"
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpen(false);
+            }}
+          >
             <li>
-              <Link to={`/admin/jamia/active`}>Dashboard</Link>
+              <Link to={`/${user.role}/fatwa`}>Dashboard</Link>
             </li>
             <li onClick={logout}>Logout</li>
           </ul>

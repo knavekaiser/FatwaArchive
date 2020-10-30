@@ -402,10 +402,13 @@ export const View = ({
         columns={columns}
       />
       <Table id={id} sort={sort} setSort={setSort}>
-        {data.map((item) => (
-          <Element setData={setData} key={item._id} data={item} />
-        ))}
-        {loading && <LoadingColumn />}
+        {loading ? (
+          <LoadingColumn />
+        ) : (
+          data.map((item) => (
+            <Element setData={setData} key={item._id} data={item} />
+          ))
+        )}
       </Table>
     </>
   );

@@ -33,7 +33,7 @@ export const GetGroupData = (multipleInput) => {
       if (input.value === "" || section.classList.contains("disabled")) {
         continue;
       } else {
-        data[section.id] = input.value;
+        data[section.id] = isNaN(+input.value) ? input.value : +input.value;
       }
     }
     Object.keys(data).length > 0 && allData.push(data);

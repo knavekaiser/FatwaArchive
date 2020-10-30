@@ -172,6 +172,7 @@
       tr {
         grid-template-columns: 6rem 0.2fr 0.8fr;
         &.full {
+          background: $base-white;
           grid-template-columns: 10rem 1fr;
           grid-row-gap: 1rem;
           .label {
@@ -211,7 +212,44 @@
     }
     #allFatwa {
       tr {
-        grid-template-columns: 0.3fr 6rem 0.7fr 5rem;
+        grid-template-columns: 8rem 6rem 1fr 5rem;
+        &.full {
+          background: $base-white;
+          grid-template-columns: 10rem 1fr;
+          grid-row-gap: 1rem;
+          .label {
+            font-size: 0.8rem;
+            color: $light-text;
+            position: relative;
+            &::after {
+              content: ":";
+              display: inline-block;
+              position: absolute;
+              right: 0;
+            }
+          }
+          .btns {
+            width: min-content;
+            grid-column: 2;
+            display: grid;
+            grid-auto-flow: column;
+            grid-gap: 0.5rem;
+            button {
+              cursor: pointer;
+              text-transform: uppercase;
+              padding: 0.25rem 0.5rem;
+              display: grid;
+              grid-auto-flow: column;
+              align-items: center;
+              white-space: nowrap;
+              ion-icon {
+                font-size: 1.5em;
+                margin-right: 0.25rem;
+                color: orange;
+              }
+            }
+          }
+        }
       }
     }
   }
@@ -221,33 +259,60 @@
   .jamiaProfile {
     grid-template-columns: 64px 1fr;
   }
-  .view {
-    grid-column: 2/3;
-  }
-  .sidebar {
-    &.full {
-      box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
-      background: $base-white;
-      z-index: 15;
-    }
-  }
 }
 
 @media only screen and (max-width: 480px) {
   .jamiaProfile {
     grid-template-columns: 0 1fr;
-  }
-  .view {
-    grid-column: 2/3;
-  }
-  .sidebar {
-    &.mini {
-      width: 0;
-    }
-    &.full {
-      box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
-      background: $base-white;
-      z-index: 15;
+    .view {
+      #allFatwa,
+      #fatwaSubmitions {
+        tr {
+          grid-template-columns: 6rem 1fr;
+          &.full {
+            grid-template-columns: 1fr;
+            .label {
+              white-space: nowrap;
+              width: min-content;
+              padding-right: 1rem;
+            }
+            .data {
+              grid-column: 1;
+              margin-bottom: 1.5rem;
+            }
+          }
+        }
+      }
+      #allFatwa {
+        &.thead {
+          tr {
+            th:nth-child(4),
+            th:nth-child(1) {
+              display: none;
+            }
+          }
+        }
+        tr:not(.full) {
+          td:nth-child(4),
+          td:nth-child(1) {
+            display: none;
+          }
+        }
+      }
+      #fatwaSubmitions {
+        &.thead {
+          tr {
+            th:nth-child(2) {
+              display: none;
+            }
+          }
+        }
+        tr:not(.full) {
+          td:nth-child(2) {
+            display: none;
+          }
+        }
+      }
     }
   }
 }

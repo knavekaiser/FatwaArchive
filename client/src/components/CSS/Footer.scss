@@ -28,5 +28,7 @@
 @media only screen and (max-width: 480px) {
   .footer {
     padding: 1rem;
+    justify-content: space-between;
+    // flex-wrap: wrap;
   }
 }

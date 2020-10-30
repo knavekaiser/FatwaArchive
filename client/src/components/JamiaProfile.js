@@ -157,27 +157,66 @@ function Profile() {
 }
 
 function SingleFatwa({ data, setData }) {
+  const { locale, setFatwaToEdit } = useContext(SiteContext);
   const fatwa = data;
   const history = useHistory();
-  const editFatwa = (path) => history.push(path);
-  function deleteFatwa(id) {
-    fetch(`/api/fatwa/${id}`, {
-      method: "DELETE",
-    })
-      .then((res) => {
-        if (res.status === 200) {
-          setData((prev) => {
-            return prev.filter((item) => item._id !== id);
-          });
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+  const [open, setOpen] = useState(false);
+  function edit() {
+    setFatwaToEdit(fatwa);
+    history.push("/jamia/add");
   }
-  return (
-    <tr data-id={fatwa._id}>
-      <td>{fatwa.topic}</td>
+  function deleteFatwa() {
+    if (window.confirm("Do you want to delete this fatwa?")) {
+      fetch(`/api/fatwa/${fatwa._id}`, {
+        method: "DELETE",
+      })
+        .then((res) => {
+          if (res.status === 200) {
+            setData((prev) => {
+              return prev.filter((item) => item._id !== fatwa._id);
+            });
+          } else {
+            alert("something went wrong.");
+          }
+        })
+        .catch((err) => {
+          alert("something went wrong.");
+          console.log(err);
+        });
+    }
+  }
+  return open ? (
+    <tr className="full">
+      <td className="label">Added</td>
+      <td className="data">
+        <FormattedDate
+          value={new Date(fatwa.added)}
+          day="numeric"
+          month="numeric"
+          year="numeric"
+        />
+      </td>
+      <td className="label">title</td>
+      <td className="data">
+        <Link to={`/fatwa/${fatwa.link[locale]}`}>{fatwa.title[locale]}</Link>
+      </td>
+      <td className="label">translate</td>
+      <td className="data">{fatwa.translation}</td>
+      <td className="data btns">
+        <button onClick={() => setOpen(false)}>
+          <ion-icon name="chevron-up-outline"></ion-icon> Hide Detail
+        </button>
+        <button onClick={edit}>
+          <ion-icon name="pencil-outline"></ion-icon> Edit
+        </button>
+        <button onClick={deleteFatwa}>
+          <ion-icon name="trash-outline"></ion-icon> Delete Fatwa
+        </button>
+      </td>
+    </tr>
+  ) : (
+    <tr data-id={fatwa._id} onClick={() => setOpen(true)}>
+      <td>{fatwa.topic[locale]}</td>
       <td>
         <FormattedDate
           value={new Date(fatwa.added)}
@@ -186,11 +225,7 @@ function SingleFatwa({ data, setData }) {
           year="numeric"
         />
       </td>
-      <td>
-        <Link target="_blank" title="Show Fatwa" to={`/fatwa/${fatwa.link}`}>
-          {fatwa.title}
-        </Link>
-      </td>
+      <td>{fatwa.title[locale]}</td>
       <td>{fatwa.translation.split(" ")[0]}</td>
     </tr>
   );
@@ -200,30 +235,32 @@ function JamiaSingleFatwaSubmition({ data, setData }) {
   const [open, setOpen] = useState(false);
   const fatwa = data;
   const history = useHistory();
-  const editFatwa = (path) => history.push(path);
   function edit() {
     setFatwaToEdit(fatwa);
     history.push("/jamia/add");
   }
-  function removeSubmition(id) {
-    fetch(`/api/fatwa/${id}`, {
+  function removeSubmition() {
+    fetch(`/api/fatwaSubmitions/${fatwa._id}`, {
       method: "DELETE",
     })
       .then((res) => {
         if (res.status === 200) {
           setData((prev) => {
-            return prev.filter((item) => item._id !== id);
+            return prev.filter((item) => item._id !== fatwa._id);
           });
+        } else {
+          alert("something went wrong");
         }
       })
       .catch((err) => {
+        alert("something went wrong");
         console.log(err);
       });
   }
   return open ? (
     <tr data-id={fatwa._id} className="full">
       <td className="label">Submitted</td>
-      <td>
+      <td className="data">
         <FormattedDate
           value={new Date(fatwa.submitted)}
           day="numeric"
@@ -232,17 +269,17 @@ function JamiaSingleFatwaSubmition({ data, setData }) {
         />
       </td>
       <td className="label">topic</td>
-      <td>{fatwa.topic[locale]}</td>
+      <td className="data">{fatwa.topic[locale]}</td>
       <td className="label">title (Bangla)</td>
-      <td>{fatwa.title["bn-BD"]}</td>
+      <td className="data">{fatwa.title["bn-BD"]}</td>
       {fatwa.title["en-US"] && (
         <>
           <td className="label">title (English)</td>
-          <td>{fatwa.title["en-US"]}</td>
+          <td className="data">{fatwa.title["en-US"]}</td>
         </>
       )}
       <td className="label">question (Bangla)</td>
-      <td>{fatwa.ques["bn-BD"]}</td>
+      <td className="data">{fatwa.ques["bn-BD"]}</td>
       {fatwa.ques["en-US"] && (
         <>
           <td className="label">question (English)</td>
@@ -250,15 +287,15 @@ function JamiaSingleFatwaSubmition({ data, setData }) {
         </>
       )}
       <td className="label">answer (Bangla)</td>
-      <td>{fatwa.ans["bn-BD"]}</td>
+      <td className="data">{fatwa.ans["bn-BD"]}</td>
       {fatwa.ans["en-US"] && (
         <>
           <td className="label">answer (English)</td>
-          <td>{fatwa.ans["en-US"]}</td>
+          <td className="data">{fatwa.ans["en-US"]}</td>
         </>
       )}
       <td className="label">Ref.</td>
-      <td>
+      <td className="data">
         <ul>
           {fatwa.ref.map((item, i) =>
             item.book ? (
@@ -273,12 +310,15 @@ function JamiaSingleFatwaSubmition({ data, setData }) {
           )}
         </ul>
       </td>
-      <td className="btns">
+      <td className="data btns">
         <button onClick={() => setOpen(false)}>
           <ion-icon name="chevron-up-outline"></ion-icon> Hide Detail
         </button>
         <button onClick={edit}>
           <ion-icon name="pencil-outline"></ion-icon> Edit
+        </button>
+        <button onClick={removeSubmition}>
+          <ion-icon name="trash-outline"></ion-icon> Remove
         </button>
       </td>
     </tr>
@@ -440,37 +480,13 @@ function JamiaAllFatwa() {
                 name: "answer",
                 input: <Input label="Answer" type="text" required={true} />,
               },
-              {
-                name: "jamia",
-                input: (
-                  <Combobox
-                    id={ID(8)}
-                    maxHeight={500}
-                    label="jamia"
-                    data={["jamia 1", "jamia 2", "jamia 3"]}
-                    required={true}
-                  />
-                ),
-              },
-              {
-                name: "translation",
-                input: (
-                  <Combobox
-                    id={ID(8)}
-                    maxHeight={500}
-                    label="jamia"
-                    data={["Generated", "Manual"]}
-                    required={true}
-                  />
-                ),
-              },
             ]}
             columns={[
               { column: "date", sort: true, colCode: "submitted" },
               { column: "topic", sort: true, colCode: "topic" },
               { column: "title", sort: false },
             ]}
-            defaultSort={{ column: "added", order: "des" }}
+            defaultSort={{ column: "submitted", order: "des" }}
           />
         </Route>
       </Switch>

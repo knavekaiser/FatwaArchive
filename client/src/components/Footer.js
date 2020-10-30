@@ -1,18 +1,22 @@
-import React from "react";
+import React, { useContext } from "react";
 // import { FormattedMessage } from "react-intl";
 import "./CSS/Footer.min.css";
+import { SiteContext } from "../Context";
 import { Link } from "react-router-dom";
 
 function Footer() {
+  const { user } = useContext(SiteContext);
   return (
     <div className="footer">
       <ul>
         <li>
           <Link to="/about">About</Link>
         </li>
-        <li>
-          <Link to="/admin">Admin</Link>
-        </li>
+        {user === null && (
+          <li>
+            <Link to="/admin">Admin</Link>
+          </li>
+        )}
       </ul>
       <ul>
         <li>&copy; Naeem Ahmad 2020</li>
