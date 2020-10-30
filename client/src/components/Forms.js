@@ -485,7 +485,7 @@ export const JamiaRegister = () => {
 };
 
 export const JamiaLogin = () => {
-  const [invalidCred, setInvalidCred] = useState(true);
+  const [invalidCred, setInvalidCred] = useState(false);
   const [loading, setLoading] = useState(false);
   const history = useHistory();
   const { user } = useContext(SiteContext);
@@ -563,7 +563,7 @@ export const JamiaLogin = () => {
 };
 
 export const AdminLogin = () => {
-  const [setInvalidCredentials] = useState(null);
+  const [invalidCred, setInvalidCred] = useState(false);
   const [loading, setLoading] = useState(false);
   const history = useHistory();
   const { setUser, setIsAuthenticated, locale, user } = useContext(SiteContext);
@@ -582,7 +582,7 @@ export const AdminLogin = () => {
       .then((res) => {
         setLoading(false);
         if (res.status === 401) {
-          setInvalidCredentials(true);
+          setInvalidCred(true);
         }
         return res.json();
       })
@@ -596,7 +596,10 @@ export const AdminLogin = () => {
   return (
     <div className={`main jamiaForms ${locale === "bn-BD" ? "bn-BD" : ""}`}>
       {user && <Redirect to="/" />}
-      <form className="adminLogin" onSubmit={submit}>
+      <form
+        className={`adminLogin ${invalidCred ? "invalidCred" : ""}`}
+        onSubmit={submit}
+      >
         <h2 data-bn="This part is only for Admins.">Admin</h2>
         <Input
           required={true}
@@ -608,7 +611,9 @@ export const AdminLogin = () => {
           validation={/^[a-zA-Z0-9]+$/}
           onChange={(target) => setUserId(target.value)}
           warning="a-z, A-Z, 0-9"
-        />
+        >
+          {invalidCred && <p className="warning">Wrong Id or password</p>}
+        </Input>
         <PasswordInput
           dataId="pass"
           onChange={(target) => setPass(target.value)}
