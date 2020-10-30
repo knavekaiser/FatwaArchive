@@ -35,7 +35,7 @@ function App() {
   const { setUser, setIsAuthenticated } = useContext(SiteContext);
   const { locale, setLocale } = useContext(SiteContext);
   const history = useHistory();
-  const link = useRef(history.location.pathname);
+  const link = useRef(window.location.href.replace(window.location.origin, ""));
   const setLan = () => {
     if (history.location.pathname.startsWith("/fatwa/")) {
       let path = history.location.pathname.replace("/fatwa/", "");

@@ -19,7 +19,7 @@ function Footer() {
         )}
       </ul>
       <ul>
-        <li>&copy; Naeem Ahmad 2020</li>
+        <li className="copy">&copy; Fatwa Archive</li>
       </ul>
     </div>
   );

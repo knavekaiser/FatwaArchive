@@ -29,6 +29,15 @@
   .footer {
     padding: 1rem;
     justify-content: space-between;
+    ul {
+      overflow-x: hidden;
+      .copy {
+        width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
     // flex-wrap: wrap;
   }
 }

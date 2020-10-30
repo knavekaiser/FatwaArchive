@@ -20,7 +20,7 @@ function SearchResult() {
         setResults(data);
       })
       .catch((err) => console.log("Error: " + err));
-  }, [history, locale]);
+  }, [history.location, locale]);
   return (
     <div className="main searchResult">
       {results.length > 0 && (
