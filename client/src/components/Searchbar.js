@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext, useRef } from "react";
 import { Link, useHistory } from "react-router-dom";
 import { SiteContext } from "../Context";
 import "./CSS/Searchbar.min.css";
+import { FormattedMessage } from "react-intl";
 
 const defaultValidation = /^[ঀ-৾ا-ﻰa-zA-Z0-9\s:;"',.।?-]+$/;
 
@@ -29,8 +30,10 @@ function Searchbar({ onFocus, children }) {
   }
 
   function change(e) {
-    const validator = new RegExp("[a-z0-9~!@#$%^&*()_-{}|:;]", "i");
-    if (validator.test(e.target.value)) {
+    if (
+      (locale === "bn-BD" && /[a-z0-9]/gi.test(e.target.value)) ||
+      (locale === "en-US" && /[ঀ-৾]/gi.test(e.target.value))
+    ) {
       form.current.classList.add("wrong");
     } else {
       form.current.classList.remove("wrong");
@@ -87,7 +90,9 @@ function Searchbar({ onFocus, children }) {
         placeholder="প্রশ্ন বা বিষয়বস্তু..."
         value={searchInput}
       />
-      <span className="warning">বাংলা লিখুন</span>
+      <span className="warning">
+        {locale === "bn-BD" ? "বাংলায় খুঁজুন" : "Search in English"}
+      </span>
       <button type="submit">
         <ion-icon name="search-outline"></ion-icon>
       </button>
