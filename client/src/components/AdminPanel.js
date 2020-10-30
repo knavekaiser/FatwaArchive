@@ -102,22 +102,8 @@ function SingleFatwa({ data, setData }) {
     </tr>
   ) : (
     <tr data-id={fatwa._id} onClick={() => setOpen(true)}>
-      <td>
-        <Link
-          title={`Show all Fatwa from ${fatwa.jamia}`}
-          to={`/jamia/${fatwa.jamia}`}
-        >
-          {fatwa.jamia}
-        </Link>
-      </td>
-      <td>
-        <Link
-          title={`Show all Fatwa about ${fatwa.topic[locale]}`}
-          to={`/tableOfContent/${fatwa.topic[locale]}`}
-        >
-          {fatwa.topic[locale]}
-        </Link>
-      </td>
+      <td>{fatwa.jamia}</td>
+      <td>{fatwa.topic[locale]}</td>
       <td>{fatwa.translation.split(" ")[0]}</td>
       <td>
         <FormattedDate
@@ -127,15 +113,7 @@ function SingleFatwa({ data, setData }) {
           year="numeric"
         />
       </td>
-      <td>
-        <Link
-          target="_blank"
-          title="Show Fatwa"
-          to={`/fatwa/${fatwa.link[locale]}`}
-        >
-          {fatwa.title[locale]}
-        </Link>
-      </td>
+      <td>{fatwa.title[locale]}</td>
     </tr>
   );
 }
@@ -514,7 +492,7 @@ function SingleJamiaSubmition({ data, setData }) {
     </tr>
   ) : (
     <tr
-      className="fullDetail"
+      className="full"
       onClick={() => (showFull ? setShowFull(false) : setShowFull(true))}
     >
       <td className="label">Submitted</td>
@@ -548,7 +526,7 @@ function SingleJamiaSubmition({ data, setData }) {
           {jamia.applicant.mobile.replace("+88", "")}
         </a>
       </td>
-      <td className="btns">
+      <td className="data btns">
         <button className="accept" onClick={() => accept(jamia._id)}>
           <ion-icon name="checkmark-outline"></ion-icon>Accept
         </button>
@@ -574,14 +552,7 @@ function SingleJamia({ data, setData }) {
     <tr onClick={() => setShowFull(true)}>
       <td className="jamiaId">{jamia.id}</td>
       <td className="jamiaName">
-        <Link
-          title={`view ${jamia.name["en-US"]}`}
-          to={`/jamia/${jamia.id}`}
-          target="_black"
-        >
-          {jamia.name[locale]}
-          <ion-icon name="open-outline"></ion-icon>
-        </Link>
+        {jamia.name[locale]}
         <span>{jamia.address}</span>
       </td>
       <td className="jamiaPrimeMufti">{jamia.primeMufti[locale]}</td>
@@ -603,7 +574,7 @@ function SingleJamia({ data, setData }) {
       </td>
     </tr>
   ) : (
-    <tr className="fullDetail">
+    <tr className="full">
       <td className="label">Joined</td>
       <td className="data">
         <FormattedDate
@@ -735,7 +706,7 @@ function SingleJamia({ data, setData }) {
           api={patchApi}
         />
       </td>
-      <td className="btns">
+      <td className="data btns">
         <button className="ghost" onClick={() => ghost(jamia._id)}>
           <ion-icon name="skull-outline"></ion-icon>Ghost
         </button>
@@ -774,7 +745,7 @@ function AllJamia() {
         </Route>
         <Route path="/admin/jamia/active">
           <View
-            key="allActiveJamia"
+            key="allJamia"
             Element={SingleJamia}
             defaultSort={{ column: "joined", order: "des" }}
             id="allJamia"
@@ -782,7 +753,7 @@ function AllJamia() {
             columns={[
               { column: "id", sort: false, colCode: "id" },
               { column: "name", sort: false, colCode: "name" },
-              { column: "founder", sort: false, colCode: "founder" },
+              { column: "prime mufti", sort: false, colCode: "primeMufti" },
               { column: "joined", sort: true, colCode: "joined" },
               { column: "fatwa", sort: true, colCode: "fatwa" },
               { column: "contact", sort: false, colCode: "contact" },

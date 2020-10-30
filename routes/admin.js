@@ -13,39 +13,6 @@ function getLan(str) {
     : "bn-BD";
 }
 
-// router.route("/allfatwa").get((req, res) => {
-//   const locale = req.headers["accept-language"];
-//   if (locale.length > 5) {
-//     res.status(400).json("No language selected or formation is wrong");
-//     return;
-//   }
-//   Fatwa.find()
-//     .then((fatwas) => {
-//       if (fatwas.length === 0) {
-//         res.json(fatwas);
-//         return;
-//       }
-//       if (fatwas[0].link[locale] === undefined) {
-//         res.status(404).json("nothing found in given language");
-//         return;
-//       }
-//       const data = fatwas.map((fatwa) => {
-//         return {
-//           _id: fatwa._id,
-//           added: fatwa.added,
-//           link: fatwa.link[locale],
-//           topic: fatwa.topic[locale],
-//           title: fatwa.title[locale],
-//           ques: fatwa.ques[locale],
-//           ans: fatwa.ans[locale],
-//           jamia: fatwa.jamia,
-//           translation: fatwa.translation,
-//         };
-//       });
-//       res.json(data);
-//     })
-//     .catch((err) => res.status(400).json("Error: " + err));
-// });
 router.route("/admin/allfatwa/filter").get((req, res) => {
   const locale = req.headers["accept-language"];
   const query = {};
@@ -338,24 +305,33 @@ router.route("/jamia/accept/:_id").post((req, res) => {
     });
 });
 router.route("/jamia/active/filter").get((req, res) => {
+  const sort = { column: req.query.column, order: req.query.order };
   Jamia.find()
     .then((jamias) => {
-      const data = jamias.map((jamia) => {
-        return {
-          _id: jamia._id,
-          joined: jamia.joined,
-          fatwa: jamia.fatwa,
-          name: jamia.name,
-          founder: jamia.founder,
-          primeMufti: jamia.primeMufti,
-          est: jamia.est,
-          address: jamia.address,
-          contact: jamia.contact,
-          about: jamia.about,
-          id: jamia.id,
-          applicant: jamia.applicant,
-        };
-      });
+      const data = jamias
+        .map((jamia) => {
+          return {
+            _id: jamia._id,
+            joined: jamia.joined,
+            fatwa: jamia.fatwa,
+            name: jamia.name,
+            founder: jamia.founder,
+            primeMufti: jamia.primeMufti,
+            est: jamia.est,
+            address: jamia.address,
+            contact: jamia.contact,
+            about: jamia.about,
+            id: jamia.id,
+            applicant: jamia.applicant,
+          };
+        })
+        .sort((a, b) => {
+          if (a[sort.column] < b[sort.column]) {
+            return sort.order === "des" ? 1 : -1;
+          } else {
+            return sort.order === "des" ? -1 : 1;
+          }
+        });
       res.status(200).json(data);
     })
     .catch((err) => res.status(400).json(err));

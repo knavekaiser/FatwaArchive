@@ -10,11 +10,14 @@
     }
   }
   #allJamia {
-    min-width: 830px;
+    // min-width: 830px;
     tr {
       grid-template-columns: 0.3fr 0.5fr 0.25fr 75px 55px 108px;
-      td {
+      td,
+      td span {
         overflow-x: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
         cursor: default;
         &.jamiaName {
           a {
@@ -54,8 +57,8 @@
       grid-template-columns: 6rem 8rem 8rem 1fr;
     }
   }
-  #allJamia .fullDetail,
-  #jamiaSubmitions .fullDetail,
+  #allJamia .full,
+  #jamiaSubmitions .full,
   #fatwaSubmitions .full,
   #allFatwa .full {
     grid-template-columns: 0.25fr 0.8fr;
