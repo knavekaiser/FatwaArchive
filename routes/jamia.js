@@ -5,10 +5,7 @@ const { User } = require("../models/userModel");
 router.route("/fatwa/new").post(passport.authenticate("jwt"), (req, res) => {
   const { title, ques, ans } = req.body;
   const newFatwaSubmition = new FatwaSubmitions({
-    topic: {
-      "bn-BD": req.body.topic,
-      "en-US": req.body.topicEn,
-    },
+    topic: req.body.topic,
     title: {
       "bn-BD": title,
       "en-US": req.body.titleEn,
@@ -33,7 +30,14 @@ router.route("/fatwa/new").post(passport.authenticate("jwt"), (req, res) => {
     .then(() => res.send("fatwa added"))
     .catch((err) => {
       console.log(err);
-      res.status(400).json({ err });
+      if (err.code === 11000) {
+        res.status(400).json({
+          code: err.code,
+          field: Object.keys(err.keyValue)[0],
+        });
+      } else {
+        res.status(400).json(err);
+      }
     });
 });
 router
@@ -134,25 +138,13 @@ router.route("/fatwa/edit/:id").patch((req, res) => {
   const query = { _id: req.params.id };
   req.newData = {
     link: {
-      "bn-BD": req.body.title.replace(/\s/g, "-"),
-      "en-US": (req.body.titleEn || titleEn).replace(/\s/g, "-"),
+      "bn-BD": req.body.title["bn-BD"].replace(/\s/g, "-"),
+      "en-US": (req.body.title["en-US"] || titleEn).replace(/\s/g, "-"),
     },
-    topic: {
-      "bn-BD": req.body.topic,
-      "en-US": req.body.topicEn,
-    },
-    title: {
-      "bn-BD": req.body.title,
-      "en-US": req.body.titleEn,
-    },
-    ques: {
-      "bn-BD": req.body.ques,
-      "en-US": req.body.quesEn,
-    },
-    ans: {
-      "bn-BD": req.body.ans,
-      "en-US": req.body.ansEn,
-    },
+    topic: req.body.topic,
+    title: req.body.title,
+    ques: req.body.ques,
+    ans: req.body.ans,
     ref: req.body.ref,
     img: req.body.img,
     updated: new Date(),

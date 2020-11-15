@@ -40,8 +40,23 @@ const jamiaSubmitions = new Schema({
   },
 });
 
+const passRecoveryToken = new Schema(
+  {
+    id: { type: String, required: true, unique: true },
+    code: { type: String, required: true },
+    expireAt: { type: Date, default: Date.now, index: { expires: "1m" } },
+    try: { type: Number, default: 0 },
+  },
+  { timestamp: true }
+);
+
 const JamiaSubmitions = mongoose.model("JamiaSubmitions", jamiaSubmitions);
 const Jamia = mongoose.model("Jamia", jamia);
+const PassRecoveryToken = mongoose.model(
+  "PassRecoveryToken",
+  passRecoveryToken
+);
 
 exports.JamiaSubmitions = JamiaSubmitions;
 exports.Jamia = Jamia;
+exports.PassRecoveryToken = PassRecoveryToken;

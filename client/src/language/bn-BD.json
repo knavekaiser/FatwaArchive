@@ -31,5 +31,22 @@
   "form.jamiaReg.warning.invalidChar": "অকার্যকর অক্ষর!",
   "form.jamiaReg.warning.charLimit": "{number} অক্ষর বাকি!",
   "form.jamiaReg.tcAgreement": "আমি ফতোয়া আর্কাইভের সকল {link} মেনে নিলাম ।",
-  "form.jamiaReg.submit": "রেজিস্টার"
+  "form.jamiaReg.submit": "রেজিস্টার",
+  "form.passRecovery.head": "পাসওয়ার্ড পুনরুদ্ধার",
+  "form.passRecovery.id.dsrc": "নিম্নে জামিয়ার লগইন আইডি প্রবেশ করুন ।",
+  "form.passRecovery.noJamia": "জামিয়া পাওয়া যায়নি",
+  "form.passRecovery.code.dsrc": "জামিয়ার আবেদনকারীর ফোনে একটি ভেরিফিকেশন কোড পাঠানো হয়েছে । কোডটি নিম্নে প্রবেশ করুন ।",
+  "form.passRecovery.code.ps": "কোড পাননি",
+  "form.passRecovery.code.wait": " {sec} সেকেন্ড অপেক্ষা করুন ।",
+  "form.passRecovery.code.resend": "পুনরায় পাঠান",
+  "form.passRecovery.code.sending": "পাঠানো হচ্ছে",
+  "form.passRecovery.code.input": "৪ সংখ্যার কোড",
+  "form.passRecovery.code.wrongInput": "কোড ভুল । {attempts} প্রচেষ্টা বাকি আছে ।",
+  "form.passRecovery.code.manyWrongAttempts": "অনেক ভুল প্রচেষ্টা",
+  "form.passRecovery.code.resendCode": "পুনরায় কোড পাঠান",
+  "form.passRecovery.pass.dscr": "{sec} সেকেন্ডের মধ্যে নিম্নে নতুন পাসওয়ার্ড প্রবেশ করুন ।",
+  "form.passRecovery.pass.input1": "নতুন পাসওয়ার্ড",
+  "form.passRecovery.pass.input2": "পাসওয়ার্ড নিশ্চিত করুন",
+  "form.passRecovery.timeout": "সময় শেষ",
+  "form.passRecovery.startOver": "আবার শুরু করুন ।"
 }

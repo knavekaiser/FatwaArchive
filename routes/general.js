@@ -1,5 +1,11 @@
 const { Fatwa, FatwaSubmitions } = require("../models/fatwaModel");
-const { Jamia, JamiaSubmitions } = require("../models/jamiaModel");
+const {
+  Jamia,
+  JamiaSubmitions,
+  PassRecoveryToken,
+} = require("../models/jamiaModel");
+const { UserQuestion } = require("../models/userSubmitionModel");
+const fetch = require("node-fetch");
 
 const regEx = (input) => new RegExp(input.replace(" ", ".+"), "gi");
 const signToken = (id, role) => {
@@ -11,6 +17,13 @@ const signToken = (id, role) => {
     },
     process.env.JWT_SECRET
   );
+};
+const genCode = (n) => {
+  code = "";
+  while (code.length < n) {
+    code += Math.ceil(Math.random() * 9);
+  }
+  return code;
 };
 
 router.route("/fatwa/:link").get((req, res) => {
@@ -139,6 +152,20 @@ router.route("/searchSuggestions").get((req, res) => {
   }
 });
 
+router.route("/askFatwa").post((req, res) => {
+  new UserQuestion({
+    ...req.body,
+  })
+    .save()
+    .then(() => {
+      res.status(200).json("test done");
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json(err);
+    });
+});
+
 router.route("/jamia/new").post((req, res) => {
   bcrypt
     .hash(req.body.password, 10)
@@ -203,6 +230,136 @@ router
     res.clearCookie("access_token");
     res.json({ user: null, success: true });
   });
+
+router.route("/passRecovery").put((req, res) => {
+  Jamia.findOne({ id: req.body.id }).then((jamia) => {
+    if (jamia === null) {
+      res.status(404).json("jamia not found");
+    } else {
+      const code = genCode(4);
+      PassRecoveryToken.find({ id: req.body.id })
+        .then((token) => {
+          if (token) {
+            return PassRecoveryToken.findOneAndDelete({ id: req.body.id });
+          } else {
+            return;
+          }
+        })
+        .then(() => bcrypt.hash(code, 10))
+        .then((hash) => {
+          return new PassRecoveryToken({
+            id: jamia.id,
+            code: hash,
+          });
+        })
+        .then((newToken) => newToken.save())
+        .then(() =>
+          fetch(
+            `http://api.greenweb.com.bd/api.php/?token=${process.env.SMS_TOKEN}&to=${jamia.applicant.mobile}&message=fatwa archive password reset code ${code}`,
+            { method: "POST" }
+          )
+        )
+        .then(() => {
+          res.json("code sent");
+        })
+        .catch((err) => {
+          console.log(err);
+          res.status(500).json(err);
+        });
+    }
+  });
+});
+router.route("/varifyPassCode").put((req, res) => {
+  const id = req.body.id;
+  const code = req.body.code;
+  PassRecoveryToken.findOne({ id: id }).then((token) => {
+    if (!token) {
+      res.status(404).json("token not found");
+    } else {
+      if (token.try === 2 && !bcrypt.compareSync(code, token.code)) {
+        PassRecoveryToken.findOneAndDelete({ id: id })
+          .then(() => {
+            res.status(400).json("too many attempts.");
+          })
+          .catch((err) => {
+            console.log(err);
+            res.status(500).json(err);
+          });
+      } else if (!bcrypt.compareSync(code, token.code)) {
+        PassRecoveryToken.findOne({ id: id })
+          .then((token) =>
+            PassRecoveryToken.findOneAndUpdate(
+              { id: id },
+              { try: token.try + 1 }
+            )
+          )
+          .then(() => {
+            res.status(401).json("code found but code did not matched");
+          })
+          .catch((err) => {
+            console.log(err);
+            res.status(500).json(err);
+          });
+      } else if (bcrypt.compareSync(code, token.code)) {
+        bcrypt
+          .hash(code, 10)
+          .then((hash) =>
+            PassRecoveryToken.findOneAndUpdate(
+              { id: id, code: hash },
+              { expireAt: Date.now() }
+            )
+          )
+          .then(() => {
+            res.json("code found and code matched");
+          })
+          .catch((err) => {
+            console.log(err);
+            res.status(500).json(err);
+          });
+      }
+    }
+  });
+});
+router.route("/jamiaNewPass").patch((req, res) => {
+  const id = req.body.jamia;
+  const code = req.body.code;
+  const pass = req.body.newPass;
+  PassRecoveryToken.findOne({ id: id })
+    .then((token) => {
+      if (!token) {
+        res.status(404).json("time out");
+      } else {
+        if (bcrypt.compareSync(code, token.code)) {
+          bcrypt
+            .hash(pass, 10)
+            .then((hash) =>
+              Jamia.findOneAndUpdate({ id: id }, { password: hash })
+            )
+            .then(() => PassRecoveryToken.findOneAndDelete({ id: id }))
+            .then(() => res.json("password reset successfully"))
+            .catch((err) => {
+              console.log(err);
+              res.status(500).json(err);
+            });
+        } else {
+          res.status(401).json("wrong code");
+        }
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json(err);
+    });
+});
+
+router.route("/allToken").get((req, res) => {
+  PassRecoveryToken.find()
+    .then((tokens) => res.json(tokens))
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json(err);
+    });
+});
 
 router.route("/authenticate").get(passport.authenticate("jwt"), (req, res) => {
   if (req.isAuthenticated()) {

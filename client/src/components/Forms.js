@@ -13,7 +13,7 @@ import {
   PasswordInput,
   $,
 } from "./FormElements";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, FormattedNumber } from "react-intl";
 
 const SS = {
   set: (key, value) => sessionStorage.setItem(key, value),
@@ -416,7 +416,7 @@ export const JamiaRegister = () => {
   return !success ? (
     <div className={`main jamiaForms ${locale === "bn-BD" ? "bn-BD" : ""}`}>
       {user && <Redirect to="/" />}
-      <form className="reg" onSubmit={submit}>
+      <form className="reg" onSubmit={submit} autofill="false">
         <h2>
           <FormattedMessage
             id="form.jamiaReg.head"
@@ -538,10 +538,12 @@ export const JamiaLogin = () => {
             setInvalidCred(false);
           }}
           warning="a-z, A-Z, 0-9"
+          id="jamiaLoginId"
         >
           {invalidCred && <p className="warning">Wrong Id or password</p>}
         </Input>
         <PasswordInput
+          id="jamiaLoginPass"
           dataId="pass"
           onChange={(target) => {
             setPass(target.value);
@@ -551,11 +553,348 @@ export const JamiaLogin = () => {
             id="form.login.password"
             defaultMessage="Password"
           />
-        />
+        >
+          <Link className="forgotPass" to="/passwordRecovery">
+            Forgot password
+          </Link>
+        </PasswordInput>
         <button type="submit" disabled={loading}>
           <FormattedMessage id="form.login.submit" defaultMessage="Login" />
           {loading && <span className="loading"></span>}
         </button>
+      </form>
+    </div>
+  );
+};
+
+export const PassRecovery = () => {
+  const { locale, user } = useContext(SiteContext);
+  const [loading, setLoading] = useState(false);
+  const [noJamia, setNoJamia] = useState(false);
+  const [wrongCode, setWrongCode] = useState(false);
+  const [id, setId] = useState("");
+  const [code, setCode] = useState("");
+  const [step, setStep] = useState(1);
+  const [resend, setResend] = useState(false);
+  const [sendingCode, setSendingCode] = useState(false);
+  const [timer, setTimer] = useState(60);
+  const [attempts, setAttempts] = useState(0);
+
+  let interval;
+  useEffect(() => {
+    if (step === 2 || step === 3) {
+      interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
+    }
+    return () => {
+      clearInterval(interval);
+    };
+  }, [step]);
+  useEffect(() => {
+    if (step === 2 && timer <= 0 && !resend) {
+      setResend(true);
+    }
+  }, [timer]);
+  function resendCode() {
+    setSendingCode(true);
+    fetch(`/api/passRecovery`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id: id }),
+    })
+      .then((res) => {
+        setLoading(false);
+        setSendingCode(false);
+        setAttempts(0);
+        setWrongCode(false);
+        if (res.status === 200) {
+          setTimer(60);
+        } else {
+          throw "something went worng";
+        }
+      })
+      .catch((err) => {
+        alert("something went wrong");
+        console.log(err);
+      });
+  }
+  function submit(e) {
+    e.preventDefault();
+    setLoading(true);
+    if (step === 1) {
+      fetch(`/api/passRecovery`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: id }),
+      })
+        .then((res) => {
+          setLoading(false);
+          if (res.status === 404) {
+            setNoJamia(true);
+          } else if (res.status === 200) {
+            setStep(2);
+            setTimer(60);
+          } else if (res.status === 500) {
+            alert("something went wrong");
+          }
+        })
+        .catch((err) => {
+          alert("something went wrong");
+          console.log(err);
+        });
+    } else if (step === 2) {
+      fetch(`/api/varifyPassCode`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: id, code: code }),
+      })
+        .then((res) => {
+          setLoading(false);
+          setAttempts((prev) => prev + 1);
+          if (res.status === 401) {
+            setWrongCode(true);
+          } else if (res.status === 200) {
+            setTimer(60);
+            setStep(3);
+          } else if (res.status === 400) {
+            if (attempts === 2) {
+              setTimer(0);
+            }
+          }
+        })
+        .catch((err) => {
+          alert("something went wrong");
+          console.log(err);
+        });
+    } else if (step === 3) {
+      fetch("/api/jamiaNewPass", {
+        method: "PATCH",
+        headers: { "Content-Type": "Application/json" },
+        body: JSON.stringify({
+          newPass: $("#pass input").value,
+          jamia: id,
+          code: code,
+        }),
+      })
+        .then((res) => {
+          setLoading(false);
+          if (res.status === 200) {
+            setStep("success");
+          }
+        })
+        .catch((err) => {
+          alert("something went wrong");
+          console.log(err);
+        });
+    }
+  }
+  return (
+    <div className={`main jamiaForms ${locale === "bn-BD" ? "bn-BD" : ""}`}>
+      {user && <Redirect to="/" />}
+      <form className={`passRecovery`} onSubmit={submit}>
+        <h3>
+          <FormattedMessage
+            id="form.passRecovery.head"
+            defaultMessage="Password Recovery"
+          />
+        </h3>
+        {step === 1 && (
+          <>
+            <p>
+              <FormattedMessage
+                id="form.passRecovery.id.dsrc"
+                defaultMessage="Enter Jamia's login Id below."
+              />
+            </p>
+            <Input
+              required={true}
+              id="passRecoveryId"
+              dataId="id"
+              type="text"
+              validation={/^[a-zA-Z0-9]+$/}
+              warning="a-z, A-Z, 0-9"
+              onChange={(target) => {
+                setId(target.value);
+                setNoJamia(false);
+              }}
+              className={noJamia ? "err" : ""}
+              label=<FormattedMessage id="form.login.id" defaultMessage="Id" />
+            >
+              {noJamia && (
+                <span className="errMessage">
+                  <FormattedMessage
+                    id="form.passRecovery.noJamia"
+                    defaultMessage="Jamia doesn't exists"
+                  />
+                </span>
+              )}
+            </Input>
+          </>
+        )}
+        {step === 2 && (
+          <>
+            <p>
+              <FormattedMessage
+                id="form.passRecovery.code.dsrc"
+                defaultMessage="A varification code has been sent to Jamia's applicant's mobile. Enter the code below."
+              />
+              <br />
+              <br />
+              <span className="resend">
+                <FormattedMessage
+                  id="form.passRecovery.code.ps"
+                  defaultMessage="didn't get the code"
+                />
+                ?{" "}
+                {timer <= 0 ? (
+                  sendingCode ? (
+                    <span>
+                      <FormattedMessage
+                        id="form.passRecovery.code.sending"
+                        defaultMessage="Sending"
+                      />
+                    </span>
+                  ) : (
+                    <span onClick={resendCode} className="sendAgain">
+                      <FormattedMessage
+                        id="form.passRecovery.code.resend"
+                        defaultMessage="Resend"
+                      />
+                    </span>
+                  )
+                ) : (
+                  <span>
+                    <FormattedMessage
+                      id="form.passRecovery.code.wait"
+                      defaultMessage="wait {sec}s."
+                      values={{ sec: <FormattedNumber value={timer} /> }}
+                    />
+                  </span>
+                )}
+              </span>
+            </p>
+            <Input
+              required={true}
+              id="passRecoveryVarificationCode"
+              dataId="code"
+              type="text"
+              validation={/^[0-9]+$/}
+              warning="0-9"
+              min={4}
+              max={4}
+              onChange={(target) => {
+                setCode(target.value);
+                setWrongCode(false);
+              }}
+              className={wrongCode ? "err" : ""}
+              label=<FormattedMessage
+                id="form.passRecovery.code.input"
+                defaultMessage="4 digit code"
+              />
+            >
+              {wrongCode &&
+                (attempts > 2 ? (
+                  <span className="errMessage">
+                    <FormattedMessage
+                      id="form.passRecovery.code.manyWrongAttempts"
+                      defaultMessage="Many wrong attempts."
+                    />{" "}
+                    <span className="sendAgain" onClick={resendCode}>
+                      <FormattedMessage
+                        id="form.passRecovery.code.resendCode"
+                        defaultMessage="Resend Code"
+                      />
+                    </span>
+                  </span>
+                ) : (
+                  <span className="errMessage">
+                    <FormattedMessage
+                      id="form.passRecovery.code.wrongInput"
+                      defaultMessage="Code is wrong. {attempts} attempts left"
+                      values={{
+                        attempts: <FormattedNumber value={3 - attempts} />,
+                      }}
+                    />
+                  </span>
+                ))}
+            </Input>
+          </>
+        )}
+        {step === 3 && (
+          <>
+            {timer > 0 ? (
+              <>
+                <p>
+                  <FormattedMessage
+                    id="form.passRecovery.pass.dscr"
+                    defaultMessage="Enter your new password below within {sec}s."
+                    values={{ sec: <FormattedNumber value={timer} /> }}
+                  />
+                </p>
+                <PasswordInput
+                  match=".passRecovery #confirmPass input"
+                  passwordStrength={true}
+                  dataId="pass"
+                  label=<FormattedMessage
+                    id="form.passRecovery.pass.input1"
+                    defaultValue="New password"
+                  />
+                />
+                <PasswordInput
+                  match=".passRecovery #pass input"
+                  dataId="confirmPass"
+                  label=<FormattedMessage
+                    id="form.passRecovery.pass.input2"
+                    defaultValue="Confirm password"
+                  />
+                />
+              </>
+            ) : (
+              <p>
+                <FormattedMessage
+                  id="form.passRecovery.timeout"
+                  defaultValue="Timeout."
+                />{" "}
+                <Link
+                  to="/passwordRecovery"
+                  onClick={() => {
+                    setStep(1);
+                    setTimer(60);
+                  }}
+                >
+                  <FormattedMessage
+                    id="form.passRecovery.startOver"
+                    defaultValue="Start over"
+                  />
+                </Link>
+              </p>
+            )}
+          </>
+        )}
+        {step === "success" && (
+          <p>
+            Password has been successfully changed. Click{" "}
+            <Link to="/login">here</Link> to login.
+          </p>
+        )}
+        {step !== "success" && (
+          <button
+            type="submit"
+            disabled={
+              loading ||
+              (step === 2 && timer <= 0) ||
+              (step === 2 && attempts > 2) ||
+              (step === 3 && timer <= 0)
+            }
+          >
+            <FormattedMessage
+              id="form.addFatwa.submit"
+              defaultMessage="Submit"
+            />
+            {loading && <span className="loading"></span>}
+          </button>
+        )}
       </form>
     </div>
   );
@@ -647,6 +986,7 @@ export const AddFatwaForm = ({ match }) => {
     ref: [],
     img: [],
   });
+  const [sameExists, setSameExists] = useState("");
   function handleMount() {
     if (fatwaToEdit === null) return;
     setPreFill((prev) => {
@@ -703,7 +1043,8 @@ export const AddFatwaForm = ({ match }) => {
           inputBooks: [...inputBooks],
           inputSura: [...inputSura],
         }),
-        translate: fatwaToEdit.title["en-US"] && true,
+        translate:
+          fatwaToEdit.translation === "google translate" ? false : true,
         topic: fatwaToEdit.topic,
         title: fatwaToEdit.title["bn-BD"],
         titleEn: fatwaToEdit.title["en-US"],
@@ -721,8 +1062,7 @@ export const AddFatwaForm = ({ match }) => {
   function submit(e) {
     e.preventDefault();
     const data = {
-      topicEn: $(".addFatwa #topic input").dataset.en,
-      topic: $(".addFatwa #topic input").dataset.bn,
+      topic: JSON.parse(SS.get("newFatwa-topic")),
       title: SS.get("newFatwa-title"),
       ...(preFill.translate && {
         titleEn: SS.get("newFatwa-titleEn"),
@@ -767,8 +1107,15 @@ export const AddFatwaForm = ({ match }) => {
           SS.remove("newFatwa-ans");
           setFatwaToEdit(null);
           return;
+        } else if (res.status === 400) {
+          return res.json();
         } else {
           alert("something went wrong!");
+        }
+      })
+      .then((data) => {
+        if (data && data.code === 11000) {
+          setSameExists(data.field);
         }
       })
       .catch((err) => {
@@ -816,8 +1163,16 @@ export const AddFatwaForm = ({ match }) => {
           defaultMessage="Title"
         />
         max={200}
-        onChange={(target) => SS.set("newFatwa-title", target.value)}
-      />
+        className={sameExists === "title.bn-BD" ? "err" : ""}
+        onChange={(target) => {
+          SS.set("newFatwa-title", target.value);
+          setSameExists("");
+        }}
+      >
+        {sameExists === "title.bn-BD" && (
+          <span className="errMessage">This title already exists!</span>
+        )}
+      </Input>
       {preFill.translate && (
         <Input
           defaultValue={preFill.titleEn || SS.get("newFatwa-titleEn")}
@@ -849,14 +1204,22 @@ export const AddFatwaForm = ({ match }) => {
       )}
       <Textarea
         defaultValue={preFill.ans || SS.get("newFatwa-ans")}
-        onChange={(target) => SS.set("newFatwa-ans", target.value)}
+        onChange={(target) => {
+          SS.set("newFatwa-ans", target.value);
+          setSameExists(false);
+        }}
         required={true}
         dataId="ans"
+        className={sameExists === "ans.bn-BD" ? "err" : ""}
         label=<FormattedMessage
           id="form.addFatwa.ans"
           defaultMessage="Answer"
         />
-      />
+      >
+        {sameExists === "ans.bn-BD" && (
+          <span className="errMessage">this fatwa already exists</span>
+        )}
+      </Textarea>
       {preFill.translate && (
         <Textarea
           defaultValue={preFill.ansEn || SS.get("newFatwa-ansEn")}

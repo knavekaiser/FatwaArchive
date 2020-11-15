@@ -19,6 +19,7 @@ function Profile() {
   const patchApi = `/api/jamia/edit/${user._id}`;
   return (
     <div className="view">
+      <h1>Jamia Profile</h1>
       <ul id="profileInfo">
         <li className="label">Joined</li>
         <li className="data">
@@ -163,7 +164,7 @@ function SingleFatwa({ data, setData }) {
   const [open, setOpen] = useState(false);
   function edit() {
     setFatwaToEdit(fatwa);
-    history.push("/jamia/add");
+    history.push(`/jamia/add/${fatwa._id}`);
   }
   function deleteFatwa() {
     if (window.confirm("Do you want to delete this fatwa?")) {
@@ -198,7 +199,10 @@ function SingleFatwa({ data, setData }) {
       </td>
       <td className="label">title</td>
       <td className="data">
-        <Link to={`/fatwa/${fatwa.link[locale]}`}>{fatwa.title[locale]}</Link>
+        <Link target="_blank" to={`/fatwa/${fatwa.link[locale]}`}>
+          {fatwa.title[locale]}
+          <ion-icon name="open-outline"></ion-icon>
+        </Link>
       </td>
       <td className="label">translate</td>
       <td className="data">{fatwa.translation}</td>
@@ -515,6 +519,7 @@ function JamiaProfile() {
           path="/jamia/add"
           component={(props) => (
             <div className="view">
+              <h1>Add new Fatwa</h1>
               <AddFatwaForm {...props} />
             </div>
           )}

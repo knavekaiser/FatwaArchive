@@ -12,8 +12,8 @@ const fatwa = new Schema({
     "bn-BD": { type: String, required: true, trim: true, unique: true },
   },
   ques: {
-    "en-US": { type: String, required: true, trim: true, unique: true },
-    "bn-BD": { type: String, required: true, trim: true, unique: true },
+    "en-US": { type: String, required: true, trim: true },
+    "bn-BD": { type: String, required: true, trim: true },
   },
   ans: {
     "en-US": { type: String, required: true, trim: true, unique: true },
@@ -36,7 +36,7 @@ const fatwaSubmitions = new Schema({
   },
   ques: {
     "en-US": { type: String, default: "", trim: true },
-    "bn-BD": { type: String, required: true, trim: true, unique: true },
+    "bn-BD": { type: String, required: true, trim: true },
   },
   ans: {
     "en-US": { type: String, default: "", trim: true },

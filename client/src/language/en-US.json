@@ -30,5 +30,22 @@
   "form.jamiaReg.applicantContact": "Applicant's Mobile",
   "form.jamiaReg.warning.invalidChar": "Invalid Character!",
   "form.jamiaReg.warning.charLimit": "{number} charecters left!",
-  "form.jamiaReg.submit": "Register"
+  "form.jamiaReg.submit": "Register",
+  "form.passRecovery.head": "Password Recovery",
+  "form.passRecovery.id.dsrc": "Enter Jamia's login Id below.",
+  "form.passRecovery.noJamia": "Jamia does not exists",
+  "form.passRecovery.code.dsrc": "A varification code has been sent to Jamia's applicant's mobile. Enter the code below.",
+  "form.passRecovery.code.ps": "didn't get the code",
+  "form.passRecovery.code.wait": "wait {sec}s.",
+  "form.passRecovery.code.resend": "Resend",
+  "form.passRecovery.code.sending": "Sending",
+  "form.passRecovery.code.input": "4 digit code",
+  "form.passRecovery.code.wrongInput": "Code is wrong. {attempts} attempts left",
+  "form.passRecovery.code.manyWrongAttempts": "Too many wrong attempts.",
+  "form.passRecovery.code.resendCode": "Resend code.",
+  "form.passRecovery.pass.dscr": "Enter your new password below within {sec}s.",
+  "form.passRecovery.pass.input1": "New password",
+  "form.passRecovery.pass.input2": "Confirm password",
+  "form.passRecovery.timeout": "Timeout.",
+  "form.passRecovery.startOver": "Start over."
 }

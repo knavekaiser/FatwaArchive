@@ -77,6 +77,7 @@ export const Input = ({
   min,
   children,
   placeholder,
+  className,
 }) => {
   const [value, setValue] = useState("");
   const [showLabel, setShowLabel] = useState(true);
@@ -109,14 +110,13 @@ export const Input = ({
   return (
     <section
       id={dataId}
-      className={`input ${invalidChar ? "invalid" : ""} ${
-        disabled ? "disabled" : ""
-      }`}
+      className={`input ${className ? className : ""} ${
+        invalidChar ? "invalid" : ""
+      } ${disabled ? "disabled" : ""}`}
     >
       <label className={`label ${showLabel ? "active" : ""}`}>
         {invalidChar ? (warning ? warning : "অকার্যকর অক্ষর!") : label}
       </label>
-
       <input
         minLength={min}
         value={value}
@@ -142,6 +142,8 @@ export const PasswordInput = ({
   placeholder,
   onChange,
   defaultValue,
+  id,
+  children,
 }) => {
   const [showPass, setShowPass] = useState(false);
   const [style, setStyle] = useState({ width: 0 });
@@ -192,6 +194,7 @@ export const PasswordInput = ({
   }
   return (
     <Input
+      id={id}
       defaultValue={defaultValue}
       validation={/./}
       min={8}
@@ -224,6 +227,7 @@ export const PasswordInput = ({
       ) : (
         <ion-icon onClick={handleIconClick} name="eye-off-outline"></ion-icon>
       )}
+      {children}
     </Input>
   );
 };
@@ -238,6 +242,8 @@ export const Textarea = ({
   validation,
   warning,
   onChange,
+  className,
+  children,
 }) => {
   const [value, setValue] = useState("");
   const [showLabel, setShowLabel] = useState(true);
@@ -270,7 +276,9 @@ export const Textarea = ({
   return (
     <section
       id={dataId}
-      className={`input textarea ${invalidChar ? "invalid" : ""}`}
+      className={`input textarea ${className ? className : ""} ${
+        invalidChar ? "invalid" : ""
+      }`}
     >
       <label className={`label ${showLabel ? "active" : ""}`}>
         {invalidChar ? (warning ? warning : "অকার্যকর অক্ষর!") : label}
@@ -293,6 +301,7 @@ export const Textarea = ({
           />
         </p>
       )}
+      {children}
     </section>
   );
 };

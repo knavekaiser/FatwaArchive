@@ -52,7 +52,9 @@ function SingleFatwa({ data, setData }) {
       <td className="data">{fatwa.topic[locale]}</td>
       <td className="label">title (Bangla)</td>
       <td className="data">
-        <Link to={`/fatwa/${fatwa.link["bn-BD"]}`}>{fatwa.title["bn-BD"]}</Link>
+        <Link target="_blank" to={`/fatwa/${fatwa.link["bn-BD"]}`}>
+          {fatwa.title["bn-BD"]}
+        </Link>
       </td>
       {fatwa.title["en-US"] && (
         <>
@@ -842,17 +844,96 @@ function SingleUserReview() {
     </tr>
   );
 }
+function SingleUserQuestions({ data, setData }) {
+  const [open, setOpen] = useState(false);
+  const ques = data;
+  function remove() {
+    console.log("remove question here");
+  }
+  return !open ? (
+    <tr onClick={() => setOpen(true)}>
+      <td>
+        <FormattedDate
+          value={ques.submitted}
+          day="numeric"
+          month="numeric"
+          year="2-digit"
+        />
+      </td>
+      <td>
+        {ques.name}
+        <span>{ques.email}</span>
+      </td>
+      <td>{ques.ques}</td>
+    </tr>
+  ) : (
+    <tr className="full">
+      <td className="label">Submitted</td>
+      <td className="data">
+        <FormattedDate
+          value={ques.submitted}
+          day="numeric"
+          month="numeric"
+          year="2-digit"
+        />
+      </td>
+      <td className="label">Name</td>
+      <td className="data">{ques.name}</td>
+      <td className="label">Email</td>
+      <td className="data">{ques.email}</td>
+      <td className="label">Mobile</td>
+      <td className="data">
+        <a href={`tel:${ques.mobile}`}>{ques.mobile}</a>
+      </td>
+      <td className="label">Question</td>
+      <td className="data">{ques.ques}</td>
+      <td className="data btns">
+        <button className="hideDetail" onClick={() => setOpen(false)}>
+          <ion-icon name="chevron-up-outline"></ion-icon>Hide Detail
+        </button>
+        <button className="remove" onClick={remove}>
+          <ion-icon name="trash-outline"></ion-icon>Remove
+        </button>
+      </td>
+    </tr>
+  );
+}
 function UserReview() {
-  //this will have 3 tabs. 1) user submitted question, 2) review, 3) report
   return (
     <div className="view">
       <h1>User Review</h1>
       <Tabs
-        page="/admin/userReview/"
-        tabs={["Review", "Questions", "report"]}
+        page="/admin/user/"
+        tabs={["Questions", "Answered Question", "Review", "report"]}
       />
       <Switch>
-        <Route path="/admin/userReview">
+        <Route path="/admin/user" exact>
+          <View
+            Element={SingleUserQuestions}
+            defaultSort={{ column: "submitted", order: "des" }}
+            id="allQuestions"
+            api="api/admin/userQuestion/filter?"
+            columns={[
+              { column: "date", sort: true, colCode: "submitted" },
+              { column: "name", sort: false, colCode: "name" },
+              { column: "question", sort: false, colCode: "ques" },
+            ]}
+          />
+        </Route>
+        <Route path="/admin/user/questions">
+          <View
+            Element={SingleUserQuestions}
+            defaultSort={{ column: "submitted", order: "des" }}
+            id="allQuestions"
+            api="api/admin/userQuestion/filter?"
+            columns={[
+              { column: "date", sort: true, colCode: "submitted" },
+              { column: "name", sort: false, colCode: "name" },
+              { column: "question", sort: false, colCode: "ques" },
+            ]}
+          />
+        </Route>
+        <Route path="/admin/user/review">
           <View
             Element={SingleUserReview}
             defaultSort={{ column: "date", order: "des" }}
@@ -866,21 +947,7 @@ function UserReview() {
             ]}
           />
         </Route>
-        <Route path="/admin/questions">
-          <View
-            Element={SingleUserReview}
-            defaultSort={{ column: "date", order: "des" }}
-            id="allPatreons"
-            api="api/admin/userReview/filter?"
-            categories={[]}
-            columns={[
-              { column: "name", sort: false, colCode: "name" },
-              { column: "date", sort: true, colCode: "date" },
-              { column: "message", sort: false, colCode: "message" },
-            ]}
-          />
-        </Route>
-        <Route path="/admin/report">
+        <Route path="/admin/user/report">
           <View
             Element={SingleUserReview}
             defaultSort={{ column: "date", order: "des" }}
@@ -912,8 +979,8 @@ function AdminPanel() {
             icon: "umbrella",
           },
           {
-            label: "User Review",
-            path: "/admin/userreview",
+            label: "User Submitions",
+            path: "/admin/user",
             icon: "people",
           },
         ]}
@@ -927,7 +994,7 @@ function AdminPanel() {
         <Route path="/admin/jamia" component={AllJamia} />
         <Route path="/admin/fatwa/:filter?" component={AllFatwa} />
         <Route path="/admin/patreons" component={Patreons} />
-        <Route path="/admin/userReview" component={UserReview} />
+        <Route path="/admin/user" component={UserReview} />
       </Switch>
     </div>
   );

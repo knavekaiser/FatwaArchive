@@ -1,11 +1,8 @@
 const { Fatwa, FatwaSubmitions } = require("../models/fatwaModel");
 const { Jamia, JamiaSubmitions } = require("../models/jamiaModel");
+const { UserQuestion } = require("../models/userSubmitionModel");
 // const { User, Session } = require("../models/userModel");
 const fetch = require("node-fetch");
-
-// fetch(
-//   "http://66.45.237.70/api.php?username=knavekaiser&password=8H43ME25&number=8801989479749&message=$text"
-// ).then((res) => console.log(res));
 
 function getLan(str) {
   return (str.match(/[a-z\s]/gi) || []).length > (str.length / 8) * 6
@@ -13,6 +10,61 @@ function getLan(str) {
     : "bn-BD";
 }
 
+// router
+//   .route("/admin/fatwa/new")
+//   .post(passport.authenticate("jwt"), (req, res) => {
+//     const { title, ques, ans } = req.body;
+//     console.log("fatwa add is called");
+//     let titleEn = "Something went wrong with translation " + Math.random(),
+//       quesEn = "Something went wrong with translation " + Math.random(),
+//       ansEn = "Something went wrong with translation " + Math.random();
+//     Promise.all([
+//       // translate.translate([title, ques, ans], "en").then((translation) => {
+//       //   [titleEn, quesEn, ansEn] = translation[0];
+//       // }),
+//     ])
+//       .then(() => {
+//         const data = {
+//           link: {
+//             "bn-BD": req.body.title.replace(/\s/g, "-"),
+//             "en-US": (req.body.titleEn || titleEn).replace(/\s/g, "-"),
+//           },
+//           topic: {
+//             "bn-BD": req.body.topic,
+//             "en-US": req.body.topicEn,
+//           },
+//           title: {
+//             "bn-BD": title,
+//             "en-US": req.body.titleEn || titleEn,
+//           },
+//           ques: {
+//             "bn-BD": ques,
+//             "en-US": req.body.quesEn || quesEn,
+//           },
+//           ans: {
+//             "bn-BD": ans,
+//             "en-US": req.body.ansEn || ansEn,
+//           },
+//         };
+//         return new FatwaSubmitions({
+//           added: new Date(),
+//           ref: req.body.ref,
+//           img: req.body.img,
+//           jamia: req.body.jamia,
+//           updated: new Date(),
+//           translation: req.body.titleEn ? "manual" : "google translate",
+//           ...data,
+//         });
+//       })
+//       .then((fatwa) => fatwa.save())
+//       .then(() => res.send("fatwa added"))
+//       .catch((err) => {
+//         console.log(err);
+//         res.status(400).json({ err });
+//       });
+//   });
+
+//----------------------------------FATWA
 router
   .route("/admin/allfatwa/filter")
   .get(passport.authenticate("jwt"), (req, res) => {
@@ -71,61 +123,6 @@ router.route("/fatwa/:id").delete(passport.authenticate("jwt"), (req, res) => {
     .then(() => res.status(200).json("Item Deleted!"))
     .catch((err) => res.status(400).json("Error: " + err));
 });
-
-// router
-//   .route("/admin/fatwa/new")
-//   .post(passport.authenticate("jwt"), (req, res) => {
-//     const { title, ques, ans } = req.body;
-//     console.log("fatwa add is called");
-//     let titleEn = "Something went wrong with translation " + Math.random(),
-//       quesEn = "Something went wrong with translation " + Math.random(),
-//       ansEn = "Something went wrong with translation " + Math.random();
-//     Promise.all([
-//       // translate.translate([title, ques, ans], "en").then((translation) => {
-//       //   [titleEn, quesEn, ansEn] = translation[0];
-//       // }),
-//     ])
-//       .then(() => {
-//         const data = {
-//           link: {
-//             "bn-BD": req.body.title.replace(/\s/g, "-"),
-//             "en-US": (req.body.titleEn || titleEn).replace(/\s/g, "-"),
-//           },
-//           topic: {
-//             "bn-BD": req.body.topic,
-//             "en-US": req.body.topicEn,
-//           },
-//           title: {
-//             "bn-BD": title,
-//             "en-US": req.body.titleEn || titleEn,
-//           },
-//           ques: {
-//             "bn-BD": ques,
-//             "en-US": req.body.quesEn || quesEn,
-//           },
-//           ans: {
-//             "bn-BD": ans,
-//             "en-US": req.body.ansEn || ansEn,
-//           },
-//         };
-//         return new FatwaSubmitions({
-//           added: new Date(),
-//           ref: req.body.ref,
-//           img: req.body.img,
-//           jamia: req.body.jamia,
-//           updated: new Date(),
-//           translation: req.body.titleEn ? "manual" : "google translate",
-//           ...data,
-//         });
-//       })
-//       .then((fatwa) => fatwa.save())
-//       .then(() => res.send("fatwa added"))
-//       .catch((err) => {
-//         console.log(err);
-//         res.status(400).json({ err });
-//       });
-//   });
-
 router
   .route("/admin/fatwaSubmitions/filter")
   .get(passport.authenticate("jwt"), (req, res) => {
@@ -230,6 +227,7 @@ router
       .catch((err) => res.status(500).json(err));
   });
 
+//----------------------------------JAMIA
 router
   .route("/admin/jamia/submitions/filter")
   .get(passport.authenticate("jwt"), (req, res) => {
@@ -315,7 +313,16 @@ router
       })
       .then((jamiaToBeAdded) => jamiaToBeAdded.save())
       .then(() => JamiaSubmitions.findByIdAndDelete(req.params._id))
-      .then(() => console.log("send confirmation message here"))
+      .then(() =>
+        fetch(
+          `http://api.greenweb.com.bd/api.php/?token=${
+            process.env.SMS_TOKEN
+          }&to=${
+            newJamia.applicantMobile
+          }&message=${"ফতোয়া আর্কাইভে আপনার আবেদন গৃহীত হয়েছে ।"}`,
+          { method: "POST" }
+        )
+      )
       .then(() => res.status(200).json("Jamia successfully accepted"))
       .catch((err) => {
         res.status(500).json("somthing went wrong " + err);
@@ -403,6 +410,28 @@ router
       .catch((err) => res.status(500).json(err));
   });
 
+//-----------------------------------USER SUBMITIONS
+router.route("/admin/userQuestion/filter").get((req, res) => {
+  const query = {};
+  req.query.answered && (query.answered = req.query.answered);
+  const sort = { column: req.query.column, order: req.query.order };
+  UserQuestion.find(query).then((questions) => {
+    if (questions.length === 0) {
+      res.json([]);
+      return;
+    }
+    const data = questions.sort((a, b) => {
+      if (a[sort.column] < b[sort.column]) {
+        return sort.order === "des" ? 1 : -1;
+      } else {
+        return sort.order === "des" ? -1 : 1;
+      }
+    });
+    res.json(data);
+  });
+});
+
+//-----------------------------------MORE
 router.route("/patreons/filter").get((req, res) => {
   res.status(500).json([{ _id: 235252, item: "make patreons stuff" }]);
 });

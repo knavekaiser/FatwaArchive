@@ -39,7 +39,6 @@
       }
     }
     &.thead {
-      border-top: 1px solid $light-border;
       top: 43px;
     }
   }
@@ -48,7 +47,6 @@
       grid-template-columns: 0.2fr 0.5fr 0.5fr 0.25fr;
     }
     &.thead {
-      border-top: 1px solid $light-border;
       top: 43px;
     }
   }
@@ -57,10 +55,16 @@
       grid-template-columns: 6rem 8rem 8rem 1fr;
     }
   }
+  #allQuestions {
+    tr {
+      grid-template-columns: 5rem 0.3fr 0.7fr;
+    }
+  }
   #allJamia .full,
   #jamiaSubmitions .full,
   #fatwaSubmitions .full,
-  #allFatwa .full {
+  #allFatwa .full,
+  #allQuestions .full {
     grid-template-columns: 0.25fr 0.8fr;
     grid-row-gap: 1rem;
     grid-column-gap: 0;
@@ -396,6 +400,7 @@
 .tabs {
   display: flex;
   position: relative;
+  border-bottom: 1px solid $light-border;
   span {
     display: none;
     position: absolute;
@@ -452,7 +457,7 @@
     position: sticky;
     top: 43px;
     background: $base-white;
-    border-top: 1px solid $light-border;
+    // border-top: 1px solid $light-border;
     border-bottom: 1px solid $light-border;
     form {
       align-items: center;

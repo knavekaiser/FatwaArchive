@@ -42,8 +42,8 @@ function SearchResult() {
           })
         ) : (
           <p className="noResult">
-            Nothing found. but soon you will be able to submit questions. Stay
-            tuned.
+            Nothing found. ask your own questions{" "}
+            <Link to="/askQuestion">here</Link>.
           </p>
         )}
       </div>

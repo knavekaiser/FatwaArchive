@@ -8,6 +8,7 @@
   .view {
     #profileInfo {
       padding: 1rem;
+      width: 50rem;
       display: grid;
       grid-template-columns: 0.25fr 0.75fr;
       grid-row-gap: 1rem;
@@ -167,6 +168,8 @@
     }
     .addFatwa {
       padding: 2rem;
+      padding-top: 0.5rem;
+      padding-left: 0.5rem;
     }
     #fatwaSubmitions {
       tr {
@@ -228,6 +231,21 @@
               right: 0;
             }
           }
+          .data {
+            a {
+              position: relative;
+              ion-icon {
+                display: none;
+                padding-left: 0.25rem;
+                position: absolute;
+              }
+              &:hover {
+                ion-icon {
+                  display: inline-block;
+                }
+              }
+            }
+          }
           .btns {
             width: min-content;
             grid-column: 2;
@@ -254,7 +272,9 @@
     }
   }
 }
-
+ion-icon[name="trash-outline"] {
+  color: red !important;
+}
 @media only screen and (max-width: 1080px) {
   .jamiaProfile {
     grid-template-columns: 64px 1fr;
@@ -326,6 +346,7 @@
       #profileInfo {
         grid-template-columns: 1fr;
         grid-gap: 0.5rem;
+        width: auto;
         .label {
           white-space: nowrap;
           padding-right: 0.5rem;

@@ -8,9 +8,15 @@ import FourOFour from "./components/FourOFour";
 import SearchResult from "./components/SearchResult";
 import Fatwa from "./components/Fatwa";
 import About from "./components/About";
-import { JamiaLogin, JamiaRegister, AdminLogin } from "./components/Forms";
+import {
+  JamiaLogin,
+  JamiaRegister,
+  AdminLogin,
+  PassRecovery,
+} from "./components/Forms";
 import AdminPanel from "./components/AdminPanel";
 import JamiaProfile from "./components/JamiaProfile";
+import UserQuestion from "./components/UserSubmitions";
 import { SiteContext } from "./Context";
 import Enlish from "./language/en-US.json";
 import Bangali from "./language/bn-BD.json";
@@ -64,9 +70,7 @@ function App() {
   useEffect(setLan, []);
   useEffect(seeIfLoggedIn, []);
   const [messages, setMessages] = useState(null);
-  useEffect(() => {
-    setMessages(locale === "bn-BD" ? Bangali : Enlish);
-  }, [locale]);
+  useEffect(() => setMessages(locale === "bn-BD" ? Bangali : Enlish), [locale]);
   return (
     <IntlProvider locale={locale} messages={messages} onError={() => 1}>
       <div className="App">
@@ -77,8 +81,10 @@ function App() {
           <Route path="/fatwa/:id" component={Fatwa} />
           <Route path="/about" component={About} />
           <Route path="/login" component={JamiaLogin} />
+          <Route path="/passwordRecovery" component={PassRecovery} />
           <Route path="/adminLogin" component={AdminLogin} />
           <Route path="/register" component={JamiaRegister} />
+          <Route path="/askQuestion" component={UserQuestion} />
           <ProtectedRoute
             path="/jamia"
             redirect="/login"
