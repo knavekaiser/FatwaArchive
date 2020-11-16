@@ -555,7 +555,11 @@ export const JamiaLogin = () => {
           />
         >
           <Link className="forgotPass" to="/passwordRecovery">
-            Forgot password
+            <FormattedMessage
+              id="form.login.password"
+              defaultMessage="Forgot password"
+            />
+            ?
           </Link>
         </PasswordInput>
         <button type="submit" disabled={loading}>

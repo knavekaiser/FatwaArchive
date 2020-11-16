@@ -13,6 +13,7 @@
   "form.login.id": "লগইন আইডি",
   "form.admin.login.id": "ইউজারনেম",
   "form.login.password": "পাসওয়ার্ড",
+  "form.login.forgotPass": "পাসওয়ার্ড ভুলে গেছেন",
   "form.login.passwordRepeat": "পাসওয়ার্ড নিশ্চিত করুন",
   "form.login.submit": "লগইন",
   "form.jamiaReg.head": "রেজিষ্ট্রেশন",

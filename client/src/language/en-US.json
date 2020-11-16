@@ -13,6 +13,7 @@
   "form.login.id": "Login Id",
   "form.admin.login.id": "Username",
   "form.login.password": "Password",
+  "form.login.forgotPass": "Forgot password",
   "form.login.passwordRepeat": "Confirm Password",
   "form.login.submit": "Login",
   "form.jamiaReg.head": "REGISTRATION",
