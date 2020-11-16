@@ -556,7 +556,7 @@ export const JamiaLogin = () => {
         >
           <Link className="forgotPass" to="/passwordRecovery">
             <FormattedMessage
-              id="form.login.password"
+              id="form.login.forgotPass"
               defaultMessage="Forgot password"
             />
             ?
