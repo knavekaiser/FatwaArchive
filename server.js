@@ -15,9 +15,10 @@ const cookieParser = require("cookie-parser");
 const path = require("path");
 const app = express();
 
+console.log(process.env);
 //---------------------------------------------- dev stuff -
 
-// require("dotenv").config();
+require("dotenv").config();
 // const morgan = require("morgan");
 // app.use(morgan("dev"));
 
