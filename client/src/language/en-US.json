@@ -31,6 +31,8 @@
   "form.jamiaReg.applicantContact": "Applicant's Mobile",
   "form.jamiaReg.warning.invalidChar": "Invalid Character!",
   "form.jamiaReg.warning.charLimit": "{number} charecters left!",
+  "form.jamiaReg.tnc": "terms & conditions",
+  "form.jamiaReg.tcAgreement": "I accept all {link}.",
   "form.jamiaReg.submit": "Register",
   "form.passRecovery.head": "Password Recovery",
   "form.passRecovery.id.dsrc": "Enter Jamia's login Id below.",
@@ -48,5 +50,7 @@
   "form.passRecovery.pass.input1": "New password",
   "form.passRecovery.pass.input2": "Confirm password",
   "form.passRecovery.timeout": "Timeout.",
-  "form.passRecovery.startOver": "Start over."
+  "form.passRecovery.startOver": "Start over.",
+  "form.passRecovery.success": "Password has been successfully changed, click {link} to login.",
+  "form.passRecovery.redirect": "here"
 }

@@ -263,7 +263,6 @@
               ion-icon {
                 font-size: 1.5em;
                 margin-right: 0.25rem;
-                color: orange;
               }
             }
           }
@@ -272,8 +271,17 @@
     }
   }
 }
-ion-icon[name="trash-outline"] {
-  color: red !important;
+ion-icon[name="trash-outline"],
+ion-icon[name="close-outline"],
+ion-icon[name="skull-outline"] {
+  color: red;
+}
+ion-icon[name="pencil-outline"],
+ion-icon[name="create-outline"] {
+  color: orange;
+}
+ion-icon[name="checkmark-outline"] {
+  color: $accent;
 }
 @media only screen and (max-width: 1080px) {
   .jamiaProfile {

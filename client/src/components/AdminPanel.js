@@ -8,6 +8,7 @@ import {
   ComboboxMulti,
   Combobox,
   topics,
+  Submit,
   ID,
 } from "./FormElements";
 import { DataEditForm, PasswordEditForm } from "./Forms";
@@ -17,14 +18,17 @@ import { FormattedDate, FormattedNumber } from "react-intl";
 function SingleFatwa({ data, setData }) {
   const { locale } = useContext(SiteContext);
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const fatwa = data;
   const history = useHistory();
   const editFatwa = (path) => history.push(path);
   function deleteFatwa() {
+    setLoading(true);
     fetch(`/api/fatwa/${fatwa._id}`, {
       method: "DELETE",
     })
       .then((res) => {
+        setLoading(false);
         if (res.status === 200) {
           setData((prev) => {
             return prev.filter((item) => item._id !== fatwa._id);
@@ -103,9 +107,15 @@ function SingleFatwa({ data, setData }) {
         <button onClick={() => setOpen(false)}>
           <ion-icon name="chevron-up-outline"></ion-icon> Hide Detail
         </button>
-        <button onClick={deleteFatwa}>
-          <ion-icon name="trash-outline"></ion-icon> Delete
-        </button>
+        <Submit
+          loading={loading}
+          onClick={deleteFatwa}
+          label={
+            <>
+              <ion-icon name="trash-outline"></ion-icon> Delete
+            </>
+          }
+        />
       </td>
     </tr>
   ) : (
@@ -128,6 +138,7 @@ function SingleFatwa({ data, setData }) {
 function SingleFatwaSubmition({ data, setData }) {
   const { locale, setFatwaToEdit } = useContext(SiteContext);
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const fatwa = data;
   const history = useHistory();
   const editFatwa = (path) => history.push(path);
@@ -136,9 +147,11 @@ function SingleFatwaSubmition({ data, setData }) {
     history.push("/admin/add");
   }
   function acceptFatwa() {
+    setLoading(true);
     fetch(`/api/admin/fatwaSubmitions/accept/${fatwa._id}`, { method: "POST" })
       .then((res) => {
         if (res.status === 200) {
+          setLoading(false);
           setData((prev) => {
             return prev.filter((item) => item._id !== fatwa._id);
           });
@@ -152,10 +165,12 @@ function SingleFatwaSubmition({ data, setData }) {
       });
   }
   function removeSubmition() {
+    setLoading(true);
     fetch(`/api/admin/fatwaSubmitions/remove/${fatwa._id}`, {
       method: "DELETE",
     })
       .then((res) => {
+        setLoading(false);
         if (res.status === 200) {
           setData((prev) => {
             return prev.filter((item) => item._id !== fatwa._id);
@@ -170,7 +185,7 @@ function SingleFatwaSubmition({ data, setData }) {
       });
   }
   return open ? (
-    <tr data-id={fatwa._id} className="full">
+    <tr data-id={fatwa._id} className={`full ${loading ? "loading" : ""}`}>
       <td className="label">Submitted</td>
       <td className="data">
         <FormattedDate
@@ -223,22 +238,38 @@ function SingleFatwaSubmition({ data, setData }) {
         </ul>
       </td>
       <td className="btns data">
-        <button onClick={acceptFatwa}>
-          <ion-icon name="checkmark-outline"></ion-icon> Accept
-        </button>
-        <button onClick={() => setOpen(false)}>
+        <Submit
+          loading={loading}
+          onClick={acceptFatwa}
+          label={
+            <>
+              <ion-icon name="checkmark-outline"></ion-icon> Accept
+            </>
+          }
+        />
+        <button disabled={loading} onClick={() => setOpen(false)}>
           <ion-icon name="chevron-up-outline"></ion-icon> Hide Detail
         </button>
-        <button onClick={editFatwaSubmition}>
+        <button disabled={loading} onClick={editFatwaSubmition}>
           <ion-icon name="pencil-outline"></ion-icon> Edit
         </button>
-        <button onClick={removeSubmition}>
-          <ion-icon name="trash-outline"></ion-icon> Delete
-        </button>
+        <Submit
+          loading={loading}
+          onClick={removeSubmition}
+          label={
+            <>
+              <ion-icon name="trash-outline"></ion-icon> Delete
+            </>
+          }
+        />
       </td>
     </tr>
   ) : (
-    <tr data-id={fatwa._id} onClick={() => setOpen(true)}>
+    <tr
+      className={loading ? "loading" : ""}
+      data-id={fatwa._id}
+      onClick={() => setOpen(true)}
+    >
       <td>
         <FormattedDate
           value={new Date(fatwa.submitted)}
@@ -453,27 +484,36 @@ function SingleJamiaSubmition({ data, setData }) {
   const jamia = data;
   const { locale } = useContext(SiteContext);
   const [showFull, setShowFull] = useState(false);
-  function accept(_id) {
-    fetch(`/api/admin/jamia/accept/${_id}`, {
+  const [loading, setLoading] = useState(false);
+  function accept() {
+    setLoading(true);
+    fetch(`/api/admin/jamia/accept`, {
       method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ _id: jamia._id }),
     })
       .then((res) => {
+        setLoading(false);
         if (res.status === 200) {
           setData((prev) => {
-            return prev.filter((submitions) => submitions._id !== _id);
+            return prev.filter((submitions) => submitions._id !== jamia._id);
           });
         }
       })
       .catch((err) => console.log(err));
   }
-  function reject(_id) {
-    fetch(`/api/admin/jamia/reject/${_id}`, {
+  function reject() {
+    setLoading(true);
+    fetch(`/api/admin/jamia/reject`, {
       method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ _id: jamia._id }),
     })
       .then((res) => {
+        setLoading(false);
         if (res.status === 200) {
           setData((prev) => {
-            return prev.filter((submitions) => submitions._id !== _id);
+            return prev.filter((submitions) => submitions._id !== jamia._id);
           });
         }
       })
@@ -499,10 +539,7 @@ function SingleJamiaSubmition({ data, setData }) {
       </td>
     </tr>
   ) : (
-    <tr
-      className="full"
-      onClick={() => (showFull ? setShowFull(false) : setShowFull(true))}
-    >
+    <tr className="full">
       <td className="label">Submitted</td>
       <td className="data">
         <FormattedDate
@@ -535,12 +572,24 @@ function SingleJamiaSubmition({ data, setData }) {
         </a>
       </td>
       <td className="data btns">
-        <button className="accept" onClick={() => accept(jamia._id)}>
-          <ion-icon name="checkmark-outline"></ion-icon>Accept
-        </button>
-        <button className="reject" onClick={() => reject(jamia._id)}>
-          <ion-icon name="close-outline"></ion-icon>Reject
-        </button>
+        <Submit
+          loading={loading}
+          onClick={accept}
+          label={
+            <>
+              <ion-icon name="checkmark-outline"></ion-icon> Accept
+            </>
+          }
+        />
+        <Submit
+          loading={loading}
+          onClick={reject}
+          label={
+            <>
+              <ion-icon name="close-outline"></ion-icon> Reject
+            </>
+          }
+        />
       </td>
     </tr>
   );
@@ -548,14 +597,17 @@ function SingleJamiaSubmition({ data, setData }) {
 function SingleJamia({ data, setData }) {
   const jamia = data;
   const { locale } = useContext(SiteContext);
+  const [loading, setLoading] = useState(false);
   const [showFull, setShowFull] = useState(false);
   function ghost(_id) {
     console.log(_id);
   }
   function remove() {
     if (window.confirm("You want to delete this jamia")) {
-      fetch(`/api/admin/jamia/${jamia._id}`, {
+      fetch(`/api/admin/jamia/`, {
         method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ _id: jamia._id }),
       })
         .then((res) => {
           if (res.status === 200) {
@@ -732,15 +784,27 @@ function SingleJamia({ data, setData }) {
         />
       </td>
       <td className="data btns">
-        <button className="ghost" onClick={() => ghost(jamia._id)}>
-          <ion-icon name="skull-outline"></ion-icon>Ghost
-        </button>
+        <Submit
+          loading={loading}
+          onClick={ghost}
+          label={
+            <>
+              <ion-icon name="skull-outline"></ion-icon> Ghost
+            </>
+          }
+        />
         <button className="hideDetail" onClick={() => setShowFull(false)}>
           <ion-icon name="chevron-up-outline"></ion-icon>Hide Detail
         </button>
-        <button className="remove" onClick={remove}>
-          <ion-icon name="trash-outline"></ion-icon>Remove
-        </button>
+        <Submit
+          loading={loading}
+          onClick={remove}
+          label={
+            <>
+              <ion-icon name="trash-outline"></ion-icon> Remove
+            </>
+          }
+        />
       </td>
     </tr>
   );

@@ -253,12 +253,15 @@ router.route("/passRecovery").put((req, res) => {
           });
         })
         .then((newToken) => newToken.save())
-        .then(() =>
-          fetch(
-            `http://api.greenweb.com.bd/api.php/?token=${process.env.SMS_TOKEN}&to=${jamia.applicant.mobile}&message=fatwa archive password reset code ${code}`,
+        .then(() => {
+          const message = encodeURI(
+            `Hello,\nYour password reset code is ${code}. \nFatwa Archive.`
+          );
+          return fetch(
+            `http://api.greenweb.com.bd/api.php/?token=${process.env.SMS_TOKEN}&to=${jamia.applicant.mobile}&message=${message}`,
             { method: "POST" }
-          )
-        )
+          );
+        })
         .then(() => {
           res.json("code sent");
         })

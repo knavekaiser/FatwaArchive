@@ -48,7 +48,8 @@
       .forgotPass {
         position: absolute;
         text-decoration: underline;
-        bottom: -2.5rem;
+        right: 0;
+        bottom: -1.5rem;
         font-size: 0.9rem;
         color: $light-text;
       }
@@ -374,6 +375,9 @@ form {
     button[type="submit"] {
       margin: auto;
       margin-right: 0;
+      &.loading {
+        color: transparent;
+      }
     }
   }
   button {
@@ -399,16 +403,6 @@ form {
       background: $light-hover;
       pointer-events: none;
     }
-    .loading {
-      z-index: -1;
-      height: 120%;
-      width: 1rem;
-      background: $accent;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      animation: loading 1s ease-in-out infinite;
-    }
     position: relative;
     overflow: hidden;
     z-index: 1;
@@ -432,20 +426,71 @@ form {
     width: 100%;
   }
 }
-@keyframes loading {
-  0% {
-    transform: translate(calc(-250% - 1rem), -50%) rotate(10deg);
-  }
-  100% {
-    transform: translate(250%, -50%) rotate(10deg);
-  }
-}
 @keyframes validatingId {
   0% {
     transform: rotate(0);
   }
   100% {
     transform: rotate(360deg);
+  }
+}
+.spinner {
+  display: inline-block;
+  position: absolute;
+  min-width: 2rem;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  div {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 0.8em;
+    height: 0.8em;
+    border-radius: 50%;
+    background: $light-text;
+    animation-timing-function: cubic-bezier(0, 1, 1, 0);
+    &:nth-child(1) {
+      left: calc(50% - 1.25em);
+      animation: lds-ellipsis1 0.6s infinite;
+    }
+    &:nth-child(2) {
+      left: calc(50%);
+      animation: lds-ellipsis2 0.6s infinite;
+    }
+    &:nth-child(3) {
+      left: calc(50% + 1.25em);
+      animation: lds-ellipsis2 0.6s infinite;
+    }
+    &:nth-child(4) {
+      left: calc(50% + 1.25em);
+      animation: lds-ellipsis3 0.6s infinite;
+    }
+  }
+}
+@keyframes lds-ellipsis1 {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+@keyframes lds-ellipsis3 {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0);
+  }
+}
+@keyframes lds-ellipsis2 {
+  0% {
+    transform: translate(calc(-50% - 1.25em), -50%);
+  }
+  100% {
+    transform: translate(-50%, -50%);
   }
 }
 

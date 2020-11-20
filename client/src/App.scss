@@ -117,3 +117,14 @@ input::-webkit-inner-spin-button {
     }
   }
 }
+
+#portal {
+  z-index: 100;
+  top: 0;
+  left: 0;
+  position: fixed;
+  height: 100%;
+  width: 100%;
+  display: grid;
+  place-items: center;
+}

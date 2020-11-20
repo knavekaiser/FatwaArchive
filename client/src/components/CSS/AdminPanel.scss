@@ -53,6 +53,9 @@
   #fatwaSubmitions {
     tr {
       grid-template-columns: 6rem 8rem 8rem 1fr;
+      &.loading {
+        // animation: loadingColumn2 1.25s linear alternate infinite;
+      }
     }
   }
   #allQuestions {
@@ -68,6 +71,7 @@
     grid-template-columns: 0.25fr 0.8fr;
     grid-row-gap: 1rem;
     grid-column-gap: 0;
+    position: relative;
     .label {
       font-size: 0.8rem;
       color: $light-text;
@@ -193,6 +197,17 @@
       grid-gap: 0.5rem;
       flex-wrap: wrap;
       button {
+        position: relative;
+        &.loading {
+          cursor: default;
+          color: transparent;
+          ion-icon {
+            color: transparent;
+          }
+          .spinner {
+            font-size: 0.6rem;
+          }
+        }
         cursor: pointer;
         text-transform: uppercase;
         padding: 0.25rem 0.5rem;
@@ -203,19 +218,6 @@
         ion-icon {
           font-size: 1.5em;
           margin-right: 0.25rem;
-          color: $accent;
-        }
-        &.reject,
-        &.remove {
-          ion-icon {
-            color: red;
-          }
-        }
-        &.ghost,
-        &.hideDetail {
-          ion-icon {
-            color: orange;
-          }
         }
       }
     }
@@ -226,13 +228,6 @@
   #fatwaSubmitions .full {
     .label {
       align-self: flex-start;
-    }
-    .btns {
-      button {
-        ion-icon {
-          color: orange;
-        }
-      }
     }
   }
 }
@@ -752,5 +747,30 @@
   }
   100% {
     background: $base-white;
+  }
+}
+@keyframes gradient {
+  0% {
+    background-position: 0% 24%;
+  }
+  50% {
+    background-position: 100% 77%;
+  }
+  100% {
+    background-position: 0% 24%;
+  }
+}
+@keyframes loadingColumn2 {
+  0% {
+    background: rgba(255, 161, 0, 0.08);
+    opacity: 1;
+  }
+  50% {
+    background: rgba(255, 161, 0, 0.08);
+    opacity: 0.5;
+  }
+  100% {
+    background: rgba(255, 161, 0, 0.08);
+    opacity: 1;
   }
 }

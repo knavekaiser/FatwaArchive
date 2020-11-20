@@ -269,12 +269,13 @@ router
       .catch((err) => res.status(400).json(err));
   });
 router
-  .route("/admin/jamia/accept/:_id")
+  .route("/admin/jamia/accept")
   .post(passport.authenticate("jwt"), (req, res) => {
+    console.log(req.body);
     const name = {};
     const primeMufti = {};
     let newJamia = {};
-    JamiaSubmitions.findById(req.params._id)
+    JamiaSubmitions.findById(req.body._id)
       .then((jamia) => {
         newJamia = jamia;
         return Promise.all([
@@ -312,17 +313,14 @@ router
         });
       })
       .then((jamiaToBeAdded) => jamiaToBeAdded.save())
-      .then(() => JamiaSubmitions.findByIdAndDelete(req.params._id))
-      .then(() =>
-        fetch(
-          `http://api.greenweb.com.bd/api.php/?token=${
-            process.env.SMS_TOKEN
-          }&to=${
-            newJamia.applicantMobile
-          }&message=${"ফতোয়া আর্কাইভে আপনার আবেদন গৃহীত হয়েছে ।"}`,
+      .then(() => JamiaSubmitions.findByIdAndDelete(req.body._id))
+      .then(() => {
+        const message = encodeURI(`আপনার আবেদন গৃহীত হয়েছে । ফতোয়া আর্কাইভ`);
+        return fetch(
+          `http://api.greenweb.com.bd/api.php/?token=${process.env.SMS_TOKEN}&to=${newJamia.applicantMobile}&message=${message}`,
           { method: "POST" }
-        )
-      )
+        );
+      })
       .then(() => res.status(200).json("Jamia successfully accepted"))
       .catch((err) => {
         res.status(500).json("somthing went wrong " + err);
@@ -364,9 +362,9 @@ router
       .catch((err) => res.status(400).json(err));
   });
 router
-  .route("/admin/jamia/reject/:_id")
+  .route("/admin/jamia/reject")
   .delete(passport.authenticate("jwt"), (req, res) => {
-    JamiaSubmitions.findByIdAndDelete(req.params._id)
+    JamiaSubmitions.findByIdAndDelete(req.body._id)
       .then(() => res.status(200).json("Jamia Submition deleted!"))
       .catch((err) => {
         res.json(err);
@@ -403,10 +401,10 @@ router
     }
   });
 router
-  .route("/admin/jamia/:_id")
+  .route("/admin/jamia")
   .delete(passport.authenticate("jwt"), (req, res) => {
-    Jamia.findByIdAndDelete(req.params._id)
-      .then(() => res.json("jamai successfully deleted"))
+    Jamia.findByIdAndDelete(req.body._id)
+      .then(() => res.json("jamia successfully deleted"))
       .catch((err) => res.status(500).json(err));
   });
 

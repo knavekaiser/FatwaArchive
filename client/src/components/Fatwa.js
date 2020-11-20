@@ -3,6 +3,7 @@ import { Link, useHistory } from "react-router-dom";
 import { SiteContext } from "../Context";
 import "./CSS/Fatwa.min.css";
 import { FormattedNumber } from "react-intl";
+import Modal from "./Modals";
 import { Helmet } from "react-helmet";
 
 function Loading() {
@@ -20,6 +21,7 @@ function Fatwa({ match }) {
   const history = useHistory();
   const [loading, setLoading] = useState(true);
   const [fatwa, setFatwa] = useState({});
+  const [report, setReport] = useState(true);
   const fixUrlOnLocaleChange = () =>
     fatwa.link && history.push(`/fatwa/${fatwa.link[locale]}`);
   useEffect(fixUrlOnLocaleChange, [locale]);
@@ -144,6 +146,11 @@ function Fatwa({ match }) {
         </>
       ) : (
         <>Fatwa did not found.</>
+      )}
+      {report && (
+        <Modal open={true}>
+          <h2>this is a modal</h2>
+        </Modal>
       )}
     </div>
   );

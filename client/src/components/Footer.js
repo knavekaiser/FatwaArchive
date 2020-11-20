@@ -11,6 +11,7 @@ function Footer() {
       <ul>
         <li>
           <Link to="/about">About</Link>
+          <Link to="/askQuestion">Ask Question</Link>
         </li>
         {user === null && (
           <li>

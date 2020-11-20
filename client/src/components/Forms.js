@@ -11,6 +11,7 @@ import {
   MultipleInput,
   topics,
   PasswordInput,
+  Submit,
   $,
 } from "./FormElements";
 import { FormattedMessage, FormattedNumber } from "react-intl";
@@ -43,14 +44,6 @@ const refInputSura = [
     { id: "aayat", type: "number", label: { en: "Aayat", bn: "আয়াত" } },
   ],
 ];
-// <section>
-// <div className="label login">
-// <FormattedMessage
-// id="form.jamiaReg.label.loginDetail"
-// defaultMessage="LOGIN DETAIL"
-// />
-// </div>
-// </section>
 
 function JamiaDetail() {
   return (
@@ -389,9 +382,7 @@ export const JamiaRegister = () => {
     console.log(data);
     const options = {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     };
     setLoading(true);
@@ -435,18 +426,20 @@ export const JamiaRegister = () => {
         {step === 3 && <ApplicantDetail />}
         {step === 3 && (
           <Checkbox required={true}>
-            {locale === "en-US" && (
-              <>
-                I accept all{" "}
-                <Link to="/terms&conditions">Terms and conditions.</Link>
-              </>
-            )}
-            {locale === "bn-BD" && (
-              <>
-                আমি ফাতোয়া আর্কাইভের সকল{" "}
-                <Link to="/terms&conditions">শর্ত সমূহ</Link> মেনে নিলাম ।
-              </>
-            )}
+            <FormattedMessage
+              id="form.jamiaReg.tcAgreement"
+              defaultMessage="I accept all terms & conditions."
+              values={{
+                link: (
+                  <a href="/terms&conditions">
+                    <FormattedMessage
+                      id="form.jamiaReg.tnc"
+                      defaultMessage="terms & conditions"
+                    />
+                  </a>
+                ),
+              }}
+            />
           </Checkbox>
         )}
         {(step === 2 || step === 3) && (
@@ -562,10 +555,12 @@ export const JamiaLogin = () => {
             ?
           </Link>
         </PasswordInput>
-        <button type="submit" disabled={loading}>
-          <FormattedMessage id="form.login.submit" defaultMessage="Login" />
-          {loading && <span className="loading"></span>}
-        </button>
+        <Submit
+          loading={loading}
+          label={
+            <FormattedMessage id="form.login.submit" defaultMessage="Login" />
+          }
+        />
       </form>
     </div>
   );
@@ -878,8 +873,20 @@ export const PassRecovery = () => {
         )}
         {step === "success" && (
           <p>
-            Password has been successfully changed. Click{" "}
-            <Link to="/login">here</Link> to login.
+            <FormattedMessage
+              id="form.passRecovery.success"
+              values={{
+                link: (
+                  <a href="/login">
+                    <FormattedMessage
+                      id="form.passRecovery.redirect"
+                      defaultMessage="here"
+                    />
+                  </a>
+                ),
+              }}
+              defaultMessage="Password has been successfully changed."
+            />
           </p>
         )}
         {step !== "success" && (
@@ -963,10 +970,12 @@ export const AdminLogin = () => {
             defaultMessage="Password"
           />
         />
-        <button type="submit" disabled={loading}>
-          <FormattedMessage id="form.login.submit" defaultMessage="Login" />
-          {loading && <span className="loading"></span>}
-        </button>
+        <Submit
+          loading={loading}
+          label={
+            <FormattedMessage id="form.login.submit" defaultMessage="Login" />
+          }
+        />
       </form>
     </div>
   );

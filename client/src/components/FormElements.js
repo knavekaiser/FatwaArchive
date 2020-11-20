@@ -585,3 +585,24 @@ export const Checkbox = ({
     </section>
   );
 };
+
+export const Submit = ({ label, children, loading, onClick }) => {
+  return (
+    <button
+      className={loading ? "loading" : ""}
+      type="submit"
+      disabled={loading}
+      onClick={onClick}
+    >
+      {loading && (
+        <div class="spinner">
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+      )}
+      {label}
+    </button>
+  );
+};
