@@ -6,9 +6,9 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "install-client": "cd client && npm install",
+    "i-client": "cd ./client && npm i",
     "build": "cd client && npm run build",
-    "heroku-postbuild": "npm run install-client && npm run build"
+    "heroku-postbuild": "npm run i-client && npm run build"
   },
   "repository": {
     "type": "git",
