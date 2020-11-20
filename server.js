@@ -22,12 +22,12 @@ require("dotenv").config();
 // app.use(morgan("dev"));
 
 //----------------------------------------------------------
+console.log(process.env.GOOGLE_API_CREDENTIAL);
 
 const PORT = process.env.PORT || 8080;
 const URI = process.env.ATLAS_URI;
 
 const CREDENTIALS = JSON.parse(process.env.GOOGLE_API_CREDENTIAL);
-console.log(JSON.parse(process.env.GOOGLE_API_CREDENTIAL));
 global.translate = new Translate({
   credentials: CREDENTIALS,
   project_id: CREDENTIALS.project_id,
