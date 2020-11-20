@@ -1,4 +1,8 @@
 ---
 deployment:
   tasks:
-    - npm run install-client && npm run build
+    - cd client
+    - npm install
+    - npm run build
+    - cd ../
+    - npm start
