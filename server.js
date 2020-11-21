@@ -24,7 +24,7 @@ console.log(process.env);
 
 //----------------------------------------------------------
 
-const PORT = process.env.REMOTE_PORT || process.env.PORT || 8080;
+const PORT = process.env.PORT || 8080;
 const URI = process.env.ATLAS_URI;
 
 const CREDENTIALS = process.env.GOOGLE_API_CREDENTIAL;
@@ -57,4 +57,4 @@ app.get("*", (req, res) => {
   return res.sendFile(path.join(__dirname, "/client/build/index.html"));
 });
 
-app.listen(PORT, () => console.log("server just ran at " + PORT));
+app.listen(() => console.log("server just ran at " + PORT));
