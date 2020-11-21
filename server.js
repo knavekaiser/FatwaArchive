@@ -27,8 +27,6 @@ console.log(process.env);
 const PORT = process.env.PORT || 8080;
 const URI = process.env.ATLAS_URI;
 
-JSON.parse(process.env.GOOGLE_API_CREDENTIAL);
-
 const CREDENTIALS = process.env.GOOGLE_API_CREDENTIAL;
 global.translate = new Translate({
   credentials: CREDENTIALS,
