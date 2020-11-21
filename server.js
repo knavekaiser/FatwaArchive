@@ -24,7 +24,7 @@ console.log(process.env);
 
 //----------------------------------------------------------
 
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || process.env.SERVER_PORT || 8080;
 const URI = process.env.ATLAS_URI;
 
 const CREDENTIALS = process.env.GOOGLE_API_CREDENTIAL;
