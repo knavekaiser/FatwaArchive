@@ -18,6 +18,7 @@ const app = express();
 //---------------------------------------------- dev stuff -
 
 require("dotenv").config();
+console.log(process.env);
 // const morgan = require("morgan");
 // app.use(morgan("dev"));
 
@@ -25,8 +26,6 @@ require("dotenv").config();
 
 const PORT = process.env.PORT || 8080;
 const URI = process.env.ATLAS_URI;
-
-console.log(process.env);
 
 JSON.parse(process.env.GOOGLE_API_CREDENTIAL);
 
