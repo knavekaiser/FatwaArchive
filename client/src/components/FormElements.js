@@ -595,7 +595,7 @@ export const Submit = ({ label, children, loading, onClick }) => {
       onClick={onClick}
     >
       {loading && (
-        <div class="spinner">
+        <div className="spinner">
           <div></div>
           <div></div>
           <div></div>

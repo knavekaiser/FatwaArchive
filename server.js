@@ -17,14 +17,15 @@ const app = express();
 
 //---------------------------------------------- dev stuff -
 
-require("dotenv").config();
+// require("dotenv").config();
 console.log(process.env);
+console.log(process.env.GOOGLE_API_CREDENTIAL);
 // const morgan = require("morgan");
 // app.use(morgan("dev"));
 
 //----------------------------------------------------------
 
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 8877;
 const URI = process.env.ATLAS_URI;
 
 const CREDENTIALS = process.env.GOOGLE_API_CREDENTIAL;
@@ -57,4 +58,4 @@ app.get("*", (req, res) => {
   return res.sendFile(path.join(__dirname, "/client/build/index.html"));
 });
 
-app.listen(() => console.log("server just ran at " + PORT));
+app.listen(PORT, () => console.log("server just ran at " + PORT));

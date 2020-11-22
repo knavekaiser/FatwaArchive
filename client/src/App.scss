@@ -6,36 +6,67 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.App {
+#root,
+#portal {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   letter-spacing: 0.05em;
   font-family: "Roboto", sans-serif, "SolaimanLipi";
-  // text-align: center;
+  color: $font-color;
+}
+input {
+  color: $font-color;
+  font-family: "Roboto", sans-serif, "SolaimanLipi";
+}
+a {
+  text-decoration: inherit;
+  color: inherit;
+}
+li {
+  list-style: none;
+}
+textarea {
+  font-family: "Roboto", sans-serif, "SolaimanLipi";
+  resize: none;
+}
+button {
+  font-family: "Roboto", sans-serif, "SolaimanLipi";
+}
+.App {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   background-color: $base-white;
-  color: $font-color;
-  input {
-    color: $font-color;
-    font-family: "Roboto", sans-serif, "SolaimanLipi";
+}
+
+#portal {
+  z-index: 100;
+  top: 0;
+  left: 0;
+  position: fixed;
+  height: 100%;
+  width: 100%;
+  display: grid;
+  grid-template-areas: "main";
+  place-items: center;
+  pointer-events: none;
+  .modalBackdrop {
+    pointer-events: all;
+    height: 100%;
+    width: 100%;
+    grid-area: main;
+    background: rgba(0, 0, 0, 0.2);
   }
-  a {
-    text-decoration: inherit;
-    color: inherit;
-  }
-  li {
-    list-style: none;
-  }
-  textarea {
-    font-family: "Roboto", sans-serif, "SolaimanLipi";
-    resize: none;
-  }
-  button {
-    font-family: "Roboto", sans-serif, "SolaimanLipi";
+  .modal {
+    grid-area: main;
   }
 }
+.modal {
+  * {
+    pointer-events: all;
+  }
+}
+
 .main {
   flex: 1;
 }
@@ -116,15 +147,4 @@ input::-webkit-inner-spin-button {
       }
     }
   }
-}
-
-#portal {
-  z-index: 100;
-  top: 0;
-  left: 0;
-  position: fixed;
-  height: 100%;
-  width: 100%;
-  display: grid;
-  place-items: center;
 }

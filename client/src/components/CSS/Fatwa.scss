@@ -114,6 +114,8 @@
     border-radius: 5px;
     padding: 5px 10px;
     color: $light-text;
+    background: $base-white;
+    cursor: pointer;
     &:hover {
       background: $light-hover;
     }

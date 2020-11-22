@@ -15,6 +15,7 @@ import {
   $,
 } from "./FormElements";
 import { FormattedMessage, FormattedNumber } from "react-intl";
+import { Toast } from "./Modals";
 
 const SS = {
   set: (key, value) => sessionStorage.setItem(key, value),
@@ -1422,6 +1423,74 @@ export const PasswordEditForm = ({ api }) => {
           </button>
         </>
       )}
+    </form>
+  );
+};
+
+export const Report = ({ fatwa, setReport }) => {
+  const [loading, setLoading] = useState(false);
+  const jamia = fatwa.jamia;
+  function submit(e) {
+    e.preventDefault();
+    setLoading(true);
+    fetch("/api/userReport", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fatwa: fatwa._id,
+        user: {
+          name: $("#name input").value,
+          email: $("#email input").value,
+          mobile: $("#mobile input").value,
+        },
+        message: {
+          subject: $("#subject input").value,
+          body: $("#message textarea").value,
+        },
+      }),
+    }).then((res) => {
+      setLoading(false);
+      if (res.status === 200) {
+        setReport(false);
+      } else {
+      }
+    });
+  }
+  return (
+    <form onSubmit={submit} className="userReport">
+      <section className="head">
+        <h2>User Report</h2>
+        <p className="ps">
+          * Your message will be sent to the Jamia or the Mufti who submitted
+          this fatwa.
+        </p>
+      </section>
+      <Input
+        label="Full name"
+        dataId="name"
+        required={true}
+        validation={/^[ঀ-৾a-zA-Z\s(),]+$/}
+        type="text"
+      />
+      <Input
+        label="Email"
+        dataId="email"
+        required={true}
+        type="text"
+        validation={/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/}
+      />
+      <Input
+        label="Mobile"
+        required={true}
+        dataId="mobile"
+        type="text"
+        defaultValue="+8801"
+        warning="+8801..."
+        validation={/^\+\d{0,13}$/}
+      />
+      <Input label="Subject" dataId="subject" required={true} />
+      <Textarea label="Message" dataId="message" required={true} />
+      <Submit loading={loading} label="Submit" />
     </form>
   );
 };

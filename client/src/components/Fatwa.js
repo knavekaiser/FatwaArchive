@@ -3,8 +3,9 @@ import { Link, useHistory } from "react-router-dom";
 import { SiteContext } from "../Context";
 import "./CSS/Fatwa.min.css";
 import { FormattedNumber } from "react-intl";
-import Modal from "./Modals";
+import { Modal } from "./Modals";
 import { Helmet } from "react-helmet";
+import { Report } from "./Forms";
 
 function Loading() {
   return (
@@ -137,9 +138,9 @@ function Fatwa({ match }) {
           <br />
           <br />
           <br />
-          <Link className="cla" to="/user/review">
+          <button className="cla" onClick={() => setReport(true)}>
             মতামত / অভিযোগ
-          </Link>
+          </button>
           <br />
           <br />
           <br />
@@ -147,11 +148,9 @@ function Fatwa({ match }) {
       ) : (
         <>Fatwa did not found.</>
       )}
-      {report && (
-        <Modal open={true}>
-          <h2>this is a modal</h2>
-        </Modal>
-      )}
+      <Modal open={report} setOpen={setReport}>
+        <Report fatwa={fatwa} setReport={setReport} />
+      </Modal>
     </div>
   );
 }
