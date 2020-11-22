@@ -17,7 +17,7 @@ const app = express();
 
 //---------------------------------------------- dev stuff -
 
-// require("dotenv").config();
+require("dotenv").config();
 console.log(process.env);
 console.log(process.env.GOOGLE_API_CREDENTIAL);
 // const morgan = require("morgan");
