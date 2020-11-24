@@ -26,7 +26,7 @@ require("dotenv").config();
 const PORT = process.env.PORT || 8877;
 const URI = process.env.ATLAS_URI;
 
-const CREDENTIALS = process.env.GOOGLE_API_CREDENTIAL;
+const CREDENTIALS = JSON.parse(process.env.GOOGLE_API_CREDENTIAL);
 global.translate = new Translate({
   credentials: CREDENTIALS,
   project_id: CREDENTIALS.project_id,
