@@ -51,6 +51,7 @@ function Nav({ location }) {
   const { lan, setLan, locale, setLocale, user } = useContext(SiteContext);
   useEffect(() => {
     if (
+      location.pathname.startsWith("/moblieSearch") ||
       location.pathname.startsWith("/about") ||
       location.pathname.startsWith("/jamia") ||
       location.pathname.startsWith("/admin") ||

@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { Route, Switch, Link, useHistory } from "react-router-dom";
 import { SiteContext } from "../Context";
 import { Tabs, View, Sidebar } from "./TableElements";
@@ -8,11 +8,22 @@ import {
   Combobox,
   Textarea,
   ComboboxMulti,
+  Submit,
   topics,
 } from "./FormElements";
 import "./CSS/JamiaProfile.min.css";
-import { FormattedDate, FormattedNumber } from "react-intl";
+import {
+  FormattedDate,
+  FormattedNumber,
+  FormattedTime,
+  FormattedTimeParts,
+} from "react-intl";
 import { AddFatwaForm, DataEditForm, PasswordEditForm } from "./Forms";
+
+const encodeURL = (obj) =>
+  Object.keys(obj)
+    .map((key) => `${key}=${obj[key]}`)
+    .join("&");
 
 function Profile() {
   const { user } = useContext(SiteContext);
@@ -24,7 +35,7 @@ function Profile() {
         <li className="label">Joined</li>
         <li className="data">
           <FormattedDate
-            value={new Date(user.joined)}
+            value={user.joined}
             day="numeric"
             month="numeric"
             year="2-digit"
@@ -191,7 +202,7 @@ function SingleFatwa({ data, setData }) {
       <td className="label">Added</td>
       <td className="data">
         <FormattedDate
-          value={new Date(fatwa.added)}
+          value={fatwa.added}
           day="numeric"
           month="numeric"
           year="numeric"
@@ -223,7 +234,7 @@ function SingleFatwa({ data, setData }) {
       <td>{fatwa.topic[locale]}</td>
       <td>
         <FormattedDate
-          value={new Date(fatwa.added)}
+          value={fatwa.added}
           day="numeric"
           month="numeric"
           year="numeric"
@@ -266,7 +277,7 @@ function JamiaSingleFatwaSubmition({ data, setData }) {
       <td className="label">Submitted</td>
       <td className="data">
         <FormattedDate
-          value={new Date(fatwa.submitted)}
+          value={fatwa.submitted}
           day="numeric"
           month="numeric"
           year="numeric"
@@ -330,7 +341,7 @@ function JamiaSingleFatwaSubmition({ data, setData }) {
     <tr data-id={fatwa._id} onClick={() => setOpen(true)}>
       <td>
         <FormattedDate
-          value={new Date(fatwa.submitted)}
+          value={fatwa.submitted}
           day="numeric"
           month="numeric"
           year="numeric"
@@ -382,10 +393,12 @@ function JamiaAllFatwa() {
                 name: "translation",
                 input: (
                   <Combobox
-                    id={ID(8)}
                     maxHeight={500}
-                    label="jamia"
-                    data={["Generated", "Manual"]}
+                    label="by"
+                    options={[
+                      { label: "Generated", value: "generated" },
+                      { label: "Manual", value: "manual" },
+                    ]}
                     required={true}
                   />
                 ),
@@ -498,6 +511,323 @@ function JamiaAllFatwa() {
   );
 }
 
+function UserSubmitions() {
+  return (
+    <div className="view">
+      <h1 className="viewTitle">User Submitions</h1>
+      <Tabs
+        page="/jamia/userSubmitions/"
+        tabs={["Question Feed", "Our Questions", "Reviews", "Reports"]}
+      />
+      <Switch>
+        <Route path="/jamia/fatwa" exact>
+          <View
+            key="jamiaAllFatwa"
+            Element={SingleFatwa}
+            id="allFatwa"
+            api="api/jamia/allFatwa/filter?"
+            categories={[
+              {
+                name: "topic",
+                input: (
+                  <ComboboxMulti
+                    id={ID(8)}
+                    maxHeight={300}
+                    label="topic"
+                    data={topics}
+                    required={true}
+                  />
+                ),
+              },
+              {
+                name: "title",
+                input: <Input label="Title" type="text" required={true} />,
+              },
+              {
+                name: "question",
+                input: <Input label="Question" type="text" required={true} />,
+              },
+              {
+                name: "answer",
+                input: <Input label="Answer" type="text" required={true} />,
+              },
+              {
+                name: "translation",
+                input: (
+                  <Combobox
+                    maxHeight={500}
+                    label="by"
+                    options={[
+                      { label: "Generated", value: "generated" },
+                      { label: "Manual", value: "manual" },
+                    ]}
+                    required={true}
+                  />
+                ),
+              },
+            ]}
+            columns={[
+              { column: "topic", sort: true, colCode: "topic" },
+              { column: "date", sort: true, colCode: "added" },
+              { column: "title", sort: false, colCode: "title" },
+              { column: "translation", sort: true, colCode: "translation" },
+            ]}
+            defaultSort={{ column: "added", order: "des" }}
+          />
+        </Route>
+        <Route path="/jamia/fatwa/live">
+          <View
+            key="jamiaAllFatwa"
+            Element={SingleFatwa}
+            id="allFatwa"
+            api="api/jamia/allFatwa/filter?"
+            categories={[
+              {
+                name: "topic",
+                input: (
+                  <ComboboxMulti
+                    id={ID(8)}
+                    maxHeight={300}
+                    label="topic"
+                    data={topics}
+                    required={true}
+                  />
+                ),
+              },
+              {
+                name: "title",
+                input: <Input label="Title" type="text" required={true} />,
+              },
+              {
+                name: "question",
+                input: <Input label="Question" type="text" required={true} />,
+              },
+              {
+                name: "answer",
+                input: <Input label="Answer" type="text" required={true} />,
+              },
+              {
+                name: "translation",
+                input: (
+                  <Combobox
+                    maxHeight={500}
+                    label="by"
+                    options={[
+                      { label: "Generated", value: "generated" },
+                      { label: "Manual", value: "manual" },
+                    ]}
+                    required={true}
+                  />
+                ),
+              },
+            ]}
+            columns={[
+              { column: "topic", sort: true, colCode: "topic" },
+              { column: "date", sort: true, colCode: "added" },
+              { column: "title", sort: false, colCode: "title" },
+              { column: "translation", sort: true, colCode: "translation" },
+            ]}
+            defaultSort={{ column: "added", order: "des" }}
+          />
+        </Route>
+        <Route path="/jamia/fatwa/submitions">
+          <View
+            key="jamiaAllFatwaSubmition"
+            Element={JamiaSingleFatwaSubmition}
+            id="fatwaSubmitions"
+            api="api/jamia/fatwaSubmitions/filter?"
+            categories={[
+              {
+                name: "topic",
+                input: (
+                  <ComboboxMulti
+                    id={ID(8)}
+                    maxHeight={300}
+                    label="topic"
+                    data={topics}
+                    required={true}
+                  />
+                ),
+              },
+              {
+                name: "title",
+                input: <Input label="Title" type="text" required={true} />,
+              },
+              {
+                name: "question",
+                input: <Input label="Question" type="text" required={true} />,
+              },
+              {
+                name: "answer",
+                input: <Input label="Answer" type="text" required={true} />,
+              },
+            ]}
+            columns={[
+              { column: "date", sort: true, colCode: "submitted" },
+              { column: "topic", sort: true, colCode: "topic" },
+              { column: "title", sort: false },
+            ]}
+            defaultSort={{ column: "submitted", order: "des" }}
+          />
+        </Route>
+      </Switch>
+    </div>
+  );
+}
+
+function SingleQuestion({ data }) {
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+  return (
+    <li
+      className={`question ${!open ? "mini" : ""}`}
+      onClick={(e) => {
+        e.stopPropagation();
+        setOpen(!open);
+      }}
+    >
+      <div className="user">
+        <p className="name">{data.name}</p>
+        {open && (
+          <p className="contact">
+            {data.mobile ? (
+              <a href={`tel:${data.mobile}`}>{data.mobile}</a>
+            ) : (
+              <a href={`email:${data.email}`}>{data.email}</a>
+            )}
+          </p>
+        )}
+        <p className="date">
+          {new Date(data.submitted).getFullYear() !==
+          new Date().getFullYear() ? (
+            <FormattedDate
+              value={data.submitted}
+              day="numeric"
+              month="long"
+              year="numeric"
+            />
+          ) : (
+            <FormattedDate value={data.submitted} day="numeric" month="long" />
+          )}
+          {" ● "}
+          <FormattedTimeParts value={data.submitted}>
+            {(parts) => (
+              <>
+                {parts[0].value}
+                {parts[1].value}
+                {parts[2].value}
+                <small>{parts[4].value.toLowerCase()}</small>
+              </>
+            )}
+          </FormattedTimeParts>
+        </p>
+      </div>
+      <p className="ques">{data.ques}</p>
+      <ul className="tags">
+        <li className="tag">{data.topic}</li>
+        <li className="tag">#2021</li>
+      </ul>
+      <div className="btns">
+        {open && (
+          <Submit
+            label={
+              <>
+                <ion-icon name="checkmark-outline"></ion-icon> Accept
+              </>
+            }
+            onClick={() => setLoading(true)}
+            loading={loading}
+          />
+        )}
+        <button className="more" onClick={() => setOpen(!open)}>
+          {open ? (
+            <>
+              <ion-icon name="chevron-up-outline"></ion-icon>
+            </>
+          ) : (
+            <>
+              <ion-icon name="chevron-down-outline"></ion-icon>
+            </>
+          )}
+        </button>
+      </div>
+    </li>
+  );
+}
+function NewQuestions() {
+  const abortController = new AbortController();
+  const signal = abortController.signal;
+  const { locale } = useContext(SiteContext);
+  const [loading, setLoading] = useState(true);
+  const [sort, setSort] = useState({ column: "submitted", order: "asc" });
+  const [filters, setFilters] = useState({});
+  const [data, setData] = useState([]);
+  function fetchData() {
+    !loading && setLoading(true);
+    const query = encodeURL(filters);
+    const sortOrder = encodeURL(sort);
+    const options = { headers: { "Accept-Language": locale }, signal: signal };
+    const url = `/api/jamia/questionFeed/filter?${query}&${sortOrder}`;
+    fetch(url, options)
+      .then((res) => res.json())
+      .then((data) => {
+        setLoading(false);
+        setData(data);
+      })
+      .catch((err) => {
+        console.log(err);
+        console.log("handle error!!");
+      });
+    return () => abortController.abort();
+  }
+  useEffect(() => {});
+  useEffect(fetchData, [sort, filters]);
+  return (
+    <>
+      <div className="filters">
+        <Combobox
+          defaultValue={0}
+          change={setSort}
+          maxHeight={200}
+          id="questionFeedSort"
+          icon="layers"
+          options={[
+            {
+              label: "New first",
+              value: { column: "submitted", order: "asc" },
+            },
+            {
+              label: "Old first",
+              value: { column: "submitted", order: "dsc" },
+            },
+          ]}
+        />
+      </div>
+      <ul className="feed">
+        {data.map((item) => (
+          <SingleQuestion key={item._id} data={item} />
+        ))}
+      </ul>
+    </>
+  );
+}
+function QuestionFeed() {
+  return (
+    <div className="view questionFeed">
+      <h1 className="viewTitle">Question feed</h1>
+      <Tabs page="/jamia/questionFeed/" tabs={["New Questions"]} />
+      <Switch>
+        <Route path="/jamia/questionFeed" exact>
+          <NewQuestions />
+        </Route>
+        <Route path="/jamia/questionFeed/newQuestions">
+          <NewQuestions />
+        </Route>
+      </Switch>
+    </div>
+  );
+}
+
 function JamiaProfile() {
   const { user, locale } = useContext(SiteContext);
   return (
@@ -505,7 +835,17 @@ function JamiaProfile() {
       <Sidebar
         views={[
           { label: "New Fatwa", path: "/jamia/add", icon: "add" },
+          {
+            label: "Question feed",
+            path: "/jamia/questionFeed",
+            icon: "chatbox-ellipses",
+          },
           { label: "Fatwa", path: "/jamia/fatwa", icon: "reader" },
+          {
+            label: "User Submitions",
+            path: "/jamia/userSubmitions",
+            icon: "people",
+          },
         ]}
       >
         <div className="profile">
@@ -524,9 +864,11 @@ function JamiaProfile() {
             </div>
           )}
         />
+        <Route path="/jamia/questionFeed" component={QuestionFeed} />
         <Route path="/jamia" exact component={JamiaAllFatwa} />
         <Route path="/jamia/fatwa" component={JamiaAllFatwa} />
         <Route path="/jamia/profile" component={Profile} />
+        <Route path="/jamia/userSubmitions" component={UserSubmitions} />
       </Switch>
     </div>
   );

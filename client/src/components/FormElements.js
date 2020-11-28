@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect } from "react";
 import { SiteContext } from "../Context";
 import TextareaAutosize from "react-textarea-autosize";
 import { FormattedMessage, FormattedNumber } from "react-intl";
+import { OutsideClick } from "./TableElements";
 
 export const topics = [
   { "bn-BD": "আকীদা", "en-US": "belief" },
@@ -55,6 +56,7 @@ export const ID = (length) => {
   return result;
 };
 export const $ = (selector) => document.querySelector(selector);
+export const $$ = (selector) => document.querySelectorAll(selector);
 export const camelize = (str) => {
   return str
     .replace(/(?:^\w|[A-Z]|\b\w)/g, function (word, index) {
@@ -89,6 +91,9 @@ export const Input = ({
     }
   }, [defaultValue]);
   const changeHandler = (e) => {
+    Array.from(e.target.parentElement.children).forEach((child) => {
+      child.classList.contains("emptyFeildWarning") && child.remove();
+    });
     if (type === "text" || type === "password") {
       const regex = validation || defaultValidation;
       if (e.target.value === "" || regex.exec(e.target.value) !== null) {
@@ -262,6 +267,9 @@ export const Textarea = ({
     setShowLimit(false);
   };
   function change(e) {
+    Array.from(e.target.parentElement.children).forEach((child) => {
+      child.classList.contains("emptyFeildWarning") && child.remove();
+    });
     const regex = validation || defaultValidation;
     if (e.target.value === "" || regex.exec(e.target.value) !== null) {
       setValue(e.target.value);
@@ -331,12 +339,12 @@ const Group = ({ id, inputs, clone, setGroupCount }) => {
         return (
           <Input
             dataId={input.id}
-            key={lan === "en" ? input.label.en : input.label.bn}
+            key={input.id}
             warning={"Letters & numbers only!"}
             defaultValue={input.value}
             required={input.clone ? false : true}
             type={input.type}
-            label={lan === "en" ? input.label.en : input.label.bn}
+            label={input.label}
             id={input.clone ? id : ""}
             onChange={input.clone && handleChange}
             disabled={input.clone ? false : input.value ? false : value === ""}
@@ -498,36 +506,25 @@ export const ComboboxMulti = ({
 };
 export const Combobox = ({
   label,
-  data,
+  icon,
+  options,
   defaultValue,
-  id,
+  change,
   maxHeight,
   required,
 }) => {
-  const [value, setValue] = useState(defaultValue || "");
+  const [value, setValue] = useState(
+    (defaultValue !== undefined && options[defaultValue].label) || ""
+  );
   const [open, setOpen] = useState(false);
-  function handleClick(e) {
-    Array.from(e.target.parentElement.children).forEach((item, i) => {
-      if (item === e.target) {
-        item.classList.add("selected");
-        setValue(data[i]);
-      } else {
-        item.classList.remove("selected");
-      }
-    });
-    setOpen(false);
-  }
-  useEffect(() => {
-    const outsideClick = (e) => {
-      !e.path.includes(document.querySelector(`#${id}`)) && setOpen(false);
-    };
-    document.addEventListener("click", outsideClick);
-    return () => {
-      document.removeEventListener("click", outsideClick);
-    };
-  }, [id]);
+  // TODO: ommit the section tag inside. make outsideclick the primary shell;
   return (
-    <section id={id} className="combobox" style={{ position: "relative" }}>
+    <OutsideClick
+      className="combobox"
+      setOpen={setOpen}
+      open={open}
+      style={{ position: "relative" }}
+    >
       <label className={`${value === "" ? "active" : ""}`}>{label}</label>
       <input
         required={required}
@@ -537,7 +534,7 @@ export const Combobox = ({
       />
       <ion-icon
         onClick={() => setOpen(!open)}
-        name="chevron-down-outline"
+        name={`${icon ? icon : "chevron-down"}-outline`}
       ></ion-icon>
       <ul
         style={{
@@ -549,13 +546,21 @@ export const Combobox = ({
         }}
         className="options"
       >
-        {data.map((option) => (
-          <li key={option} onClick={handleClick} className="option">
-            {option}
+        {options.map((option) => (
+          <li
+            key={option.label}
+            onClick={() => {
+              setValue(option.label);
+              change && change(option.value);
+              setOpen(false);
+            }}
+            className="option"
+          >
+            {option.label}
           </li>
         ))}
       </ul>
-    </section>
+    </OutsideClick>
   );
 };
 export const Checkbox = ({
@@ -586,7 +591,7 @@ export const Checkbox = ({
   );
 };
 
-export const Submit = ({ label, children, loading, onClick }) => {
+export const Submit = ({ label, loading, onClick }) => {
   return (
     <button
       className={loading ? "loading" : ""}

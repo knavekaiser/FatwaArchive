@@ -22,7 +22,7 @@ function Fatwa({ match }) {
   const history = useHistory();
   const [loading, setLoading] = useState(true);
   const [fatwa, setFatwa] = useState({});
-  const [report, setReport] = useState(true);
+  const [report, setReport] = useState(false);
   const fixUrlOnLocaleChange = () =>
     fatwa.link && history.push(`/fatwa/${fatwa.link[locale]}`);
   useEffect(fixUrlOnLocaleChange, [locale]);
@@ -139,7 +139,7 @@ function Fatwa({ match }) {
           <br />
           <br />
           <button className="cla" onClick={() => setReport(true)}>
-            মতামত / অভিযোগ
+            অভিযোগ
           </button>
           <br />
           <br />

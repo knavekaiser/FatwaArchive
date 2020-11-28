@@ -910,9 +910,25 @@ function SingleUserReview() {
 }
 function SingleUserQuestions({ data, setData }) {
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const ques = data;
   function remove() {
-    console.log("remove question here");
+    setLoading(true);
+    fetch("/api/admin/removeUserQuestion", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ _id: ques._id }),
+    })
+      .then((res) => {
+        setLoading(false);
+        if (res.status === 200) {
+          setData((prev) => prev.filter((item) => item._id !== ques._id));
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        alert("something went wrong!");
+      });
   }
   return !open ? (
     <tr onClick={() => setOpen(true)}>
@@ -955,7 +971,7 @@ function SingleUserQuestions({ data, setData }) {
         <button className="hideDetail" onClick={() => setOpen(false)}>
           <ion-icon name="chevron-up-outline"></ion-icon>Hide Detail
         </button>
-        <button className="remove" onClick={remove}>
+        <button disabled={loading} className="remove" onClick={remove}>
           <ion-icon name="trash-outline"></ion-icon>Remove
         </button>
       </td>
@@ -975,7 +991,7 @@ function UserReview() {
           <View
             Element={SingleUserQuestions}
             defaultSort={{ column: "submitted", order: "des" }}
-            id="allQuestions"
+            id="userSubmitions"
             api="api/admin/userQuestion/filter?"
             columns={[
               { column: "date", sort: true, colCode: "submitted" },
@@ -988,7 +1004,7 @@ function UserReview() {
           <View
             Element={SingleUserQuestions}
             defaultSort={{ column: "submitted", order: "des" }}
-            id="allQuestions"
+            id="userSubmitions"
             api="api/admin/userQuestion/filter?"
             columns={[
               { column: "date", sort: true, colCode: "submitted" },
@@ -1038,14 +1054,14 @@ function AdminPanel() {
           { label: "Jamia", path: "/admin/jamia", icon: "book" },
           { label: "Fatwa", path: "/admin/fatwa", icon: "reader" },
           {
+            label: "User Area",
+            path: "/admin/user",
+            icon: "people",
+          },
+          {
             label: "Patreons",
             path: "/admin/patreons",
             icon: "umbrella",
-          },
-          {
-            label: "User Submitions",
-            path: "/admin/user",
-            icon: "people",
           },
         ]}
       >

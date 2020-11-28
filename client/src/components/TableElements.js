@@ -292,9 +292,9 @@ export const Table = ({ id, children, columns, setSort, sort, className }) => {
   );
 };
 
-export const OutsideClick = ({ children, setOpen, open }) => {
+export const OutsideClick = ({ className, style, children, setOpen, open }) => {
   return (
-    <div>
+    <section className={className} style={style}>
       {open && (
         <div
           className="backdrop"
@@ -305,7 +305,7 @@ export const OutsideClick = ({ children, setOpen, open }) => {
         />
       )}
       {children}
-    </div>
+    </section>
   );
 };
 

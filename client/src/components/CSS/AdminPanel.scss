@@ -12,7 +12,7 @@
   #allJamia {
     // min-width: 830px;
     tr {
-      grid-template-columns: 0.3fr 0.5fr 0.25fr 75px 55px 108px;
+      grid-template-columns: 140px 0.65fr 0.35fr 78px 38px 108px;
       td,
       td span {
         overflow-x: hidden;
@@ -39,7 +39,7 @@
       }
     }
     &.thead {
-      top: 43px;
+      top: 44px;
     }
   }
   #jamiaSubmitions {
@@ -47,7 +47,7 @@
       grid-template-columns: 0.2fr 0.5fr 0.5fr 0.25fr;
     }
     &.thead {
-      top: 43px;
+      top: 44px;
     }
   }
   #fatwaSubmitions {
@@ -57,17 +57,22 @@
         // animation: loadingColumn2 1.25s linear alternate infinite;
       }
     }
+    &.thead {
+    }
   }
-  #allQuestions {
+  #userSubmitions {
     tr {
       grid-template-columns: 5rem 0.3fr 0.7fr;
+    }
+    &.thead {
+      top: 44px;
     }
   }
   #allJamia .full,
   #jamiaSubmitions .full,
   #fatwaSubmitions .full,
   #allFatwa .full,
-  #allQuestions .full {
+  #userSubmitions .full {
     grid-template-columns: 0.25fr 0.8fr;
     grid-row-gap: 1rem;
     grid-column-gap: 0;
@@ -191,36 +196,6 @@
         }
       }
     }
-    .btns {
-      grid-column: 2;
-      display: flex;
-      grid-gap: 0.5rem;
-      flex-wrap: wrap;
-      button {
-        position: relative;
-        &.loading {
-          cursor: default;
-          color: transparent;
-          ion-icon {
-            color: transparent;
-          }
-          .spinner {
-            font-size: 0.6rem;
-          }
-        }
-        cursor: pointer;
-        text-transform: uppercase;
-        padding: 0.25rem 0.5rem;
-        display: grid;
-        grid-auto-flow: column;
-        align-items: center;
-        white-space: nowrap;
-        ion-icon {
-          font-size: 1.5em;
-          margin-right: 0.25rem;
-        }
-      }
-    }
     &:hover {
       background: none;
     }
@@ -228,6 +203,36 @@
   #fatwaSubmitions .full {
     .label {
       align-self: flex-start;
+    }
+  }
+}
+.btns {
+  grid-column: 2;
+  display: flex;
+  grid-column-gap: 1rem;
+  flex-wrap: wrap;
+  button {
+    position: relative;
+    &.loading {
+      cursor: default;
+      color: transparent;
+      ion-icon {
+        color: transparent;
+      }
+      .spinner {
+        font-size: 0.6rem;
+      }
+    }
+    cursor: pointer;
+    text-transform: uppercase;
+    padding: 0.25rem 0.5rem;
+    display: grid;
+    grid-auto-flow: column;
+    align-items: center;
+    white-space: nowrap;
+    ion-icon {
+      font-size: 1.5em;
+      // margin-right: 0.25rem;
     }
   }
 }
@@ -450,7 +455,7 @@
   .tableFilter {
     z-index: 10;
     position: sticky;
-    top: 43px;
+    top: 44px;
     background: $base-white;
     // border-top: 1px solid $light-border;
     border-bottom: 1px solid $light-border;
@@ -674,6 +679,9 @@
             text-decoration: underline;
           }
         }
+      }
+      td.jamiaFatwaCount {
+        text-align: center;
       }
     }
   }

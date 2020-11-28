@@ -27,11 +27,19 @@ const refInputBook = [
     {
       id: "book",
       type: "text",
-      label: { en: "Book", bn: "কিতাব" },
+      label: <FormattedMessage id="book" defaultMessage="Book" />,
       clone: true,
     },
-    { id: "part", type: "number", label: { en: "Part", bn: "খন্ড" } },
-    { id: "page", type: "number", label: { en: "Page", bn: "পৃষ্ঠা" } },
+    {
+      id: "part",
+      type: "number",
+      label: <FormattedMessage id="part" defaultMessage="Part" />,
+    },
+    {
+      id: "page",
+      type: "number",
+      label: <FormattedMessage id="page" defaultMessage="Page" />,
+    },
   ],
 ];
 const refInputSura = [
@@ -39,12 +47,26 @@ const refInputSura = [
     {
       id: "sura",
       type: "text",
-      label: { en: "Sura", bn: "সূরা" },
+      label: <FormattedMessage id="sura" defaultMessage="Sura" />,
       clone: true,
     },
-    { id: "aayat", type: "number", label: { en: "Aayat", bn: "আয়াত" } },
+    {
+      id: "aayat",
+      type: "number",
+      label: <FormattedMessage id="aayat" defaultMessage="Aayat" />,
+    },
   ],
 ];
+const validateMoblie = (str) => !!/\+8801\d{9}/.exec(str);
+function emptyFeildWarning(selector, inputType, warning) {
+  const emptyFeildWarning = document.createElement("p");
+  emptyFeildWarning.classList.add("emptyFeildWarning");
+  emptyFeildWarning.textContent = warning;
+  if ($(`${selector} .emptyFeildWarning`) === null) {
+    $(`${selector}`).appendChild(emptyFeildWarning);
+  }
+  $(`${selector} ${inputType}`).focus();
+}
 
 function JamiaDetail() {
   return (
@@ -53,8 +75,6 @@ function JamiaDetail() {
         defaultValue={SS.get("reg-name")}
         onChange={(target) => {
           SS.set("reg-name", target.value);
-          $("#name .emptyFeildWarning") &&
-            $("#name .emptyFeildWarning").remove();
         }}
         dataId="name"
         required={true}
@@ -70,7 +90,6 @@ function JamiaDetail() {
         defaultValue={SS.get("reg-add")}
         onChange={(target) => {
           SS.set("reg-add", target.value);
-          $("#add .emptyFeildWarning") && $("#add .emptyFeildWarning").remove();
         }}
         dataId="add"
         required={true}
@@ -84,13 +103,11 @@ function JamiaDetail() {
         defaultValue={SS.get("reg-contact") || "+8801"}
         onChange={(target) => {
           SS.set("reg-contact", target.value);
-          $("#contact .emptyFeildWarning") &&
-            $("#contact .emptyFeildWarning").remove();
         }}
         required={true}
         dataId="contact"
         type="text"
-        validation={/^\+8801\d{0,9}$/}
+        validation={/^\+\d{0,13}$/}
         warning="+8801***"
         max={14}
         min={14}
@@ -103,8 +120,6 @@ function JamiaDetail() {
         defaultValue={SS.get("reg-primeMufti")}
         onChange={(target) => {
           SS.set("reg-primeMufti", target.value);
-          $("#primeMufti .emptyFeildWarning") &&
-            $("#primeMufti .emptyFeildWarning").remove();
         }}
         dataId="primeMufti"
         required={true}
@@ -224,7 +239,7 @@ function ApplicantDetail() {
         }}
         dataId="applicantMobile"
         type="text"
-        validation={/^\+8801\d{0,9}$/}
+        validation={/^\+\d{0,13}$/}
         warning="+8801***"
         label=<FormattedMessage
           id="form.jamiaReg.applicantContact"
@@ -292,41 +307,36 @@ export const JamiaRegister = () => {
       setStep(2);
     }
   }
-  function emptyFeildWarning(selector, inputType, warning) {
-    const emptyFeildWarning = document.createElement("p");
-    emptyFeildWarning.classList.add("emptyFeildWarning");
-    emptyFeildWarning.textContent = warning;
-    if ($(`${selector} .emptyFeildWarning`) === null) {
-      $(`${selector}`).appendChild(emptyFeildWarning);
-    }
-    $(`${selector} ${inputType}`).focus();
-  }
   function rightButton() {
     if (step === 1) {
       if (SS.get("reg-name").length < 5) {
-        emptyFeildWarning("#name", "input", "Add a valid jamia");
+        emptyFeildWarning("#name", "input", "Enter a valid jamia");
         return;
       }
       if (SS.get("reg-add").length < 10) {
-        emptyFeildWarning("#add", "textarea", "Add a valid address");
+        emptyFeildWarning("#add", "textarea", "Enter a valid address");
         return;
       }
-      if (SS.get("reg-contact").length < 14) {
-        emptyFeildWarning("#contact", "input", "Add a valid mobile number.");
+      if (!validateMoblie(SS.get("reg-contact"))) {
+        emptyFeildWarning(
+          "#contact",
+          "input",
+          "Enter a valid mobile number. +8801***"
+        );
         return;
       }
       if (SS.get("reg-primeMufti").length < 4) {
-        emptyFeildWarning("#primeMufti", "input", "Add a valid jamia");
+        emptyFeildWarning("#primeMufti", "input", "Enter a valid name");
         return;
       }
       setStep(2);
     } else if (step === 2) {
       if (SS.get("reg-id").length < 8) {
-        emptyFeildWarning("#id", "input", "Add a valid id");
+        emptyFeildWarning("#id", "input", "Enter a valid id");
         return;
       }
       if ($(".reg #pass input").value.length < 7) {
-        emptyFeildWarning("#pass", "input", "Add a password");
+        emptyFeildWarning("#pass", "input", "Enter a password");
         return;
       }
       if ($(".reg #confirmPass input").value.length < 7) {
@@ -359,11 +369,11 @@ export const JamiaRegister = () => {
       emptyFeildWarning("#applicantDesignation", "input", "Add a valid title.");
       return;
     }
-    if (SS.get("reg-applicantMobile").length < 14) {
+    if (!validateMoblie(SS.get("reg-applicantMobile"))) {
       emptyFeildWarning(
         "#applicantMobile",
         "input",
-        "Add a valid mobile number"
+        "Enter a valid mobile number. +8801***"
       );
       return;
     }
@@ -900,10 +910,7 @@ export const PassRecovery = () => {
               (step === 3 && timer <= 0)
             }
           >
-            <FormattedMessage
-              id="form.addFatwa.submit"
-              defaultMessage="Submit"
-            />
+            <FormattedMessage id="form.submit" defaultMessage="Submit" />
             {loading && <span className="loading"></span>}
           </button>
         )}
@@ -1011,38 +1018,26 @@ export const AddFatwaForm = ({ match }) => {
           if (item.book) {
             inputBooks.push([
               {
-                id: "book",
-                type: "text",
-                label: { en: "Book", bn: "কিতাব" },
-                clone: true,
+                ...refInputBook[0][0],
                 value: item.book,
               },
               {
-                id: "part",
-                type: "number",
-                label: { en: "Part", bn: "খন্ড" },
+                ...refInputBook[0][1],
                 value: item.part,
               },
               {
-                id: "page",
-                type: "number",
-                label: { en: "Page", bn: "পৃষ্ঠা" },
+                ...refInputBook[0][2],
                 value: item.page,
               },
             ]);
           } else {
             inputSura.push([
               {
-                id: "sura",
-                type: "text",
-                label: { en: "Sura", bn: "সূরা" },
-                clone: true,
+                ...refInputSura[0][0],
                 value: item.sura,
               },
               {
-                id: "aayat",
-                type: "number",
-                label: { en: "Aayat", bn: "আয়াত" },
+                ...refInputSura[0][1],
                 value: item.aayat,
               },
             ]);
@@ -1147,10 +1142,7 @@ export const AddFatwaForm = ({ match }) => {
           preFill.topic ||
           (SS.get("newFatwa-topic") && JSON.parse(SS.get("newFatwa-topic")))
         }
-        label=<FormattedMessage
-          id="form.addFatwa.topic"
-          defaultMessage="Topic"
-        />
+        label=<FormattedMessage id="topic" defaultMessage="Topic" />
         id="topic"
         data={topics}
         maxHeight="15rem"
@@ -1172,10 +1164,7 @@ export const AddFatwaForm = ({ match }) => {
         defaultValue={preFill.title || SS.get("newFatwa-title")}
         required={true}
         dataId="title"
-        label=<FormattedMessage
-          id="form.addFatwa.title"
-          defaultMessage="Title"
-        />
+        label=<FormattedMessage id="title" defaultMessage="Title" />
         max={200}
         className={sameExists === "title.bn-BD" ? "err" : ""}
         onChange={(target) => {
@@ -1202,10 +1191,7 @@ export const AddFatwaForm = ({ match }) => {
         onChange={(target) => SS.set("newFatwa-ques", target.value)}
         required={true}
         dataId="ques"
-        label=<FormattedMessage
-          id="form.addFatwa.ques"
-          defaultMessage="Question"
-        />
+        label=<FormattedMessage id="question" defaultMessage="Question" />
       />
       {preFill.translate && (
         <Textarea
@@ -1225,10 +1211,7 @@ export const AddFatwaForm = ({ match }) => {
         required={true}
         dataId="ans"
         className={sameExists === "ans.bn-BD" ? "err" : ""}
-        label=<FormattedMessage
-          id="form.addFatwa.ans"
-          defaultMessage="Answer"
-        />
+        label=<FormattedMessage id="answer" defaultMessage="Answer" />
       >
         {sameExists === "ans.bn-BD" && (
           <span className="errMessage">this fatwa already exists</span>
@@ -1254,7 +1237,7 @@ export const AddFatwaForm = ({ match }) => {
         refInput={refInputSura}
       />
       <button disabled={loading} type="submit" className="btn">
-        <FormattedMessage id="form.addFatwa.submit" defaultMessage="Submit" />
+        <FormattedMessage id="form.submit" defaultMessage="Submit" />
         {loading && <span className="spinner"></span>}
       </button>
     </form>
@@ -1432,65 +1415,128 @@ export const Report = ({ fatwa, setReport }) => {
   const jamia = fatwa.jamia;
   function submit(e) {
     e.preventDefault();
+    if (SS.get("reportFatwa-name").length < 3) {
+      emptyFeildWarning("#name", "input", "Enter a valid name");
+      return;
+    }
+    if (
+      !/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g.exec(SS.get("reportFatwa-email"))
+    ) {
+      emptyFeildWarning("#email", "input", "Enter a valid email");
+      return;
+    }
+    if (!validateMoblie(SS.get("reportFatwa-mobile"))) {
+      emptyFeildWarning(
+        "#mobile",
+        "input",
+        "Enter a valid mobile number. +8801***"
+      );
+      return;
+    }
+    if (SS.get("reportFatwa-subject").length < 5) {
+      emptyFeildWarning("#subject", "input", "Enter a subject.");
+      return;
+    }
+    if (SS.get("reportFatwa-message").length < 10) {
+      emptyFeildWarning("#message", "textarea", "Enter a message.");
+      return;
+    }
     setLoading(true);
-    fetch("/api/userReport", {
+    fetch("/api/reportFatwa", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         fatwa: fatwa._id,
+        jamia: fatwa.jamia.id,
         user: {
-          name: $("#name input").value,
-          email: $("#email input").value,
-          mobile: $("#mobile input").value,
+          name: SS.get("reportFatwa-name"),
+          email: SS.get("reportFatwa-email"),
+          mobile: SS.get("reportFatwa-mobile"),
         },
         message: {
-          subject: $("#subject input").value,
-          body: $("#message textarea").value,
+          subject: SS.get("reportFatwa-subject"),
+          body: SS.get("reportFatwa-message"),
         },
       }),
     }).then((res) => {
       setLoading(false);
       if (res.status === 200) {
         setReport(false);
+        SS.remove("reportFatwa-name");
+        SS.remove("reportFatwa-email");
+        SS.remove("reportFatwa-mobile");
+        SS.remove("reportFatwa-subject");
+        SS.remove("reportFatwa-message");
       } else {
+        alert("something went wrong");
       }
     });
   }
   return (
-    <form onSubmit={submit} className="userReport">
-      <section className="head">
-        <h2>User Report</h2>
-        <p className="ps">
-          * Your message will be sent to the Jamia or the Mufti who submitted
-          this fatwa.
-        </p>
-      </section>
-      <Input
-        label="Full name"
-        dataId="name"
-        required={true}
-        validation={/^[ঀ-৾a-zA-Z\s(),]+$/}
-        type="text"
-      />
-      <Input
-        label="Email"
-        dataId="email"
-        required={true}
-        type="text"
-        validation={/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/}
-      />
-      <Input
-        label="Mobile"
-        required={true}
-        dataId="mobile"
-        type="text"
-        defaultValue="+8801"
-        warning="+8801..."
-        validation={/^\+\d{0,13}$/}
-      />
-      <Input label="Subject" dataId="subject" required={true} />
-      <Textarea label="Message" dataId="message" required={true} />
-      <Submit loading={loading} label="Submit" />
-    </form>
+    <div className="userReportContainer">
+      <ion-icon
+        onClick={() => setReport(false)}
+        class="close"
+        name="close-outline"
+      ></ion-icon>
+      <form onSubmit={submit} className="userReport">
+        <section className="head">
+          <h2>User Report</h2>
+          <p className="ps">
+            * Your message be will be sent to the Jamia or the Mufti who
+            submitted this fatwa.
+          </p>
+        </section>
+        <Input
+          label="Full name"
+          dataId="name"
+          validation={/^[ঀ-৾a-zA-Z\s(),]+$/}
+          defaultValue={SS.get("reportFatwa-name")}
+          onChange={(target) => {
+            SS.set("reportFatwa-name", target.value);
+          }}
+          type="text"
+        />
+        <Input
+          label="Email"
+          dataId="email"
+          type="text"
+          defaultValue={SS.get("reportFatwa-email")}
+          validation={/^[a-zA-Z0-9.-_@]+$/}
+          onChange={(target) => {
+            SS.set("reportFatwa-email", target.value);
+          }}
+        />
+        <Input
+          label="Mobile"
+          dataId="mobile"
+          defaultValue={SS.get("reportFatwa-mobile") || "+8801"}
+          onChange={(target) => {
+            SS.set("reportFatwa-mobile", target.value);
+          }}
+          type="text"
+          warning="+8801..."
+          validation={/^\+\d{0,13}$/}
+        />
+        <Input
+          label="Subject"
+          dataId="subject"
+          defaultValue={SS.get("reportFatwa-subject")}
+          onChange={(target) => {
+            SS.set("reportFatwa-subject", target.value);
+          }}
+        />
+        <Textarea
+          label="Message"
+          dataId="message"
+          defaultValue={SS.get("reportFatwa-message")}
+          onChange={(target) => {
+            SS.set("reportFatwa-message", target.value);
+          }}
+        />
+        <Submit loading={loading} label="Submit" />
+        <section className="bottomPadding" />
+      </form>
+    </div>
   );
 };

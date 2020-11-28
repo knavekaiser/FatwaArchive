@@ -11,6 +11,7 @@ export const Provider = ({ children }) => {
   const [sidebarSize, setSidebarSize] = useState(() =>
     window.innerWidth <= 1080 ? "mini" : "full"
   );
+  const [jamias, setJamias] = useState([]);
   return (
     <SiteContext.Provider
       value={{
@@ -28,6 +29,8 @@ export const Provider = ({ children }) => {
         setFatwaToEdit,
         sidebarSize,
         setSidebarSize,
+        jamias,
+        setJamias,
       }}
     >
       {children}

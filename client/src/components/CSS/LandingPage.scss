@@ -3,14 +3,14 @@
 .landingPage {
   display: flex;
   justify-content: center;
-  overflow: hidden;
   .content {
-    transform: translateY(20%);
+    transform: translateY(20vh);
     padding: 1rem;
     width: 100%;
     margin: 0 1rem;
     max-width: 35rem;
     text-align: center;
+    height: min-content;
     .logo {
       width: 80%;
       height: 6rem;

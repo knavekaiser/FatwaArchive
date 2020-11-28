@@ -17,8 +17,25 @@ const userReview = new Schema({
   submitted: { type: Date, default: Date.now },
 });
 
+const reportFatwa = new Schema({
+  fatwa: { type: String, required: true },
+  jamia: { type: String, required: true },
+  submitted: { type: Date, default: Date.now },
+  user: {
+    name: { type: String, required: true, trim: true },
+    email: { type: String, required: true, trim: true },
+    mobile: { type: String, trim: true },
+  },
+  message: {
+    subject: { type: String, required: true, trim: true },
+    body: { type: String, required: true, trim: true },
+  },
+});
+
 const UserQuestion = mongoose.model("UserQuestion", userQuestion);
 const UserReview = mongoose.model("UserReview", userReview);
+const ReportFatwa = mongoose.model("ReportFatwa", reportFatwa);
 
 exports.UserQuestion = UserQuestion;
 exports.UserReview = UserReview;
+exports.ReportFatwa = ReportFatwa;

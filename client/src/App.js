@@ -38,7 +38,7 @@ function ProtectedRoute({
 }
 
 function App() {
-  const { setUser, setIsAuthenticated } = useContext(SiteContext);
+  const { setUser, setIsAuthenticated, setJamias } = useContext(SiteContext);
   const { locale, setLocale } = useContext(SiteContext);
   const history = useHistory();
   const link = useRef(window.location.href.replace(window.location.origin, ""));
@@ -62,6 +62,9 @@ function App() {
       })
       .then((data) => {
         setIsAuthenticated(data.isAuthenticated);
+        const jamias = {};
+        data.jamias.forEach((jamia) => (jamias[jamia.id] = jamia));
+        setJamias(jamias);
         setUser(data.user);
         history.push(link.current);
       })
@@ -77,6 +80,7 @@ function App() {
         <Route path="/" component={Nav} />
         <Switch>
           <Route path="/" exact component={LandingPage} />
+          <Route path="/moblieSearch" component={LandingPage} />
           <Route path="/search" component={SearchResult} />
           <Route path="/fatwa/:id" component={Fatwa} />
           <Route path="/about" component={About} />

@@ -18,8 +18,8 @@ const app = express();
 //---------------------------------------------- dev stuff -
 
 require("dotenv").config();
-// const morgan = require("morgan");
-// app.use(morgan("dev"));
+const morgan = require("morgan");
+app.use(morgan("dev"));
 
 //----------------------------------------------------------
 

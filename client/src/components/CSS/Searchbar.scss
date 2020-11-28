@@ -79,13 +79,15 @@
     box-shadow: 0 5px 8px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     border: 1px solid $light-hover;
-    li {
-      a {
-        padding: 0.5rem 1rem;
-        display: block;
-        width: 100%;
-        &:hover {
-          background-color: $light-hover;
+    ul {
+      li {
+        a {
+          padding: 0.5rem 1rem;
+          display: block;
+          width: 100%;
+          &.hover {
+            background-color: $light-hover;
+          }
         }
       }
     }

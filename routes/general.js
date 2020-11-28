@@ -4,7 +4,7 @@ const {
   JamiaSubmitions,
   PassRecoveryToken,
 } = require("../models/jamiaModel");
-const { UserQuestion } = require("../models/userSubmitionModel");
+const { UserQuestion, ReportFatwa } = require("../models/userSubmitionModel");
 const fetch = require("node-fetch");
 
 const regEx = (input) => new RegExp(input.replace(" ", ".+"), "gi");
@@ -165,6 +165,23 @@ router.route("/askFatwa").post((req, res) => {
       res.status(500).json(err);
     });
 });
+router.route("/reportFatwa").post((req, res) => {
+  new ReportFatwa({ ...req.body })
+    .save()
+    .then((response) => {
+      //here send the notification to jamia and admin.
+      //then
+      console.log(response);
+      if (true) {
+        res.json("report has been submitted");
+      } else {
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json("something went wrong");
+    });
+});
 
 router.route("/jamia/new").post((req, res) => {
   bcrypt
@@ -186,6 +203,7 @@ router.route("/jamia/new").post((req, res) => {
     });
 });
 
+//----------------------------------JAMIA
 router
   .route("/login")
   .post(
@@ -223,14 +241,12 @@ router
       }
     }
   );
-
 router
   .route("/logout")
   .get(passport.authenticate("jwt", { session: false }), (req, res) => {
     res.clearCookie("access_token");
     res.json({ user: null, success: true });
   });
-
 router.route("/passRecovery").put((req, res) => {
   Jamia.findOne({ id: req.body.id }).then((jamia) => {
     if (jamia === null) {
@@ -355,15 +371,6 @@ router.route("/jamiaNewPass").patch((req, res) => {
     });
 });
 
-router.route("/allToken").get((req, res) => {
-  PassRecoveryToken.find()
-    .then((tokens) => res.json(tokens))
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json(err);
-    });
-});
-
 router.route("/authenticate").get(passport.authenticate("jwt"), (req, res) => {
   if (req.isAuthenticated()) {
     const user = {};
@@ -387,7 +394,18 @@ router.route("/authenticate").get(passport.authenticate("jwt"), (req, res) => {
     user.id = req.user.id;
     user._id = req.user._id;
     user.role = req.user.role;
-    res.status(200).json({ isAuthenticated: true, user });
+    Jamia.find()
+      .then((jamias) => {
+        return jamias.map((jamia) => {
+          return {
+            id: jamia.id,
+            name: jamia.name,
+          };
+        });
+      })
+      .then((jamias) => {
+        res.status(200).json({ isAuthenticated: true, user, jamias: jamias });
+      });
   } else {
     res.status(500).json("something went wrong!");
   }
