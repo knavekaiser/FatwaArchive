@@ -512,6 +512,7 @@ export const Combobox = ({
   change,
   maxHeight,
   required,
+  disabled,
 }) => {
   const [value, setValue] = useState(
     (defaultValue !== undefined && options[defaultValue].label) || ""
@@ -520,7 +521,7 @@ export const Combobox = ({
   // TODO: ommit the section tag inside. make outsideclick the primary shell;
   return (
     <OutsideClick
-      className="combobox"
+      className={`combobox ${disabled ? "disabled" : ""}`}
       setOpen={setOpen}
       open={open}
       style={{ position: "relative" }}

@@ -126,7 +126,7 @@ router
   .route("/jamia/questionFeed/filter")
   .get(passport.authenticate("jwt"), (req, res) => {
     const sort = { column: req.query.column, order: req.query.order };
-    UserQuestion.find()
+    UserQuestion.find({ answered: false })
       .sort(`${sort.order === "asc" ? "-" : ""}${sort.column}`)
       .then((questions) => {
         res.json(questions);

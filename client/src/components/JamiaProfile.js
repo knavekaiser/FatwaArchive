@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useRef } from "react";
 import { Route, Switch, Link, useHistory } from "react-router-dom";
 import { SiteContext } from "../Context";
 import { Tabs, View, Sidebar } from "./TableElements";
@@ -24,6 +24,16 @@ const encodeURL = (obj) =>
   Object.keys(obj)
     .map((key) => `${key}=${obj[key]}`)
     .join("&");
+
+function LoadingPost() {
+  return (
+    <div className="question loading">
+      <div className="user"></div>
+      <div className="ques"></div>
+      <div className="tags"></div>
+    </div>
+  );
+}
 
 function Profile() {
   const { user } = useContext(SiteContext);
@@ -678,12 +688,17 @@ function UserSubmitions() {
 function SingleQuestion({ data }) {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  const container = useRef(null);
+  //add button for instant answer.
+  //use useLayoutEffect to show/hide "...more/...less"
   return (
     <li
+      ref={container}
       className={`question ${!open ? "mini" : ""}`}
       onClick={(e) => {
-        e.stopPropagation();
-        setOpen(!open);
+        if (e.target === container.current) {
+          setOpen(!open);
+        }
       }}
     >
       <div className="user">
@@ -709,7 +724,7 @@ function SingleQuestion({ data }) {
           ) : (
             <FormattedDate value={data.submitted} day="numeric" month="long" />
           )}
-          {" ● "}
+          <span className="separator" />
           <FormattedTimeParts value={data.submitted}>
             {(parts) => (
               <>
@@ -729,15 +744,20 @@ function SingleQuestion({ data }) {
       </ul>
       <div className="btns">
         {open && (
-          <Submit
-            label={
-              <>
-                <ion-icon name="checkmark-outline"></ion-icon> Accept
-              </>
-            }
-            onClick={() => setLoading(true)}
-            loading={loading}
-          />
+          <>
+            <Submit
+              label={
+                <>
+                  <ion-icon name="checkmark-outline"></ion-icon> Accept
+                </>
+              }
+              onClick={() => setLoading(true)}
+              loading={loading}
+            />
+            <button type="submit">
+              <ion-icon name="star-outline"></ion-icon> Answer
+            </button>
+          </>
         )}
         <button className="more" onClick={() => setOpen(!open)}>
           {open ? (
@@ -759,7 +779,7 @@ function NewQuestions() {
   const signal = abortController.signal;
   const { locale } = useContext(SiteContext);
   const [loading, setLoading] = useState(true);
-  const [sort, setSort] = useState({ column: "submitted", order: "asc" });
+  const [sort, setSort] = useState({ column: "submitted", order: "dsc" });
   const [filters, setFilters] = useState({});
   const [data, setData] = useState([]);
   function fetchData() {
@@ -786,7 +806,8 @@ function NewQuestions() {
     <>
       <div className="filters">
         <Combobox
-          defaultValue={0}
+          disabled={loading}
+          defaultValue={1}
           change={setSort}
           maxHeight={200}
           id="questionFeedSort"
@@ -804,9 +825,11 @@ function NewQuestions() {
         />
       </div>
       <ul className="feed">
-        {data.map((item) => (
-          <SingleQuestion key={item._id} data={item} />
-        ))}
+        {!loading ? (
+          data.map((item) => <SingleQuestion key={item._id} data={item} />)
+        ) : (
+          <LoadingPost />
+        )}
       </ul>
     </>
   );

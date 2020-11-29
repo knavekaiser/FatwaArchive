@@ -277,6 +277,8 @@
         background: $base-white;
         border-bottom: 1px solid $light-border;
         display: flex;
+        z-index: 5;
+        box-shadow: 0 0px 5px rgba(0, 0, 0, 0.05);
         .combobox {
           width: min-content;
           display: flex;
@@ -288,6 +290,12 @@
             min-width: 6rem;
             border: none;
             padding: 0;
+          }
+          &.disabled {
+            ion-icon {
+              pointer-events: none;
+              opacity: 0.5;
+            }
           }
           ion-icon {
             position: relative;
@@ -313,9 +321,9 @@
         grid-gap: 0.75rem;
         .question {
           background: #fdfdfd;
-          padding: 1rem 1.2rem;
+          padding: 1.5rem 1.2rem;
           border-radius: 8px;
-          box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
           display: grid;
           grid-template-columns: 1fr 1fr;
           grid-gap: 0.5rem;
@@ -333,6 +341,16 @@
             .date {
               font-size: 0.8rem;
               color: $light-text;
+              display: flex;
+              align-items: center;
+              .separator {
+                height: 0.5em;
+                width: 0.5em;
+                display: inline-block;
+                background: $light-text;
+                border-radius: 1rem;
+                margin: 0 0.3em;
+              }
             }
           }
           .ques {
@@ -350,10 +368,13 @@
             grid-gap: 0.4rem;
           }
           .tags {
+            height: min-content;
             margin: auto;
             margin-bottom: 0;
             margin-left: 0;
+            flex-wrap: wrap;
             .tag {
+              white-space: nowrap;
               font-size: 0.8rem;
               color: $accent;
               padding: 0.1em 0.5em;
@@ -363,6 +384,7 @@
             }
           }
           .btns {
+            justify-content: flex-end;
             margin: auto;
             margin-top: 1rem;
             margin-right: 0;
@@ -393,6 +415,25 @@
             }
           }
         }
+        .loading {
+          div {
+            background: $light-hover;
+            height: 1rem;
+            border-radius: 0.5rem;
+            animation: loadingColumn 1.5s infinite;
+          }
+          .user {
+            width: 30%;
+          }
+          .ques {
+            width: 90%;
+            grid-column: 1/3;
+          }
+          .tags {
+            height: 0.75rem;
+            width: 3rem;
+          }
+        }
       }
     }
   }
@@ -406,7 +447,8 @@ ion-icon[name="skull-outline"] {
 ion-icon[name="pencil-outline"],
 ion-icon[name="create-outline"],
 ion-icon[name="chevron-up-outline"],
-ion-icon[name="chevron-down-outline"] {
+ion-icon[name="chevron-down-outline"],
+ion-icon[name="star-outline"] {
   color: orange;
 }
 ion-icon[name="checkmark-outline"],
@@ -514,16 +556,12 @@ ion-icon[name="save-outline"] {
           grid-gap: 0.75rem;
           padding: 0.5rem;
           .question {
-            padding: 0.75rem;
+            padding: 1.25rem 0.75rem;
             grid-gap: 0.75rem;
             &.mini {
               .ques {
                 -webkit-line-clamp: 3;
               }
-            }
-            .tags {
-              white-space: nowrap;
-              flex-wrap: wrap;
             }
             .btns {
               .more {
