@@ -33,6 +33,7 @@
           display: grid;
           grid-auto-flow: column;
           grid-template-columns: 1fr min-content;
+          grid-gap: 0.5rem;
           align-items: center;
           a {
             width: min-content;
@@ -42,7 +43,7 @@
             border: none;
             padding: 0;
             border-radius: 0;
-            margin-left: 0.5rem;
+            display: grid;
             &:hover {
               background: none;
               color: inherit;
@@ -70,10 +71,11 @@
             }
           }
           ion-icon {
+            margin: auto;
+            display: block;
             font-size: 1.5rem;
             cursor: pointer;
             opacity: 0;
-            margin-left: 0.25rem;
             background: white;
             padding: 0.33rem 0.5rem;
             box-shadow: inset 0 0 0 1px $light-border;
@@ -117,6 +119,7 @@
                 section {
                   display: flex;
                   align-items: center;
+                  grid-gap: 0.3rem;
                   span {
                     height: 2px;
                     position: absolute;
@@ -167,11 +170,9 @@
       }
     }
     .addFatwa {
-      padding: 2rem;
-      padding-top: 0.5rem;
-      padding-left: 0.5rem;
+      padding: 0.5rem;
     }
-    #fatwaSubmitions {
+    #fatwaSubmissions {
       tr {
         grid-template-columns: 6rem 0.2fr 0.8fr;
         &.full {
@@ -467,7 +468,7 @@ ion-icon[name="save-outline"] {
     grid-template-columns: 0 1fr;
     .view {
       #allFatwa,
-      #fatwaSubmitions {
+      #fatwaSubmissions {
         tr {
           &.full {
             .data {
@@ -508,7 +509,7 @@ ion-icon[name="save-outline"] {
         }
       }
     }
-    #fatwaSubmitions {
+    #fatwaSubmissions {
       &.thead {
         tr {
           th:nth-child(2) {
@@ -575,7 +576,7 @@ ion-icon[name="save-outline"] {
   }
   .adminPanel {
     .view {
-      #fatwaSubmitions {
+      #fatwaSubmissions {
         &.thead {
           tr {
             th:nth-child(2),
@@ -683,7 +684,7 @@ ion-icon[name="save-outline"] {
           }
         }
       }
-      #jamiaSubmitions {
+      #jamiaSubmissions {
         &.thead {
           tr {
             th:nth-child(3),

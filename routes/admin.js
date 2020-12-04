@@ -1,14 +1,18 @@
-const { Fatwa, FatwaSubmitions } = require("../models/fatwaModel");
-const { Jamia, JamiaSubmitions } = require("../models/jamiaModel");
-const { UserQuestion } = require("../models/userSubmitionModel");
-// const { User, Session } = require("../models/userModel");
+const { Fatwa, FatwaSubmissions } = require("../models/fatwaModel");
+const { Source, Jamia } = require("../models/sourceModel");
+const { UserQuestion } = require("../models/userSubmissionModel");
+const { User, Session } = require("../models/userModel");
+
 const fetch = require("node-fetch");
 
-function getLan(str) {
-  return (str.match(/[a-z\s]/gi) || []).length > (str.length / 8) * 6
-    ? "en-US"
-    : "bn-BD";
-}
+const getLan = (input) => {
+  const str = input.replaceAll(" ", "");
+  if ((str.match(/[a-z]/gi) || []).length / str.length > 0.9) {
+    return "en-US";
+  } else {
+    return "bn-BD";
+  }
+};
 
 // router
 //   .route("/admin/fatwa/new")
@@ -46,7 +50,7 @@ function getLan(str) {
 //             "en-US": req.body.ansEn || ansEn,
 //           },
 //         };
-//         return new FatwaSubmitions({
+//         return new FatwaSubmissions({
 //           added: new Date(),
 //           ref: req.body.ref,
 //           img: req.body.img,
@@ -71,9 +75,10 @@ router
     const locale = req.headers["accept-language"];
     const query = {};
     const sort = { column: req.query.column, order: req.query.order };
-    req.query.title && (query[`title.${locale}`] = regEx(req.query.title));
-    req.query.question && (query[`ques.${locale}`] = regEx(req.query.question));
-    req.query.answer && (query[`ans.${locale}`] = regEx(req.query.answer));
+    req.query.title && (query[`title.${locale}`] = RegExp(req.query.title));
+    req.query.question &&
+      (query[`ques.${locale}`] = RegExp(req.query.question));
+    req.query.answer && (query[`ans.${locale}`] = RegExp(req.query.answer));
     req.query.topic && (query[`topic.${locale}`] = req.query.topic);
     req.query.jamia && (query.jamia = req.query.jamia);
     if (locale.length > 5) {
@@ -81,7 +86,7 @@ router
       return;
     }
     Fatwa.find(query)
-      .sort(`${sort.order === "asc" ? "-" : ""}${sort.column}`)
+      .sort(`${sort.order === "des" ? "-" : ""}${sort.column}`)
       .then((fatwas) => {
         if (fatwas.length === 0) {
           res.json([]);
@@ -117,37 +122,38 @@ router.route("/fatwa/:id").delete(passport.authenticate("jwt"), (req, res) => {
     .catch((err) => res.status(400).json("Error: " + err));
 });
 router
-  .route("/admin/fatwaSubmitions/filter")
+  .route("/admin/fatwaSubmissions/filter")
   .get(passport.authenticate("jwt"), (req, res) => {
     if (req.user.role !== "admin") return res.status("403").json("forbidden");
     const locale = req.headers["accept-language"];
     const query = {};
     const sort = { column: req.query.column, order: req.query.order };
-    req.query.title && (query[`title.${locale}`] = regEx(req.query.title));
-    req.query.question && (query[`ques.${locale}`] = regEx(req.query.question));
-    req.query.answer && (query[`ans.${locale}`] = regEx(req.query.answer));
+    req.query.title && (query[`title.${locale}`] = RegExp(req.query.title));
+    req.query.question &&
+      (query[`ques.${locale}`] = RegExp(req.query.question));
+    req.query.answer && (query[`ans.${locale}`] = RegExp(req.query.answer));
     req.query.topic && (query[`topic.${locale}`] = req.query.topic);
     req.query.jamia && (query.jamia = req.query.jamia);
-    FatwaSubmitions.find(query)
-      .sort(`${sort.order === "asc" ? "-" : ""}${sort.column}`)
-      .then((submitions) => {
-        if (submitions.length === 0) {
+    FatwaSubmissions.find(query)
+      .sort(`${sort.order === "des" ? "-" : ""}${sort.column}`)
+      .then((submissions) => {
+        if (submissions.length === 0) {
           res.json([]);
           return;
         }
-        res.json(submitions);
+        res.json(submissions);
       })
       .catch((err) => res.status(400).json(err));
   });
 router
-  .route("/admin/fatwaSubmitions/accept/:_id")
+  .route("/admin/fatwaSubmissions/accept/:_id")
   .post(passport.authenticate("jwt"), (req, res) => {
     if (req.user.role !== "admin") return res.status("403").json("forbidden");
     let titleEn = "Something went wrong with translation " + Math.random(),
       quesEn = "Something went wrong with translation " + Math.random(),
       ansEn = "Something went wrong with translation " + Math.random();
     let submittedFatwa = {};
-    FatwaSubmitions.findById(req.params._id)
+    FatwaSubmissions.findById(req.params._id)
       .then((fatwa) => {
         submittedFatwa = fatwa;
         if (fatwa.title["en-US"]) return;
@@ -196,7 +202,7 @@ router
         });
       })
       .then((fatwa) => fatwa.save())
-      .then(() => FatwaSubmitions.findByIdAndDelete(req.params._id))
+      .then(() => FatwaSubmissions.findByIdAndDelete(req.params._id))
       .then(() => res.send("fatwa added"))
       .catch((err) => {
         console.log(err);
@@ -204,98 +210,52 @@ router
       });
   });
 router
-  .route("/admin/fatwaSubmitions/remove/:_id")
+  .route("/admin/fatwaSubmissions/remove/:_id")
   .delete(passport.authenticate("jwt"), (req, res) => {
-    FatwaSubmitions.findByIdAndDelete(req.params._id)
+    FatwaSubmissions.findByIdAndDelete(req.params._id)
       .then(() => {
-        res.json("submition successfully deleted.");
+        res.json("submission successfully deleted.");
       })
       .catch((err) => res.status(500).json(err));
   });
 
-//----------------------------------JAMIA
+//----------------------------------NEW SOURCE
 router
-  .route("/admin/jamia/submitions/filter")
+  .route("/admin/sources/submissions/filter")
   .get(passport.authenticate("jwt"), (req, res) => {
     const locale = req.headers["accept-language"];
-    const query = {};
+    const query = { status: "pending" };
+    req.query.role && (query.role = RegExp(req.query.role));
     const sort = { column: req.query.column, order: req.query.order };
     if (locale.length > 5) {
       res.status(400).json("No language selected or formation is wrong");
       return;
     }
-    JamiaSubmitions.find()
-      .sort(`${sort.order === "asc" ? "-" : ""}${sort.column}`)
-      .then((submitions) => {
-        if (submitions.length === 0) {
+    Jamia.find(query)
+      .select("-pass -type")
+      .sort(`${sort.order === "des" ? "-" : ""}${sort.column}`)
+      .then((submissions) => {
+        if (submissions.length === 0) {
           res.json([]);
           return;
         }
-        const data = submitions.map((jamia) => {
-          return {
-            _id: jamia._id,
-            submitted: jamia.submitted,
-            name: jamia.name,
-            primeMufti: jamia.primeMufti,
-            address: jamia.address,
-            contact: jamia.contact,
-            id: jamia.id,
-            applicant: jamia.applicant,
-          };
-        });
-        res.json(data);
+        res.json(submissions);
       })
       .catch((err) => res.status(400).json(err));
   });
+
+//----------------------------------JAMIA
 router
-  .route("/admin/jamia/accept")
+  .route("/admin/source/accept")
   .post(passport.authenticate("jwt"), (req, res) => {
-    const name = {};
-    const primeMufti = {};
-    let newJamia = {};
-    JamiaSubmitions.findById(req.body._id)
-      .then((jamia) => {
-        newJamia = jamia;
-        return Promise.all([
-          translate
-            .translate(jamia.name, getLan(jamia.name) === "bn-BD" ? "en" : "bn")
-            .then((translation) => {
-              name[getLan(jamia.name)] = jamia.name;
-              name[getLan(jamia.name) === "bn-BD" ? "en-US" : "bn-BD"] =
-                translation[0];
-            }),
-          translate
-            .translate(
-              jamia.primeMufti,
-              getLan(jamia.primeMufti) === "bn-BD" ? "en" : "bn"
-            )
-            .then((translation) => {
-              primeMufti[getLan(jamia.primeMufti)] = jamia.primeMufti;
-              primeMufti[
-                getLan(jamia.primeMufti) === "bn-BD" ? "en-US" : "bn-BD"
-              ] = translation[0];
-            }),
-        ]);
-      })
-      .then(() => {
-        return new Jamia({
-          joined: new Date(),
-          fatwa: 0,
-          name,
-          primeMufti,
-          address: newJamia.address,
-          contact: newJamia.contact,
-          id: newJamia.id,
-          password: newJamia.password,
-          applicant: newJamia.applicant,
-        });
-      })
-      .then((jamiaToBeAdded) => jamiaToBeAdded.save())
-      .then(() => JamiaSubmitions.findByIdAndDelete(req.body._id))
-      .then(() => {
+    Jamia.findByIdAndUpdate(req.body._id, {
+      status: "active",
+      joined: new Date(),
+    })
+      .then((source) => {
         const message = encodeURI(`আপনার আবেদন গৃহীত হয়েছে । ফতোয়া আর্কাইভ`);
         return fetch(
-          `http://api.greenweb.com.bd/api.php/?token=${process.env.SMS_TOKEN}&to=${newJamia.applicantMobile}&message=${message}`,
+          `http://api.greenweb.com.bd/api.php/?token=${process.env.SMS_TOKEN}&to=${source.appl.mob}&message=${message}`,
           { method: "POST" }
         );
       })
@@ -306,43 +266,30 @@ router
       });
   });
 router
-  .route("/admin/jamia/active/filter")
+  .route("/admin/sources/active/filter")
   .get(passport.authenticate("jwt"), (req, res) => {
+    const query = { status: "active" };
     const sort = { column: req.query.column, order: req.query.order };
-    Jamia.find()
-      .sort(`${sort.order === "asc" ? "-" : ""}${sort.column}`)
-      .then((jamias) => {
-        const data = jamias.map((jamia) => {
-          return {
-            _id: jamia._id,
-            joined: jamia.joined,
-            fatwa: jamia.fatwa,
-            name: jamia.name,
-            founder: jamia.founder,
-            primeMufti: jamia.primeMufti,
-            est: jamia.est,
-            address: jamia.address,
-            contact: jamia.contact,
-            about: jamia.about,
-            id: jamia.id,
-            applicant: jamia.applicant,
-          };
-        });
-        res.status(200).json(data);
+    req.query.role && (query.role = RegExp(req.query.role));
+    Jamia.find(query)
+      .sort(`${sort.order === "des" ? "-" : ""}${sort.column}`)
+      .select("-pass -type")
+      .then((sources) => {
+        res.status(200).json(sources);
       })
       .catch((err) => res.status(400).json(err));
   });
 router
-  .route("/admin/jamia/reject")
+  .route("/admin/source/reject")
   .delete(passport.authenticate("jwt"), (req, res) => {
-    JamiaSubmitions.findByIdAndDelete(req.body._id)
-      .then(() => res.status(200).json("Jamia Submition deleted!"))
+    Jamia.findByIdAndDelete(req.body._id)
+      .then(() => res.status(200).json("Jamia Submission deleted!"))
       .catch((err) => {
         res.json(err);
       });
   });
 router
-  .route("/admin/jamia/edit/:_id")
+  .route("/admin/source/edit/:_id")
   .patch(passport.authenticate("jwt"), (req, res) => {
     if (Object.keys(req.body).length === 1) {
       Jamia.findOneAndUpdate({ _id: req.params._id }, req.body)
@@ -351,14 +298,13 @@ router
         })
         .catch((err) => res.json(err));
     } else if (Object.keys(req.body).length === 3) {
-      console.log(req.body);
       Jamia.findById(req.params._id)
-        .then((jamia) => bcrypt.compare(req.body.oldPass, jamia.password))
+        .then((jamia) => bcrypt.compare(req.body.oldPass, jamia.pass))
         .then((match) => {
           if (match) {
             Jamia.findOneAndUpdate(
               { _id: req.params._id },
-              { password: bcrypt.hashSync(req.body.newPass, 10) }
+              { pass: bcrypt.hashSync(req.body.newPass, 10) }
             )
               .then(() => res.json("password changed successfully"))
               .catch((err) => {
@@ -372,7 +318,7 @@ router
     }
   });
 router
-  .route("/admin/jamia")
+  .route("/admin/source")
   .delete(passport.authenticate("jwt"), (req, res) => {
     Jamia.findByIdAndDelete(req.body._id)
       .then(() => res.json("jamia successfully deleted"))
@@ -381,17 +327,16 @@ router
 
 //-----------------------------------USER SUBMITIONS
 router.route("/admin/userQuestion/filter").get((req, res) => {
-  // const query = {};
-  // req.query.answered && (query.answered = req.query.answered);
+  const query = {};
+  req.query.name && (query.name = req.query.name);
   const sort = { column: req.query.column, order: req.query.order };
-  UserQuestion.find()
-    .sort(`${sort.order === "asc" ? "-" : ""}${sort.column}`)
+  UserQuestion.find(query)
+    .sort(`${sort.order === "des" ? "-" : ""}${sort.column}`)
     .then((questions) => {
       if (questions.length === 0) {
         res.json([]);
         return;
       }
-      console.log(questions[0]);
       res.json(questions);
     });
 });

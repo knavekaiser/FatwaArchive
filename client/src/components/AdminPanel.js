@@ -2,18 +2,11 @@ import React, { useState, useContext } from "react";
 import { Link, Route, Switch, useHistory } from "react-router-dom";
 import { SiteContext } from "../Context.js";
 import "./CSS/AdminPanel.min.css";
-import {
-  Input,
-  Textarea,
-  ComboboxMulti,
-  Combobox,
-  topics,
-  Submit,
-  ID,
-} from "./FormElements";
+import { Input, Textarea, Combobox, topics, Submit, ID } from "./FormElements";
 import { DataEditForm, PasswordEditForm } from "./Forms";
 import { Tabs, Actions, Sidebar, View } from "./TableElements";
 import { FormattedDate, FormattedNumber } from "react-intl";
+import FourOFour from "./FourOFour";
 
 function SingleFatwa({ data, setData }) {
   const { locale } = useContext(SiteContext);
@@ -135,20 +128,20 @@ function SingleFatwa({ data, setData }) {
     </tr>
   );
 }
-function SingleFatwaSubmition({ data, setData }) {
+function SingleFatwaSubmission({ data, setData }) {
   const { locale, setFatwaToEdit } = useContext(SiteContext);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const fatwa = data;
   const history = useHistory();
   const editFatwa = (path) => history.push(path);
-  function editFatwaSubmition(id) {
+  function editFatwaSubmission(id) {
     setFatwaToEdit(fatwa);
     history.push("/admin/add");
   }
   function acceptFatwa() {
     setLoading(true);
-    fetch(`/api/admin/fatwaSubmitions/accept/${fatwa._id}`, { method: "POST" })
+    fetch(`/api/admin/fatwaSubmissions/accept/${fatwa._id}`, { method: "POST" })
       .then((res) => {
         if (res.status === 200) {
           setLoading(false);
@@ -164,9 +157,9 @@ function SingleFatwaSubmition({ data, setData }) {
         console.log(err);
       });
   }
-  function removeSubmition() {
+  function removeSubmission() {
     setLoading(true);
-    fetch(`/api/admin/fatwaSubmitions/remove/${fatwa._id}`, {
+    fetch(`/api/admin/fatwaSubmissions/remove/${fatwa._id}`, {
       method: "DELETE",
     })
       .then((res) => {
@@ -250,12 +243,12 @@ function SingleFatwaSubmition({ data, setData }) {
         <button disabled={loading} onClick={() => setOpen(false)}>
           <ion-icon name="chevron-up-outline"></ion-icon> Hide Detail
         </button>
-        <button disabled={loading} onClick={editFatwaSubmition}>
+        <button disabled={loading} onClick={editFatwaSubmission}>
           <ion-icon name="pencil-outline"></ion-icon> Edit
         </button>
         <Submit
           loading={loading}
-          onClick={removeSubmition}
+          onClick={removeSubmission}
           label={
             <>
               <ion-icon name="trash-outline"></ion-icon> Delete
@@ -285,10 +278,11 @@ function SingleFatwaSubmition({ data, setData }) {
   );
 }
 function AllFatwa({ history, location, match }) {
+  const { locale } = useContext(SiteContext);
   return (
     <div className="view">
       <h1 className="viewTitle">Fatwa</h1>
-      <Tabs page="/admin/fatwa/" tabs={["Live", "Submitions"]} />
+      <Tabs page="/admin/fatwa/" tabs={["Live", "Submissions"]} />
       <Switch>
         <Route path="/admin/fatwa" exact>
           <View
@@ -300,12 +294,13 @@ function AllFatwa({ history, location, match }) {
               {
                 name: "topic",
                 input: (
-                  <ComboboxMulti
-                    id={ID(8)}
-                    maxHeight={300}
-                    label="topic"
-                    data={topics}
-                    required={true}
+                  <Combobox
+                    options={topics.map((option) => {
+                      return {
+                        label: option[locale],
+                        value: option,
+                      };
+                    })}
                   />
                 ),
               },
@@ -366,12 +361,13 @@ function AllFatwa({ history, location, match }) {
               {
                 name: "topic",
                 input: (
-                  <ComboboxMulti
-                    id={ID(8)}
-                    maxHeight={300}
-                    label="topic"
-                    data={topics}
-                    required={true}
+                  <Combobox
+                    options={topics.map((option) => {
+                      return {
+                        label: option[locale],
+                        value: option,
+                      };
+                    })}
                   />
                 ),
               },
@@ -422,22 +418,23 @@ function AllFatwa({ history, location, match }) {
             defaultSort={{ column: "added", order: "des" }}
           />
         </Route>
-        <Route path="/admin/fatwa/submitions">
+        <Route path="/admin/fatwa/submissions">
           <View
-            key="allFatwaSubmition"
-            Element={SingleFatwaSubmition}
-            id="fatwaSubmitions"
-            api="api/admin/fatwaSubmitions/filter?"
+            key="allFatwaSubmission"
+            Element={SingleFatwaSubmission}
+            id="fatwaSubmissions"
+            api="api/admin/fatwaSubmissions/filter?"
             categories={[
               {
                 name: "topic",
                 input: (
-                  <ComboboxMulti
-                    id={ID(8)}
-                    maxHeight={300}
-                    label="topic"
-                    data={topics}
-                    required={true}
+                  <Combobox
+                    options={topics.map((option) => {
+                      return {
+                        label: option[locale],
+                        value: option,
+                      };
+                    })}
                   />
                 ),
               },
@@ -480,14 +477,15 @@ function AllFatwa({ history, location, match }) {
   );
 }
 
-function SingleJamiaSubmition({ data, setData }) {
+function JamiaSubmission() {}
+function SingleSourceSubmission({ data, setData }) {
   const jamia = data;
   const { locale } = useContext(SiteContext);
   const [showFull, setShowFull] = useState(false);
   const [loading, setLoading] = useState(false);
   function accept() {
     setLoading(true);
-    fetch(`/api/admin/jamia/accept`, {
+    fetch(`/api/admin/source/accept`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ _id: jamia._id }),
@@ -496,7 +494,7 @@ function SingleJamiaSubmition({ data, setData }) {
         setLoading(false);
         if (res.status === 200) {
           setData((prev) => {
-            return prev.filter((submitions) => submitions._id !== jamia._id);
+            return prev.filter((submissions) => submissions._id !== jamia._id);
           });
         }
       })
@@ -504,7 +502,7 @@ function SingleJamiaSubmition({ data, setData }) {
   }
   function reject() {
     setLoading(true);
-    fetch(`/api/admin/jamia/reject`, {
+    fetch(`/api/admin/source/reject`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ _id: jamia._id }),
@@ -513,7 +511,7 @@ function SingleJamiaSubmition({ data, setData }) {
         setLoading(false);
         if (res.status === 200) {
           setData((prev) => {
-            return prev.filter((submitions) => submitions._id !== jamia._id);
+            return prev.filter((submissions) => submissions._id !== jamia._id);
           });
         }
       })
@@ -523,17 +521,18 @@ function SingleJamiaSubmition({ data, setData }) {
     <tr onClick={() => (showFull ? setShowFull(false) : setShowFull(true))}>
       <td>
         <FormattedDate
-          value={new Date(jamia.submitted)}
+          value={new Date(jamia.joined)}
           day="numeric"
           month="numeric"
           year="2-digit"
         />
       </td>
       <td>
-        {jamia.name}
+        {jamia.name[locale]}
         <span>{jamia.address}</span>
       </td>
-      <td>{jamia.primeMufti}</td>
+      <td>{jamia.role}</td>
+      <td>{jamia.primeMufti[locale]}</td>
       <td>
         <a href={`tel:${jamia.contact}`}>{jamia.contact.replace("+88", "")}</a>
       </td>
@@ -543,7 +542,7 @@ function SingleJamiaSubmition({ data, setData }) {
       <td className="label">Submitted</td>
       <td className="data">
         <FormattedDate
-          value={new Date(jamia.submitted)}
+          value={new Date(jamia.joined)}
           day="numeric"
           month="numeric"
           year="2-digit"
@@ -552,9 +551,9 @@ function SingleJamiaSubmition({ data, setData }) {
       <td className="label">ID</td>
       <td className="data">{jamia.id}</td>
       <td className="label">Name</td>
-      <td className="data">{jamia.name}</td>
+      <td className="data">{jamia.name[locale]}</td>
       <td className="label">Prime Mufti</td>
-      <td className="data">{jamia.primeMufti}</td>
+      <td className="data">{jamia.primeMufti[locale]}</td>
       <td className="label">Address</td>
       <td className="data">{jamia.address}</td>
       <td className="label">Contact</td>
@@ -562,13 +561,13 @@ function SingleJamiaSubmition({ data, setData }) {
         <a href={`tel:${jamia.contact}`}>{jamia.contact.replace("+88", "")}</a>
       </td>
       <td className="label">Applicant's Name</td>
-      <td className="data">{jamia.applicant.name}</td>
+      <td className="data">{jamia.appl.name}</td>
       <td className="label">Applicant's designation</td>
-      <td className="data">{jamia.applicant.designation}</td>
+      <td className="data">{jamia.appl.designation}</td>
       <td className="label">Applicant's mobile</td>
       <td className="data">
-        <a href={`tel:${jamia.applicant.mobile}`}>
-          {jamia.applicant.mobile.replace("+88", "")}
+        <a href={`tel:${jamia.appl.mob}`}>
+          {jamia.appl.mob.replace("+88", "")}
         </a>
       </td>
       <td className="data btns">
@@ -628,6 +627,7 @@ function SingleJamia({ data, setData }) {
   return !showFull ? (
     <tr onClick={() => setShowFull(true)}>
       <td className="jamiaId">{jamia.id}</td>
+      <td className="jamiaType">{jamia.role}</td>
       <td className="jamiaName">
         {jamia.name[locale]}
         <span>{jamia.address}</span>
@@ -677,7 +677,7 @@ function SingleJamia({ data, setData }) {
           api={patchApi}
           defaultValue={jamia.name["bn-BD"]}
           Element={Input}
-          validation={/^[ঀ-৾\s(),]+$/}
+          pattern={/^[ঀ-৾\s(),]+$/}
           fieldCode="name.bn-BD"
         />
       </td>
@@ -687,7 +687,7 @@ function SingleJamia({ data, setData }) {
           api={patchApi}
           defaultValue={jamia.name["en-US"]}
           Element={Input}
-          validation={/^[a-zA-Z\s(),]+$/}
+          pattern={/^[a-zA-Z\s(),]+$/}
           fieldCode="name.en-US"
         />
       </td>
@@ -736,7 +736,7 @@ function SingleJamia({ data, setData }) {
         <DataEditForm
           defaultValue={jamia.contact}
           Element={Input}
-          validation={/^\+8801\d{0,9}$/}
+          pattern={/^\+8801\d{0,9}$/}
           tel={true}
           fieldCode="contact"
           api={patchApi}
@@ -747,7 +747,7 @@ function SingleJamia({ data, setData }) {
         <DataEditForm
           defaultValue={jamia.about}
           Element={Textarea}
-          validation={/^[ঀ-ৣৰ-৾a-zA-Z\s(),-]+$/}
+          pattern={/^[ঀ-ৣৰ-৾a-zA-Z\s(),-]+$/}
           fieldCode="about"
           api={patchApi}
         />
@@ -755,31 +755,31 @@ function SingleJamia({ data, setData }) {
       <td className="label">Applicant's Name</td>
       <td className="data">
         <DataEditForm
-          defaultValue={jamia.applicant.name}
+          defaultValue={jamia.appl.name}
           Element={Input}
-          validation={/^[ঀ-ৣৰ-৾a-zA-Z\s(),-]+$/}
-          fieldCode="applicant.name"
+          pattern={/^[ঀ-ৣৰ-৾a-zA-Z\s(),-]+$/}
+          fieldCode="appl.name"
           api={patchApi}
         />
       </td>
       <td className="label">Applicant's designation</td>
       <td className="data">
         <DataEditForm
-          defaultValue={jamia.applicant.designation}
+          defaultValue={jamia.appl.designation}
           Element={Input}
-          validation={/^[ঀ-ৣৰ-৾a-zA-Z\s(),-]+$/}
-          fieldCode="applicant.designation"
+          pattern={/^[ঀ-ৣৰ-৾a-zA-Z\s(),-]+$/}
+          fieldCode="appl.designation"
           api={patchApi}
         />
       </td>
       <td className="label">Applicant's mobile</td>
       <td className="data">
         <DataEditForm
-          defaultValue={jamia.applicant.mobile}
+          defaultValue={jamia.appl.mob}
           Element={Input}
-          validation={/^\+8801\d{0,9}$/}
+          pattern={/^\+8801\d{0,9}$/}
           tel={true}
-          fieldCode="applicant.mobile"
+          fieldCode="appl.mob"
           api={patchApi}
         />
       </td>
@@ -809,21 +809,37 @@ function SingleJamia({ data, setData }) {
     </tr>
   );
 }
-function AllJamia() {
+function AllSources() {
   return (
     <div className="view">
-      <h1 className="viewTitle">Jamia</h1>
-      <Tabs page="/admin/jamia/" tabs={["Active", "Submitions"]} />
+      <h1 className="viewTitle">source</h1>
+      <Tabs page="/admin/sources/" tabs={["Active", "Submissions"]} />
       <Switch>
-        <Route path="/admin/jamia" exact>
+        <Route path="/admin/sources" exact>
           <View
             key="allJamia"
             Element={SingleJamia}
             defaultSort={{ column: "joined", order: "des" }}
             id="allJamia"
-            api="api/admin/jamia/active/filter?"
+            api="api/admin/sources/active/filter?"
+            categories={[
+              {
+                name: "role",
+                bridge: "is",
+                input: (
+                  <Combobox
+                    label="ধরন"
+                    options={[
+                      { label: "Jamia", value: "jamia" },
+                      { label: "Mufti", value: "mufti" },
+                    ]}
+                  />
+                ),
+              },
+            ]}
             columns={[
               { column: "id", sort: false, colCode: "id" },
+              { column: "type", sort: true, colCode: "role" },
               { column: "name", sort: false, colCode: "name" },
               { column: "prime mufti", sort: false, colCode: "primeMufti" },
               { column: "joined", sort: true, colCode: "joined" },
@@ -832,15 +848,31 @@ function AllJamia() {
             ]}
           />
         </Route>
-        <Route path="/admin/jamia/active">
+        <Route path="/admin/sources/active">
           <View
             key="allJamia"
             Element={SingleJamia}
             defaultSort={{ column: "joined", order: "des" }}
             id="allJamia"
-            api="api/admin/jamia/active/filter?"
+            api="api/admin/sources/active/filter?"
+            categories={[
+              {
+                name: "role",
+                bridge: "is",
+                input: (
+                  <Combobox
+                    label="ধরন"
+                    options={[
+                      { label: "Jamia", value: "jamia" },
+                      { label: "Mufti", value: "mufti" },
+                    ]}
+                  />
+                ),
+              },
+            ]}
             columns={[
               { column: "id", sort: false, colCode: "id" },
+              { column: "type", sort: true, colCode: "role" },
               { column: "name", sort: false, colCode: "name" },
               { column: "prime mufti", sort: false, colCode: "primeMufti" },
               { column: "joined", sort: true, colCode: "joined" },
@@ -849,16 +881,31 @@ function AllJamia() {
             ]}
           />
         </Route>
-        <Route path="/admin/jamia/submitions">
+        <Route path="/admin/sources/submissions">
           <View
-            key="allSubmittedJamia"
-            Element={SingleJamiaSubmition}
-            defaultSort={{ column: "submitted", order: "des" }}
-            id="jamiaSubmitions"
-            api="api/admin/jamia/submitions/filter?"
+            key="allSourceSubmissions"
+            Element={SingleSourceSubmission}
+            defaultSort={{ column: "joined", order: "des" }}
+            id="jamiaSubmissions"
+            api="api/admin/sources/submissions/filter?"
+            categories={[
+              {
+                name: "role",
+                input: (
+                  <Combobox
+                    label="ধরন"
+                    options={[
+                      { label: "jamia", value: "jamia" },
+                      { label: "mufti", value: "mufti" },
+                    ]}
+                  />
+                ),
+              },
+            ]}
             columns={[
-              { column: "submitted", sort: true, colCode: "submitted" },
+              { column: "joined", sort: true, colCode: "joined" },
               { column: "name & address", sort: false, colCode: "name" },
+              { column: "type", sort: true, colCode: "role" },
               { column: "prime mufti", sort: false, colCode: "primeMufti" },
               { column: "contact", sort: false, colCode: "contact" },
             ]}
@@ -963,7 +1010,7 @@ function SingleUserQuestions({ data, setData }) {
       <td className="data">{ques.email}</td>
       <td className="label">Mobile</td>
       <td className="data">
-        <a href={`tel:${ques.mobile}`}>{ques.mobile}</a>
+        <a href={`tel:${ques.mob}`}>{ques.mob}</a>
       </td>
       <td className="label">Question</td>
       <td className="data">{ques.ques}</td>
@@ -979,6 +1026,7 @@ function SingleUserQuestions({ data, setData }) {
   );
 }
 function UserReview() {
+  const { locale } = useContext(SiteContext);
   return (
     <div className="view">
       <h1>User Review</h1>
@@ -991,8 +1039,53 @@ function UserReview() {
           <View
             Element={SingleUserQuestions}
             defaultSort={{ column: "submitted", order: "des" }}
-            id="userSubmitions"
+            id="userSubmissions"
             api="api/admin/userQuestion/filter?"
+            categories={[
+              {
+                name: "topic",
+                input: (
+                  <Combobox
+                    options={topics.map((option) => {
+                      return {
+                        label: option[locale],
+                        value: option,
+                      };
+                    })}
+                    required={true}
+                  ></Combobox>
+                ),
+              },
+              {
+                name: "name",
+                input: <Input label="Name" type="text" required={true} />,
+              },
+              {
+                name: "answered",
+                input: (
+                  <Combobox
+                    label="Answered"
+                    options={[
+                      { label: "Answered", value: true },
+                      { label: "Not answered", value: false },
+                    ]}
+                    required={true}
+                  />
+                ),
+              },
+              {
+                name: "taken",
+                input: (
+                  <Combobox
+                    id={ID(8)}
+                    maxHeight={500}
+                    label="jamia"
+                    data={["jamia 1", "jamia 2", "jamia 3"]}
+                    required={true}
+                  />
+                ),
+              },
+            ]}
             columns={[
               { column: "date", sort: true, colCode: "submitted" },
               { column: "name", sort: false, colCode: "name" },
@@ -1004,7 +1097,7 @@ function UserReview() {
           <View
             Element={SingleUserQuestions}
             defaultSort={{ column: "submitted", order: "des" }}
-            id="userSubmitions"
+            id="userSubmissions"
             api="api/admin/userQuestion/filter?"
             columns={[
               { column: "date", sort: true, colCode: "submitted" },
@@ -1051,7 +1144,7 @@ function AdminPanel() {
     <div className="main adminPanel">
       <Sidebar
         views={[
-          { label: "Jamia", path: "/admin/jamia", icon: "book" },
+          { label: "Sources", path: "/admin/sources", icon: "book" },
           { label: "Fatwa", path: "/admin/fatwa", icon: "reader" },
           {
             label: "User Area",
@@ -1070,11 +1163,12 @@ function AdminPanel() {
         </div>
       </Sidebar>
       <Switch>
-        <Route path="/admin" exact component={AllJamia} />
-        <Route path="/admin/jamia" component={AllJamia} />
+        <Route path="/admin" exact component={AllSources} />
+        <Route path="/admin/sources" component={AllSources} />
         <Route path="/admin/fatwa/:filter?" component={AllFatwa} />
         <Route path="/admin/patreons" component={Patreons} />
         <Route path="/admin/user" component={UserReview} />
+        <Route path="/" component={FourOFour} />
       </Switch>
     </div>
   );

@@ -49,6 +49,7 @@ export const Sidebar = ({ views, children }) => {
 };
 
 export const Filter = ({ categories, filters, setFilters }) => {
+  const { locale } = useContext(SiteContext);
   const [showCategories, setShowCategories] = useState(false);
   const [value, setValue] = useState("");
   const [showMiniForm, setShowMiniForm] = useState(false);
@@ -61,10 +62,10 @@ export const Filter = ({ categories, filters, setFilters }) => {
   }
   function submit(e) {
     e.preventDefault();
-    if (filters.title) {
+    if (filters[categories[0].name]) {
       return;
     }
-    addChip("title", value);
+    addChip(categories[0].fieldName, categories[0].bridge, value);
     setValue("");
     filterInput.current.focus();
     setShowCategories(false);
@@ -75,7 +76,13 @@ export const Filter = ({ categories, filters, setFilters }) => {
       // --------- NEED LOOKUP
       return;
     }
-    addChip(miniForm.name, e.target.querySelector("input").value);
+    addChip(
+      miniForm.fieldName,
+      miniForm.bridge,
+      e.target.querySelector("input").getAttribute("data")
+        ? JSON.parse(e.target.querySelector("input").getAttribute("data"))
+        : e.target.querySelector("input").value
+    );
     setValue("");
     setShowCategories(false);
   }
@@ -83,10 +90,16 @@ export const Filter = ({ categories, filters, setFilters }) => {
     setMiniForm(item);
     setShowMiniForm(true);
   }
-  function addChip(category, value) {
+  function addChip(fieldName, bridge = ":", value) {
     setFilters((prev) => {
-      const newChips = { ...prev };
-      newChips[category] = value;
+      const newChips = {
+        ...prev,
+        [fieldName]: {
+          value: value,
+          bridge: bridge,
+          display: value[locale] ? value[locale] : value,
+        },
+      };
       return newChips;
     });
     setShowCategories(false);
@@ -102,16 +115,16 @@ export const Filter = ({ categories, filters, setFilters }) => {
           name="filter-outline"
         ></ion-icon>
         <div className="chips">
-          {Object.entries(filters).map((item, i) => (
-            <div key={item[1]} className="chip">
+          {Object.keys(filters).map((item, i) => (
+            <div key={filters[item].display} className="chip">
               <p>
-                {item[0]} contains '<b>{item[1]}</b>'
+                {item} {filters[item].display} '<b>{filters[item].display}</b>'
               </p>
               <ion-icon
                 onClick={() =>
                   setFilters((prev) => {
                     const newChips = { ...prev };
-                    delete newChips[item[0]];
+                    delete newChips[item];
                     return newChips;
                   })
                 }
@@ -143,22 +156,38 @@ export const Filter = ({ categories, filters, setFilters }) => {
               top: filterInput.current.offsetTop + 40,
             }}
           >
-            {!showMiniForm ? (
+            {showMiniForm ? (
+              <div className="miniForm">
+                <header>
+                  <p>{miniForm.name}</p>
+                  <ion-icon
+                    onClick={() => {
+                      setShowCategories(false);
+                    }}
+                    name="close-outline"
+                  ></ion-icon>
+                </header>
+                <form onSubmit={miniFormSubmit}>
+                  {miniForm.input}
+                  <button type="submit">APPLY</button>
+                </form>
+              </div>
+            ) : (
               <>
                 {value === "" &&
                   categories
-                    .filter((item) => !filters[item.name])
+                    .filter((item) => !filters[item.fieldName])
                     .map((item) => (
                       <li
-                        key={item.name}
+                        key={item.fieldName}
                         onClick={(e) => suggestionClick(e, item)}
                       >
                         {item.name}
                       </li>
                     ))}
-                {value !== "" && !filters.title && (
+                {value !== "" && !filters[categories[0].name] && (
                   <li onClick={submit}>
-                    Title contains '<b>{value}</b>'
+                    {`${categories[0].display}`} '<b>{value}</b>'
                   </li>
                 )}
                 {value !== "" &&
@@ -177,26 +206,10 @@ export const Filter = ({ categories, filters, setFilters }) => {
                   categories.filter((item) =>
                     item.name.includes(value.toLowerCase())
                   ).length === 0 &&
-                  filters.title && (
+                  filters[categories[0].fieldName] && (
                     <li className="noFilter">No matching filter</li>
                   )}
               </>
-            ) : (
-              <div className="miniForm">
-                <header>
-                  <p>{miniForm.name}</p>
-                  <ion-icon
-                    onClick={() => {
-                      setShowCategories(false);
-                    }}
-                    name="close-outline"
-                  ></ion-icon>
-                </header>
-                <form onSubmit={miniFormSubmit}>
-                  {miniForm.input}
-                  <button type="submit">APPLY</button>
-                </form>
-              </div>
             )}
           </ul>
         </OutsideClick>
@@ -292,9 +305,16 @@ export const Table = ({ id, children, columns, setSort, sort, className }) => {
   );
 };
 
-export const OutsideClick = ({ className, style, children, setOpen, open }) => {
+export const OutsideClick = ({
+  id,
+  className,
+  style,
+  children,
+  setOpen,
+  open,
+}) => {
   return (
-    <section className={className} style={style}>
+    <section className={className} style={style} id={id}>
       {open && (
         <div
           className="backdrop"
@@ -336,10 +356,22 @@ export const Actions = ({ id, actions }) => {
   );
 };
 
-const encodeURL = (obj) =>
-  Object.keys(obj)
-    .map((key) => `${key}=${obj[key]}`)
+const encodeURL = (obj) => {
+  const query = Object.keys(obj)
+    .map(
+      (key) =>
+        `${key}=${
+          obj[key].value
+            ? typeof obj[key].value === "string"
+              ? obj[key].value
+              : JSON.stringify(obj[key].value)
+            : obj[key]
+        }`
+    )
     .join("&");
+  console.log(obj, query);
+  return query;
+};
 
 export const LoadingColumn = () => {
   return (
@@ -371,6 +403,7 @@ export const View = ({
     !loading && setLoading(true);
     const query = encodeURL(filters);
     const sortOrder = encodeURL(sort);
+    // console.log(query);
     const options = { headers: { "Accept-Language": locale }, signal: signal };
     const url = `/${api}${query}&${sortOrder}`;
     fetch(url, options)
@@ -380,8 +413,8 @@ export const View = ({
         setLoading(false);
       })
       .catch((err) => {
+        alert("something went wrong");
         console.log(err);
-        console.log("handle error!!");
       });
     return () => abortController.abort();
   }

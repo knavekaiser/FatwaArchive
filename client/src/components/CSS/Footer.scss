@@ -3,25 +3,33 @@
 .footer {
   background-color: $base-white;
   border-top: 1px solid $light-border;
-  padding: 2rem 2rem;
+  padding: 1.5rem 2rem;
   display: flex;
+  grid-gap: 0.25rem;
   justify-content: space-between;
   color: #888;
   ul {
-    display: grid;
-    grid-auto-flow: column;
-    grid-row-gap: 0.5rem;
+    display: flex;
+    grid-gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+    .copy {
+      padding: 0.5rem 0.5rem;
+    }
+    li {
+      white-space: nowrap;
+    }
   }
-  li {
-    white-space: nowrap;
+  .links li {
     list-style: none;
+    border-radius: 5px;
+    cursor: pointer;
     a {
-      border-radius: 5px;
       padding: 0.5rem 1rem;
-      transition: background-color 0.2s ease-in-out;
-      &:hover {
-        background-color: $light-hover;
-      }
+      display: inline-block;
+    }
+    &:hover {
+      background-color: $light-hover;
     }
   }
 }
@@ -29,19 +37,12 @@
 @media only screen and (max-width: 480px) {
   .footer {
     padding: 1rem;
-    justify-content: space-between;
     flex-direction: column;
-    grid-gap: 0.75rem;
     ul {
       justify-content: center;
-      overflow-x: hidden;
-      .copy {
-        width: 100%;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
     }
-    // flex-wrap: wrap;
+    .links li a {
+      padding: 0.5rem 0.9rem;
+    }
   }
 }

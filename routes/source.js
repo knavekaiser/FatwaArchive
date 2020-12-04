@@ -1,32 +1,33 @@
-const { Fatwa, FatwaSubmitions } = require("../models/fatwaModel");
-const { Jamia, JamiaSubmitions } = require("../models/jamiaModel");
+const { Fatwa } = require("../models/fatwaModel");
+const { Jamia } = require("../models/sourceModel");
 const { User } = require("../models/userModel");
-const { UserQuestion } = require("../models/userSubmitionModel");
+const { UserQuestion } = require("../models/userSubmissionModel");
 
+//-------------------------------NEW FATWA
 router.route("/fatwa/new").post(passport.authenticate("jwt"), (req, res) => {
-  const { title, ques, ans } = req.body;
-  const newFatwaSubmition = new FatwaSubmitions({
+  const { title, titleEn, ques, quesEn, ans, ansEn } = req.body;
+  const newFatwa = new Fatwa({
     topic: req.body.topic,
     title: {
       "bn-BD": title,
-      "en-US": req.body.titleEn,
+      ...(titleEn && { "en-US": titleEn }),
     },
     ques: {
       "bn-BD": ques,
-      "en-US": req.body.quesEn,
+      ...(quesEn && { "en-US": quesEn }),
     },
     ans: {
       "bn-BD": ans,
-      "en-US": req.body.ansEn,
+      ...(ansEn && { "en-US": ansEn }),
     },
     added: new Date(),
     ref: req.body.ref,
     img: req.body.img,
-    jamia: req.body.jamia,
+    source: req.user._id,
     updated: new Date(),
-    translation: req.body.titleEn ? "manual" : "google translate",
+    translation: titleEn ? "manual" : "google translate",
   });
-  newFatwaSubmition
+  newFatwa
     .save()
     .then(() => res.send("fatwa added"))
     .catch((err) => {
@@ -37,50 +38,74 @@ router.route("/fatwa/new").post(passport.authenticate("jwt"), (req, res) => {
           field: Object.keys(err.keyValue)[0],
         });
       } else {
-        res.status(400).json(err);
+        res.status(400).json("err");
       }
     });
 });
 router
-  .route("/jamia/fatwaSubmitions/filter")
+  .route("/source/fatwaSubmissions/filter")
   .get(passport.authenticate("jwt"), (req, res) => {
-    if (req.user.role !== "jamia") return res.status(403).json("unauthorized");
     const locale = req.headers["accept-language"];
-    const query = { jamia: req.user.id };
+    const query = { source: req.user._id, status: "pending" };
     const sort = { column: req.query.column, order: req.query.order };
     req.query.title && (query[`title.${locale}`] = RegExp(req.query.title));
     req.query.question &&
       (query[`ques.${locale}`] = RegExp(req.query.question));
     req.query.answer && (query[`ans.${locale}`] = RegExp(req.query.answer));
     req.query.topic && (query[`topic.${locale}`] = req.query.topic);
-    FatwaSubmitions.find(query)
-      .sort(`${sort.order === "asc" ? "-" : ""}${sort.column}`)
-      .then((submitions) => {
-        if (submitions.length === 0) {
+    Fatwa.find({ cous }).then((res) => {
+      console.log(res);
+    });
+    Fatwa.find(query)
+      .sort(`${sort.order === "des" ? "-" : ""}${sort.column}`)
+      .then((submissions) => {
+        if (submissions.length === 0) {
           res.json([]);
           return;
         }
-        res.json(submitions);
+        res.json(submissions);
       })
       .catch((err) => res.status(400).json(err));
   });
-router.route("/fatwaSubmitions/:_id").delete((req, res) => {
-  FatwaSubmitions.findByIdAndDelete(req.params._id)
+router.route("/fatwaSubmissions/:_id").delete((req, res) => {
+  FatwaSubmissions.findByIdAndDelete(req.params._id)
     .then(() => res.json("successfully deleted"))
     .catch((err) => res.status(400).json("Error: " + err));
 });
 
+//----------------------------------------------ALL FATWA
 router
-  .route("/jamia/allfatwa/filter")
+  .route("/fatwaLive/filter?")
+  .get(passport.authenticate("jwt"), (req, res) => {
+    Fatwa.find({ id: req.user.id }).then((fatwas) => {
+      if (fatwas.length === 0) {
+        res.json([]);
+        return;
+      }
+      const data = fatwas.sort((a, b) => {
+        if (a[sort.column] < b[sort.column]) {
+          return sort.order === "des" ? 1 : -1;
+        } else {
+          return sort.order === "des" ? -1 : 1;
+        }
+      });
+      res.json(data);
+    });
+    res.json([]);
+  });
+
+router
+  .route("/source/allfatwa/filter")
   .get(passport.authenticate("jwt"), (req, res) => {
     const locale = req.headers["accept-language"];
-    const query = { jamia: req.user.id };
+    const query = { source: req.user._id };
     const sort = { column: req.query.column, order: req.query.order };
     const { title, ques, ans, topic, jamia, translation } = req.query;
     title && (query[`title.${locale}`] = RegExp(title));
     ques && (query[`ques.${locale}`] = RegExp(ques));
     ans && (query[`ans.${locale}`] = RegExp(ans));
     topic && (query[`topic.${locale}`] = topic);
+    console.log(query);
     translation &&
       (translation === "Manual"
         ? (query.translation = "manual")
@@ -90,7 +115,7 @@ router
       return;
     }
     Fatwa.find(query)
-      .sort(`${sort.order === "asc" ? "-" : ""}${sort.column}`)
+      .sort(`${sort.order === "des" ? "-" : ""}${sort.column}`)
       .then((fatwas) => {
         if (fatwas.length === 0) {
           res.json([]);
@@ -119,21 +144,6 @@ router
       .catch((err) => {
         res.status(400).json("Error: " + err);
         console.log(err);
-      });
-  });
-
-router
-  .route("/jamia/questionFeed/filter")
-  .get(passport.authenticate("jwt"), (req, res) => {
-    const sort = { column: req.query.column, order: req.query.order };
-    UserQuestion.find({ answered: false })
-      .sort(`${sort.order === "asc" ? "-" : ""}${sort.column}`)
-      .then((questions) => {
-        res.json(questions);
-      })
-      .catch((err) => {
-        console.log(err);
-        res.status(500).json("something went wrong");
       });
   });
 
@@ -170,56 +180,55 @@ router.route("/fatwa/:_id").delete((req, res) => {
     .catch((err) => res.status(400).json("Error: " + err));
 });
 
+//---------------------------------------------USER QUESTION
 router
-  .route("/fatwaLive/filter?")
+  .route("/source/questionFeed/filter")
   .get(passport.authenticate("jwt"), (req, res) => {
-    Fatwa.find({ id: req.user.id }).then((fatwas) => {
-      if (fatwas.length === 0) {
-        res.json([]);
-        return;
-      }
-      const data = fatwas.sort((a, b) => {
-        if (a[sort.column] < b[sort.column]) {
-          return sort.order === "des" ? 1 : -1;
-        } else {
-          return sort.order === "des" ? -1 : 1;
-        }
+    const sort = { column: req.query.column, order: req.query.order };
+    UserQuestion.find({ answered: false })
+      .sort(`${sort.order === "des" ? "-" : ""}${sort.column}`)
+      .then((questions) => {
+        res.json(questions);
+      })
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json("something went wrong");
       });
-      res.json(data);
-    });
-    res.json([]);
   });
 
-router.route("/edit/:_id").patch(passport.authenticate("jwt"), (req, res) => {
-  if (req.user.role !== "jamia") {
-    res.status(403).json("unauthorized!");
-    return;
-  }
-  if (Object.keys(req.body).length === 1) {
-    Jamia.findOneAndUpdate({ _id: req.params._id }, req.body)
-      .then((jamia) => {
-        res.json("data successfully updated!");
-      })
-      .catch((err) => res.json(err));
-  } else if (Object.keys(req.body).length === 3) {
-    Jamia.findById(req.params._id)
-      .then((jamia) => bcrypt.compare(req.body.oldPass, jamia.password))
-      .then((match) => {
-        if (match) {
-          Jamia.findOneAndUpdate(
-            { _id: req.params._id },
-            { password: bcrypt.hashSync(req.body.newPass, 10) }
-          )
-            .then(() => res.json("password changed successfully"))
-            .catch((err) => {
-              res.status(500).json(err);
-            });
-        } else {
-          res.status(401).json("Old password does not match");
-        }
-      })
-      .catch((err) => res.status(500).json(err));
-  }
-});
+//--------------------------------------------PROFILE
+router
+  .route("/jamia/edit/:_id")
+  .patch(passport.authenticate("jwt"), (req, res) => {
+    if (req.user.role !== "jamia") {
+      res.status(403).json("unauthorized!");
+      return;
+    }
+    if (Object.keys(req.body).length === 1) {
+      Jamia.findOneAndUpdate({ _id: req.params._id }, req.body)
+        .then((jamia) => {
+          res.json("data successfully updated!");
+        })
+        .catch((err) => res.json(err));
+    } else if (Object.keys(req.body).length === 3) {
+      Jamia.findById(req.params._id)
+        .then((jamia) => bcrypt.compare(req.body.oldPass, jamia.pass))
+        .then((match) => {
+          if (match) {
+            Jamia.findOneAndUpdate(
+              { _id: req.params._id },
+              { pass: bcrypt.hashSync(req.body.newPass, 10) }
+            )
+              .then(() => res.json("password changed successfully"))
+              .catch((err) => {
+                res.status(500).json(err);
+              });
+          } else {
+            res.status(401).json("Old password does not match");
+          }
+        })
+        .catch((err) => res.status(500).json(err));
+    }
+  });
 
 module.exports = router;

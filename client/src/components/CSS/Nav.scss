@@ -4,11 +4,12 @@
   z-index: 20;
   position: sticky;
   top: 0;
-  padding: 0.5rem 2rem;
+  padding: 0.5rem 1rem;
   display: grid;
-  grid-template-columns: 180px 1fr auto;
+  grid-template-columns: min-content 1fr auto;
   grid-template-areas: "lg sr nv";
   background: $base-white;
+  grid-gap: 1rem;
   .sidebarToggleBtn {
     display: flex;
     align-items: center;
@@ -27,10 +28,17 @@
       }
     }
   }
-  .logo {
-    width: 90%;
-    height: 2.5rem;
-    object-fit: contain;
+  .navLogo {
+    img {
+      width: 125px;
+      object-fit: contain;
+    }
+  }
+  .sidebarToggleBtn + .navLogo {
+    margin: auto;
+    width: min-content;
+    display: flex;
+    justify-content: center;
   }
   align-items: center;
   #searchbar {
@@ -48,7 +56,6 @@
   }
   nav {
     grid-area: nv;
-    margin-left: 2rem;
     .avatar {
       text-transform: uppercase;
       background: $blue;
@@ -99,10 +106,16 @@
     grid-template-columns: 1fr auto;
     grid-template-areas: "lg nv" "sr sr";
     &.mini {
-      grid-template-columns: 32px 1fr min-content;
+      grid-template-columns: min-content 1fr min-content;
       grid-template-areas: "bt lg nv";
-      & > a {
+      .navLogo {
         grid-area: lg;
+        display: flex;
+        justify-content: center;
+        width: min-content;
+      }
+      .sidebarToggleBtn + .navLogo {
+        width: 100%;
       }
     }
     #searchbar {

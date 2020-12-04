@@ -39,7 +39,8 @@ mongoose
     useCreateIndex: true,
     useFindAndModify: false,
   })
-  .then(() => console.log("connected to db"));
+  .then(() => console.log("connected to db"))
+  .catch((err) => console.log("could not connect to db, here's why: " + err));
 
 app.use(express.json());
 app.use(cookieParser());
@@ -48,7 +49,7 @@ require("./config/passport");
 app.use(passport.initialize());
 
 app.use("/api", require("./routes/general"));
-app.use("/api/jamia", require("./routes/jamia"));
+app.use("/api/source", require("./routes/source"));
 app.use("/api/admin", require("./routes/admin"));
 
 app.use(express.static(path.join(__dirname, "client/build")));

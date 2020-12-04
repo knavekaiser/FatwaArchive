@@ -1,4 +1,4 @@
-const { Jamia } = require("../models/jamiaModel");
+const { Jamia } = require("../models/sourceModel");
 const { User } = require("../models/userModel");
 
 const cookieExtractor = (req) => {
@@ -43,7 +43,7 @@ passport.use(
       Model.findOne({ id: username })
         .then((model) => {
           if (!model || (model && model.ghost)) return next(null, false);
-          if (!bcrypt.compareSync(password, model.password))
+          if (!bcrypt.compareSync(password, model.pass))
             return next(null, false);
           return next(null, model);
         })

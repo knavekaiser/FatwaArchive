@@ -7,7 +7,7 @@ import {
   Input,
   Combobox,
   Textarea,
-  ComboboxMulti,
+  // ComboboxMulti,
   Submit,
   topics,
 } from "./FormElements";
@@ -37,7 +37,7 @@ function LoadingPost() {
 
 function Profile() {
   const { user } = useContext(SiteContext);
-  const patchApi = `/api/jamia/edit/${user._id}`;
+  const patchApi = `/api/source/edit/${user._id}`;
   return (
     <div className="view">
       <h1>Jamia Profile</h1>
@@ -67,7 +67,7 @@ function Profile() {
             api={patchApi}
             defaultValue={user.name["bn-BD"]}
             Element={Input}
-            validation={/^[ঀ-৾\s(),]+$/}
+            pattern={/^[ঀ-৾\s(),]+$/}
             fieldCode="name.bn-BD"
           />
         </li>
@@ -77,7 +77,7 @@ function Profile() {
             api={patchApi}
             defaultValue={user.name["en-US"]}
             Element={Input}
-            validation={/^[a-zA-Z\s(),]+$/}
+            pattern={/^[a-zA-Z\s(),]+$/}
             fieldCode="name.en-US"
           />
         </li>
@@ -126,7 +126,7 @@ function Profile() {
           <DataEditForm
             defaultValue={user.contact}
             Element={Input}
-            validation={/^\+8801\d{0,9}$/}
+            pattern={/^\+8801\d{0,9}$/}
             tel={true}
             fieldCode="contact"
             api={patchApi}
@@ -137,7 +137,7 @@ function Profile() {
           <DataEditForm
             defaultValue={user.about}
             Element={Textarea}
-            validation={/^[ঀ-ৣৰ-৾a-zA-Z\s(),-]+$/}
+            pattern={/^[ঀ-ৣৰ-৾a-zA-Z\s(),-]+$/}
             fieldCode="about"
             api={patchApi}
           />
@@ -145,9 +145,9 @@ function Profile() {
         <li className="label">Applicant's Name</li>
         <li className="data">
           <DataEditForm
-            defaultValue={user.applicant.name}
+            defaultValue={user.appl.name}
             Element={Input}
-            validation={/^[ঀ-ৣৰ-৾a-zA-Z\s(),-]+$/}
+            pattern={/^[ঀ-ৣৰ-৾a-zA-Z\s(),-]+$/}
             fieldCode="applicant.name"
             api={patchApi}
           />
@@ -155,9 +155,9 @@ function Profile() {
         <li className="label">Applicant's designation</li>
         <li className="data">
           <DataEditForm
-            defaultValue={user.applicant.designation}
+            defaultValue={user.appl.des}
             Element={Input}
-            validation={/^[ঀ-ৣৰ-৾a-zA-Z\s(),-]+$/}
+            pattern={/^[ঀ-ৣৰ-৾a-zA-Z\s(),-]+$/}
             fieldCode="applicant.designation"
             api={patchApi}
           />
@@ -165,9 +165,9 @@ function Profile() {
         <li className="label">Applicant's mobile</li>
         <li className="data">
           <DataEditForm
-            defaultValue={user.applicant.mobile}
+            defaultValue={user.appl.mob}
             Element={Input}
-            validation={/^\+8801\d{0,9}$/}
+            pattern={/^\+8801\d{0,9}$/}
             tel={true}
             fieldCode="applicant.mobile"
             api={patchApi}
@@ -255,7 +255,7 @@ function SingleFatwa({ data, setData }) {
     </tr>
   );
 }
-function JamiaSingleFatwaSubmition({ data, setData }) {
+function JamiaSingleFatwaSubmission({ data, setData }) {
   const { locale, setFatwaToEdit } = useContext(SiteContext);
   const [open, setOpen] = useState(false);
   const fatwa = data;
@@ -264,8 +264,8 @@ function JamiaSingleFatwaSubmition({ data, setData }) {
     setFatwaToEdit(fatwa);
     history.push("/jamia/add");
   }
-  function removeSubmition() {
-    fetch(`/api/fatwaSubmitions/${fatwa._id}`, {
+  function removeSubmission() {
+    fetch(`/api/fatwaSubmissions/${fatwa._id}`, {
       method: "DELETE",
     })
       .then((res) => {
@@ -342,7 +342,7 @@ function JamiaSingleFatwaSubmition({ data, setData }) {
         <button onClick={edit}>
           <ion-icon name="pencil-outline"></ion-icon> Edit
         </button>
-        <button onClick={removeSubmition}>
+        <button onClick={removeSubmission}>
           <ion-icon name="trash-outline"></ion-icon> Remove
         </button>
       </td>
@@ -363,53 +363,67 @@ function JamiaSingleFatwaSubmition({ data, setData }) {
   );
 }
 function JamiaAllFatwa() {
+  const { locale } = useContext(SiteContext);
   return (
     <div className="view">
       <h1 className="viewTitle">Fatwa</h1>
-      <Tabs page="/jamia/fatwa/" tabs={["Live", "Submitions"]} />
+      <Tabs page="/jamia/fatwa/" tabs={["Live", "Submissions"]} />
       <Switch>
         <Route path="/jamia/fatwa" exact>
           <View
             key="jamiaAllFatwa"
             Element={SingleFatwa}
             id="allFatwa"
-            api="api/jamia/allFatwa/filter?"
+            api="api/source/allFatwa/filter?"
             categories={[
               {
-                name: "topic",
+                fieldName: "title",
+                name: "Title",
+                display: "Title contains",
+                input: <Input label="Title" type="text" required={true} />,
+              },
+              {
+                fieldName: "topic",
+                name: "Topic",
+                display: "Topic is",
                 input: (
-                  <ComboboxMulti
+                  <Combobox
                     id={ID(8)}
                     maxHeight={300}
                     label="topic"
-                    data={topics}
-                    required={true}
+                    options={topics.map((option) => {
+                      return {
+                        label: option[locale],
+                        value: option,
+                      };
+                    })}
                   />
                 ),
               },
               {
-                name: "title",
-                input: <Input label="Title" type="text" required={true} />,
-              },
-              {
-                name: "question",
+                fieldName: "question",
+                name: "Question",
+                display: "Question contains",
                 input: <Input label="Question" type="text" required={true} />,
               },
               {
-                name: "answer",
+                fieldName: "answer",
+                name: "Answer",
+                display: "Answer contains",
                 input: <Input label="Answer" type="text" required={true} />,
               },
               {
-                name: "translation",
+                fieldName: "translation",
+                name: "Translation",
+                display: "Translation :",
                 input: (
                   <Combobox
                     maxHeight={500}
-                    label="by"
+                    label="transition"
                     options={[
                       { label: "Generated", value: "generated" },
                       { label: "Manual", value: "manual" },
                     ]}
-                    required={true}
                   />
                 ),
               },
@@ -428,17 +442,21 @@ function JamiaAllFatwa() {
             key="jamiaAllFatwa"
             Element={SingleFatwa}
             id="allFatwa"
-            api="api/jamia/allFatwa/filter?"
+            api="api/source/allFatwa/filter?"
             categories={[
               {
                 name: "topic",
                 input: (
-                  <ComboboxMulti
+                  <Combobox
                     id={ID(8)}
                     maxHeight={300}
                     label="topic"
-                    data={topics}
-                    required={true}
+                    options={topics.map((option) => {
+                      return {
+                        label: option[locale],
+                        value: option,
+                      };
+                    })}
                   />
                 ),
               },
@@ -458,11 +476,12 @@ function JamiaAllFatwa() {
                 name: "translation",
                 input: (
                   <Combobox
-                    id={ID(8)}
                     maxHeight={500}
                     label="jamia"
-                    data={["Generated", "Manual"]}
-                    required={true}
+                    options={[
+                      { label: "Generated", value: "generated" },
+                      { label: "Manual", value: "manual" },
+                    ]}
                   />
                 ),
               },
@@ -476,22 +495,26 @@ function JamiaAllFatwa() {
             defaultSort={{ column: "added", order: "des" }}
           />
         </Route>
-        <Route path="/jamia/fatwa/submitions">
+        <Route path="/jamia/fatwa/submissions">
           <View
-            key="jamiaAllFatwaSubmition"
-            Element={JamiaSingleFatwaSubmition}
-            id="fatwaSubmitions"
-            api="api/jamia/fatwaSubmitions/filter?"
+            key="jamiaAllFatwaSubmission"
+            Element={JamiaSingleFatwaSubmission}
+            id="fatwaSubmissions"
+            api="api/source/fatwaSubmissions/filter?"
             categories={[
               {
                 name: "topic",
                 input: (
-                  <ComboboxMulti
+                  <Combobox
                     id={ID(8)}
                     maxHeight={300}
                     label="topic"
-                    data={topics}
-                    required={true}
+                    options={topics.map((option) => {
+                      return {
+                        label: option[locale],
+                        value: option,
+                      };
+                    })}
                   />
                 ),
               },
@@ -521,12 +544,12 @@ function JamiaAllFatwa() {
   );
 }
 
-function UserSubmitions() {
+function UserSubmissions() {
   return (
     <div className="view">
-      <h1 className="viewTitle">User Submitions</h1>
+      <h1 className="viewTitle">User Submissions</h1>
       <Tabs
-        page="/jamia/userSubmitions/"
+        page="/jamia/userSubmissions/"
         tabs={["Question Feed", "Our Questions", "Reviews", "Reports"]}
       />
       <Switch>
@@ -535,18 +558,19 @@ function UserSubmitions() {
             key="jamiaAllFatwa"
             Element={SingleFatwa}
             id="allFatwa"
-            api="api/jamia/allFatwa/filter?"
+            api="api/source/allFatwa/filter?"
             categories={[
               {
                 name: "topic",
                 input: (
-                  <ComboboxMulti
-                    id={ID(8)}
-                    maxHeight={300}
-                    label="topic"
-                    data={topics}
-                    required={true}
-                  />
+                  <></>
+                  // <ComboboxMulti
+                  //   id={ID(8)}
+                  //   maxHeight={300}
+                  //   label="topic"
+                  //   data={topics}
+                  //   required={true}
+                  // />
                 ),
               },
               {
@@ -590,18 +614,19 @@ function UserSubmitions() {
             key="jamiaAllFatwa"
             Element={SingleFatwa}
             id="allFatwa"
-            api="api/jamia/allFatwa/filter?"
+            api="api/source/allFatwa/filter?"
             categories={[
               {
                 name: "topic",
                 input: (
-                  <ComboboxMulti
-                    id={ID(8)}
-                    maxHeight={300}
-                    label="topic"
-                    data={topics}
-                    required={true}
-                  />
+                  <></>
+                  // <ComboboxMulti
+                  //   id={ID(8)}
+                  //   maxHeight={300}
+                  //   label="topic"
+                  //   data={topics}
+                  //   required={true}
+                  // />
                 ),
               },
               {
@@ -640,23 +665,24 @@ function UserSubmitions() {
             defaultSort={{ column: "added", order: "des" }}
           />
         </Route>
-        <Route path="/jamia/fatwa/submitions">
+        <Route path="/jamia/fatwa/submissions">
           <View
-            key="jamiaAllFatwaSubmition"
-            Element={JamiaSingleFatwaSubmition}
-            id="fatwaSubmitions"
-            api="api/jamia/fatwaSubmitions/filter?"
+            key="jamiaAllFatwaSubmission"
+            Element={JamiaSingleFatwaSubmission}
+            id="fatwaSubmissions"
+            api="api/source/fatwaSubmissions/filter?"
             categories={[
               {
                 name: "topic",
                 input: (
-                  <ComboboxMulti
-                    id={ID(8)}
-                    maxHeight={300}
-                    label="topic"
-                    data={topics}
-                    required={true}
-                  />
+                  <></>
+                  // <ComboboxMulti
+                  //   id={ID(8)}
+                  //   maxHeight={300}
+                  //   label="topic"
+                  //   data={topics}
+                  //   required={true}
+                  // />
                 ),
               },
               {
@@ -787,7 +813,7 @@ function NewQuestions() {
     const query = encodeURL(filters);
     const sortOrder = encodeURL(sort);
     const options = { headers: { "Accept-Language": locale }, signal: signal };
-    const url = `/api/jamia/questionFeed/filter?${query}&${sortOrder}`;
+    const url = `/api/source/questionFeed/filter?${query}&${sortOrder}`;
     fetch(url, options)
       .then((res) => res.json())
       .then((data) => {
@@ -865,8 +891,8 @@ function JamiaProfile() {
           },
           { label: "Fatwa", path: "/jamia/fatwa", icon: "reader" },
           {
-            label: "User Submitions",
-            path: "/jamia/userSubmitions",
+            label: "User Submissions",
+            path: "/jamia/userSubmissions",
             icon: "people",
           },
         ]}
@@ -891,7 +917,7 @@ function JamiaProfile() {
         <Route path="/jamia" exact component={JamiaAllFatwa} />
         <Route path="/jamia/fatwa" component={JamiaAllFatwa} />
         <Route path="/jamia/profile" component={Profile} />
-        <Route path="/jamia/userSubmitions" component={UserSubmitions} />
+        <Route path="/jamia/userSubmissions" component={UserSubmissions} />
       </Switch>
     </div>
   );

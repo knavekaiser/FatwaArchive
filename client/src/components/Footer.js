@@ -5,12 +5,14 @@ import { SiteContext } from "../Context";
 import { Link } from "react-router-dom";
 
 function Footer() {
-  const { user } = useContext(SiteContext);
+  const { user, locale, setLocale } = useContext(SiteContext);
   return (
     <div className="footer">
-      <ul>
+      <ul className="links">
         <li>
           <Link to="/about">About</Link>
+        </li>
+        <li>
           <Link to="/askQuestion">Ask Question</Link>
         </li>
         {user === null && (
@@ -18,6 +20,13 @@ function Footer() {
             <Link to="/admin">Admin</Link>
           </li>
         )}
+        <li
+          onClick={() => {
+            locale === "bn-BD" ? setLocale("en-US") : setLocale("bn-BD");
+          }}
+        >
+          {locale === "bn-BD" ? <a>BN</a> : <a>EN</a>}
+        </li>
       </ul>
       <ul>
         <li className="copy">&copy; Fatwa Archive</li>

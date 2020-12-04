@@ -12,7 +12,8 @@
   #allJamia {
     // min-width: 830px;
     tr {
-      grid-template-columns: 140px 0.65fr 0.35fr 78px 38px 108px;
+      grid-template-columns: 130px 70px 0.65fr 0.35fr 78px 38px 108px;
+
       td,
       td span {
         overflow-x: hidden;
@@ -42,15 +43,18 @@
       top: 44px;
     }
   }
-  #jamiaSubmitions {
+  #jamiaSubmissions {
     tr {
-      grid-template-columns: 0.2fr 0.5fr 0.5fr 0.25fr;
+      grid-template-columns: 70px 0.75fr 70px 0.5fr 115px;
+      th {
+        white-space: nowrap;
+      }
     }
     &.thead {
       top: 44px;
     }
   }
-  #fatwaSubmitions {
+  #fatwaSubmissions {
     tr {
       grid-template-columns: 6rem 8rem 8rem 1fr;
       &.loading {
@@ -60,7 +64,7 @@
     &.thead {
     }
   }
-  #userSubmitions {
+  #userSubmissions {
     tr {
       grid-template-columns: 5rem 0.3fr 0.7fr;
     }
@@ -69,10 +73,10 @@
     }
   }
   #allJamia .full,
-  #jamiaSubmitions .full,
-  #fatwaSubmitions .full,
+  #jamiaSubmissions .full,
+  #fatwaSubmissions .full,
   #allFatwa .full,
-  #userSubmitions .full {
+  #userSubmissions .full {
     grid-template-columns: 0.25fr 0.8fr;
     grid-row-gap: 1rem;
     grid-column-gap: 0;
@@ -200,7 +204,7 @@
       background: none;
     }
   }
-  #fatwaSubmitions .full {
+  #fatwaSubmissions .full {
     .label {
       align-self: flex-start;
     }
@@ -237,14 +241,18 @@
   }
 }
 .addFatwa {
+  .checkbox {
+    opacity: 0;
+    pointer-events: none;
+  }
   width: 100%;
   max-width: 40rem;
   height: min-content;
   display: grid;
   grid-template-columns: 0.6fr 0.4fr;
-  grid-template-areas: "tp ch" "tl tl" "qs qs" "an an" "mlb mls";
   grid-row-gap: 3rem;
   grid-column-gap: 1rem;
+  grid-template-areas: "tp ch" "tl tl" "qs qs" "an an" "mlb mls";
   &.translate {
     grid-template-areas: "tp ch" "tl tl" "tlen tlen" "qs qs" "qsen qsen" "an an" "anen anen" "mlb mls";
   }
@@ -299,6 +307,11 @@
       grid-column-gap: 1rem;
       grid-template-columns: 0.5fr 0.25fr 0.25fr;
     }
+  }
+  button[type="submit"] {
+    grid-column: 2/3;
+    margin: auto;
+    margin-right: 0;
   }
 }
 .sidebar {
@@ -401,6 +414,10 @@
   display: flex;
   position: relative;
   border-bottom: 1px solid $light-border;
+  overflow-x: auto;
+  &::-webkit-scrollbar {
+    display: none;
+  }
   span {
     display: none;
     position: absolute;
@@ -457,7 +474,6 @@
     position: sticky;
     top: 44px;
     background: $base-white;
-    // border-top: 1px solid $light-border;
     border-bottom: 1px solid $light-border;
     form {
       align-items: center;
@@ -478,14 +494,14 @@
         // white-space: nowrap;
         display: flex;
         flex-wrap: wrap;
-        padding: 0.5rem 0.75rem;
+        padding: 0.5rem 0.5rem;
         padding-left: 0;
         width: 100%;
         .chip {
           margin: 0.25rem;
           min-height: 2rem;
           background: $light-hover;
-          padding: 0.5rem 0.75rem;
+          padding: 0 0.75rem;
           padding-right: 0.5rem;
           border-radius: 1rem;
           display: flex;
@@ -521,6 +537,7 @@
       box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
       background: $base-white;
       border-radius: 4px;
+      padding: 0.3rem 0;
       // overflow: hidden;
       text-transform: capitalize;
       .noFilter {
@@ -534,8 +551,8 @@
         border: none;
         border-top: 1px solid $light-border;
       }
-      li {
-        padding: 0.75rem 1.5rem;
+      & > li {
+        padding: 0.75rem 1.25rem;
         cursor: pointer;
         &:hover {
           background: $light-hover;
@@ -657,7 +674,7 @@
       grid-column-gap: 1rem;
       align-items: center;
       justify-content: center;
-      grid-template-columns: 0.25fr 0.3fr 0.37fr 3rem 3rem;
+      // grid-template-columns: 0.25fr 0.3fr 0.37fr 3rem 3rem;
       &.loadingColumn {
         min-height: 5rem;
         border: none;
@@ -713,6 +730,12 @@
 }
 
 @media only screen and (max-width: 480px) {
+  .addFatwa {
+    grid-template-areas: "tp ch" "tl tl" "qs qs" "an an" "mlb mlb" "mls mls";
+    &.translate {
+      grid-template-areas: "tp ch" "tl tl" "tlen tlen" "qs qs" "qsen qsen" "an an" "anen anen" "mlb mlb" "mls mls";
+    }
+  }
   .adminPanel {
     grid-template-columns: 0 1fr;
   }

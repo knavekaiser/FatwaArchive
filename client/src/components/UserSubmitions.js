@@ -1,46 +1,102 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import { SiteContext } from "../Context";
 import { Link } from "react-router-dom";
-import { Input, Textarea, $ } from "./FormElements";
+import {
+  Input,
+  Textarea,
+  Submit,
+  $,
+  Combobox,
+  topics,
+  SS,
+} from "./FormElements";
+import { FormattedMessage } from "react-intl";
+
 function UserQuestion() {
   const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { locale } = useContext(SiteContext);
   function submit(e) {
     e.preventDefault();
+    // ---------------------  Validate each field here!!!
     const userInput = {
-      name: $("#name input").value,
-      email: $("#email input").value,
-      mobile: $("#mobile input").value,
-      topic: $("#topic input").value,
-      ques: $("#question textarea").value,
+      user: {
+        name: SS.get("askFatwa-name"),
+        email: SS.get("askFatwa-email"),
+        mobile: SS.get("askFatwa-mobile"),
+      },
+      ques: {
+        topic: JSON.parse(SS.get("askFatwa-topic")),
+        body: SS.get("askFatwa-question"),
+      },
     };
+    console.log(userInput);
     fetch("/api/askFatwa", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(userInput),
     }).then((res) => {
       if (res.status === 200) {
         setSuccess(true);
       } else {
+        alert("something went wrong");
         console.log(res);
       }
     });
   }
   return !success ? (
     <div className={`main userQuestion ${success ? "success" : ""}`}>
+      <h2>User Question</h2>
       <form onSubmit={submit}>
-        <Input dataId="name" label="Full Name" required={true} />
-        <Input dataId="email" label="Email" required={true} />
+        <Input
+          dataId="name"
+          label=<FormattedMessage
+            id="form.fullName"
+            defaultMessage="Full name"
+          />
+          onChange={(target) => SS.set("askFatwa-name", target.value)}
+          required={true}
+        />
+        <Input
+          dataId="email"
+          onChange={(target) => SS.set("askFatwa-email", target.value)}
+          label=<FormattedMessage id="form.email" defaultMessage="Email" />
+          required={true}
+        />
         <Input
           dataId="mobile"
-          label="Mobile"
+          onChange={(target) => SS.set("askFatwa-mobile", target.value)}
+          label=<FormattedMessage id="form.mobile" defaultMessage="Mobile" />
           type="text"
-          validation={/^\+\d{0,13}$/}
+          pattern={/^\+\d{0,13}$/}
+          defaultValue="+8801"
           warning="+8801..."
         />
-        <Input dataId="topic" label="Topic" required={true} />
-        <Textarea dataId="question" label="Question" required={true} />
-        <button>Submit</button>
+        <Combobox
+          maxHeight={200}
+          options={topics.map((topic) => {
+            return {
+              label: topic[locale],
+              value: topic,
+            };
+          })}
+          onChange={(target) =>
+            SS.set("askFatwa-topic", JSON.stringify(target.value))
+          }
+          label=<FormattedMessage id="topic" defaultMessage="Topic" />
+          required={true}
+        />
+        <Textarea
+          onChange={(target) => SS.set("askFatwa-question", target.value)}
+          dataId="question"
+          label=<FormattedMessage id="question" defaultMessage="Question" />
+          required={true}
+        />
+        <Submit
+          label=<FormattedMessage id="form.submit" defaultMessage="Submit" />
+          loading={loading}
+          setLoading={setLoading}
+        />
       </form>
       <br />
       <br />

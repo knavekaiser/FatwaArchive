@@ -268,7 +268,6 @@
           &[disabled] {
             background: $base-white;
             border-color: $light-text;
-            color: $light-text;
           }
         }
       }
@@ -308,6 +307,7 @@
   padding-bottom: 2rem;
   max-width: 35rem;
   form {
+    margin-top: 2rem;
     display: grid;
     grid-gap: 2rem;
   }
@@ -327,7 +327,8 @@
     }
   }
 }
-.input {
+.input,
+.combobox {
   .emptyFeildWarning {
     position: absolute;
     font-size: 0.8rem;
@@ -472,14 +473,14 @@ form {
   &.reg,
   &.login,
   &.adminLogin,
-  &.userReport {
-    button[type="submit"] {
-      margin: auto;
-      margin-right: 0;
-      &.loading {
-        color: transparent;
-      }
+  button[type="submit"] {
+    margin: auto;
+    &.loading {
+      color: transparent;
     }
+  }
+  button[type="submit"] {
+    margin-right: 0;
   }
   button {
     text-transform: uppercase;
@@ -742,9 +743,18 @@ form {
     border-radius: 0 0 0.5rem 0.5rem;
     transition: height, 0.4s ease-in-out;
     .option {
-      padding: 0.3rem;
+      &:first-child {
+        margin-top: 0.3rem;
+      }
+      &:last-child {
+        margin-bottom: 0.3rem;
+      }
+      padding: 0.3rem 0.5rem;
       &.selected {
-        background: $light-border;
+        background: $light-hover;
+        color: $light-text;
+        font-style: italic;
+        pointer-events: none;
       }
       &:hover {
         background: $light-hover;

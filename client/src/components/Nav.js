@@ -48,7 +48,7 @@ function Nav({ location }) {
   const { sidebarSize, setSidebarSize } = useContext(SiteContext);
   const [style, setStyle] = useState({ boxShadow: "none" });
   const [showSearchbar, setShowSearchbar] = useState(true);
-  const { lan, setLan, locale, setLocale, user } = useContext(SiteContext);
+  const { user } = useContext(SiteContext);
   useEffect(() => {
     if (
       location.pathname.startsWith("/moblieSearch") ||
@@ -90,8 +90,8 @@ function Nav({ location }) {
         )}
       />
       <Route path="/:other">
-        <Link to="/">
-          <img className="logo" src={logo} alt="Fatwa Archive logo" />
+        <Link className="navLogo" to="/">
+          <img src={logo} alt="Fatwa Archive logo" />
         </Link>
         {showSearchbar && <Searchbar key="navSearch" />}
       </Route>
@@ -113,14 +113,6 @@ function Nav({ location }) {
               )}
             </>
           )}
-          <li
-            onClick={() => {
-              lan === "bn" ? setLan("en") : setLan("bn");
-              locale === "bn-BD" ? setLocale("en-US") : setLocale("bn-BD");
-            }}
-          >
-            {locale === "bn-BD" ? "BN" : "EN"}
-          </li>
         </ul>
       </nav>
     </div>

@@ -23,6 +23,7 @@ export const topics = [
   { "bn-BD": "ভাড়া-লিজ", "en-US": "rent-lease" },
   { "bn-BD": "ইতিহাস", "en-US": "history" },
 ];
+
 export const GetGroupData = (multipleInput) => {
   const allData = [];
   for (var i = 0; i < multipleInput.children.length; i++) {
@@ -42,6 +43,11 @@ export const GetGroupData = (multipleInput) => {
   return allData;
 };
 const defaultValidation = /^[ঀ-৾؀-ۿa-zA-Z0-9\s():;"',.।?/\\-]+$/;
+export const SS = {
+  set: (key, value) => sessionStorage.setItem(key, value),
+  get: (key) => sessionStorage.getItem(key) || "",
+  remove: (key) => sessionStorage.removeItem(key),
+};
 
 export const ID = (length) => {
   var result = "";
@@ -66,16 +72,16 @@ export const camelize = (str) => {
 };
 export const Input = ({
   warning,
-  validation,
+  pattern,
   defaultValue,
   type,
   label,
   required,
   id,
-  max,
   onChange,
   disabled,
   dataId,
+  max,
   min,
   children,
   placeholder,
@@ -95,7 +101,7 @@ export const Input = ({
       child.classList.contains("emptyFeildWarning") && child.remove();
     });
     if (type === "text" || type === "password") {
-      const regex = validation || defaultValidation;
+      const regex = pattern || defaultValidation;
       if (e.target.value === "" || regex.exec(e.target.value) !== null) {
         setValue(e.target.value);
         onChange && onChange(e.target);
@@ -201,7 +207,7 @@ export const PasswordInput = ({
     <Input
       id={id}
       defaultValue={defaultValue}
-      validation={/./}
+      pattern={/./}
       min={8}
       dataId={dataId}
       type={showPass ? "text" : "password"}
@@ -244,18 +250,18 @@ export const Textarea = ({
   max,
   dataId,
   defaultValue,
-  validation,
+  pattern,
   warning,
   onChange,
   className,
   children,
 }) => {
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState(defaultValue);
   const [showLabel, setShowLabel] = useState(true);
   const [invalidChar, setInvalidChar] = useState(false);
   useEffect(() => {
     defaultValue && setValue(defaultValue);
-    defaultValue && defaultValue.length > 10 && setShowLabel(false);
+    defaultValue && setShowLabel(false);
   }, [defaultValue]);
   const [showLimit, setShowLimit] = useState(false);
   const focus = () => {
@@ -270,7 +276,7 @@ export const Textarea = ({
     Array.from(e.target.parentElement.children).forEach((child) => {
       child.classList.contains("emptyFeildWarning") && child.remove();
     });
-    const regex = validation || defaultValidation;
+    const regex = pattern || defaultValidation;
     if (e.target.value === "" || regex.exec(e.target.value) !== null) {
       setValue(e.target.value);
       onChange && onChange(e.target);
@@ -432,103 +438,41 @@ export const MultipleInput = ({ inputs, refInput, id }) => {
     </div>
   );
 };
-export const ComboboxMulti = ({
-  label,
-  data,
-  defaultValue,
-  id,
-  maxHeight,
-  required,
-  onChange,
-}) => {
-  const { locale } = useContext(SiteContext);
-  const [value, setValue] = useState({ [locale]: "" });
-  const [open, setOpen] = useState(false);
-  useEffect(() => {
-    defaultValue && setValue(defaultValue);
-  }, [defaultValue]);
-  function handleClick(e) {
-    Array.from(e.target.parentElement.children).forEach((item, i) => {
-      if (item === e.target) {
-        item.classList.add("selected");
-        setValue(data[i]);
-        onChange && onChange(data[i]);
-      } else {
-        item.classList.remove("selected");
-      }
-    });
-    setOpen(false);
-  }
-  useEffect(() => {
-    const outsideClick = (e) => {
-      !e.path.includes(document.querySelector(`#${id}`)) && setOpen(false);
-    };
-    document.addEventListener("click", outsideClick);
-    return () => {
-      document.removeEventListener("click", outsideClick);
-    };
-  }, [id]);
-  return (
-    <section id={id} className="combobox" style={{ position: "relative" }}>
-      <label className={`${value[locale] === "" ? "active" : ""}`}>
-        {label}
-      </label>
-      <input
-        required={required}
-        value={value[locale]}
-        data-en={value["en-US"]}
-        data-bn={value["bn-BD"]}
-        onFocus={(e) => e.target.blur()}
-        onChange={(e) => e.target.blur()}
-      />
-      <ion-icon
-        onClick={() => setOpen(true)}
-        name="chevron-down-outline"
-      ></ion-icon>
-      <ul
-        style={{
-          width: "100%",
-          position: "absolute",
-          maxHeight: open ? maxHeight : 0,
-          zIndex: 100,
-          overflow: "auto",
-        }}
-        className="options"
-      >
-        {data.map((option) => (
-          <li key={option[locale]} onClick={handleClick} className="option">
-            {option[locale]}
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-};
 export const Combobox = ({
   label,
   icon,
   options,
   defaultValue,
-  change,
+  onChange,
   maxHeight,
   required,
   disabled,
+  dataId,
 }) => {
-  const [value, setValue] = useState(
-    (defaultValue !== undefined && options[defaultValue].label) || ""
-  );
+  const { locale } = useContext(SiteContext);
+  const [value, setValue] = useState(() => {
+    if (defaultValue > -1 && options[defaultValue]) {
+      return options[defaultValue].label;
+    } else if (typeof defaultValue === "object") {
+      return defaultValue[locale];
+    } else {
+      return "";
+    }
+  });
   const [open, setOpen] = useState(false);
-  // TODO: ommit the section tag inside. make outsideclick the primary shell;
+  const [data, setData] = useState("");
   return (
     <OutsideClick
       className={`combobox ${disabled ? "disabled" : ""}`}
       setOpen={setOpen}
       open={open}
       style={{ position: "relative" }}
+      id={dataId ? dataId : ""}
     >
       <label className={`${value === "" ? "active" : ""}`}>{label}</label>
       <input
         required={required}
+        data={JSON.stringify(data)}
         value={value}
         onFocus={(e) => e.target.blur()}
         onChange={(e) => e.target.blur()}
@@ -550,12 +494,19 @@ export const Combobox = ({
         {options.map((option) => (
           <li
             key={option.label}
-            onClick={() => {
+            onClick={(e) => {
+              Array.from(e.target.parentElement.parentElement.children).forEach(
+                (child) => {
+                  child.classList.contains("emptyFeildWarning") &&
+                    child.remove();
+                }
+              );
+              setData(option.value);
               setValue(option.label);
-              change && change(option.value);
+              onChange && onChange(option);
               setOpen(false);
             }}
-            className="option"
+            className={`option ${value === option.label ? "selected" : ""}`}
           >
             {option.label}
           </li>
