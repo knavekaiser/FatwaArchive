@@ -8,7 +8,6 @@ export const Modal = ({ open, setOpen, children }) => {
       <div
         className="modalBackdrop"
         onClick={() => {
-          console.log("click");
           setOpen(false);
         }}
       />

@@ -42,7 +42,8 @@ export const GetGroupData = (multipleInput) => {
   }
   return allData;
 };
-const defaultValidation = /^[ঀ-৾؀-ۿa-zA-Z0-9\s():;"',.।?/\\-]+$/;
+// const defaultValidation = /^[ঀ-৾؀-ۿa-zA-Z0-9\s():;"',.।!?/\\-]+$/;
+const defaultValidation = /./;
 export const SS = {
   set: (key, value) => sessionStorage.setItem(key, value),
   get: (key) => sessionStorage.getItem(key) || "",

@@ -226,7 +226,7 @@ function SingleFatwa({ data, setData }) {
         </Link>
       </td>
       <td className="label">translate</td>
-      <td className="data">{fatwa.translation}</td>
+      <td className="data">{fatwa.translation ? "Yes" : "No"}</td>
       <td className="data btns">
         <button onClick={() => setOpen(false)}>
           <ion-icon name="chevron-up-outline"></ion-icon> Hide Detail
@@ -251,7 +251,7 @@ function SingleFatwa({ data, setData }) {
         />
       </td>
       <td>{fatwa.title[locale]}</td>
-      <td>{fatwa.translation.split(" ")[0]}</td>
+      <td>{fatwa.translation ? "Yes" : "No"}</td>
     </tr>
   );
 }
@@ -379,13 +379,13 @@ function JamiaAllFatwa() {
               {
                 fieldName: "title",
                 name: "Title",
-                display: "Title contains",
+                chip: "Title contains",
                 input: <Input label="Title" type="text" required={true} />,
               },
               {
                 fieldName: "topic",
                 name: "Topic",
-                display: "Topic is",
+                chip: "Topic is",
                 input: (
                   <Combobox
                     id={ID(8)}
@@ -403,7 +403,7 @@ function JamiaAllFatwa() {
               {
                 fieldName: "question",
                 name: "Question",
-                display: "Question contains",
+                chip: "Question contains",
                 input: <Input label="Question" type="text" required={true} />,
               },
               {
@@ -415,11 +415,11 @@ function JamiaAllFatwa() {
               {
                 fieldName: "translation",
                 name: "Translation",
-                display: "Translation :",
+                chip: "Translation :",
                 input: (
                   <Combobox
                     maxHeight={500}
-                    label="transition"
+                    label="Translation"
                     options={[
                       { label: "Generated", value: "generated" },
                       { label: "Manual", value: "manual" },
@@ -430,11 +430,11 @@ function JamiaAllFatwa() {
             ]}
             columns={[
               { column: "topic", sort: true, colCode: "topic" },
-              { column: "date", sort: true, colCode: "added" },
+              { column: "date", sort: true, colCode: "createdAt" },
               { column: "title", sort: false, colCode: "title" },
               { column: "translation", sort: true, colCode: "translation" },
             ]}
-            defaultSort={{ column: "added", order: "des" }}
+            defaultSort={{ column: "createdAt", order: "des" }}
           />
         </Route>
         <Route path="/jamia/fatwa/live">
@@ -532,11 +532,11 @@ function JamiaAllFatwa() {
               },
             ]}
             columns={[
-              { column: "date", sort: true, colCode: "submitted" },
+              { column: "date", sort: true, colCode: "createdAt" },
               { column: "topic", sort: true, colCode: "topic" },
               { column: "title", sort: false },
             ]}
-            defaultSort={{ column: "submitted", order: "des" }}
+            defaultSort={{ column: "createdAt", order: "des" }}
           />
         </Route>
       </Switch>

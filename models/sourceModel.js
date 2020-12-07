@@ -11,6 +11,9 @@ const source = new Schema(
       "bn-BD": { type: String, required: true, trim: true },
     },
     status: { type: String, default: "pending" },
+    meta: {
+      needsApproval: { type: Boolean, default: true },
+    },
   },
   {
     discriminatorKey: "type",
@@ -49,6 +52,23 @@ const Mufti = Source.discriminator(
     },
   })
 );
+
+const passRecoveryToken = new Schema(
+  {
+    id: { type: String, required: true, unique: true },
+    code: { type: String, required: true },
+    expireAt: { type: Date, default: Date.now, index: { expires: "1m" } },
+    try: { type: Number, default: 0 },
+  },
+  { timestamp: true }
+);
+
+const PassRecoveryToken = mongoose.model(
+  "PassRecoveryToken",
+  passRecoveryToken
+);
+
+exports.PassRecoveryToken = PassRecoveryToken;
 
 exports.Source = Source;
 exports.Jamia = Jamia;

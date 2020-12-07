@@ -9,6 +9,27 @@ global.JwtStrategy = require("passport-jwt").Strategy;
 global.ExtractJwt = require("passport-jwt").ExtractJwt;
 global.jwt = require("jsonwebtoken");
 
+global.getLan = (sentence) => {
+  const str = sentence.replace(/[\s\-\.?।]/gi, "");
+  if ((str.match(/[a-z0-9]/gi) || []).length / str.length > 0.9) {
+    return "en-US";
+  } else {
+    return "bn-BD";
+  }
+};
+global.TranslateAll = async function (arr) {
+  const allTans = Promise.all(
+    arr.map((item) =>
+      translate.translate(item, getLan(item) === "en-US" ? "bn" : "en")
+    )
+  )
+    .then((res) => res.map((item) => item[0]))
+    .catch((err) => {
+      throw err;
+    });
+  return await allTans;
+};
+
 const { Translate } = require("@google-cloud/translate").v2;
 
 const cookieParser = require("cookie-parser");

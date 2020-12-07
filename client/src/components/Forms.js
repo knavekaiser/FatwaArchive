@@ -54,9 +54,9 @@ const refInputSura = [
   ],
 ];
 const validateMoblie = (str) => !!/\+8801\d{9}/.exec(str);
-const getLan = (input) => {
-  const str = input.replaceAll(" ", "");
-  if ((str.match(/[a-z]/gi) || []).length / str.length > 0.9) {
+const getLan = (sentence) => {
+  const str = sentence.replace(/\s/g, "");
+  if ((str.match(/[a-z0-9]/gi) || []).length / str.length > 0.9) {
     return "en-US";
   } else {
     return "bn-BD";
@@ -1118,6 +1118,8 @@ export const AddFatwaForm = ({ match }) => {
         ...GetGroupData($(".addFatwa #books.multipleInput")),
         ...GetGroupData($(".addFatwa #sura.multipleInput")),
       ],
+      translation:
+        (SS.get("newFatwa-ansEn") && SS.get("newFatwa-quesEn")) || false,
       img: preFill.img,
       source: user._id,
     };
@@ -1441,7 +1443,7 @@ export const PasswordEditForm = ({ api }) => {
   );
 };
 
-export const Report = ({ fatwa, setReport }) => {
+export const Report = ({ fatwa, close }) => {
   const [loading, setLoading] = useState(false);
   const jamia = fatwa.jamia;
   function submit(e) {
@@ -1492,7 +1494,7 @@ export const Report = ({ fatwa, setReport }) => {
     }).then((res) => {
       setLoading(false);
       if (res.status === 200) {
-        setReport(false);
+        close(false);
         SS.remove("reportFatwa-name");
         SS.remove("reportFatwa-email");
         SS.remove("reportFatwa-mobile");
@@ -1506,7 +1508,7 @@ export const Report = ({ fatwa, setReport }) => {
   return (
     <div className="userReportContainer">
       <ion-icon
-        onClick={() => setReport(false)}
+        onClick={() => close(false)}
         class="close"
         name="close-outline"
       ></ion-icon>

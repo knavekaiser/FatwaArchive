@@ -18,8 +18,8 @@ const userReview = new Schema({
 });
 
 const reportFatwa = new Schema({
-  fatwa: { type: String, required: true },
-  jamia: { type: String, required: true },
+  fatwa: { type: Schema.Types.ObjectId, ref: "Fatwa" },
+  jamia: { type: Schema.Types.ObjectId, ref: "Source" },
   submitted: { type: Date, default: Date.now },
   user: {
     name: { type: String, required: true, trim: true },

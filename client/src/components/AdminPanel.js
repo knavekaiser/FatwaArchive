@@ -5,12 +5,12 @@ import "./CSS/AdminPanel.min.css";
 import { Input, Textarea, Combobox, topics, Submit, ID } from "./FormElements";
 import { DataEditForm, PasswordEditForm } from "./Forms";
 import { Tabs, Actions, Sidebar, View } from "./TableElements";
-import { FormattedDate, FormattedNumber } from "react-intl";
+import { FormattedDate, FormattedNumber, FormattedMessage } from "react-intl";
 import FourOFour from "./FourOFour";
 
 function SingleFatwa({ data, setData }) {
   const { locale } = useContext(SiteContext);
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   const [loading, setLoading] = useState(false);
   const fatwa = data;
   const history = useHistory();
@@ -37,7 +37,7 @@ function SingleFatwa({ data, setData }) {
       <td className="label">Added</td>
       <td className="data">
         <FormattedDate
-          value={new Date(fatwa.added)}
+          value={new Date(fatwa.createdAt)}
           day="numeric"
           month="numeric"
           year="numeric"
@@ -86,7 +86,12 @@ function SingleFatwa({ data, setData }) {
             fatwa.ref.map((item, i) =>
               item.book ? (
                 <li key={item.book + item.part + item.page}>
-                  book: {item.book}, part: {item.part}, page: {item.page}
+                  <FormattedMessage id="book" defaultMessage="Book" />:{" "}
+                  {item.book},{" "}
+                  <FormattedMessage id="part" defaultMessage="Part" />:{" "}
+                  <FormattedNumber value={item.part} />,{" "}
+                  <FormattedMessage id="page" defaultMessage="Page" />:{" "}
+                  <FormattedNumber value={item.page} />
                 </li>
               ) : (
                 <li key={item.sura + item.aayat}>
@@ -113,12 +118,12 @@ function SingleFatwa({ data, setData }) {
     </tr>
   ) : (
     <tr data-id={fatwa._id} onClick={() => setOpen(true)}>
-      <td>{fatwa.jamia}</td>
+      <td>{fatwa.source.name[locale]}</td>
       <td>{fatwa.topic[locale]}</td>
       <td>{fatwa.translation.split(" ")[0]}</td>
       <td>
         <FormattedDate
-          value={new Date(fatwa.added)}
+          value={new Date(fatwa.createdAt)}
           day="numeric"
           month="numeric"
           year="numeric"
@@ -182,7 +187,7 @@ function SingleFatwaSubmission({ data, setData }) {
       <td className="label">Submitted</td>
       <td className="data">
         <FormattedDate
-          value={new Date(fatwa.submitted)}
+          value={new Date(fatwa.createdAt)}
           day="numeric"
           month="numeric"
           year="numeric"
@@ -265,14 +270,14 @@ function SingleFatwaSubmission({ data, setData }) {
     >
       <td>
         <FormattedDate
-          value={new Date(fatwa.submitted)}
+          value={new Date(fatwa.createdAt)}
           day="numeric"
           month="numeric"
           year="numeric"
         />
       </td>
       <td>{fatwa.topic[locale]}</td>
-      <td>{fatwa.jamia}</td>
+      <td>{fatwa.source.name[locale]}</td>
       <td>{fatwa.title[locale]}</td>
     </tr>
   );
@@ -464,12 +469,12 @@ function AllFatwa({ history, location, match }) {
               },
             ]}
             columns={[
-              { column: "date", sort: true, colCode: "submitted" },
+              { column: "date", sort: true, colCode: "createdAt" },
               { column: "topic", sort: true, colCode: "topic" },
               { column: "jamia", sort: true, colCode: "jamia" },
               { column: "title", sort: false },
             ]}
-            defaultSort={{ column: "submitted", order: "des" }}
+            defaultSort={{ column: "createdAt", order: "des" }}
           />
         </Route>
       </Switch>

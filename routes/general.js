@@ -1,11 +1,11 @@
-const { Fatwa, FatwaSubmissions } = require("../models/fatwaModel");
-const {
-  // Jamia,
-  // JamiaSubmissions,
-  PassRecoveryToken,
-} = require("../models/jamiaModel");
+const { Fatwa, FatwaSubmission } = require("../models/fatwaModel");
 const { UserQuestion, ReportFatwa } = require("../models/userSubmissionModel");
-const { Source, Jamia, Mufti } = require("../models/sourceModel");
+const {
+  Source,
+  Jamia,
+  Mufti,
+  PassRecoveryToken,
+} = require("../models/sourceModel");
 const fetch = require("node-fetch");
 
 const regEx = (input) => new RegExp(input.replace(" ", ".+"), "gi");
@@ -42,38 +42,20 @@ router.route("/siteData").get((req, res) => {
 router.route("/fatwa/:link").get((req, res) => {
   const locale = req.headers["accept-language"];
   if (locale.length > 5) return res.status(400).json("No language selected.");
-  const key = `link.${locale}`;
-  let result = null;
-  Fatwa.findOne({ [key]: req.params.link })
+  const query = {
+    status: "live",
+    [`link.${getLan(req.params.link)}`]: req.params.link,
+  };
+  console.log(getLan(req.params.link));
+  Fatwa.findOne(query, "-status")
+    .populate("source", "name primeMufti")
     .then((fatwa) => {
-      if (fatwa === null) {
-        res.json("nothing found");
-        return;
+      console.log(fatwa);
+      if (fatwa) {
+        res.json(fatwa);
+      } else {
+        res.status(404).json("nothing found");
       }
-      result = {
-        _id: fatwa._id,
-        added: fatwa.added,
-        link: fatwa.link,
-        topic: fatwa.topic,
-        title: fatwa.title,
-        ques: fatwa.ques,
-        ans: fatwa.ans,
-        jamia: fatwa.jamia,
-        ref: fatwa.ref,
-        img: fatwa.img,
-        translation: fatwa.translation,
-      };
-    })
-    .then(() => Jamia.findOne({ id: result.jamia }))
-    .then((jamia) => {
-      const data = {
-        ...result,
-        jamia: {
-          name: jamia.name,
-          id: jamia.id,
-        },
-      };
-      res.json(data);
     })
     .catch((err) => {
       console.log(err);
@@ -167,8 +149,7 @@ router.route("/searchSuggestions").get((req, res) => {
 router.route("/suggestions?").get((req, res) => {
   const locale = req.headers["accept-language"];
   if (locale === "bn-BD" || locale === "en-US") {
-    const query = new RegExp(`${req.query.q.replace(" ", ".+")}\\w+`, "giu");
-    console.log(locale, query);
+    const query = new RegExp(`${req.query.q.replace(" ", "[ .।?!]+")}`, "giu");
     Fatwa.getSuggestions(
       {
         status: "live",
@@ -241,45 +222,24 @@ router.route("/reportFatwa").post((req, res) => {
     });
 });
 
-//------------------------------------------------------NEW SOURCE
-router.route("/jamia/new").post((req, res) => {
+//-------------------------------------------------------------NEW SOURCE
+router.route("/source/new").post((req, res) => {
   Promise.all([
-    translate
-      .translate(
-        Object.values(req.body.name)[0],
-        Object.keys(req.body.name)[0] === "en-US" ? "bn" : "en"
-      )
-      .then((translation) => {
-        Object.keys(req.body.name)[0] === "en-US"
-          ? (req.body.name["bn-BD"] = translation[0])
-          : (req.body.name["en-US"] = translation[0]);
-      })
-      .catch((err) => {
-        throw err;
-      }),
-    translate
-      .translate(
-        Object.values(req.body.primeMufti)[0],
-        Object.keys(req.body.primeMufti)[0] === "en-US" ? "bn" : "en"
-      )
-      .then((translation) => {
-        Object.keys(req.body.primeMufti)[0] === "en-US"
-          ? (req.body.primeMufti["bn-BD"] = translation[0])
-          : (req.body.primeMufti["en-US"] = translation[0]);
-      })
-      .catch((err) => {
-        throw err;
-      }),
+    TranslateAll([
+      req.body.name["en-US"] || req.body.name["bn-BD"],
+      req.body.primeMufti["en-US"] || req.body.primeMufti["bn-BD"],
+    ]),
+    bcrypt.hash(req.body.pass, 10),
   ])
-    .then(() => bcrypt.hash(req.body.pass, 10))
-    .then(
-      (hashed) =>
-        new Jamia({
-          ...req.body,
-          pass: hashed,
-          role: "jamia",
-        })
-    )
+    .then((data) => {
+      req.body.name[getLan(data[0][0])] = data[0][0];
+      req.body.primeMufti[getLan(data[0][1])] = data[0][1];
+      return new Jamia({
+        ...req.body,
+        pass: data[1],
+        role: "jamia",
+      });
+    })
     .then((submission) => submission.save())
     .then(() => res.status(200).json("application submitted!"))
     .catch((err) => {
@@ -371,7 +331,7 @@ router
   });
 
 router.route("/passRecovery").put((req, res) => {
-  Jamia.findOne({ id: req.body.id }).then((source) => {
+  Source.findOne({ id: req.body.id }).then((source) => {
     if (source === null) {
       res.status(404).json("profile not found");
     } else {

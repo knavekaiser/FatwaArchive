@@ -49,7 +49,6 @@ export const Sidebar = ({ views, children }) => {
 };
 
 export const Filter = ({ categories, filters, setFilters }) => {
-  const { locale } = useContext(SiteContext);
   const [showCategories, setShowCategories] = useState(false);
   const [value, setValue] = useState("");
   const [showMiniForm, setShowMiniForm] = useState(false);
@@ -62,10 +61,10 @@ export const Filter = ({ categories, filters, setFilters }) => {
   }
   function submit(e) {
     e.preventDefault();
-    if (filters[categories[0].name]) {
+    if (filters.title) {
       return;
     }
-    addChip(categories[0].fieldName, categories[0].bridge, value);
+    addChip("title", value);
     setValue("");
     filterInput.current.focus();
     setShowCategories(false);
@@ -76,13 +75,7 @@ export const Filter = ({ categories, filters, setFilters }) => {
       // --------- NEED LOOKUP
       return;
     }
-    addChip(
-      miniForm.fieldName,
-      miniForm.bridge,
-      e.target.querySelector("input").getAttribute("data")
-        ? JSON.parse(e.target.querySelector("input").getAttribute("data"))
-        : e.target.querySelector("input").value
-    );
+    addChip(miniForm.fieldName, e.target.querySelector("input").value);
     setValue("");
     setShowCategories(false);
   }
@@ -90,16 +83,10 @@ export const Filter = ({ categories, filters, setFilters }) => {
     setMiniForm(item);
     setShowMiniForm(true);
   }
-  function addChip(fieldName, bridge = ":", value) {
+  function addChip(category, value) {
     setFilters((prev) => {
-      const newChips = {
-        ...prev,
-        [fieldName]: {
-          value: value,
-          bridge: bridge,
-          display: value[locale] ? value[locale] : value,
-        },
-      };
+      const newChips = { ...prev };
+      newChips[category] = value.toLowerCase();
       return newChips;
     });
     setShowCategories(false);
@@ -115,16 +102,16 @@ export const Filter = ({ categories, filters, setFilters }) => {
           name="filter-outline"
         ></ion-icon>
         <div className="chips">
-          {Object.keys(filters).map((item, i) => (
-            <div key={filters[item].display} className="chip">
+          {Object.entries(filters).map((item, i) => (
+            <div key={item[1]} className="chip">
               <p>
-                {item} {filters[item].display} '<b>{filters[item].display}</b>'
+                {item[0]} contains '<b>{item[1]}</b>'
               </p>
               <ion-icon
                 onClick={() =>
                   setFilters((prev) => {
                     const newChips = { ...prev };
-                    delete newChips[item];
+                    delete newChips[item[0]];
                     return newChips;
                   })
                 }
@@ -156,7 +143,45 @@ export const Filter = ({ categories, filters, setFilters }) => {
               top: filterInput.current.offsetTop + 40,
             }}
           >
-            {showMiniForm ? (
+            {!showMiniForm ? (
+              <>
+                {value === "" &&
+                  categories
+                    .filter((item) => !filters[item.fieldName])
+                    .map((item) => (
+                      <li
+                        key={item.name}
+                        onClick={(e) => suggestionClick(e, item)}
+                      >
+                        {item.name}
+                      </li>
+                    ))}
+                {value !== "" && !filters.title && (
+                  <li onClick={submit}>
+                    Title contains '<b>{value}</b>'
+                  </li>
+                )}
+                {value !== "" &&
+                  categories
+                    .filter((item) => !filters[item.fieldName])
+                    .filter((item) => item.name.includes(value.toLowerCase()))
+                    .map((item, i) => (
+                      <React.Fragment key={item.name}>
+                        {i === 0 && <hr />}
+                        <li onClick={(e) => suggestionClick(e, item)}>
+                          {item.name}
+                        </li>
+                      </React.Fragment>
+                    ))}
+                {value !== "" &&
+                  categories.filter((item) =>
+                    item.name.includes(value.toLowerCase())
+                  ).length === 0 &&
+                  filters.title && (
+                    <li className="noFilter">No matching filter</li>
+                  )}
+              </>
+            ) : (
               <div className="miniForm">
                 <header>
                   <p>{miniForm.name}</p>
@@ -172,44 +197,6 @@ export const Filter = ({ categories, filters, setFilters }) => {
                   <button type="submit">APPLY</button>
                 </form>
               </div>
-            ) : (
-              <>
-                {value === "" &&
-                  categories
-                    .filter((item) => !filters[item.fieldName])
-                    .map((item) => (
-                      <li
-                        key={item.fieldName}
-                        onClick={(e) => suggestionClick(e, item)}
-                      >
-                        {item.name}
-                      </li>
-                    ))}
-                {value !== "" && !filters[categories[0].name] && (
-                  <li onClick={submit}>
-                    {`${categories[0].display}`} '<b>{value}</b>'
-                  </li>
-                )}
-                {value !== "" &&
-                  categories
-                    .filter((item) => !filters[item.name])
-                    .filter((item) => item.name.includes(value.toLowerCase()))
-                    .map((item, i) => (
-                      <React.Fragment key={item.name}>
-                        {i === 0 && <hr />}
-                        <li onClick={(e) => suggestionClick(e, item)}>
-                          {item.name}
-                        </li>
-                      </React.Fragment>
-                    ))}
-                {value !== "" &&
-                  categories.filter((item) =>
-                    item.name.includes(value.toLowerCase())
-                  ).length === 0 &&
-                  filters[categories[0].fieldName] && (
-                    <li className="noFilter">No matching filter</li>
-                  )}
-              </>
             )}
           </ul>
         </OutsideClick>
@@ -356,22 +343,10 @@ export const Actions = ({ id, actions }) => {
   );
 };
 
-const encodeURL = (obj) => {
-  const query = Object.keys(obj)
-    .map(
-      (key) =>
-        `${key}=${
-          obj[key].value
-            ? typeof obj[key].value === "string"
-              ? obj[key].value
-              : JSON.stringify(obj[key].value)
-            : obj[key]
-        }`
-    )
+const encodeURL = (obj) =>
+  Object.keys(obj)
+    .map((key) => `${key}=${obj[key]}`)
     .join("&");
-  console.log(obj, query);
-  return query;
-};
 
 export const LoadingColumn = () => {
   return (
@@ -380,6 +355,22 @@ export const LoadingColumn = () => {
       <td></td>
       <td></td>
       <td></td>
+    </tr>
+  );
+};
+
+export const ErrorColumn = () => {
+  return (
+    <tr>
+      <td>Some thing went wrong!</td>
+    </tr>
+  );
+};
+
+export const EmptyColumn = () => {
+  return (
+    <tr>
+      <td>Nothing here for now.</td>
     </tr>
   );
 };
@@ -403,7 +394,6 @@ export const View = ({
     !loading && setLoading(true);
     const query = encodeURL(filters);
     const sortOrder = encodeURL(sort);
-    // console.log(query);
     const options = { headers: { "Accept-Language": locale }, signal: signal };
     const url = `/${api}${query}&${sortOrder}`;
     fetch(url, options)
@@ -436,13 +426,12 @@ export const View = ({
         columns={columns}
       />
       <Table id={id} sort={sort} setSort={setSort}>
-        {loading ? (
-          <LoadingColumn />
-        ) : (
+        {loading && <LoadingColumn />}
+        {!loading &&
+          data.length > 0 &&
           data.map((item) => (
             <Element setData={setData} key={item._id} data={item} />
-          ))
-        )}
+          ))}
       </Table>
     </>
   );
