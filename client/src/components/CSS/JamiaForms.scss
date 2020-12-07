@@ -425,30 +425,32 @@
       }
     }
   }
-  .userReport {
-    padding: 1.5rem;
-    width: calc(100vw - 2rem);
-    max-height: calc(100vh - 2rem);
-    margin: 1rem;
-    .head {
-      h2 {
-        margin-bottom: 0.5rem;
-      }
-      p {
-        font-size: 0.95rem;
-        &.ps {
-          font-size: 0.8rem;
-          color: $light-text;
+  .userReportContainer {
+    margin: 0;
+    .userReport {
+      padding: 1.5rem;
+      width: calc(100vw - 2rem);
+      max-height: calc(100vh - 2rem);
+      .head {
+        h2 {
+          margin-bottom: 0.5rem;
+        }
+        p {
+          font-size: 0.95rem;
+          &.ps {
+            font-size: 0.8rem;
+            color: $light-text;
+          }
         }
       }
-    }
-    #email {
-      grid-column: 1/3;
-      grid-row: 3/4;
-    }
-    #mobile {
-      grid-column: 1/3;
-      grid-row: 4/5;
+      #email {
+        grid-column: 1/3;
+        grid-row: 3/4;
+      }
+      #mobile {
+        grid-column: 1/3;
+        grid-row: 4/5;
+      }
     }
   }
   .main.userQuestion {
@@ -458,10 +460,10 @@
     padding: 1rem;
     width: 100%;
     .successPromt {
-      grid-template-columns: 1fr;
+      grid-template-columns: 1fr !important;
       grid-row-gap: 1rem;
       place-items: center;
-      margin: auto;
+      margin: auto 1rem !important;
       a {
         margin: auto;
       }

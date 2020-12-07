@@ -1,12 +1,30 @@
-const userQuestion = new Schema({
-  name: { type: String, required: true, trim: true },
-  email: { type: String, required: true },
-  mobile: { type: String },
-  topic: { type: String, required: true },
-  ques: { type: String, required: true, unique: true },
-  answered: { type: Boolean, default: false },
-  submitted: { type: Date, default: Date.now },
-});
+const userQuestion = new Schema(
+  {
+    user: {
+      name: { type: String, required: true, trim: true },
+      add: { type: String, required: true, trim: true },
+      mob: { type: String },
+    },
+    question: {
+      topic: { type: String, required: true },
+      body: { type: String, required: true, unique: true },
+    },
+    answered: { type: Boolean, default: false },
+    answers: [
+      {
+        source: { type: Schema.Types.ObjectId, ref: "Source", required: true },
+        body: { type: Boolean, default: false, required: true, trim: true },
+        vote: {
+          count: { type: Number, default: 0 },
+          voters: [
+            { type: Schema.Types.ObjectId, ref: "Source", required: true },
+          ],
+        },
+      },
+    ],
+  },
+  { timestamps: true }
+);
 
 const userReview = new Schema({
   name: { type: String, required: true, trim: true },

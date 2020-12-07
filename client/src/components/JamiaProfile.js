@@ -2,15 +2,7 @@ import React, { useState, useContext, useEffect, useRef } from "react";
 import { Route, Switch, Link, useHistory } from "react-router-dom";
 import { SiteContext } from "../Context";
 import { Tabs, View, Sidebar } from "./TableElements";
-import {
-  ID,
-  Input,
-  Combobox,
-  Textarea,
-  // ComboboxMulti,
-  Submit,
-  topics,
-} from "./FormElements";
+import { ID, Input, Combobox, Textarea, Submit, topics } from "./FormElements";
 import "./CSS/JamiaProfile.min.css";
 import {
   FormattedDate,
@@ -180,6 +172,7 @@ function Profile() {
 
 function SingleFatwa({ data, setData }) {
   const { locale, setFatwaToEdit } = useContext(SiteContext);
+  const [loading, setLoading] = useState(false);
   const fatwa = data;
   const history = useHistory();
   const [open, setOpen] = useState(false);
@@ -189,10 +182,14 @@ function SingleFatwa({ data, setData }) {
   }
   function deleteFatwa() {
     if (window.confirm("Do you want to delete this fatwa?")) {
-      fetch(`/api/fatwa/${fatwa._id}`, {
+      setLoading(true);
+      fetch(`/api/source/fatwa/`, {
         method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fatwa: fatwa._id, source: fatwa.source }),
       })
         .then((res) => {
+          setLoading(false);
           if (res.status === 200) {
             setData((prev) => {
               return prev.filter((item) => item._id !== fatwa._id);
@@ -445,7 +442,15 @@ function JamiaAllFatwa() {
             api="api/source/allFatwa/filter?"
             categories={[
               {
-                name: "topic",
+                fieldName: "title",
+                name: "Title",
+                chip: "Title contains",
+                input: <Input label="Title" type="text" required={true} />,
+              },
+              {
+                fieldName: "topic",
+                name: "Topic",
+                chip: "Topic is",
                 input: (
                   <Combobox
                     id={ID(8)}
@@ -461,23 +466,25 @@ function JamiaAllFatwa() {
                 ),
               },
               {
-                name: "title",
-                input: <Input label="Title" type="text" required={true} />,
-              },
-              {
-                name: "question",
+                fieldName: "question",
+                name: "Question",
+                chip: "Question contains",
                 input: <Input label="Question" type="text" required={true} />,
               },
               {
-                name: "answer",
+                fieldName: "answer",
+                name: "Answer",
+                display: "Answer contains",
                 input: <Input label="Answer" type="text" required={true} />,
               },
               {
-                name: "translation",
+                fieldName: "translation",
+                name: "Translation",
+                chip: "Translation :",
                 input: (
                   <Combobox
                     maxHeight={500}
-                    label="jamia"
+                    label="Translation"
                     options={[
                       { label: "Generated", value: "generated" },
                       { label: "Manual", value: "manual" },
@@ -488,11 +495,11 @@ function JamiaAllFatwa() {
             ]}
             columns={[
               { column: "topic", sort: true, colCode: "topic" },
-              { column: "date", sort: true, colCode: "added" },
+              { column: "date", sort: true, colCode: "createdAt" },
               { column: "title", sort: false, colCode: "title" },
               { column: "translation", sort: true, colCode: "translation" },
             ]}
-            defaultSort={{ column: "added", order: "des" }}
+            defaultSort={{ column: "createdAt", order: "des" }}
           />
         </Route>
         <Route path="/jamia/fatwa/submissions">

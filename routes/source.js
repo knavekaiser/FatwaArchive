@@ -74,30 +74,10 @@ router.route("/fatwaSubmissions/:_id").delete((req, res) => {
 
 //----------------------------------------------ALL FATWA
 router
-  .route("/fatwaLive/filter?")
-  .get(passport.authenticate("jwt"), (req, res) => {
-    Fatwa.find({ id: req.user.id }).then((fatwas) => {
-      if (fatwas.length === 0) {
-        res.json([]);
-        return;
-      }
-      const data = fatwas.sort((a, b) => {
-        if (a[sort.column] < b[sort.column]) {
-          return sort.order === "des" ? 1 : -1;
-        } else {
-          return sort.order === "des" ? -1 : 1;
-        }
-      });
-      res.json(data);
-    });
-    res.json([]);
-  });
-
-router
   .route("/source/allfatwa/filter")
   .get(passport.authenticate("jwt"), (req, res) => {
     const locale = req.headers["accept-language"];
-    const query = { source: req.user._id };
+    const query = { status: "live", source: req.user._id };
     const sort = { column: req.query.column, order: req.query.order };
     const { title, ques, ans, topic, jamia, translation } = req.query;
     title && (query[`title.${locale}`] = RegExp(title));
@@ -108,34 +88,11 @@ router
       (translation === "Manual"
         ? (query.translation = "manual")
         : (query.translation = "google translate"));
-    console.log(query);
     if (locale === "bn-BD" || locale === "en-US") {
-      Fatwa.find(query)
+      Fatwa.find(query, "-status -meta -img")
         .sort(`${sort.order === "des" ? "-" : ""}${sort.column}`)
         .then((fatwas) => {
-          if (fatwas.length === 0) {
-            res.json([]);
-            return;
-          }
-          if (fatwas[0].link[locale] === undefined) {
-            res.status(404).json("nothing found in given language");
-            return;
-          }
-          const data = fatwas.map((fatwa) => {
-            return {
-              _id: fatwa._id,
-              added: fatwa.added,
-              link: fatwa.link,
-              topic: fatwa.topic,
-              title: fatwa.title,
-              ques: fatwa.ques,
-              ans: fatwa.ans,
-              jamia: fatwa.jamia,
-              ref: fatwa.ref,
-              translation: fatwa.translation,
-            };
-          });
-          res.json(data);
+          res.json(fatwas);
         })
         .catch((err) => {
           res.status(400).json("Error: " + err);
@@ -173,8 +130,11 @@ router.route("/fatwa/edit/:id").patch((req, res) => {
   // .then(() => res.json("fatwa updated"))
   // .catch((err) => res.status(400).json("Error: " + err));
 });
-router.route("/fatwa/:_id").delete((req, res) => {
-  Fatwa.findByIdAndDelete(req.params._id)
+router.route("/source/fatwa").delete((req, res) => {
+  Fatwa.findOneAndUpdate(req.body.fatwa, { status: "deleted" })
+    .then(() =>
+      Source.findByIdAndUpdate(req.body.source, { $inc: { fatwa: -1 } })
+    )
     .then(() => res.json("successfully deleted"))
     .catch((err) => res.status(400).json("Error: " + err));
 });

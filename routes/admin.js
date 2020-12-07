@@ -80,7 +80,6 @@ router
       .populate("source", "name primeMufti role")
       .sort(`${sort.order === "des" ? "-" : ""}${sort.column}`)
       .then((fatwas) => {
-        console.log(fatwas);
         res.json(fatwas);
       })
       .catch((err) => {
@@ -88,11 +87,17 @@ router
         console.log(err);
       });
   });
-router.route("/fatwa/:id").delete(passport.authenticate("jwt"), (req, res) => {
-  Fatwa.findByIdAndDelete(req.params.id)
-    .then(() => res.status(200).json("Item Deleted!"))
-    .catch((err) => res.status(400).json("Error: " + err));
-});
+router
+  .route("/admin/fatwa/")
+  .delete(passport.authenticate("jwt"), (req, res) => {
+    console.log(req.body);
+    Fatwa.findByIdAndDelete(req.body.fatwa)
+      .then(() =>
+        Source.findByIdAndUpdate(req.body.source, { $inc: { fatwa: -1 } })
+      )
+      .then(() => res.status(200).json("Item Deleted!"))
+      .catch((err) => res.status(400).json("Error: " + err));
+  });
 router
   .route("/admin/fatwaSubmissions/filter")
   .get(passport.authenticate("jwt"), (req, res) => {
@@ -174,6 +179,9 @@ router
       })
       .then((fatwa) => fatwa.save())
       .then(() => FatwaSubmission.findByIdAndDelete(req.params._id))
+      .then(() =>
+        Source.findByIdAndUpdate(submittedFatwa.source, { $inc: { fatwa: 1 } })
+      )
       .then(() => res.send("fatwa added"))
       .catch((err) => {
         console.log(err);

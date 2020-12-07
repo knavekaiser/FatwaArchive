@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useContext } from "react";
 import { SiteContext } from "../Context";
 import { Link, useHistory } from "react-router-dom";
 import { camelize } from "./FormElements";
+import Footer from "./Footer";
 
 export const Sidebar = ({ views, children }) => {
   const { sidebarSize, setSidebarSize } = useContext(SiteContext);
@@ -43,6 +44,7 @@ export const Sidebar = ({ views, children }) => {
           );
         })}
       </ul>
+      <Footer />
       <div className="backdrop" onClick={() => setSidebarSize("mini")}></div>
     </div>
   );

@@ -379,6 +379,29 @@
       }
     }
   }
+  position: relative;
+  .footer {
+    position: absolute;
+    bottom: 0;
+    padding: 0.5rem;
+    flex-direction: column;
+    justify-content: center;
+    .links {
+      grid-gap: 0;
+      li {
+        a {
+          font-size: 0.9rem;
+          padding: 0.5rem 0.5rem;
+        }
+      }
+    }
+    ul {
+      justify-content: center;
+      .copy {
+        font-size: 0.8rem;
+      }
+    }
+  }
   &.mini {
     width: 4rem;
     .profile {
@@ -407,6 +430,9 @@
           }
         }
       }
+    }
+    .footer {
+      display: none;
     }
   }
 }

@@ -10,15 +10,17 @@ import FourOFour from "./FourOFour";
 
 function SingleFatwa({ data, setData }) {
   const { locale } = useContext(SiteContext);
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const fatwa = data;
   const history = useHistory();
   const editFatwa = (path) => history.push(path);
   function deleteFatwa() {
     setLoading(true);
-    fetch(`/api/fatwa/${fatwa._id}`, {
+    fetch(`/api/admin/fatwa/`, {
       method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fatwa: fatwa._id, source: fatwa.source._id }),
     })
       .then((res) => {
         setLoading(false);
@@ -120,7 +122,7 @@ function SingleFatwa({ data, setData }) {
     <tr data-id={fatwa._id} onClick={() => setOpen(true)}>
       <td>{fatwa.source.name[locale]}</td>
       <td>{fatwa.topic[locale]}</td>
-      <td>{fatwa.translation.split(" ")[0]}</td>
+      <td>{fatwa.translation ? "Yes" : "No"}</td>
       <td>
         <FormattedDate
           value={new Date(fatwa.createdAt)}
@@ -148,8 +150,8 @@ function SingleFatwaSubmission({ data, setData }) {
     setLoading(true);
     fetch(`/api/admin/fatwaSubmissions/accept/${fatwa._id}`, { method: "POST" })
       .then((res) => {
+        setLoading(false);
         if (res.status === 200) {
-          setLoading(false);
           setData((prev) => {
             return prev.filter((item) => item._id !== fatwa._id);
           });

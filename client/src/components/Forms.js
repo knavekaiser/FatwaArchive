@@ -937,22 +937,25 @@ export const AdminLogin = () => {
   const { setUser, setIsAuthenticated, locale, user } = useContext(SiteContext);
   const [userId, setUserId] = useState("");
   const [pass, setPass] = useState("");
+  useEffect(() => {
+    setInvalidCred(false);
+  }, [userId, pass]);
   function submit(e) {
     e.preventDefault();
     setLoading(true);
     fetch(`/api/login`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username: userId, password: pass, role: "admin" }),
     })
       .then((res) => {
         setLoading(false);
         if (res.status === 401) {
           setInvalidCred(true);
+          throw 401;
+        } else {
+          return res.json();
         }
-        return res.json();
       })
       .then((data) => {
         setIsAuthenticated(data.isAuthenticated);
@@ -960,7 +963,6 @@ export const AdminLogin = () => {
         history.push("/admin/sources");
       })
       .catch((err) => {
-        alert("something went wrong");
         console.log(err);
       });
   }
