@@ -192,17 +192,29 @@ router.route("/suggestions?").get((req, res) => {
 
 //---------------------------------------------WAY TOOO MUCH WORK HERE!!!
 router.route("/askFatwa").post((req, res) => {
-  new UserQuestion({
-    ...req.body,
-  })
-    .save()
-    .then(() => {
-      res.status(200).json("test done");
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json(err);
-    });
+  if (
+    req.body.user.name &&
+    req.body.user.add &&
+    req.body.user.mob &&
+    req.body.ques.topic &&
+    req.body.ques.body
+  ) {
+    new UserQuestion({ ...req.body })
+      .save()
+      .then(() => res.json({ code: "ok", content: "question added" }))
+      .catch((err) => {
+        if (err.code === 11000) {
+          res.status(400).json({
+            code: err.code,
+            field: Object.keys(err.keyValue)[0],
+          });
+        } else {
+          console.log(err);
+        }
+      });
+  } else {
+    res.status(400);
+  }
 });
 router.route("/reportFatwa").post((req, res) => {
   new ReportFatwa({ ...req.body })

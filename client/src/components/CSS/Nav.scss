@@ -88,10 +88,13 @@
       grid-column-gap: 0.5rem;
       li {
         font-size: 0.97rem;
-        padding: 0.5rem 0.5rem;
         border-radius: 5px;
         cursor: pointer;
         color: $light-text;
+        a {
+          display: block;
+          padding: 0.5rem 0.85rem;
+        }
         &:hover {
           background: $light-hover;
         }

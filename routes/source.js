@@ -57,7 +57,6 @@ router
     FatwaSubmission.find(query)
       .sort(`${sort.order === "des" ? "-" : ""}${sort.column}`)
       .then((submissions) => {
-        console.log(submissions);
         if (submissions.length === 0) {
           res.json([]);
           return;
@@ -144,50 +143,126 @@ router
   .route("/source/questionFeed/filter")
   .get(passport.authenticate("jwt"), (req, res) => {
     const sort = { column: req.query.column, order: req.query.order };
-    UserQuestion.find({ answered: false })
+    UserQuestion.find({
+      $or: [{ status: "pending" }, { status: "pendingApproval" }],
+    })
       .sort(`${sort.order === "des" ? "-" : ""}${sort.column}`)
-      .then((questions) => {
-        res.json(questions);
-      })
+      .then((questions) => res.json(questions))
       .catch((err) => {
         console.log(err);
         res.status(500).json("something went wrong");
       });
   });
-
-//--------------------------------------------PROFILE
 router
-  .route("/jamia/edit/:_id")
-  .patch(passport.authenticate("jwt"), (req, res) => {
-    if (req.user.role !== "jamia") {
-      res.status(403).json("unauthorized!");
-      return;
-    }
-    if (Object.keys(req.body).length === 1) {
-      Jamia.findOneAndUpdate({ _id: req.params._id }, req.body)
-        .then((jamia) => {
-          res.json("data successfully updated!");
-        })
-        .catch((err) => res.json(err));
-    } else if (Object.keys(req.body).length === 3) {
-      Jamia.findById(req.params._id)
-        .then((jamia) => bcrypt.compare(req.body.oldPass, jamia.pass))
-        .then((match) => {
-          if (match) {
-            Jamia.findOneAndUpdate(
-              { _id: req.params._id },
-              { pass: bcrypt.hashSync(req.body.newPass, 10) }
-            )
-              .then(() => res.json("password changed successfully"))
-              .catch((err) => {
-                res.status(500).json(err);
-              });
-          } else {
-            res.status(401).json("Old password does not match");
-          }
-        })
-        .catch((err) => res.status(500).json(err));
+  .route("/source/userQues/:_id")
+  .get(passport.authenticate("jwt"), (req, res) => {
+    if (ObjectID.isValid(req.params._id)) {
+      UserQuestion.findById(req.params._id)
+        .populate("ans.source", "name add")
+        .then((ques) => res.json({ code: "ok", content: ques }))
+        .catch((err) => {
+          console.log(err);
+          res.status(500).json("something went wrong");
+        });
+    } else {
+      res.status(400).json("invalid id");
     }
   });
+router
+  .route("/source/userQues/answer/:_id")
+  .post(passport.authenticate("jwt"), (req, res) => {
+    if (ObjectID.isValid(req.params._id)) {
+      UserQuestion.findById(req.params._id)
+        .then((ques) => ques.addAns(req.body))
+        .then(() =>
+          UserQuestion.findOne({ _id: req.params._id }).populate(
+            "ans.source",
+            "name primeMufti"
+          )
+        )
+        .then((saved) => {
+          res.status(200).json({ code: "ok", content: saved });
+        })
+        .catch((err) => {
+          console.log(err);
+          if (err === "already answered" || err === "answer exists") {
+            res.status(400).json(err);
+          } else {
+            res.status(500).json("enternal error");
+          }
+        });
+    } else {
+      res.status(400).json("invalid id");
+    }
+  });
+router
+  .route("/source/userQues/answer/:_id")
+  .delete(passport.authenticate("jwt"), (req, res) => {
+    if (ObjectID.isValid(req.params._id)) {
+      if (req.user._id.toString() === req.body.source.toString()) {
+        UserQuestion.findById(req.params._id)
+          .populate("ans.source", "name primeMufti")
+          .then((ques) => ques.dltAns(req.body))
+          .then((saved) => {
+            res.json({ code: "ok", content: saved });
+          })
+          .catch((err) => {
+            console.log(err);
+            res.status(500).json("internal error");
+          });
+      } else {
+        res.status(403).json("forbidden");
+      }
+    } else {
+      res.status(400).json("invalid id");
+    }
+  });
+router
+  .route("/source/userQues/vote/:_id")
+  .put(passport.authenticate("jwt"), (req, res) => {
+    if (ObjectID.isValid(req.params._id)) {
+      UserQuestion.findById(req.params._id)
+        .populate("ans.source", "name primeMufti")
+        .then((ques) => ques.vote(req.body))
+        .then((saved) => {
+          res.json({ code: "ok", content: saved });
+        })
+        .catch((err) => {
+          console.log(err);
+          res.status(500).json("internal error");
+        });
+    } else {
+      res.status(400).json("invalid id");
+    }
+  });
+
+//--------------------------------------------PROFILE
+router.route("/source/edit").patch(passport.authenticate("jwt"), (req, res) => {
+  console.log(req.body);
+  if (Object.keys(req.body).length === 1) {
+    Jamia.findOneAndUpdate({ _id: req.user._id }, req.body)
+      .then((jamia) => {
+        res.json("data successfully updated!");
+      })
+      .catch((err) => res.json(err));
+  } else if (Object.keys(req.body).length === 3) {
+    Jamia.findById(req.user._id)
+      .then((jamia) => {
+        if (bcrypt.compareSync(req.body.oldPass, jamia.pass)) {
+          Jamia.findOneAndUpdate(
+            { _id: req.user._id },
+            { pass: bcrypt.hashSync(req.body.newPass, 10) }
+          )
+            .then(() => res.json("password changed successfully"))
+            .catch((err) => {
+              res.status(500).json(err);
+            });
+        } else {
+          res.status(401).json("Old password does not match");
+        }
+      })
+      .catch((err) => res.status(500).json(err));
+  }
+});
 
 module.exports = router;

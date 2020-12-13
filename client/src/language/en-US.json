@@ -26,7 +26,7 @@
   "form.jamiaReg.name": "Jamia's Name",
   "form.jamiaReg.founder": "Founder",
   "form.jamiaReg.est": "EST",
-  "form.jamiaReg.add": "Address",
+  "form.add": "Address",
   "form.jamiaReg.contact": "Contact",
   "form.jamiaReg.primeMufti": "Prime Mufti",
   "form.jamiaReg.label.loginDetail": "LOGIN INFO",
@@ -58,5 +58,6 @@
   "form.passRecovery.startOver": "Start over.",
   "form.passRecovery.success": "Password has been successfully changed, click {link} to login.",
   "form.passRecovery.redirect": "here",
-  "results.count": "{number} fatwas found."
+  "results.count": "{number} fatwas found.",
+  "ans.tag.refCount": "{number} reference(s)"
 }

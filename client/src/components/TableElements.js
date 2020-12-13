@@ -318,11 +318,11 @@ export const OutsideClick = ({
   );
 };
 
-export const Actions = ({ id, actions }) => {
+export const Actions = ({ actions, icon }) => {
   const [open, setOpen] = useState(false);
   return (
     <div className="actions" onClick={() => setOpen(true)}>
-      <ion-icon name="chevron-down-outline"></ion-icon>
+      <ion-icon name={icon || `chevron-down-outline`}></ion-icon>
       {open && (
         <OutsideClick open={open} setOpen={setOpen}>
           <ul>
@@ -333,9 +333,9 @@ export const Actions = ({ id, actions }) => {
                   item.action();
                   setOpen(false);
                 }}
-                key={item.option}
+                key={item.label}
               >
-                {item.option}
+                {item.label}
               </li>
             ))}
           </ul>

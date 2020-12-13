@@ -9,6 +9,7 @@ import {
   Combobox,
   topics,
   SS,
+  emptyFieldWarning,
 } from "./FormElements";
 import { FormattedMessage } from "react-intl";
 
@@ -18,61 +19,92 @@ function UserQuestion() {
   const { locale } = useContext(SiteContext);
   function submit(e) {
     e.preventDefault();
-    // ---------------------  Validate each field here!!!
+    if (SS.get("askFatwa-name").length < 5) {
+      emptyFieldWarning("#name", "input", "Enter your full name");
+      return;
+    }
+    if (SS.get("askFatwa-add").length < 10) {
+      emptyFieldWarning("#address", "input", "Enter valid address");
+      return;
+    }
+    if (SS.get("askFatwa-mob").length < 14) {
+      emptyFieldWarning("#mobile", "input", "Enter your mobile number");
+      return;
+    }
+    if (!SS.get("askFatwa-topic")) {
+      emptyFieldWarning("#topic", "", "Select a topic");
+      return;
+    }
+    if (SS.get("askFatwa-ques").length < 15) {
+      emptyFieldWarning("#question", "textarea", "Enter your question.");
+      return;
+    }
     const userInput = {
       user: {
         name: SS.get("askFatwa-name"),
-        email: SS.get("askFatwa-email"),
-        mobile: SS.get("askFatwa-mobile"),
+        add: SS.get("askFatwa-add"),
+        mob: SS.get("askFatwa-mob"),
       },
       ques: {
         topic: JSON.parse(SS.get("askFatwa-topic")),
-        body: SS.get("askFatwa-question"),
+        body: SS.get("askFatwa-ques"),
       },
     };
-    console.log(userInput);
+    setLoading(true);
     fetch("/api/askFatwa", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(userInput),
-    }).then((res) => {
-      if (res.status === 200) {
-        setSuccess(true);
-      } else {
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setLoading(false);
+        if (data.code === "ok") {
+          setSuccess(true);
+          SS.remove("askFatwa-name");
+          SS.remove("askFatwa-add");
+          SS.remove("askFatwa-mob");
+          SS.remove("askFatwa-topic");
+          SS.remove("askFatwa-ques");
+        } else if (data.code === 11000) {
+          emptyFieldWarning("#question", "textarea", "question already exists");
+        }
+      })
+      .catch((err) => {
+        console.log(err);
         alert("something went wrong");
-        console.log(res);
-      }
-    });
+      });
   }
   return !success ? (
     <div className={`main userQuestion ${success ? "success" : ""}`}>
       <h2>User Question</h2>
       <form onSubmit={submit}>
         <Input
+          defaultValue={SS.get("askFatwa-name")}
           dataId="name"
           label=<FormattedMessage
             id="form.fullName"
             defaultMessage="Full name"
           />
           onChange={(target) => SS.set("askFatwa-name", target.value)}
-          required={true}
         />
         <Input
-          dataId="email"
-          onChange={(target) => SS.set("askFatwa-email", target.value)}
-          label=<FormattedMessage id="form.email" defaultMessage="Email" />
-          required={true}
+          defaultValue={SS.get("askFatwa-add")}
+          dataId="address"
+          onChange={(target) => SS.set("askFatwa-add", target.value)}
+          label=<FormattedMessage id="form.add" defaultMessage="Address" />
         />
         <Input
           dataId="mobile"
-          onChange={(target) => SS.set("askFatwa-mobile", target.value)}
+          onChange={(target) => SS.set("askFatwa-mob", target.value)}
           label=<FormattedMessage id="form.mobile" defaultMessage="Mobile" />
           type="text"
           pattern={/^\+\d{0,13}$/}
-          defaultValue="+8801"
+          defaultValue={SS.get("askFatwa-mob")}
           warning="+8801..."
         />
         <Combobox
+          dataId="topic"
           maxHeight={200}
           options={topics.map((topic) => {
             return {
@@ -84,13 +116,15 @@ function UserQuestion() {
             SS.set("askFatwa-topic", JSON.stringify(target.value))
           }
           label=<FormattedMessage id="topic" defaultMessage="Topic" />
-          required={true}
+          defaultValue={
+            SS.get("askFatwa-topic") && JSON.parse(SS.get("askFatwa-topic"))
+          }
         />
         <Textarea
-          onChange={(target) => SS.set("askFatwa-question", target.value)}
+          onChange={(target) => SS.set("askFatwa-ques", target.value)}
           dataId="question"
           label=<FormattedMessage id="question" defaultMessage="Question" />
-          required={true}
+          defaultValue={SS.get("askFatwa-ques")}
         />
         <Submit
           label=<FormattedMessage id="form.submit" defaultMessage="Submit" />

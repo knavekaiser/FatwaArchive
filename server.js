@@ -30,6 +30,8 @@ global.TranslateAll = async function (arr) {
   return await allTans;
 };
 
+global.ObjectID = require("mongodb").ObjectID;
+
 const { Translate } = require("@google-cloud/translate").v2;
 
 const cookieParser = require("cookie-parser");

@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDom, { createPortal } from "react-dom";
 
-export const Modal = ({ open, setOpen, children }) => {
+export const Modal = ({ open, setOpen, children, className }) => {
   if (!open) return null;
   return createPortal(
     <>
@@ -11,7 +11,7 @@ export const Modal = ({ open, setOpen, children }) => {
           setOpen(false);
         }}
       />
-      <div className="modal">{children}</div>
+      <div className={`modal ${className ? className : ""}`}>{children}</div>
     </>,
     document.getElementById("portal")
   );

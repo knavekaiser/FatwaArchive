@@ -21,6 +21,7 @@ input {
 a {
   text-decoration: inherit;
   color: inherit;
+  white-space: nowrap;
 }
 li {
   list-style: none;
@@ -111,6 +112,7 @@ input::-webkit-inner-spin-button {
   cursor: default;
   top: 0;
   left: 0;
+  // z-index: 3;
 }
 .actions {
   position: relative;
@@ -120,8 +122,12 @@ input::-webkit-inner-spin-button {
   height: 3rem;
   border-radius: 8px;
   white-space: nowrap;
+  z-index: 100;
   &:hover {
     background: $base-white;
+    ion-icon {
+      opacity: 0.5;
+    }
   }
   &:active {
     box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
@@ -130,13 +136,16 @@ input::-webkit-inner-spin-button {
     font-size: 2rem;
     // pointer-events: none;
   }
+  section {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    z-index: 10;
+  }
   ul {
     overflow: hidden;
     border-radius: 5px;
-    z-index: 100;
-    position: absolute;
-    top: 0;
-    right: 0;
+    transform: translateY(100%);
     background: $base-white;
     box-shadow: 0 2px 0.5rem rgba(0, 0, 0, 0.2);
     transition: height 0.3s ease-in-out;

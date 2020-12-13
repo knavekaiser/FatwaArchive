@@ -14,6 +14,7 @@ import {
   Submit,
   $,
   SS,
+  emptyFieldWarning,
 } from "./FormElements";
 import { FormattedMessage, FormattedNumber } from "react-intl";
 import { Toast } from "./Modals";
@@ -62,15 +63,6 @@ const getLan = (sentence) => {
     return "bn-BD";
   }
 };
-function emptyFeildWarning(selector, inputType, warning) {
-  const emptyFeildWarning = document.createElement("p");
-  emptyFeildWarning.classList.add("emptyFeildWarning");
-  emptyFeildWarning.textContent = warning;
-  if ($(`${selector} .emptyFeildWarning`) === null) {
-    $(`${selector}`).appendChild(emptyFeildWarning);
-  }
-  $(`${selector} ${inputType}`).focus();
-}
 
 function JamiaDetail() {
   return (
@@ -142,7 +134,7 @@ function LoginDetail({ idIsValid, validatingId, setIdIsValid }) {
         defaultValue={SS.get("reg-id")}
         onChange={(target) => {
           SS.set("reg-id", target.value);
-          $("#id .emptyFeildWarning") && $("#id .emptyFeildWarning").remove();
+          $("#id .emptyFieldWarning") && $("#id .emptyFieldWarning").remove();
           setIdIsValid(null);
         }}
         required={true}
@@ -183,16 +175,16 @@ function LoginDetail({ idIsValid, validatingId, setIdIsValid }) {
         />
         onChange={(target) => {
           SS.set("reg-pass", target.value);
-          $("#pass .emptyFeildWarning") &&
-            $("#pass .emptyFeildWarning").remove();
+          $("#pass .emptyFieldWarning") &&
+            $("#pass .emptyFieldWarning").remove();
         }}
       />
       <PasswordInput
         match=".reg #pass input"
         dataId="confirmPass"
         onChange={() => {
-          $("#confirmPass .emptyFeildWarning") &&
-            $("#confirmPass .emptyFeildWarning").remove();
+          $("#confirmPass .emptyFieldWarning") &&
+            $("#confirmPass .emptyFieldWarning").remove();
         }}
         label=<FormattedMessage
           id="form.login.passwordRepeat"
@@ -209,8 +201,8 @@ function ApplicantDetail() {
         defaultValue={SS.get("reg-applicant")}
         onChange={(target) => {
           SS.set("reg-applicant", target.value);
-          $("#applicant .emptyFeildWarning") &&
-            $("#applicant .emptyFeildWarning").remove();
+          $("#applicant .emptyFieldWarning") &&
+            $("#applicant .emptyFieldWarning").remove();
         }}
         dataId="applicant"
         type="text"
@@ -224,8 +216,8 @@ function ApplicantDetail() {
         defaultValue={SS.get("reg-applicantDesignation")}
         onChange={(target) => {
           SS.set("reg-applicantDesignation", target.value);
-          $("#applicantDesignation .emptyFeildWarning") &&
-            $("#applicantDesignation .emptyFeildWarning").remove();
+          $("#applicantDesignation .emptyFieldWarning") &&
+            $("#applicantDesignation .emptyFieldWarning").remove();
         }}
         dataId="applicantDesignation"
         type="text"
@@ -238,8 +230,8 @@ function ApplicantDetail() {
         defaultValue={SS.get("reg-applicantMobile") || "+8801"}
         onChange={(target) => {
           SS.set("reg-applicantMobile", target.value);
-          $("#applicantMobile .emptyFeildWarning") &&
-            $("#applicantMobile .emptyFeildWarning").remove();
+          $("#applicantMobile .emptyFieldWarning") &&
+            $("#applicantMobile .emptyFieldWarning").remove();
         }}
         dataId="applicantMobile"
         type="text"
@@ -314,15 +306,15 @@ export const JamiaRegister = () => {
   function rightButton() {
     if (step === 1) {
       if (SS.get("reg-name").length < 5) {
-        emptyFeildWarning("#name", "input", "Enter a valid jamia");
+        emptyFieldWarning("#name", "input", "Enter a valid jamia");
         return;
       }
       if (SS.get("reg-add").length < 10) {
-        emptyFeildWarning("#add", "textarea", "Enter a valid address");
+        emptyFieldWarning("#add", "textarea", "Enter a valid address");
         return;
       }
       if (!validateMoblie(SS.get("reg-contact"))) {
-        emptyFeildWarning(
+        emptyFieldWarning(
           "#contact",
           "input",
           "Enter a valid mobile number. +8801***"
@@ -330,29 +322,29 @@ export const JamiaRegister = () => {
         return;
       }
       if (SS.get("reg-primeMufti").length < 4) {
-        emptyFeildWarning("#primeMufti", "input", "Enter a valid name");
+        emptyFieldWarning("#primeMufti", "input", "Enter a valid name");
         return;
       }
       setStep(2);
     } else if (step === 2) {
       if (SS.get("reg-id").length < 8) {
-        emptyFeildWarning("#id", "input", "Enter a valid id");
+        emptyFieldWarning("#id", "input", "Enter a valid id");
         return;
       }
       if ($(".reg #pass input").value.length < 7) {
-        emptyFeildWarning("#pass", "input", "Enter a password");
+        emptyFieldWarning("#pass", "input", "Enter a password");
         return;
       }
       if ($(".reg #confirmPass input").value.length < 7) {
-        emptyFeildWarning("#confirmPass", "input", "confirm password");
+        emptyFieldWarning("#confirmPass", "input", "confirm password");
         return;
       }
       if ($(".reg #pass input").value !== $(".reg #confirmPass input").value) {
-        emptyFeildWarning("#confirmPass", "input", "Password did not match");
+        emptyFieldWarning("#confirmPass", "input", "Password did not match");
         return;
       }
       if (!idIsValid) {
-        emptyFeildWarning("#id", "input", "id is already taken");
+        emptyFieldWarning("#id", "input", "id is already taken");
         return;
       }
       setStep(3);
@@ -366,15 +358,15 @@ export const JamiaRegister = () => {
   function submit(e) {
     e.preventDefault();
     if (SS.get("reg-applicant").length < 5) {
-      emptyFeildWarning("#applicant", "input", "Add a valid name");
+      emptyFieldWarning("#applicant", "input", "Add a valid name");
       return;
     }
     if (SS.get("reg-applicantDesignation").length < 5) {
-      emptyFeildWarning("#applicantDesignation", "input", "Add a valid title.");
+      emptyFieldWarning("#applicantDesignation", "input", "Add a valid title.");
       return;
     }
     if (!validateMoblie(SS.get("reg-applicantMobile"))) {
-      emptyFeildWarning(
+      emptyFieldWarning(
         "#applicantMobile",
         "input",
         "Enter a valid mobile number. +8801***"
@@ -1071,8 +1063,7 @@ export const AddFatwaForm = ({ match }) => {
           inputBooks: [...inputBooks],
           inputSura: [...inputSura],
         }),
-        translate:
-          fatwaToEdit.translation === "google translate" ? false : true,
+        translate: fatwaToEdit.translation,
         topic: fatwaToEdit.topic,
         title: fatwaToEdit.title["bn-BD"],
         titleEn: fatwaToEdit.title["en-US"],
@@ -1089,19 +1080,19 @@ export const AddFatwaForm = ({ match }) => {
   function submit(e) {
     e.preventDefault();
     if (!SS.get("newFatwa-topic")) {
-      emptyFeildWarning(".combobox#topic", "input", "Select a topic");
+      emptyFieldWarning(".combobox#topic", "input", "Select a topic");
       return;
     }
     if (SS.get("newFatwa-title").length < 15) {
-      emptyFeildWarning(".input#title", "input", "Add a valid title");
+      emptyFieldWarning(".input#title", "input", "Add a valid title");
       return;
     }
     if (SS.get("newFatwa-ques").length < 15) {
-      emptyFeildWarning(".input#ques", "textarea", "Add a valid question");
+      emptyFieldWarning(".input#ques", "textarea", "Add a valid question");
       return;
     }
     if (SS.get("newFatwa-ans").length < 15) {
-      emptyFeildWarning(".input#ans", "textarea", "Add a valid ans");
+      emptyFieldWarning(".input#ans", "textarea", "Add a valid ans");
       return;
     }
     const data = {
@@ -1278,6 +1269,171 @@ export const AddFatwaForm = ({ match }) => {
     </form>
   );
 };
+export const UserQuestionAnswerForm = ({ ques, setQues, _id }) => {
+  const [loading, setLoading] = useState(false);
+  const history = useHistory();
+  const { user, fatwaToEdit, setFatwaToEdit, locale } = useContext(SiteContext);
+  const [sameExists, setSameExists] = useState("");
+  const [preFill, setPreFill] = useState(() => {
+    if (SS.get("ansFatwa-ref")) {
+      let inputBooks = [];
+      let inputSura = [];
+      JSON.parse(SS.get("ansFatwa-ref")).forEach((item) => {
+        if (item.book) {
+          inputBooks.push([
+            {
+              ...refInputBook[0][0],
+              value: item.book,
+            },
+            {
+              ...refInputBook[0][1],
+              value: item.part,
+            },
+            {
+              ...refInputBook[0][2],
+              value: item.page,
+            },
+          ]);
+        } else {
+          inputSura.push([
+            {
+              ...refInputSura[0][0],
+              value: item.sura,
+            },
+            {
+              ...refInputSura[0][1],
+              value: item.aayat,
+            },
+          ]);
+        }
+      });
+      inputBooks.push(...refInputBook);
+      inputSura.push(...refInputSura);
+      return { inputBooks: [...inputBooks], inputSura: [...inputSura] };
+    } else {
+      return { inputBooks: refInputBook, inputSura: refInputSura };
+    }
+  });
+  function submit(e) {
+    e.preventDefault();
+    if (SS.get("ansFatwa-title").length < 15) {
+      emptyFieldWarning(".input#title", "input", "Add a title");
+      return;
+    }
+    if (SS.get("ansFatwa-ans").length < 15) {
+      emptyFieldWarning(".input#ans", "textarea", "Add a valid ans");
+      return;
+    }
+    const data = {
+      source: user._id,
+      topic: SS.get("ansFatwa-topic")
+        ? JSON.parse(SS.get("ansFatwa-topic"))
+        : ques.topic,
+      title: SS.get("ansFatwa-title"),
+      body: SS.get("ansFatwa-ans"),
+      ref: [
+        ...GetGroupData($(".addFatwa #books.multipleInput")),
+        ...GetGroupData($(".addFatwa #sura.multipleInput")),
+      ],
+    };
+    const url = `/api/source/userQues/answer/${_id}`;
+    const options = {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    };
+    setLoading(true);
+    fetch(url, options)
+      .then((res) => res.json())
+      .then((data) => {
+        setLoading(false);
+        if (data.code === "ok") {
+          SS.remove("ansFatwa-title");
+          SS.remove("ansFatwa-ans");
+          SS.remove("ansFatwa-ref");
+          setQues(data.content);
+          history.goBack();
+        } else if (data.code === 11000) {
+          setSameExists(data.field);
+        }
+      })
+      .catch((err) => {
+        alert("something went wrong");
+        console.log(err);
+      });
+  }
+  return (
+    <form className={`addFatwa`} onSubmit={submit}>
+      <Combobox
+        dataId="topic"
+        defaultValue={ques.topic}
+        onChange={(target) => {
+          SS.set("ansFatwa-topic", JSON.stringify(target.value));
+        }}
+        maxHeight="15rem"
+        label=<FormattedMessage id="topic" defaultMessage="Topic" />
+        options={topics.map((topic) => {
+          return {
+            label: topic[locale],
+            value: topic,
+          };
+        })}
+      />
+      <Input
+        defaultValue={SS.get("ansFatwa-title")}
+        dataId="title"
+        label=<FormattedMessage id="title" defaultMessage="Title" />
+        max={200}
+        className={sameExists === "title.bn-BD" ? "err" : ""}
+        onChange={(target) => {
+          SS.set("ansFatwa-title", target.value);
+          setSameExists("");
+        }}
+      >
+        {sameExists === "title.bn-BD" && (
+          <span className="errMessage">This title already exists!</span>
+        )}
+      </Input>
+      <Textarea
+        disabled={true}
+        defaultValue={ques.body}
+        onChange={(target) => SS.set("ansFatwa-ques", target.value)}
+        dataId="ques"
+        label=<FormattedMessage id="question" defaultMessage="Question" />
+      />
+      <Textarea
+        defaultValue={SS.get("ansFatwa-ans")}
+        onChange={(target) => {
+          SS.set("ansFatwa-ans", target.value);
+          setSameExists(false);
+        }}
+        dataId="ans"
+        className={sameExists === "ans.bn-BD" ? "err" : ""}
+        label=<FormattedMessage id="answer" defaultMessage="Answer" />
+      >
+        {sameExists === "ans.bn-BD" && (
+          <span className="errMessage">this fatwa already exists</span>
+        )}
+      </Textarea>
+      <MultipleInput
+        id="books"
+        inputs={preFill.inputBooks}
+        refInput={refInputBook}
+      />
+      <MultipleInput
+        id="sura"
+        inputs={preFill.inputSura}
+        refInput={refInputSura}
+      />
+      <Submit
+        label=<FormattedMessage id="form.submit" defaultMessage="Submit" />
+        loading={loading}
+        setLoading={setLoading}
+      />
+      <section className="bottomPadding" />
+    </form>
+  );
+};
 
 export const DataEditForm = ({
   Element,
@@ -1309,14 +1465,15 @@ export const DataEditForm = ({
     } else {
       fetch(api, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ [fieldCode]: newValue }),
       })
         .then((res) => {
           if (res.status === 200) {
-            // form.current.querySelector("input").blur();
+            (
+              form.current.querySelector("input") ||
+              form.current.querySelector("textarea")
+            ).blur();
             setEdit(false);
           } else {
             alert("Something went wrong!");
@@ -1451,17 +1608,17 @@ export const Report = ({ fatwa, close }) => {
   function submit(e) {
     e.preventDefault();
     if (SS.get("reportFatwa-name").length < 3) {
-      emptyFeildWarning("#name", "input", "Enter a valid name");
+      emptyFieldWarning("#name", "input", "Enter a valid name");
       return;
     }
     if (
       !/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g.exec(SS.get("reportFatwa-email"))
     ) {
-      emptyFeildWarning("#email", "input", "Enter a valid email");
+      emptyFieldWarning("#email", "input", "Enter a valid email");
       return;
     }
     if (!validateMoblie(SS.get("reportFatwa-mobile"))) {
-      emptyFeildWarning(
+      emptyFieldWarning(
         "#mobile",
         "input",
         "Enter a valid mobile number. +8801***"
@@ -1469,11 +1626,11 @@ export const Report = ({ fatwa, close }) => {
       return;
     }
     if (SS.get("reportFatwa-subject").length < 5) {
-      emptyFeildWarning("#subject", "input", "Enter a subject.");
+      emptyFieldWarning("#subject", "input", "Enter a subject.");
       return;
     }
     if (SS.get("reportFatwa-message").length < 10) {
-      emptyFeildWarning("#message", "textarea", "Enter a message.");
+      emptyFieldWarning("#message", "textarea", "Enter a message.");
       return;
     }
     setLoading(true);

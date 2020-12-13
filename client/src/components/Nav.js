@@ -32,10 +32,12 @@ function Avatar() {
               setOpen(false);
             }}
           >
-            <Link to={`/${user.role}/fatwa`}>
-              <li>Dashboard</li>
-            </Link>
-            <li onClick={logout}>Logout</li>
+            <li>
+              <Link to={`/${user.role}/fatwa`}>Dashboard</Link>
+            </li>
+            <li onClick={logout}>
+              <a>Logout</a>
+            </li>
           </ul>
         </OutsideClick>
       )}

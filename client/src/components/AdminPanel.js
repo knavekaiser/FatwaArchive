@@ -4,7 +4,7 @@ import { SiteContext } from "../Context.js";
 import "./CSS/AdminPanel.min.css";
 import { Input, Textarea, Combobox, topics, Submit, ID } from "./FormElements";
 import { DataEditForm, PasswordEditForm } from "./Forms";
-import { Tabs, Actions, Sidebar, View } from "./TableElements";
+import { Tabs, Sidebar, View } from "./TableElements";
 import { FormattedDate, FormattedNumber, FormattedMessage } from "react-intl";
 import FourOFour from "./FourOFour";
 
@@ -610,7 +610,7 @@ function SingleJamia({ data, setData }) {
   }
   function remove() {
     if (window.confirm("You want to delete this jamia")) {
-      fetch(`/api/admin/jamia/`, {
+      fetch(`/api/admin/source/`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ _id: jamia._id }),
@@ -963,6 +963,7 @@ function SingleUserReview() {
   );
 }
 function SingleUserQuestions({ data, setData }) {
+  const { locale } = useContext(SiteContext);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const ques = data;
@@ -988,39 +989,44 @@ function SingleUserQuestions({ data, setData }) {
     <tr onClick={() => setOpen(true)}>
       <td>
         <FormattedDate
-          value={ques.submitted}
+          value={ques.createdAt}
           day="numeric"
           month="numeric"
           year="2-digit"
         />
       </td>
       <td>
-        {ques.name}
-        <span>{ques.email}</span>
+        {ques.user.name}
+        <span>{ques.user.add}</span>
       </td>
-      <td>{ques.ques}</td>
+      <td>{ques.ques.body}</td>
+      <td>
+        <FormattedNumber value={ques.ansCount} />
+      </td>
     </tr>
   ) : (
     <tr className="full">
       <td className="label">Submitted</td>
       <td className="data">
         <FormattedDate
-          value={ques.submitted}
+          value={ques.createdAt}
           day="numeric"
           month="numeric"
           year="2-digit"
         />
       </td>
       <td className="label">Name</td>
-      <td className="data">{ques.name}</td>
-      <td className="label">Email</td>
-      <td className="data">{ques.email}</td>
+      <td className="data">{ques.user.name}</td>
+      <td className="label">Address</td>
+      <td className="data">{ques.user.add}</td>
       <td className="label">Mobile</td>
       <td className="data">
-        <a href={`tel:${ques.mob}`}>{ques.mob}</a>
+        <a href={`tel:${ques.user.mob}`}>{ques.user.mob}</a>
       </td>
+      <td className="label">Topic</td>
+      <td className="data">{ques.ques.topic[locale]}</td>
       <td className="label">Question</td>
-      <td className="data">{ques.ques}</td>
+      <td className="data">{ques.ques.body}</td>
       <td className="data btns">
         <button className="hideDetail" onClick={() => setOpen(false)}>
           <ion-icon name="chevron-up-outline"></ion-icon>Hide Detail
@@ -1094,9 +1100,10 @@ function UserReview() {
               },
             ]}
             columns={[
-              { column: "date", sort: true, colCode: "submitted" },
+              { column: "date", sort: true, colCode: "createdAt" },
               { column: "name", sort: false, colCode: "name" },
               { column: "question", sort: false, colCode: "ques" },
+              { column: "answers", sort: true, colCode: "ansCount" },
             ]}
           />
         </Route>

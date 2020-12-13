@@ -1,16 +1,31 @@
 import React, { useState, useContext, useEffect, useRef } from "react";
-import { Route, Switch, Link, useHistory } from "react-router-dom";
+import { Route, Switch, Link, Redirect, useHistory } from "react-router-dom";
 import { SiteContext } from "../Context";
-import { Tabs, View, Sidebar } from "./TableElements";
-import { ID, Input, Combobox, Textarea, Submit, topics } from "./FormElements";
+import { Tabs, View, Sidebar, Actions } from "./TableElements";
+import {
+  ID,
+  Input,
+  Combobox,
+  Textarea,
+  Submit,
+  topics,
+  SS,
+} from "./FormElements";
 import "./CSS/JamiaProfile.min.css";
 import {
   FormattedDate,
   FormattedNumber,
   FormattedTime,
   FormattedTimeParts,
+  FormattedMessage,
 } from "react-intl";
-import { AddFatwaForm, DataEditForm, PasswordEditForm } from "./Forms";
+import {
+  AddFatwaForm,
+  DataEditForm,
+  PasswordEditForm,
+  UserQuestionAnswerForm,
+} from "./Forms";
+import { Modal } from "./Modals";
 
 const encodeURL = (obj) =>
   Object.keys(obj)
@@ -29,7 +44,7 @@ function LoadingPost() {
 
 function Profile() {
   const { user } = useContext(SiteContext);
-  const patchApi = `/api/source/edit/${user._id}`;
+  const patchApi = `/api/source/edit`;
   return (
     <div className="view">
       <h1>Jamia Profile</h1>
@@ -108,8 +123,7 @@ function Profile() {
           <DataEditForm
             defaultValue={user.address}
             Element={Textarea}
-            max={200}
-            fieldCode="address"
+            fieldCode="add"
             api={patchApi}
           />
         </li>
@@ -140,7 +154,7 @@ function Profile() {
             defaultValue={user.appl.name}
             Element={Input}
             pattern={/^[ঀ-ৣৰ-৾a-zA-Z\s(),-]+$/}
-            fieldCode="applicant.name"
+            fieldCode="appl.name"
             api={patchApi}
           />
         </li>
@@ -150,7 +164,7 @@ function Profile() {
             defaultValue={user.appl.des}
             Element={Input}
             pattern={/^[ঀ-ৣৰ-৾a-zA-Z\s(),-]+$/}
-            fieldCode="applicant.designation"
+            fieldCode="appl.des"
             api={patchApi}
           />
         </li>
@@ -161,7 +175,7 @@ function Profile() {
             Element={Input}
             pattern={/^\+8801\d{0,9}$/}
             tel={true}
-            fieldCode="applicant.mobile"
+            fieldCode="appl.mob"
             api={patchApi}
           />
         </li>
@@ -552,6 +566,7 @@ function JamiaAllFatwa() {
 }
 
 function UserSubmissions() {
+  const { locale } = useContext(SiteContext);
   return (
     <div className="view">
       <h1 className="viewTitle">User Submissions</h1>
@@ -570,14 +585,17 @@ function UserSubmissions() {
               {
                 name: "topic",
                 input: (
-                  <></>
-                  // <ComboboxMulti
-                  //   id={ID(8)}
-                  //   maxHeight={300}
-                  //   label="topic"
-                  //   data={topics}
-                  //   required={true}
-                  // />
+                  <Combobox
+                    maxHeight={300}
+                    label="topic"
+                    data={topics.map((item) => {
+                      return {
+                        label: item[locale],
+                        value: item,
+                      };
+                    })}
+                    required={true}
+                  />
                 ),
               },
               {
@@ -719,32 +737,23 @@ function UserSubmissions() {
 }
 
 function SingleQuestion({ data }) {
+  const { locale } = useContext(SiteContext);
+  const history = useHistory();
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const container = useRef(null);
-  //add button for instant answer.
-  //use useLayoutEffect to show/hide "...more/...less"
   return (
     <li
       ref={container}
       className={`question ${!open ? "mini" : ""}`}
       onClick={(e) => {
         if (e.target === container.current) {
-          setOpen(!open);
+          history.push("/jamia/userQuestion/" + data._id);
         }
       }}
     >
       <div className="user">
-        <p className="name">{data.name}</p>
-        {open && (
-          <p className="contact">
-            {data.mobile ? (
-              <a href={`tel:${data.mobile}`}>{data.mobile}</a>
-            ) : (
-              <a href={`email:${data.email}`}>{data.email}</a>
-            )}
-          </p>
-        )}
+        <p className="name">{data.user.name}</p>
         <p className="date">
           {new Date(data.submitted).getFullYear() !==
           new Date().getFullYear() ? (
@@ -770,40 +779,23 @@ function SingleQuestion({ data }) {
           </FormattedTimeParts>
         </p>
       </div>
-      <p className="ques">{data.ques}</p>
+      <Actions
+        actions={[
+          {
+            label: "Answer now",
+            action: () => {
+              SS.set("userAns-ques", data.ques.body);
+              SS.set("userAns-topic", JSON.stringify(data.ques.topic));
+              history.push("/jamia/answerUserQuestion/" + data._id);
+            },
+          },
+        ]}
+      />
+      <p className="ques">{data.ques.body}</p>
       <ul className="tags">
-        <li className="tag">{data.topic}</li>
+        <li className="tag">{data.ques.topic[locale]}</li>
         <li className="tag">#2021</li>
       </ul>
-      <div className="btns">
-        {open && (
-          <>
-            <Submit
-              label={
-                <>
-                  <ion-icon name="checkmark-outline"></ion-icon> Accept
-                </>
-              }
-              onClick={() => setLoading(true)}
-              loading={loading}
-            />
-            <button type="submit">
-              <ion-icon name="star-outline"></ion-icon> Answer
-            </button>
-          </>
-        )}
-        <button className="more" onClick={() => setOpen(!open)}>
-          {open ? (
-            <>
-              <ion-icon name="chevron-up-outline"></ion-icon>
-            </>
-          ) : (
-            <>
-              <ion-icon name="chevron-down-outline"></ion-icon>
-            </>
-          )}
-        </button>
-      </div>
     </li>
   );
 }
@@ -812,7 +804,7 @@ function NewQuestions() {
   const signal = abortController.signal;
   const { locale } = useContext(SiteContext);
   const [loading, setLoading] = useState(true);
-  const [sort, setSort] = useState({ column: "submitted", order: "dsc" });
+  const [sort, setSort] = useState({ column: "createdAt", order: "des" });
   const [filters, setFilters] = useState({});
   const [data, setData] = useState([]);
   function fetchData() {
@@ -825,6 +817,7 @@ function NewQuestions() {
       .then((res) => res.json())
       .then((data) => {
         setLoading(false);
+        console.log(data);
         setData(data);
       })
       .catch((err) => {
@@ -833,7 +826,6 @@ function NewQuestions() {
       });
     return () => abortController.abort();
   }
-  useEffect(() => {});
   useEffect(fetchData, [sort, filters]);
   return (
     <>
@@ -852,7 +844,7 @@ function NewQuestions() {
             },
             {
               label: "Old first",
-              value: { column: "submitted", order: "dsc" },
+              value: { column: "submitted", order: "des" },
             },
           ]}
         />
@@ -884,6 +876,299 @@ function QuestionFeed() {
   );
 }
 
+function Answer({ ques, ans, setQues }) {
+  const { locale, user } = useContext(SiteContext);
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [voted, setVoted] = useState(() => {
+    let vote = false;
+    ans.vote.voters.some((voter) => {
+      if (voter.source === user._id) {
+        vote = voter.vote;
+      }
+    });
+    return vote;
+  });
+  useEffect(() => {
+    let vote = false;
+    ans.vote.voters.some((voter) => {
+      if (voter.source === user._id) {
+        vote = voter.vote;
+      }
+    });
+    setVoted(vote);
+  }, [ans]);
+  const history = useHistory();
+  function vote(e) {
+    setLoading(true);
+    const options = {
+      method: "PUT",
+      headers: { "Content-type": "application/json" },
+      body: JSON.stringify({
+        voter: user._id,
+        ans_id: ans._id,
+        vote: e.target.getAttribute("name").includes("up") ? "up" : "down",
+      }),
+    };
+    fetch(`/api/source/userQues/vote/${ques._id}`, options)
+      .then((res) => res.json())
+      .then((data) => {
+        setLoading(false);
+        if (data.code === "ok") {
+          setQues(data.content);
+        } else {
+          throw data.code;
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        alert("something went wrong");
+      });
+  }
+  function edit() {
+    SS.set("ansFatwa-ans", ans.body);
+    SS.set("ansFatwa-title", ans.title);
+    SS.set("ansFatwa-ref", JSON.stringify(ans.ref));
+    history.push(history.location.pathname + "/add");
+  }
+  function report() {
+    console.log("report here");
+  }
+  function remove() {
+    const options = {
+      method: "DELETE",
+      headers: { "Content-type": "application/json" },
+      body: JSON.stringify({ source: ans.source._id, _id: ans._id }),
+    };
+    setLoading(true);
+    fetch(`/api/source/userQues/answer/${ques._id}`, options)
+      .then((res) => res.json())
+      .then((data) => {
+        setLoading(false);
+        if (data.code === "ok") {
+          setQues(data.content);
+        } else {
+          throw data.code;
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        alert("something went wrong");
+      });
+  }
+  return (
+    <div
+      className={`ans ${ans.source._id === user._id ? "mine" : ""} ${
+        !open ? "mini" : ""
+      }`}
+    >
+      <div className="vote">
+        <div className={`content ${voted}`}>
+          <ion-icon onClick={vote} name="chevron-up-outline"></ion-icon>
+          <p className="voteCount">
+            <FormattedNumber value={ans.vote.count} />
+          </p>
+          <ion-icon onClick={vote} name="chevron-down-outline"></ion-icon>
+        </div>
+      </div>
+      <div className="content">
+        <div className="source">
+          <p className="name">
+            <b>{ans.source.name[locale]}</b>
+          </p>
+          <p className="date">
+            <FormattedDate
+              value={ans.createdAt}
+              day="numeric"
+              month="long"
+              year="numeric"
+            />
+            <span className="separator" />
+            <FormattedTimeParts value={ans.createdAt}>
+              {(parts) => (
+                <>
+                  {parts[0].value}
+                  {parts[1].value}
+                  {parts[2].value}
+                  <small>{parts[4].value.toLowerCase()}</small>
+                </>
+              )}
+            </FormattedTimeParts>
+          </p>
+        </div>
+        <div className="body">
+          <p className="title">
+            {ans.topic[locale]}: {ans.title}
+          </p>
+          <p className="answer">{ans.body}</p>
+        </div>
+        {open && ans.ref.length > 0 && (
+          <div className="ref">
+            <p>
+              <FormattedMessage id="ref" value="Ref." />
+            </p>
+            <ul className="ref">
+              {ans.ref.map((ref, i) =>
+                ref.book ? (
+                  <li key={i}>
+                    <span>{ref.book}</span>,{" "}
+                    <FormattedMessage id="page" defaultMessage="Page" />{" "}
+                    <span>
+                      <FormattedNumber value={ref.part} />
+                    </span>
+                    , <FormattedMessage id="part" defaultMessage="Part" />{" "}
+                    <span>
+                      <FormattedNumber value={ref.page} />
+                    </span>
+                  </li>
+                ) : (
+                  <li key={i}>
+                    <span>{ref.sura}</span>,{" "}
+                    <FormattedMessage id="aayat" defaultMessage="Aayat" />{" "}
+                    <span>
+                      <FormattedNumber value={ref.aayat} />
+                    </span>
+                  </li>
+                )
+              )}
+            </ul>
+          </div>
+        )}
+        {!open && (
+          <div className="tags">
+            <p className="tag">
+              <FormattedMessage
+                values={{ number: <FormattedNumber value={ans.ref.length} /> }}
+                id="ans.tag.refCount"
+                defaultMessage={`${ans.ref.length} Reference(s)`}
+              />
+            </p>
+          </div>
+        )}
+        <span onClick={() => setOpen(!open)} className="showFull">
+          {open ? "পুরো উত্তর গোপন করুন" : "পুরো উত্তর দেখুন"}
+        </span>
+      </div>
+      {ans.source._id === user._id ? (
+        <Actions
+          icon="reorder-two-outline"
+          actions={[
+            { label: "Edit", action: edit },
+            { label: "Remove", action: remove },
+          ]}
+        />
+      ) : (
+        <Actions
+          icon="reorder-two-outline"
+          actions={[{ label: "Report", action: report }]}
+        />
+      )}
+    </div>
+  );
+}
+
+function UserQuestion({ history, match }) {
+  const { user } = useContext(SiteContext);
+  const [loading, setLoading] = useState(true);
+  const [userQues, setUserQues] = useState({});
+  const [answered, setAnswered] = useState(false);
+  useEffect(getData, []);
+  function getData() {
+    fetch("/api/source/userQues/" + match.params._id)
+      .then((res) => res.json())
+      .then((data) => {
+        setLoading(false);
+        if (data.code === "ok") {
+          setUserQues(data.content);
+          if (
+            data.content.ans.filter((item) => item.source._id === user._id)
+              .length > 0
+          ) {
+            setAnswered(true);
+          }
+        } else {
+          throw data;
+        }
+      })
+      .catch((err) => {
+        alert("something went wrong");
+        console.log(err);
+      });
+  }
+  if (userQues.ques) {
+    return (
+      <div className="view userQues">
+        <div className="container">
+          <div className="ques">
+            <div className="user">
+              <p className="name">
+                <b>{userQues.user.name}</b>
+                <span className="separator" />
+                <i>
+                  <span className="add">{userQues.user.add}</span>
+                </i>
+              </p>
+              <p className="date">
+                <FormattedDate
+                  value={userQues.createdAt}
+                  day="numeric"
+                  month="long"
+                  year="numeric"
+                />
+                <span className="separator" />
+                <FormattedTimeParts value={userQues.createdAt}>
+                  {(parts) => (
+                    <>
+                      {parts[0].value}
+                      {parts[1].value}
+                      {parts[2].value}
+                      <small>{parts[4].value.toLowerCase()}</small>
+                    </>
+                  )}
+                </FormattedTimeParts>
+              </p>
+            </div>
+            <p className="body">{userQues.ques.body}</p>
+          </div>
+          {!answered ? (
+            <Link className="addAns" to={`${match.url}/add`}>
+              Add Answer
+            </Link>
+          ) : (
+            <div className="hr" />
+          )}
+          {userQues.ans.map((item) => (
+            <Answer
+              key={item._id}
+              ques={userQues}
+              ans={item}
+              setQues={setUserQues}
+            />
+          ))}
+          <Route path={`${match.url}/add`}>
+            <Modal
+              open={true}
+              setOpen={() => history.push(match.url)}
+              className="answerForm"
+            >
+              <UserQuestionAnswerForm
+                setQues={setUserQues}
+                ques={userQues.ques}
+                _id={userQues._id}
+              />
+            </Modal>
+          </Route>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className="view">
+      {loading ? <h1>loading</h1> : <p>Question did not found!</p>}
+    </div>
+  );
+}
+
 function JamiaProfile() {
   const { user, locale } = useContext(SiteContext);
   return (
@@ -908,6 +1193,8 @@ function JamiaProfile() {
           <Link to="/jamia/profile">
             <h2>{user.name[locale][0]}</h2>
           </Link>
+          <p>{user.name[locale]}</p>
+          <p className="add">{user.add}</p>
         </div>
       </Sidebar>
       <Switch>
@@ -921,10 +1208,17 @@ function JamiaProfile() {
           )}
         />
         <Route path="/jamia/questionFeed" component={QuestionFeed} />
+        <Route path="/jamia/userQuestion/:_id" component={UserQuestion} />
         <Route path="/jamia" exact component={JamiaAllFatwa} />
         <Route path="/jamia/fatwa" component={JamiaAllFatwa} />
         <Route path="/jamia/profile" component={Profile} />
         <Route path="/jamia/userSubmissions" component={UserSubmissions} />
+        <Route path="/">
+          <div className="view">
+            <h3>404</h3>
+            <p>broken link</p>
+          </div>
+        </Route>
       </Switch>
     </div>
   );

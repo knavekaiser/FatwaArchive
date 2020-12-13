@@ -5,26 +5,102 @@ const userQuestion = new Schema(
       add: { type: String, required: true, trim: true },
       mob: { type: String },
     },
-    question: {
-      topic: { type: String, required: true },
+    ques: {
+      topic: {
+        "en-US": { type: String, required: true },
+        "bn-BD": { type: String, required: true },
+      },
       body: { type: String, required: true, unique: true },
     },
-    answered: { type: Boolean, default: false },
-    answers: [
+    ans: [
       {
-        source: { type: Schema.Types.ObjectId, ref: "Source", required: true },
-        body: { type: Boolean, default: false, required: true, trim: true },
+        source: {
+          type: Schema.Types.ObjectId,
+          ref: "Source",
+          required: true,
+        },
+        topic: {
+          "en-US": { type: String, required: true },
+          "bn-BD": { type: String, required: true },
+        },
+        title: { type: String, required: true, trim: true },
+        body: { type: String, required: true, trim: true },
+        ref: [],
         vote: {
           count: { type: Number, default: 0 },
           voters: [
-            { type: Schema.Types.ObjectId, ref: "Source", required: true },
+            {
+              source: {
+                type: Schema.Types.ObjectId,
+                ref: "Source",
+                required: true,
+              },
+              vote: { type: String, enum: ["up", "down"], required: true },
+            },
           ],
         },
+        createdAt: { type: Date, default: Date.now },
       },
     ],
+    status: { type: String, default: "pending" },
+    ansCount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
+userQuestion.methods.addAns = function (ans) {
+  this.ans = this.ans.filter(
+    (item) => item.source.toString() !== ans.source.toString()
+  );
+  if (this.ans.some((item) => item.body === ans.body)) {
+    throw "answer exsists";
+  }
+  this.status === "pending" && (this.status = "pendingApproval");
+  this.ansCount += 1;
+  this.ans.push(ans);
+  this.ans.sort((a, b) => {
+    if (a.vote.count > b.vote.count) {
+      return 1;
+    } else {
+      return -1;
+    }
+  });
+  return this.save();
+};
+userQuestion.methods.dltAns = function (detail) {
+  this.ans = this.ans.filter(
+    (ans) => ans._id.toString() !== detail._id.toString()
+  );
+  this.ansCount -= 1;
+  return this.save();
+};
+userQuestion.methods.vote = function (detail) {
+  this.ans = this.ans.map((ans) => {
+    if (ans._id.toString() === detail.ans_id.toString()) {
+      ans.vote.voters = ans.vote.voters.filter(
+        (voter) => voter.source.toString() !== detail.voter.toString()
+      );
+      ans.vote.voters.push({ source: detail.voter, vote: detail.vote });
+      let voteCount = 0;
+      ans.vote.voters.forEach((voter) => {
+        voter.vote === "up" ? voteCount++ : voteCount--;
+      });
+      ans.vote.count = voteCount;
+      return ans;
+    } else {
+      return ans;
+    }
+  });
+  this.ans.sort((a, b) => {
+    if (a.vote.count < b.vote.count) {
+      return 1;
+    } else {
+      return -1;
+    }
+  });
+  return this.save();
+};
+
+const UserQuestion = mongoose.model("UserQuestion", userQuestion);
 
 const userReview = new Schema({
   name: { type: String, required: true, trim: true },
@@ -50,7 +126,6 @@ const reportFatwa = new Schema({
   },
 });
 
-const UserQuestion = mongoose.model("UserQuestion", userQuestion);
 const UserReview = mongoose.model("UserReview", userReview);
 const ReportFatwa = mongoose.model("ReportFatwa", reportFatwa);
 

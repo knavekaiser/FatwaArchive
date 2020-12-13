@@ -64,6 +64,15 @@ export const ID = (length) => {
 };
 export const $ = (selector) => document.querySelector(selector);
 export const $$ = (selector) => document.querySelectorAll(selector);
+export const emptyFieldWarning = (selector, inputType, warning) => {
+  const emptyFieldWarning = document.createElement("p");
+  emptyFieldWarning.classList.add("emptyFieldWarning");
+  emptyFieldWarning.textContent = warning;
+  if ($(`${selector} .emptyFieldWarning`) === null) {
+    $(`${selector}`).appendChild(emptyFieldWarning);
+  }
+  $(`${selector} ${inputType}`).focus();
+};
 export const camelize = (str) => {
   return str
     .replace(/(?:^\w|[A-Z]|\b\w)/g, function (word, index) {
@@ -99,7 +108,7 @@ export const Input = ({
   }, [defaultValue]);
   const changeHandler = (e) => {
     Array.from(e.target.parentElement.children).forEach((child) => {
-      child.classList.contains("emptyFeildWarning") && child.remove();
+      child.classList.contains("emptyFieldWarning") && child.remove();
     });
     if (type === "text" || type === "password") {
       const regex = pattern || defaultValidation;
@@ -256,6 +265,7 @@ export const Textarea = ({
   onChange,
   className,
   children,
+  disabled,
 }) => {
   const [value, setValue] = useState(defaultValue);
   const [showLabel, setShowLabel] = useState(true);
@@ -275,7 +285,7 @@ export const Textarea = ({
   };
   function change(e) {
     Array.from(e.target.parentElement.children).forEach((child) => {
-      child.classList.contains("emptyFeildWarning") && child.remove();
+      child.classList.contains("emptyFieldWarning") && child.remove();
     });
     const regex = pattern || defaultValidation;
     if (e.target.value === "" || regex.exec(e.target.value) !== null) {
@@ -299,6 +309,7 @@ export const Textarea = ({
         {invalidChar ? (warning ? warning : "অকার্যকর অক্ষর!") : label}
       </label>
       <TextareaAutosize
+        disabled={disabled}
         required={required}
         value={value}
         onFocus={focus}
@@ -336,10 +347,6 @@ const Group = ({ id, inputs, clone, setGroupCount }) => {
     };
   }
   useEffect(handleMount, []);
-  function handleChange(e) {
-    clone(e);
-    setValue(e.value);
-  }
   return (
     <div className="group">
       {inputs.map((input) => {
@@ -353,7 +360,10 @@ const Group = ({ id, inputs, clone, setGroupCount }) => {
             type={input.type}
             label={input.label}
             id={input.clone ? id : ""}
-            onChange={input.clone && handleChange}
+            onChange={(e) => {
+              clone(e);
+              setValue(e.value);
+            }}
             disabled={input.clone ? false : input.value ? false : value === ""}
           />
         );
@@ -498,7 +508,7 @@ export const Combobox = ({
             onClick={(e) => {
               Array.from(e.target.parentElement.parentElement.children).forEach(
                 (child) => {
-                  child.classList.contains("emptyFeildWarning") &&
+                  child.classList.contains("emptyFieldWarning") &&
                     child.remove();
                 }
               );
