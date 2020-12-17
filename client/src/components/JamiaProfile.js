@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect, useRef } from "react";
 import { Route, Switch, Link, Redirect, useHistory } from "react-router-dom";
 import { SiteContext } from "../Context";
-import { Tabs, View, Sidebar, Actions } from "./TableElements";
+import { Tabs, View, Sidebar, Actions, LoadingPost } from "./TableElements";
 import {
   ID,
   Input,
@@ -24,6 +24,7 @@ import {
   DataEditForm,
   PasswordEditForm,
   UserQuestionAnswerForm,
+  UserQuestionReportForm,
 } from "./Forms";
 import { Modal } from "./Modals";
 
@@ -32,24 +33,18 @@ const encodeURL = (obj) =>
     .map((key) => `${key}=${obj[key]}`)
     .join("&");
 
-function LoadingPost() {
-  return (
-    <div className="question loading">
-      <div className="user"></div>
-      <div className="ques"></div>
-      <div className="tags"></div>
-    </div>
-  );
-}
-
 function Profile() {
   const { user } = useContext(SiteContext);
   const patchApi = `/api/source/edit`;
   return (
     <div className="view">
-      <h1>Jamia Profile</h1>
+      <h1>
+        <FormattedMessage id="jamiaProfile" defaultMessage="Jamia Profile" />
+      </h1>
       <ul id="profileInfo">
-        <li className="label">Joined</li>
+        <li className="label">
+          <FormattedMessage id="joined" defaultMessage="Joined" />
+        </li>
         <li className="data">
           <FormattedDate
             value={user.joined}
@@ -58,17 +53,25 @@ function Profile() {
             year="2-digit"
           />
         </li>
-        <li className="label">Fatwa</li>
+        <li className="label">
+          <FormattedMessage id="fatwa" defaultMessage="Fatwa" />
+        </li>
         <li className="data">
           <FormattedNumber value={user.fatwa} />
         </li>
-        <li className="label">ID</li>
+        <li className="label">
+          <FormattedMessage id="id" defaultMessage="ID" />
+        </li>
         <li className="data">{user.id}</li>
-        <li className="label">Password</li>
+        <li className="label">
+          <FormattedMessage id="password" defaultMessage="Password" />
+        </li>
         <li className="data">
           <PasswordEditForm api={patchApi} />
         </li>
-        <li className="label">Name (Bangla)</li>
+        <li className="label">
+          <FormattedMessage id="nameBn" defaultMessage="Name (Bangla)" />
+        </li>
         <li className="data">
           <DataEditForm
             api={patchApi}
@@ -78,7 +81,9 @@ function Profile() {
             fieldCode="name.bn-BD"
           />
         </li>
-        <li className="label">Name (Enlish)</li>
+        <li className="label">
+          <FormattedMessage id="nameEn" defaultMessage="Name (English)" />
+        </li>
         <li className="data">
           <DataEditForm
             api={patchApi}
@@ -88,7 +93,12 @@ function Profile() {
             fieldCode="name.en-US"
           />
         </li>
-        <li className="label">Prime Mufti (Bangla)</li>
+        <li className="label">
+          <FormattedMessage
+            id="primeMuftiBn"
+            defaultMessage="Prime Mufti (Bangla)"
+          />
+        </li>
         <li className="data">
           <DataEditForm
             defaultValue={user.primeMufti["bn-BD"]}
@@ -98,7 +108,12 @@ function Profile() {
             api={patchApi}
           />
         </li>
-        <li className="label">Prime Mufti (English)</li>
+        <li className="label">
+          <FormattedMessage
+            id="primeMuftiEn"
+            defaultMessage="Prime Mufti (English)"
+          />
+        </li>
         <li className="data">
           <DataEditForm
             defaultValue={user.primeMufti["en-US"]}
@@ -108,7 +123,9 @@ function Profile() {
             api={patchApi}
           />
         </li>
-        <li className="label">Founder</li>
+        <li className="label">
+          <FormattedMessage id="founder" defaultMessage="Founder" />
+        </li>
         <li className="data">
           <DataEditForm
             defaultValue={user.founder}
@@ -118,7 +135,9 @@ function Profile() {
             api={patchApi}
           />
         </li>
-        <li className="label">Address</li>
+        <li className="label">
+          <FormattedMessage id="add" defaultMessage="Address" />
+        </li>
         <li className="data">
           <DataEditForm
             defaultValue={user.address}
@@ -127,7 +146,9 @@ function Profile() {
             api={patchApi}
           />
         </li>
-        <li className="label">Contact</li>
+        <li className="label">
+          <FormattedMessage id="contact" defaultMessage="Contact" />
+        </li>
         <li className="data">
           <DataEditForm
             defaultValue={user.contact}
@@ -138,7 +159,9 @@ function Profile() {
             api={patchApi}
           />
         </li>
-        <li className="label">About</li>
+        <li className="label">
+          <FormattedMessage id="about" defaultMessage="About" />
+        </li>
         <li className="data">
           <DataEditForm
             defaultValue={user.about}
@@ -148,7 +171,9 @@ function Profile() {
             api={patchApi}
           />
         </li>
-        <li className="label">Applicant's Name</li>
+        <li className="label">
+          <FormattedMessage id="applName" defaultMessage="Applicant's Name" />
+        </li>
         <li className="data">
           <DataEditForm
             defaultValue={user.appl.name}
@@ -158,7 +183,12 @@ function Profile() {
             api={patchApi}
           />
         </li>
-        <li className="label">Applicant's designation</li>
+        <li className="label">
+          <FormattedMessage
+            id="applDes"
+            defaultMessage="Applicant's Designation"
+          />
+        </li>
         <li className="data">
           <DataEditForm
             defaultValue={user.appl.des}
@@ -168,7 +198,9 @@ function Profile() {
             api={patchApi}
           />
         </li>
-        <li className="label">Applicant's mobile</li>
+        <li className="label">
+          <FormattedMessage id="applMob" defaultMessage="Applicant's Moblie" />
+        </li>
         <li className="data">
           <DataEditForm
             defaultValue={user.appl.mob}
@@ -184,86 +216,262 @@ function Profile() {
   );
 }
 
-function SingleFatwa({ data, setData }) {
-  const { locale, setFatwaToEdit } = useContext(SiteContext);
-  const [loading, setLoading] = useState(false);
-  const fatwa = data;
-  const history = useHistory();
-  const [open, setOpen] = useState(false);
-  function edit() {
-    setFatwaToEdit(fatwa);
-    history.push(`/jamia/add/${fatwa._id}`);
-  }
-  function deleteFatwa() {
-    if (window.confirm("Do you want to delete this fatwa?")) {
-      setLoading(true);
-      fetch(`/api/source/fatwa/`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fatwa: fatwa._id, source: fatwa.source }),
-      })
-        .then((res) => {
-          setLoading(false);
-          if (res.status === 200) {
-            setData((prev) => {
-              return prev.filter((item) => item._id !== fatwa._id);
-            });
-          } else {
-            alert("something went wrong.");
-          }
-        })
-        .catch((err) => {
-          alert("something went wrong.");
-          console.log(err);
-        });
-    }
-  }
-  return open ? (
-    <tr className="full">
-      <td className="label">Added</td>
-      <td className="data">
-        <FormattedDate
-          value={fatwa.added}
-          day="numeric"
-          month="numeric"
-          year="numeric"
-        />
-      </td>
-      <td className="label">title</td>
-      <td className="data">
-        <Link target="_blank" to={`/fatwa/${fatwa.link[locale]}`}>
-          {fatwa.title[locale]}
-          <ion-icon name="open-outline"></ion-icon>
-        </Link>
-      </td>
-      <td className="label">translate</td>
-      <td className="data">{fatwa.translation ? "Yes" : "No"}</td>
-      <td className="data btns">
-        <button onClick={() => setOpen(false)}>
-          <ion-icon name="chevron-up-outline"></ion-icon> Hide Detail
-        </button>
-        <button onClick={edit}>
-          <ion-icon name="pencil-outline"></ion-icon> Edit
-        </button>
-        <button onClick={deleteFatwa}>
-          <ion-icon name="trash-outline"></ion-icon> Delete Fatwa
-        </button>
-      </td>
-    </tr>
-  ) : (
-    <tr data-id={fatwa._id} onClick={() => setOpen(true)}>
-      <td>{fatwa.topic[locale]}</td>
-      <td>
-        <FormattedDate
-          value={fatwa.added}
-          day="numeric"
-          month="numeric"
-          year="numeric"
-        />
-      </td>
-      <td>{fatwa.title[locale]}</td>
-      <td>{fatwa.translation ? "Yes" : "No"}</td>
-    </tr>
+function JamiaAllFatwa() {
+  const { locale } = useContext(SiteContext);
+  return (
+    <div className="view">
+      <h1 className="viewTitle">
+        <FormattedMessage id="fatwa" defaultMessage="Fatwa" />
+      </h1>
+      <Tabs
+        page="/jamia/fatwa/"
+        tabs={[
+          {
+            label: <FormattedMessage id="live" defaultMessage="Live" />,
+            link: "live",
+          },
+          {
+            label: <FormattedMessage id="pending" defaultMessage="pending" />,
+            link: "pending",
+          },
+        ]}
+      />
+      <Switch>
+        <Route path="/jamia/fatwa" exact>
+          <View
+            key="jamiaAllFatwa"
+            Element={SingleFatwa}
+            id="allFatwa"
+            api="api/source/allFatwa/filter?"
+            categories={[
+              {
+                fieldName: "title",
+                name: "Title",
+                chip: "Title contains",
+                input: <Input label="Title" type="text" required={true} />,
+              },
+              {
+                fieldName: "topic",
+                name: "Topic",
+                chip: "Topic is",
+                input: (
+                  <Combobox
+                    id={ID(8)}
+                    maxHeight={300}
+                    label="topic"
+                    options={topics.map((option) => {
+                      return {
+                        label: option[locale],
+                        value: option,
+                      };
+                    })}
+                  />
+                ),
+              },
+              {
+                fieldName: "question",
+                name: "Question",
+                chip: "Question contains",
+                input: <Input label="Question" type="text" required={true} />,
+              },
+              {
+                fieldName: "answer",
+                name: "Answer",
+                display: "Answer contains",
+                input: <Input label="Answer" type="text" required={true} />,
+              },
+              {
+                fieldName: "translation",
+                name: "Translation",
+                chip: "Translation :",
+                input: (
+                  <Combobox
+                    maxHeight={500}
+                    label="Translation"
+                    options={[
+                      { label: "Generated", value: "generated" },
+                      { label: "Manual", value: "manual" },
+                    ]}
+                  />
+                ),
+              },
+            ]}
+            columns={[
+              {
+                column: <FormattedMessage id="topic" defaultMessage="Topic" />,
+                sort: true,
+                colCode: "topic",
+              },
+              {
+                column: <FormattedMessage id="date" defaultMessage="Date" />,
+                sort: true,
+                colCode: "createdAt",
+              },
+              {
+                column: <FormattedMessage id="title" defaultMessage="Title" />,
+                sort: false,
+                colCode: "title",
+              },
+              {
+                column: (
+                  <FormattedMessage
+                    id="translation"
+                    defaultMessage="Translation"
+                  />
+                ),
+                sort: true,
+                colCode: "translation",
+              },
+            ]}
+            defaultSort={{ column: "createdAt", order: "des" }}
+          />
+        </Route>
+        <Route path="/jamia/fatwa/live">
+          <View
+            key="jamiaAllFatwa"
+            Element={SingleFatwa}
+            id="allFatwa"
+            api="api/source/allFatwa/filter?"
+            categories={[
+              {
+                fieldName: "title",
+                name: "Title",
+                chip: "Title contains",
+                input: <Input label="Title" type="text" required={true} />,
+              },
+              {
+                fieldName: "topic",
+                name: "Topic",
+                chip: "Topic is",
+                input: (
+                  <Combobox
+                    id={ID(8)}
+                    maxHeight={300}
+                    label="topic"
+                    options={topics.map((option) => {
+                      return {
+                        label: option[locale],
+                        value: option,
+                      };
+                    })}
+                  />
+                ),
+              },
+              {
+                fieldName: "question",
+                name: "Question",
+                chip: "Question contains",
+                input: <Input label="Question" type="text" required={true} />,
+              },
+              {
+                fieldName: "answer",
+                name: "Answer",
+                display: "Answer contains",
+                input: <Input label="Answer" type="text" required={true} />,
+              },
+              {
+                fieldName: "translation",
+                name: "Translation",
+                chip: "Translation :",
+                input: (
+                  <Combobox
+                    maxHeight={500}
+                    label="Translation"
+                    options={[
+                      { label: "Generated", value: "generated" },
+                      { label: "Manual", value: "manual" },
+                    ]}
+                  />
+                ),
+              },
+            ]}
+            columns={[
+              {
+                column: <FormattedMessage id="topic" defaultMessage="Topic" />,
+                sort: true,
+                colCode: "topic",
+              },
+              {
+                column: <FormattedMessage id="date" defaultMessage="Date" />,
+                sort: true,
+                colCode: "createdAt",
+              },
+              {
+                column: <FormattedMessage id="title" defaultMessage="Title" />,
+                sort: false,
+                colCode: "title",
+              },
+              {
+                column: (
+                  <FormattedMessage
+                    id="translation"
+                    defaultMessage="Translation"
+                  />
+                ),
+                sort: true,
+                colCode: "translation",
+              },
+            ]}
+            defaultSort={{ column: "createdAt", order: "des" }}
+          />
+        </Route>
+        <Route path="/jamia/fatwa/pending">
+          <View
+            key="jamiaAllFatwaSubmission"
+            Element={JamiaSingleFatwaSubmission}
+            id="fatwaSubmissions"
+            api="api/source/fatwaSubmissions/filter?"
+            categories={[
+              {
+                name: "topic",
+                input: (
+                  <Combobox
+                    id={ID(8)}
+                    maxHeight={300}
+                    label="topic"
+                    options={topics.map((option) => {
+                      return {
+                        label: option[locale],
+                        value: option,
+                      };
+                    })}
+                  />
+                ),
+              },
+              {
+                name: "title",
+                input: <Input label="Title" type="text" required={true} />,
+              },
+              {
+                name: "question",
+                input: <Input label="Question" type="text" required={true} />,
+              },
+              {
+                name: "answer",
+                input: <Input label="Answer" type="text" required={true} />,
+              },
+            ]}
+            columns={[
+              {
+                column: <FormattedMessage id="date" defaultMessage="Date" />,
+                sort: true,
+                colCode: "createdAt",
+              },
+              {
+                column: <FormattedMessage id="topic" defaultMessage="Topic" />,
+                sort: true,
+                colCode: "topic",
+              },
+              {
+                column: <FormattedMessage id="title" defaultMessage="title" />,
+                sort: false,
+              },
+            ]}
+            defaultSort={{ column: "createdAt", order: "des" }}
+          />
+        </Route>
+      </Switch>
+    </div>
   );
 }
 function JamiaSingleFatwaSubmission({ data, setData }) {
@@ -273,7 +481,7 @@ function JamiaSingleFatwaSubmission({ data, setData }) {
   const history = useHistory();
   function edit() {
     setFatwaToEdit(fatwa);
-    history.push("/jamia/add");
+    history.push("/jamia/editFatwa/" + fatwa._id);
   }
   function removeSubmission() {
     fetch(`/api/fatwaSubmissions/${fatwa._id}`, {
@@ -373,195 +581,86 @@ function JamiaSingleFatwaSubmission({ data, setData }) {
     </tr>
   );
 }
-function JamiaAllFatwa() {
-  const { locale } = useContext(SiteContext);
-  return (
-    <div className="view">
-      <h1 className="viewTitle">Fatwa</h1>
-      <Tabs page="/jamia/fatwa/" tabs={["Live", "Submissions"]} />
-      <Switch>
-        <Route path="/jamia/fatwa" exact>
-          <View
-            key="jamiaAllFatwa"
-            Element={SingleFatwa}
-            id="allFatwa"
-            api="api/source/allFatwa/filter?"
-            categories={[
-              {
-                fieldName: "title",
-                name: "Title",
-                chip: "Title contains",
-                input: <Input label="Title" type="text" required={true} />,
-              },
-              {
-                fieldName: "topic",
-                name: "Topic",
-                chip: "Topic is",
-                input: (
-                  <Combobox
-                    id={ID(8)}
-                    maxHeight={300}
-                    label="topic"
-                    options={topics.map((option) => {
-                      return {
-                        label: option[locale],
-                        value: option,
-                      };
-                    })}
-                  />
-                ),
-              },
-              {
-                fieldName: "question",
-                name: "Question",
-                chip: "Question contains",
-                input: <Input label="Question" type="text" required={true} />,
-              },
-              {
-                fieldName: "answer",
-                name: "Answer",
-                display: "Answer contains",
-                input: <Input label="Answer" type="text" required={true} />,
-              },
-              {
-                fieldName: "translation",
-                name: "Translation",
-                chip: "Translation :",
-                input: (
-                  <Combobox
-                    maxHeight={500}
-                    label="Translation"
-                    options={[
-                      { label: "Generated", value: "generated" },
-                      { label: "Manual", value: "manual" },
-                    ]}
-                  />
-                ),
-              },
-            ]}
-            columns={[
-              { column: "topic", sort: true, colCode: "topic" },
-              { column: "date", sort: true, colCode: "createdAt" },
-              { column: "title", sort: false, colCode: "title" },
-              { column: "translation", sort: true, colCode: "translation" },
-            ]}
-            defaultSort={{ column: "createdAt", order: "des" }}
-          />
-        </Route>
-        <Route path="/jamia/fatwa/live">
-          <View
-            key="jamiaAllFatwa"
-            Element={SingleFatwa}
-            id="allFatwa"
-            api="api/source/allFatwa/filter?"
-            categories={[
-              {
-                fieldName: "title",
-                name: "Title",
-                chip: "Title contains",
-                input: <Input label="Title" type="text" required={true} />,
-              },
-              {
-                fieldName: "topic",
-                name: "Topic",
-                chip: "Topic is",
-                input: (
-                  <Combobox
-                    id={ID(8)}
-                    maxHeight={300}
-                    label="topic"
-                    options={topics.map((option) => {
-                      return {
-                        label: option[locale],
-                        value: option,
-                      };
-                    })}
-                  />
-                ),
-              },
-              {
-                fieldName: "question",
-                name: "Question",
-                chip: "Question contains",
-                input: <Input label="Question" type="text" required={true} />,
-              },
-              {
-                fieldName: "answer",
-                name: "Answer",
-                display: "Answer contains",
-                input: <Input label="Answer" type="text" required={true} />,
-              },
-              {
-                fieldName: "translation",
-                name: "Translation",
-                chip: "Translation :",
-                input: (
-                  <Combobox
-                    maxHeight={500}
-                    label="Translation"
-                    options={[
-                      { label: "Generated", value: "generated" },
-                      { label: "Manual", value: "manual" },
-                    ]}
-                  />
-                ),
-              },
-            ]}
-            columns={[
-              { column: "topic", sort: true, colCode: "topic" },
-              { column: "date", sort: true, colCode: "createdAt" },
-              { column: "title", sort: false, colCode: "title" },
-              { column: "translation", sort: true, colCode: "translation" },
-            ]}
-            defaultSort={{ column: "createdAt", order: "des" }}
-          />
-        </Route>
-        <Route path="/jamia/fatwa/submissions">
-          <View
-            key="jamiaAllFatwaSubmission"
-            Element={JamiaSingleFatwaSubmission}
-            id="fatwaSubmissions"
-            api="api/source/fatwaSubmissions/filter?"
-            categories={[
-              {
-                name: "topic",
-                input: (
-                  <Combobox
-                    id={ID(8)}
-                    maxHeight={300}
-                    label="topic"
-                    options={topics.map((option) => {
-                      return {
-                        label: option[locale],
-                        value: option,
-                      };
-                    })}
-                  />
-                ),
-              },
-              {
-                name: "title",
-                input: <Input label="Title" type="text" required={true} />,
-              },
-              {
-                name: "question",
-                input: <Input label="Question" type="text" required={true} />,
-              },
-              {
-                name: "answer",
-                input: <Input label="Answer" type="text" required={true} />,
-              },
-            ]}
-            columns={[
-              { column: "date", sort: true, colCode: "createdAt" },
-              { column: "topic", sort: true, colCode: "topic" },
-              { column: "title", sort: false },
-            ]}
-            defaultSort={{ column: "createdAt", order: "des" }}
-          />
-        </Route>
-      </Switch>
-    </div>
+function SingleFatwa({ data, setData }) {
+  const { locale, setFatwaToEdit } = useContext(SiteContext);
+  const [loading, setLoading] = useState(false);
+  const fatwa = data;
+  const history = useHistory();
+  const [open, setOpen] = useState(false);
+  function edit() {
+    setFatwaToEdit(fatwa);
+    history.push("/jamia/editFatwa/" + fatwa._id);
+  }
+  function deleteFatwa() {
+    if (window.confirm("Do you want to delete this fatwa?")) {
+      setLoading(true);
+      fetch(`/api/source/fatwa/`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fatwa: fatwa._id, source: fatwa.source }),
+      })
+        .then((res) => {
+          setLoading(false);
+          if (res.status === 200) {
+            setData((prev) => {
+              return prev.filter((item) => item._id !== fatwa._id);
+            });
+          } else {
+            alert("something went wrong.");
+          }
+        })
+        .catch((err) => {
+          alert("something went wrong.");
+          console.log(err);
+        });
+    }
+  }
+  return open ? (
+    <tr className="full">
+      <td className="label">Added</td>
+      <td className="data">
+        <FormattedDate
+          value={fatwa.added}
+          day="numeric"
+          month="numeric"
+          year="numeric"
+        />
+      </td>
+      <td className="label">title</td>
+      <td className="data">
+        <Link target="_blank" to={`/fatwa/${fatwa.link[locale]}`}>
+          {fatwa.title[locale]}
+          <ion-icon name="open-outline"></ion-icon>
+        </Link>
+      </td>
+      <td className="label">translate</td>
+      <td className="data">{fatwa.translation ? "Yes" : "No"}</td>
+      <td className="data btns">
+        <button onClick={() => setOpen(false)}>
+          <ion-icon name="chevron-up-outline"></ion-icon> Hide Detail
+        </button>
+        <button onClick={edit}>
+          <ion-icon name="pencil-outline"></ion-icon> Edit
+        </button>
+        <button onClick={deleteFatwa}>
+          <ion-icon name="trash-outline"></ion-icon> Delete Fatwa
+        </button>
+      </td>
+    </tr>
+  ) : (
+    <tr data-id={fatwa._id} onClick={() => setOpen(true)}>
+      <td>{fatwa.topic[locale]}</td>
+      <td>
+        <FormattedDate
+          value={fatwa.added}
+          day="numeric"
+          month="numeric"
+          year="numeric"
+        />
+      </td>
+      <td>{fatwa.title[locale]}</td>
+      <td>{fatwa.translation ? "Yes" : "No"}</td>
+    </tr>
   );
 }
 
@@ -569,175 +668,116 @@ function UserSubmissions() {
   const { locale } = useContext(SiteContext);
   return (
     <div className="view">
-      <h1 className="viewTitle">User Submissions</h1>
+      <h1 className="viewTitle">
+        <FormattedMessage id="review" defaultMessage="Review" />
+      </h1>
       <Tabs
         page="/jamia/userSubmissions/"
-        tabs={["Question Feed", "Our Questions", "Reviews", "Reports"]}
+        tabs={[
+          { label: "Reviews", link: "reviews" },
+          { label: "Reports", link: "reports" },
+        ]}
+      />
+      <Switch></Switch>
+    </div>
+  );
+}
+
+function QuestionFeed() {
+  return (
+    <div className="view questionFeed">
+      <h1 className="viewTitle">
+        <FormattedMessage id="questionFeed" defaultMessage="Question Feed" />
+      </h1>
+      <Tabs
+        page="/jamia/questionFeed/"
+        tabs={[
+          {
+            label: (
+              <FormattedMessage
+                id="newQuestions"
+                defaultMessage="New Questions"
+              />
+            ),
+            link: "newQuestions",
+          },
+        ]}
       />
       <Switch>
-        <Route path="/jamia/fatwa" exact>
-          <View
-            key="jamiaAllFatwa"
-            Element={SingleFatwa}
-            id="allFatwa"
-            api="api/source/allFatwa/filter?"
-            categories={[
-              {
-                name: "topic",
-                input: (
-                  <Combobox
-                    maxHeight={300}
-                    label="topic"
-                    data={topics.map((item) => {
-                      return {
-                        label: item[locale],
-                        value: item,
-                      };
-                    })}
-                    required={true}
-                  />
-                ),
-              },
-              {
-                name: "title",
-                input: <Input label="Title" type="text" required={true} />,
-              },
-              {
-                name: "question",
-                input: <Input label="Question" type="text" required={true} />,
-              },
-              {
-                name: "answer",
-                input: <Input label="Answer" type="text" required={true} />,
-              },
-              {
-                name: "translation",
-                input: (
-                  <Combobox
-                    maxHeight={500}
-                    label="by"
-                    options={[
-                      { label: "Generated", value: "generated" },
-                      { label: "Manual", value: "manual" },
-                    ]}
-                    required={true}
-                  />
-                ),
-              },
-            ]}
-            columns={[
-              { column: "topic", sort: true, colCode: "topic" },
-              { column: "date", sort: true, colCode: "added" },
-              { column: "title", sort: false, colCode: "title" },
-              { column: "translation", sort: true, colCode: "translation" },
-            ]}
-            defaultSort={{ column: "added", order: "des" }}
-          />
+        <Route path="/jamia/questionFeed" exact>
+          <NewQuestions />
         </Route>
-        <Route path="/jamia/fatwa/live">
-          <View
-            key="jamiaAllFatwa"
-            Element={SingleFatwa}
-            id="allFatwa"
-            api="api/source/allFatwa/filter?"
-            categories={[
-              {
-                name: "topic",
-                input: (
-                  <></>
-                  // <ComboboxMulti
-                  //   id={ID(8)}
-                  //   maxHeight={300}
-                  //   label="topic"
-                  //   data={topics}
-                  //   required={true}
-                  // />
-                ),
-              },
-              {
-                name: "title",
-                input: <Input label="Title" type="text" required={true} />,
-              },
-              {
-                name: "question",
-                input: <Input label="Question" type="text" required={true} />,
-              },
-              {
-                name: "answer",
-                input: <Input label="Answer" type="text" required={true} />,
-              },
-              {
-                name: "translation",
-                input: (
-                  <Combobox
-                    maxHeight={500}
-                    label="by"
-                    options={[
-                      { label: "Generated", value: "generated" },
-                      { label: "Manual", value: "manual" },
-                    ]}
-                    required={true}
-                  />
-                ),
-              },
-            ]}
-            columns={[
-              { column: "topic", sort: true, colCode: "topic" },
-              { column: "date", sort: true, colCode: "added" },
-              { column: "title", sort: false, colCode: "title" },
-              { column: "translation", sort: true, colCode: "translation" },
-            ]}
-            defaultSort={{ column: "added", order: "des" }}
-          />
-        </Route>
-        <Route path="/jamia/fatwa/submissions">
-          <View
-            key="jamiaAllFatwaSubmission"
-            Element={JamiaSingleFatwaSubmission}
-            id="fatwaSubmissions"
-            api="api/source/fatwaSubmissions/filter?"
-            categories={[
-              {
-                name: "topic",
-                input: (
-                  <></>
-                  // <ComboboxMulti
-                  //   id={ID(8)}
-                  //   maxHeight={300}
-                  //   label="topic"
-                  //   data={topics}
-                  //   required={true}
-                  // />
-                ),
-              },
-              {
-                name: "title",
-                input: <Input label="Title" type="text" required={true} />,
-              },
-              {
-                name: "question",
-                input: <Input label="Question" type="text" required={true} />,
-              },
-              {
-                name: "answer",
-                input: <Input label="Answer" type="text" required={true} />,
-              },
-            ]}
-            columns={[
-              { column: "date", sort: true, colCode: "submitted" },
-              { column: "topic", sort: true, colCode: "topic" },
-              { column: "title", sort: false },
-            ]}
-            defaultSort={{ column: "submitted", order: "des" }}
-          />
+        <Route path="/jamia/questionFeed/newQuestions">
+          <NewQuestions />
         </Route>
       </Switch>
     </div>
   );
 }
-
-function SingleQuestion({ data }) {
+function NewQuestions() {
+  const abortController = new AbortController();
+  const signal = abortController.signal;
   const { locale } = useContext(SiteContext);
+  const [loading, setLoading] = useState(true);
+  const [sort, setSort] = useState({ column: "createdAt", order: "asc" });
+  const [filters, setFilters] = useState({});
+  const [data, setData] = useState([]);
+  function fetchData() {
+    !loading && setLoading(true);
+    console.log("ran");
+    const query = encodeURL(filters);
+    const sortOrder = encodeURL(sort);
+    const options = { headers: { "Accept-Language": locale }, signal: signal };
+    const url = `/api/source/questionFeed/filter?${query}&${sortOrder}`;
+    fetch(url, options)
+      .then((res) => res.json())
+      .then((data) => {
+        setLoading(false);
+        setData(data);
+      })
+      .catch((err) => {
+        console.log(err);
+        console.log("handle error!!");
+      });
+    return () => abortController.abort();
+  }
+  useEffect(fetchData, [sort, filters]);
+  return (
+    <>
+      <div className="filters">
+        <Combobox
+          disabled={loading}
+          defaultValue={1}
+          onChange={(option) => {
+            setSort(option.value);
+          }}
+          maxHeight={200}
+          id="questionFeedSort"
+          icon="layers"
+          options={[
+            {
+              label: "New first",
+              value: { column: "createdAt", order: "des" },
+            },
+            {
+              label: "Old first",
+              value: { column: "createdAt", order: "asc" },
+            },
+          ]}
+        />
+      </div>
+      <ul className="feed">
+        {!loading ? (
+          data.map((item) => <SingleQuestion key={item._id} data={item} />)
+        ) : (
+          <LoadingPost />
+        )}
+      </ul>
+    </>
+  );
+}
+function SingleQuestion({ data }) {
+  const { locale, user } = useContext(SiteContext);
   const history = useHistory();
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -755,19 +795,19 @@ function SingleQuestion({ data }) {
       <div className="user">
         <p className="name">{data.user.name}</p>
         <p className="date">
-          {new Date(data.submitted).getFullYear() !==
+          {new Date(data.createdAt).getFullYear() !==
           new Date().getFullYear() ? (
             <FormattedDate
-              value={data.submitted}
+              value={data.createdAt}
               day="numeric"
               month="long"
               year="numeric"
             />
           ) : (
-            <FormattedDate value={data.submitted} day="numeric" month="long" />
+            <FormattedDate value={data.createdAt} day="numeric" month="long" />
           )}
           <span className="separator" />
-          <FormattedTimeParts value={data.submitted}>
+          <FormattedTimeParts value={data.createdAt}>
             {(parts) => (
               <>
                 {parts[0].value}
@@ -780,13 +820,20 @@ function SingleQuestion({ data }) {
         </p>
       </div>
       <Actions
+        icon="reorder-two-outline"
         actions={[
           {
             label: "Answer now",
             action: () => {
               SS.set("userAns-ques", data.ques.body);
               SS.set("userAns-topic", JSON.stringify(data.ques.topic));
-              history.push("/jamia/answerUserQuestion/" + data._id);
+              history.push(`/jamia/userQuestion/${data._id}/add`);
+            },
+          },
+          {
+            label: "Report",
+            action: () => {
+              history.push(`/jamia/userQuestion/${data._id}/report`);
             },
           },
         ]}
@@ -794,85 +841,23 @@ function SingleQuestion({ data }) {
       <p className="ques">{data.ques.body}</p>
       <ul className="tags">
         <li className="tag">{data.ques.topic[locale]}</li>
-        <li className="tag">#2021</li>
-      </ul>
-    </li>
-  );
-}
-function NewQuestions() {
-  const abortController = new AbortController();
-  const signal = abortController.signal;
-  const { locale } = useContext(SiteContext);
-  const [loading, setLoading] = useState(true);
-  const [sort, setSort] = useState({ column: "createdAt", order: "des" });
-  const [filters, setFilters] = useState({});
-  const [data, setData] = useState([]);
-  function fetchData() {
-    !loading && setLoading(true);
-    const query = encodeURL(filters);
-    const sortOrder = encodeURL(sort);
-    const options = { headers: { "Accept-Language": locale }, signal: signal };
-    const url = `/api/source/questionFeed/filter?${query}&${sortOrder}`;
-    fetch(url, options)
-      .then((res) => res.json())
-      .then((data) => {
-        setLoading(false);
-        console.log(data);
-        setData(data);
-      })
-      .catch((err) => {
-        console.log(err);
-        console.log("handle error!!");
-      });
-    return () => abortController.abort();
-  }
-  useEffect(fetchData, [sort, filters]);
-  return (
-    <>
-      <div className="filters">
-        <Combobox
-          disabled={loading}
-          defaultValue={1}
-          change={setSort}
-          maxHeight={200}
-          id="questionFeedSort"
-          icon="layers"
-          options={[
-            {
-              label: "New first",
-              value: { column: "submitted", order: "asc" },
-            },
-            {
-              label: "Old first",
-              value: { column: "submitted", order: "des" },
-            },
-          ]}
-        />
-      </div>
-      <ul className="feed">
-        {!loading ? (
-          data.map((item) => <SingleQuestion key={item._id} data={item} />)
-        ) : (
-          <LoadingPost />
+        <li className="tag">
+          <FormattedMessage
+            values={{ number: <FormattedNumber value={data.ans.length} /> }}
+            id="ans.tag.ansCount"
+            defaultMessage={`${data.ans.length} Answer(s)`}
+          />
+        </li>
+        {data.ans.filter((ans) => ans.source === user._id).length > 0 && (
+          <li className="tag">
+            <FormattedMessage
+              id="ans.tag.iAnswered"
+              defaultMessage="I answered"
+            />
+          </li>
         )}
       </ul>
-    </>
-  );
-}
-function QuestionFeed() {
-  return (
-    <div className="view questionFeed">
-      <h1 className="viewTitle">Question feed</h1>
-      <Tabs page="/jamia/questionFeed/" tabs={["New Questions"]} />
-      <Switch>
-        <Route path="/jamia/questionFeed" exact>
-          <NewQuestions />
-        </Route>
-        <Route path="/jamia/questionFeed/newQuestions">
-          <NewQuestions />
-        </Route>
-      </Switch>
-    </div>
+    </li>
   );
 }
 
@@ -1043,6 +1028,15 @@ function Answer({ ques, ans, setQues }) {
                 defaultMessage={`${ans.ref.length} Reference(s)`}
               />
             </p>
+            <p className="tag">
+              <FormattedMessage
+                values={{
+                  number: <FormattedNumber value={ans.vote.voters.length} />,
+                }}
+                id="ans.tag.voteCount"
+                defaultMessage={`${ans.vote.voters.length} Vote(s)`}
+              />
+            </p>
           </div>
         )}
         <span onClick={() => setOpen(!open)} className="showFull">
@@ -1135,7 +1129,11 @@ function UserQuestion({ history, match }) {
               Add Answer
             </Link>
           ) : (
-            <div className="hr" />
+            <div className="HR">
+              <span className="hr" />
+              <span className="content">নিবেদিত উত্তর সমূহ</span>
+              <span className="hr" />
+            </div>
           )}
           {userQues.ans.map((item) => (
             <Answer
@@ -1146,16 +1144,29 @@ function UserQuestion({ history, match }) {
             />
           ))}
           <Route path={`${match.url}/add`}>
+            {!answered ? (
+              <Modal
+                open={true}
+                setOpen={() => history.push(match.url)}
+                className="answerForm"
+              >
+                <UserQuestionAnswerForm
+                  setQues={setUserQues}
+                  ques={userQues.ques}
+                  _id={userQues._id}
+                />
+              </Modal>
+            ) : (
+              <Redirect to={history.location.pathname.replace("/add", "")} />
+            )}
+          </Route>
+          <Route path={`${match.url}/report`}>
             <Modal
               open={true}
               setOpen={() => history.push(match.url)}
               className="answerForm"
             >
-              <UserQuestionAnswerForm
-                setQues={setUserQues}
-                ques={userQues.ques}
-                _id={userQues._id}
-              />
+              <UserQuestionReportForm _id={userQues._id} />
             </Modal>
           </Route>
         </div>
@@ -1175,15 +1186,30 @@ function JamiaProfile() {
     <div className="main jamiaProfile">
       <Sidebar
         views={[
-          { label: "New Fatwa", path: "/jamia/add", icon: "add" },
           {
-            label: "Question feed",
-            path: "/jamia/questionFeed",
-            icon: "chatbox-ellipses",
+            label: (
+              <FormattedMessage id="newFatwa" defaultMessage="New Fatwa" />
+            ),
+            path: "/jamia/newFatwa",
+            icon: "add",
           },
-          { label: "Fatwa", path: "/jamia/fatwa", icon: "reader" },
           {
-            label: "User Submissions",
+            label: <FormattedMessage id="fatwa" defaultMessage="Fatwa" />,
+            path: "/jamia/fatwa",
+            icon: "reader",
+          },
+          {
+            label: (
+              <FormattedMessage
+                id="questionFeed"
+                defaultMessage="Question Feed"
+              />
+            ),
+            path: "/jamia/questionFeed",
+            icon: "mail",
+          },
+          {
+            label: <FormattedMessage id="review" defaultMessage="review" />,
             path: "/jamia/userSubmissions",
             icon: "people",
           },
@@ -1199,10 +1225,26 @@ function JamiaProfile() {
       </Sidebar>
       <Switch>
         <Route
-          path="/jamia/add"
+          path="/jamia/newFatwa"
           component={(props) => (
             <div className="view">
-              <h1>Add new Fatwa</h1>
+              <h1>
+                <FormattedMessage
+                  id="addNewFatwa"
+                  defaultMessage="Add new Fatwa"
+                />
+              </h1>
+              <AddFatwaForm {...props} />
+            </div>
+          )}
+        />
+        <Route
+          path="/jamia/editFatwa/:id"
+          component={(props) => (
+            <div className="view">
+              <h1>
+                <FormattedMessage id="editFatwa" defaultMessage="Edit Fatwa" />
+              </h1>
               <AddFatwaForm {...props} />
             </div>
           )}

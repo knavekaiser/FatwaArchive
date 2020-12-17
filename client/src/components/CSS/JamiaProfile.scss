@@ -271,336 +271,348 @@
         }
       }
     }
-    &.questionFeed {
-      .filters {
-        padding: 0.5rem;
-        position: sticky;
-        top: 44px;
-        background: $base-white;
-        border-bottom: 1px solid $light-border;
-        display: flex;
-        z-index: 5;
-        box-shadow: 0 0px 5px rgba(0, 0, 0, 0.05);
-        .combobox {
-          width: min-content;
-          display: flex;
-          grid-gap: 0.5rem;
-          border: 1px solid $light-border;
-          padding: 0.25rem 0.75rem;
-          border-radius: 5rem;
-          input {
-            min-width: 6rem;
-            border: none;
-            padding: 0;
-          }
-          &.disabled {
-            ion-icon {
-              pointer-events: none;
-              opacity: 0.5;
-            }
-          }
-          ion-icon {
-            position: relative;
-            transform: none;
-            flex-shrink: 0;
-          }
-          .options {
-            bottom: 0;
-            transform: translateY(100%);
-            left: 0;
-            border-radius: 0.5rem;
-            li {
-              margin: 0.25rem 0;
-              padding: 0.5rem 1rem;
-            }
-          }
+  }
+}
+.questionFeed {
+  .filters {
+    padding: 0.5rem;
+    position: sticky;
+    top: 44px;
+    background: $base-white;
+    border-bottom: 1px solid $light-border;
+    display: flex;
+    z-index: 5;
+    box-shadow: 0 0px 5px rgba(0, 0, 0, 0.05);
+    .combobox {
+      width: min-content;
+      display: flex;
+      grid-gap: 0.5rem;
+      border: 1px solid $light-border;
+      padding: 0.25rem 0.75rem;
+      border-radius: 5rem;
+      input {
+        min-width: 6rem;
+        border: none;
+        padding: 0;
+      }
+      &.disabled {
+        ion-icon {
+          pointer-events: none;
+          opacity: 0.5;
         }
       }
-      .feed {
-        max-width: 55rem;
-        padding: 0.75rem;
-        display: grid;
-        grid-gap: 0.75rem;
-        .question {
-          background: #fdfdfd;
-          padding: 1.5rem 1.2rem;
-          border-radius: 8px;
-          box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          grid-gap: 0.5rem;
-          position: relative;
-          .user {
-            .name {
-              font-weight: 600;
-            }
-            .contact {
-              font-size: 0.9rem;
-              color: $light-text;
-              &:hover {
-                text-decoration: underline;
-              }
-            }
-            .date {
-              font-size: 0.8rem;
-              color: $light-text;
-              display: flex;
-              align-items: center;
-            }
-          }
-          .actions {
-            position: absolute;
-            right: 0;
-            top: 0;
-          }
-          .ques {
-            grid-column: 1/3;
-            line-height: 19px;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            overflow: hidden;
-            -webkit-box-orient: vertical;
-          }
-          .tags {
-            display: flex;
-            grid-gap: 0.4rem;
-            height: min-content;
-            margin: auto;
-            margin-bottom: 0;
-            margin-left: 0;
-            flex-wrap: wrap;
-            .tag {
-              white-space: nowrap;
-              font-size: 0.8rem;
-              color: $accent;
-              padding: 0.1em 0.5em;
-              border-radius: 6px;
-              border: 1px solid rgba($accent, 0.2);
-              background: rgba($accent, 0.02);
-            }
-          }
-          &.mini {
-            .ques {
-              -webkit-line-clamp: 2;
-            }
-          }
-        }
-        .loading {
-          div {
-            background: $light-hover;
-            height: 1rem;
-            border-radius: 0.5rem;
-            animation: loadingColumn 1.5s infinite;
-          }
-          .user {
-            width: 30%;
-          }
-          .ques {
-            width: 90%;
-            grid-column: 1/3;
-          }
-          .tags {
-            height: 0.75rem;
-            width: 3rem;
-          }
+      ion-icon {
+        position: relative;
+        transform: none;
+        flex-shrink: 0;
+      }
+      .options {
+        bottom: 0;
+        transform: translateY(100%);
+        left: 0;
+        border-radius: 0.5rem;
+        li {
+          padding: 0.5rem 1rem;
         }
       }
     }
-    &.userQues {
-      padding: 1rem;
-      .container {
-        max-width: 45rem;
-        .ques {
-          padding: 1rem;
-          box-shadow: 0 2px 5px rgba(#bb0000, 0.2);
-          border: 1px solid rgba(#000, 0.1);
-          border-radius: 1rem;
-          .user {
-            .name {
-              margin-bottom: 0.25rem;
-              .add {
-                font-size: 0.8rem;
-              }
-            }
-            .date {
-              display: flex;
-              align-items: center;
-              font-size: 0.8rem;
-              color: $light-text;
-              line-height: 0.7em;
-            }
-            margin-bottom: 0.8rem;
-          }
+  }
+  .feed {
+    max-width: 55rem;
+    padding: 0.75rem;
+    display: grid;
+    grid-gap: 0.75rem;
+    .question {
+      background: #fdfdfd;
+      padding: 1.5rem 1.2rem;
+      border-radius: 8px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-gap: 0.5rem;
+      position: relative;
+      .user {
+        pointer-events: none;
+        .name {
+          font-weight: 600;
         }
-        .addAns {
-          text-transform: uppercase;
-          display: block;
-          margin: 1.5rem auto;
-          width: min-content;
-          border: 2px solid $blue;
-          color: $blue;
-          border-radius: 4rem;
-          padding: 0.5rem 1rem;
+        .contact {
+          font-size: 0.9rem;
+          color: $light-text;
           &:hover {
-            color: white;
-            background: $blue;
-          }
-        }
-        .hr {
-          margin: 2.5rem auto;
-          height: 2px;
-          width: 100%;
-          max-width: 25rem;
-          background: $light-border;
-        }
-        .ans {
-          position: relative;
-          display: grid;
-          grid-template-columns: 2.5rem 1fr;
-          border-left: none;
-          align-items: center;
-          margin-bottom: 1.75rem;
-          border-radius: 0.8rem;
-          &.mine {
-            box-shadow: 0 2px 4px rgba($accent, 0.3);
-            .content {
-              border-color: $accent;
-            }
-          }
-          &.mini {
-            .content {
-              .body {
-                .answer {
-                  -webkit-line-clamp: 2;
-                  line-height: 20px;
-                  text-overflow: ellipsis;
-                  display: -webkit-box;
-                  overflow: hidden;
-                  -webkit-box-orient: vertical;
-                }
-              }
-            }
-          }
-          .vote {
-            background: $light-hover;
-            border: 1px solid $light-border;
-            height: 100%;
-            width: 100%;
-            display: grid;
-            .content {
-              margin: auto;
-              width: content;
-              height: min-content;
-              place-items: center;
-              display: grid;
-              padding: 0;
-              border: none;
-              &.up {
-                ion-icon[name="chevron-up-outline"] {
-                  color: rgba($blue, 0.4);
-                  pointer-events: none;
-                }
-              }
-              &.down {
-                ion-icon[name="chevron-down-outline"] {
-                  color: rgba($blue, 0.4);
-                  pointer-events: none;
-                }
-              }
-              ion-icon {
-                font-size: 1.8rem;
-                cursor: pointer;
-                color: $light-text;
-                &:hover {
-                  &[name="chevron-up-outline"] {
-                    color: $accent;
-                  }
-                  &[name="chevron-down-outline"] {
-                    color: red;
-                  }
-                }
-              }
-            }
-            .voteCount {
-              text-align: center;
-              font-size: 1.2rem;
-            }
-          }
-          .actions {
-            position: absolute;
-            right: 0.25rem;
-            top: 0;
-            width: auto;
-            height: auto;
-            ion-icon {
-              color: $light-text;
-            }
-            &:hover {
-              background: none;
-            }
-          }
-          .content {
-            border: 1px solid $light-border;
-            border-radius: 0 0.8rem 0.8rem 0;
-            border-left: none;
-            padding: 1rem;
-            display: grid;
-            grid-gap: 0.7rem;
-            .source {
-              .name {
-                margin-bottom: 0.25rem;
-              }
-              .date {
-                font-size: 0.8rem;
-                color: $light-text;
-                line-height: 0.7em;
-              }
-            }
-            .body {
-              .title {
-                font-style: italic;
-                font-size: 1.1em;
-                margin-bottom: 0.3rem;
-              }
-            }
-          }
-          .tags {
-            display: flex;
-            grid-gap: 0.4rem;
-            height: min-content;
-            margin: auto;
-            margin-bottom: 0;
-            margin-left: 0;
-            flex-wrap: wrap;
-            .tag {
-              white-space: nowrap;
-              font-size: 0.8rem;
-              color: $accent;
-              padding: 0.1em 0.5em;
-              border-radius: 6px;
-              border: 1px solid rgba($accent, 0.2);
-              background: rgba($accent, 0.02);
-            }
-          }
-          .showFull {
-            font-size: 0.8rem;
             text-decoration: underline;
-            font-style: italic;
-            color: $light-text;
-            cursor: pointer;
-            &:hover {
-              text-decoration: none;
-              color: $light-border;
+          }
+        }
+        .date {
+          font-size: 0.8rem;
+          color: $light-text;
+          display: flex;
+          align-items: center;
+        }
+      }
+      .actions {
+        position: absolute;
+        right: 0;
+        top: 0;
+      }
+      .ques {
+        grid-column: 1/3;
+        line-height: 19px;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        overflow: hidden;
+        -webkit-box-orient: vertical;
+        pointer-events: none;
+      }
+      .tags {
+        display: flex;
+        grid-gap: 0.4rem;
+        height: min-content;
+        margin: auto;
+        margin-bottom: 0;
+        margin-left: 0;
+        flex-wrap: wrap;
+        .tag {
+          white-space: nowrap;
+          font-size: 0.8rem;
+          color: $accent;
+          padding: 0.1em 0.5em;
+          border-radius: 6px;
+          border: 1px solid rgba($accent, 0.2);
+          background: rgba($accent, 0.02);
+        }
+      }
+      &.mini {
+        .ques {
+          -webkit-line-clamp: 2;
+        }
+      }
+    }
+    .loading {
+      div {
+        background: $light-hover;
+        height: 1rem;
+        border-radius: 0.5rem;
+        animation: loadingColumn 1.5s infinite;
+      }
+      .user {
+        width: 30%;
+      }
+      .ques {
+        width: 90%;
+        grid-column: 1/3;
+      }
+      .tags {
+        height: 0.75rem;
+        width: 3rem;
+      }
+    }
+  }
+}
+.userQues {
+  padding: 1rem;
+  .container {
+    max-width: 45rem;
+    .ques {
+      padding: 1rem;
+      box-shadow: 0 2px 5px rgba(#bb0000, 0.2);
+      border: 1px solid rgba(#000, 0.1);
+      border-radius: 1rem;
+      .user {
+        .name {
+          margin-bottom: 0.25rem;
+          .add {
+            font-size: 0.8rem;
+          }
+        }
+        .date {
+          display: flex;
+          align-items: center;
+          font-size: 0.8rem;
+          color: $light-text;
+          line-height: 0.7em;
+        }
+        margin-bottom: 0.8rem;
+      }
+    }
+    .addAns {
+      text-transform: uppercase;
+      display: block;
+      margin: 1.5rem auto;
+      width: min-content;
+      border: 2px solid $blue;
+      color: $blue;
+      border-radius: 4rem;
+      padding: 0.5rem 1rem;
+      &:hover {
+        color: white;
+        background: $blue;
+      }
+    }
+    .HR {
+      display: grid;
+      align-items: center;
+      justify-content: center;
+      grid-template-columns: 1fr min-content 1fr;
+      grid-gap: 1rem;
+      max-width: 25rem;
+      margin: 2.5rem auto;
+      .content {
+        white-space: nowrap;
+        font-style: italic;
+      }
+      .hr {
+        height: 2px;
+        width: 100%;
+        background: $light-border;
+      }
+    }
+    .ans {
+      position: relative;
+      display: grid;
+      grid-template-columns: 2.5rem 1fr;
+      border-left: none;
+      align-items: center;
+      margin-bottom: 1.75rem;
+      border-radius: 0.8rem;
+      &.mine {
+        box-shadow: 0 2px 4px rgba($accent, 0.3);
+        .content {
+          border-color: $accent;
+        }
+      }
+      &.mini {
+        .content {
+          .body {
+            .answer {
+              -webkit-line-clamp: 2;
+              line-height: 20px;
+              text-overflow: ellipsis;
+              display: -webkit-box;
+              overflow: hidden;
+              -webkit-box-orient: vertical;
             }
           }
+        }
+      }
+      .vote {
+        background: $light-hover;
+        border: 1px solid $light-border;
+        height: 100%;
+        width: 100%;
+        display: grid;
+        .content {
+          margin: auto;
+          width: content;
+          height: min-content;
+          place-items: center;
+          display: grid;
+          padding: 0;
+          border: none;
+          &.up {
+            ion-icon[name="chevron-up-outline"] {
+              color: rgba($blue, 0.4);
+              pointer-events: none;
+            }
+          }
+          &.down {
+            ion-icon[name="chevron-down-outline"] {
+              color: rgba($blue, 0.4);
+              pointer-events: none;
+            }
+          }
+          ion-icon {
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: $light-text;
+            &:hover {
+              &[name="chevron-up-outline"] {
+                color: $accent;
+              }
+              &[name="chevron-down-outline"] {
+                color: red;
+              }
+            }
+          }
+        }
+        .voteCount {
+          text-align: center;
+          font-size: 1.2rem;
+        }
+      }
+      .actions {
+        position: absolute;
+        right: 0.25rem;
+        top: 0;
+        width: auto;
+        height: auto;
+        ion-icon {
+          color: $light-text;
+        }
+        &:hover {
+          background: none;
+        }
+      }
+      .content {
+        border: 1px solid $light-border;
+        border-radius: 0 0.8rem 0.8rem 0;
+        border-left: none;
+        padding: 1rem;
+        display: grid;
+        grid-gap: 0.7rem;
+        .source {
+          .name {
+            margin-bottom: 0.25rem;
+          }
+          .date {
+            font-size: 0.8rem;
+            color: $light-text;
+            line-height: 0.7em;
+          }
+        }
+        .body {
+          .title {
+            font-style: italic;
+            font-size: 1.1em;
+            margin-bottom: 0.3rem;
+          }
+        }
+      }
+      .tags {
+        display: flex;
+        grid-gap: 0.4rem;
+        height: min-content;
+        margin: auto;
+        margin-bottom: 0;
+        margin-left: 0;
+        flex-wrap: wrap;
+        .tag {
+          white-space: nowrap;
+          font-size: 0.8rem;
+          color: $accent;
+          padding: 0.1em 0.5em;
+          border-radius: 6px;
+          border: 1px solid rgba($accent, 0.2);
+          background: rgba($accent, 0.02);
+        }
+      }
+      .showFull {
+        font-size: 0.8rem;
+        text-decoration: underline;
+        font-style: italic;
+        color: $light-text;
+        cursor: pointer;
+        &:hover {
+          text-decoration: none;
+          color: $light-border;
         }
       }
     }
   }
 }
-
 .answerForm {
-  .addFatwa {
+  .addFatwa,
+  .reportUserQues {
     max-width: 45rem;
     width: 100%;
     grid-template-columns: 1.5fr 1fr;
@@ -620,6 +632,16 @@
     }
     button[type="submit"] {
       grid-row-start: -1;
+    }
+  }
+  .reportUserQues {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100vw;
+    max-width: 25rem;
+    grid-gap: 2rem;
+    button[type="submit"] {
+      grid-row: 4/5;
     }
   }
 }
@@ -762,7 +784,7 @@ ion-icon[name="save-outline"] {
           .ques {
             border-radius: 0;
           }
-          .hr {
+          .HR {
             width: 60%;
             margin: 1.5rem auto;
           }

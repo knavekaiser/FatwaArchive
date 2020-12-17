@@ -1,4 +1,4 @@
-const { Fatwa, FatwaSubmission } = require("../models/fatwaModel");
+const { FatwaSubmission } = require("../models/fatwaModel");
 const { UserQuestion, ReportFatwa } = require("../models/userSubmissionModel");
 const {
   Source,

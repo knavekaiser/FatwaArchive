@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-// import { FormattedMessage } from "react-intl";
+import { FormattedMessage } from "react-intl";
 import "./CSS/Footer.min.css";
 import { SiteContext } from "../Context";
 import { Link } from "react-router-dom";
@@ -10,10 +10,14 @@ function Footer() {
     <div className="footer">
       <ul className="links">
         <li>
-          <Link to="/about">About</Link>
+          <Link to="/about">
+            <FormattedMessage id="about" defaultMessage="About" />
+          </Link>
         </li>
         <li>
-          <Link to="/askQuestion">Ask Question</Link>
+          <Link to="/askQuestion">
+            <FormattedMessage id="askFatwa" defaultMessage="Ask Fatwa" />
+          </Link>
         </li>
         {user === null && (
           <li>
@@ -25,7 +29,7 @@ function Footer() {
             locale === "bn-BD" ? setLocale("en-US") : setLocale("bn-BD");
           }}
         >
-          {locale === "bn-BD" ? <a>BN</a> : <a>EN</a>}
+          {locale === "en-US" ? <a>বাং</a> : <a>EN</a>}
         </li>
       </ul>
       <ul>

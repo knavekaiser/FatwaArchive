@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
 import { SiteContext } from "../Context";
 import { Link, useHistory } from "react-router-dom";
+import { FormattedMessage } from "react-intl";
 import { camelize } from "./FormElements";
 import Footer from "./Footer";
 
@@ -28,10 +29,10 @@ export const Sidebar = ({ views, children }) => {
         {views.map((view) => {
           return (
             <li
+              key={Math.random()}
               onClick={() =>
                 window.innerWidth <= 1080 && setSidebarSize("mini")
               }
-              key={view.label}
               className={
                 history.location.pathname.startsWith(view.path) ? "active" : ""
               }
@@ -121,13 +122,17 @@ export const Filter = ({ categories, filters, setFilters }) => {
               ></ion-icon>
             </div>
           ))}
-          <input
-            ref={filterInput}
-            value={value}
-            onChange={change}
-            onFocus={() => setShowCategories(true)}
-            placeholder="Filter"
-          />
+          <FormattedMessage id="filter">
+            {(msg) => (
+              <input
+                ref={filterInput}
+                value={value}
+                onChange={change}
+                onFocus={() => setShowCategories(true)}
+                placeholder={msg}
+              />
+            )}
+          </FormattedMessage>
         </div>
         {Object.values(filters).length > 0 && (
           <ion-icon
@@ -212,10 +217,9 @@ export const Tabs = ({ tabs, defaultTab, page }) => {
   const currentPath = history.location.pathname.replace(page, "").split("/")[0];
   const [index, setIndex] = useState(() => {
     let index = 0;
-    tabs.forEach((item, i) => camelize(item) === currentPath && (index = i));
+    tabs.forEach((item, i) => item.link === currentPath && (index = i));
     return index;
   });
-
   function switchTab(e) {
     Array.from(e.target.parentElement.children).forEach((element) => {
       element.classList.contains("active") &&
@@ -230,12 +234,12 @@ export const Tabs = ({ tabs, defaultTab, page }) => {
     <ul className="tabs">
       {tabs.map((tab, i) => (
         <Link
-          key={tab}
+          key={tab.link}
           className={i === index ? "active" : ""}
           onClick={switchTab}
-          to={`${page}${camelize(tab)}`}
+          to={`${page}${tab.link}`}
         >
-          {tab}
+          {tab.label}
         </Link>
       ))}
       <span
@@ -256,9 +260,9 @@ export const Table = ({ id, children, columns, setSort, sort, className }) => {
           <tr>
             {columns.map((col) =>
               !col.sort ? (
-                <th key={col.column}>{col.column}</th>
+                <th key={Math.random()}>{col.column}</th>
               ) : (
-                <th key={col.column}>
+                <th key={Math.random()}>
                   <button
                     className={sort.column === col.colCode ? "active" : ""}
                     onClick={() =>
@@ -436,5 +440,15 @@ export const View = ({
           ))}
       </Table>
     </>
+  );
+};
+
+export const LoadingPost = () => {
+  return (
+    <div className="question loading">
+      <div className="user"></div>
+      <div className="ques"></div>
+      <div className="tags"></div>
+    </div>
   );
 };

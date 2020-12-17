@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useRef } from "react";
 import { SiteContext } from "../Context";
 import TextareaAutosize from "react-textarea-autosize";
 import { FormattedMessage, FormattedNumber } from "react-intl";
@@ -35,7 +35,18 @@ export const GetGroupData = (multipleInput) => {
       if (input.value === "" || section.classList.contains("disabled")) {
         continue;
       } else {
-        data[section.id] = isNaN(+input.value) ? input.value : +input.value;
+        const num = +input.value
+          .replaceAll("০", "0")
+          .replaceAll("১", "1")
+          .replaceAll("২", "2")
+          .replaceAll("৩", "3")
+          .replaceAll("৪", "4")
+          .replaceAll("৫", "5")
+          .replaceAll("৬", "6")
+          .replaceAll("৭", "7")
+          .replaceAll("৮", "8")
+          .replaceAll("৯", "9");
+        data[section.id] = isNaN(num) ? input.value : num;
       }
     }
     Object.keys(data).length > 0 && allData.push(data);
@@ -81,68 +92,65 @@ export const camelize = (str) => {
     .replace(/\s+/g, "");
 };
 export const Input = ({
-  warning,
-  pattern,
-  defaultValue,
-  type,
-  label,
-  required,
   id,
+  dataId,
+  label,
+  type,
+  defaultValue,
+  pattern,
+  strict,
+  warning,
+  required,
   onChange,
   disabled,
-  dataId,
   max,
   min,
   children,
   placeholder,
   className,
+  validationMessage,
+  autoFocus,
 }) => {
-  const [value, setValue] = useState("");
-  const [showLabel, setShowLabel] = useState(true);
+  const [value, setValue] = useState(defaultValue);
+  const [showLabel, setShowLabel] = useState(!defaultValue);
   const [invalidChar, setInvalidChar] = useState(false);
-  useEffect(() => {
-    if (defaultValue) {
-      setValue(defaultValue);
-      setShowLabel(false);
-    }
-  }, [defaultValue]);
+  const [invalidInput, setInvalidInput] = useState(false);
   const changeHandler = (e) => {
-    Array.from(e.target.parentElement.children).forEach((child) => {
-      child.classList.contains("emptyFieldWarning") && child.remove();
-    });
-    if (type === "text" || type === "password") {
-      const regex = pattern || defaultValidation;
-      if (e.target.value === "" || regex.exec(e.target.value) !== null) {
-        setValue(e.target.value);
-        onChange && onChange(e.target);
-      } else {
-        if (!invalidChar) {
-          setInvalidChar(true);
-          setTimeout(() => setInvalidChar(false), 2000);
-        }
-      }
-    } else {
+    e.target.setCustomValidity("");
+    setInvalidInput(false);
+    const regex = strict || defaultValidation;
+    if (e.target.value === "" || regex.exec(e.target.value) !== null) {
       setValue(e.target.value);
       onChange && onChange(e.target);
+    } else {
+      if (!invalidChar) {
+        setInvalidChar(true);
+        setTimeout(() => setInvalidChar(false), 2000);
+      }
     }
   };
   const focus = () => setShowLabel(false);
-  const blur = () => value === "" && setShowLabel(true);
+  const blur = () => !value && setShowLabel(true);
   return (
     <section
       id={dataId}
-      className={`input ${className ? className : ""} ${
-        invalidChar ? "invalid" : ""
-      } ${disabled ? "disabled" : ""}`}
+      className={`input ${className || ""} ${invalidChar ? "invalid" : ""} ${
+        disabled ? "disabled" : ""
+      }`}
     >
       <label className={`label ${showLabel ? "active" : ""}`}>
         {invalidChar ? (warning ? warning : "অকার্যকর অক্ষর!") : label}
       </label>
       <input
+        autoFocus={autoFocus}
+        onInvalid={(e) => {
+          e.target.setCustomValidity(" ");
+          setInvalidInput(true);
+        }}
         minLength={min}
-        value={value}
+        value={value || ""}
         required={required}
-        type={type}
+        type={type || "text"}
         onChange={changeHandler}
         onFocus={focus}
         onBlur={blur}
@@ -150,8 +158,10 @@ export const Input = ({
         id={id ? id : ID(8)}
         disabled={disabled}
         placeholder={placeholder}
+        pattern={pattern}
       />
       {children}
+      {invalidInput && <p className="emptyFieldWarning">{validationMessage}</p>}
     </section>
   );
 };
@@ -164,6 +174,7 @@ export const PasswordInput = ({
   onChange,
   defaultValue,
   id,
+  pattern,
   children,
 }) => {
   const [showPass, setShowPass] = useState(false);
@@ -217,7 +228,8 @@ export const PasswordInput = ({
     <Input
       id={id}
       defaultValue={defaultValue}
-      pattern={/./}
+      strict={/./}
+      pattern={pattern}
       min={8}
       dataId={dataId}
       type={showPass ? "text" : "password"}
@@ -226,6 +238,13 @@ export const PasswordInput = ({
       max={32}
       onChange={change}
       placeholder={placeholder}
+      validationMessage={
+        !passwordStrength && match
+          ? pass.length > 0
+            ? "পাসওয়ার্ড মেলেনি"
+            : "পাসওয়ার্ড নিশ্চিত করুন"
+          : "পাসওয়ার্ড প্রবেশ করুন"
+      }
     >
       {passwordStrength && (
         <span style={style} className="passwordStrength"></span>
@@ -257,6 +276,7 @@ export const Textarea = ({
   label,
   required,
   id,
+  min,
   max,
   dataId,
   defaultValue,
@@ -266,10 +286,14 @@ export const Textarea = ({
   className,
   children,
   disabled,
+  validationMessage,
+  strict,
+  autoFocus,
 }) => {
   const [value, setValue] = useState(defaultValue);
   const [showLabel, setShowLabel] = useState(true);
   const [invalidChar, setInvalidChar] = useState(false);
+  const [invalidInput, setInvalidInput] = useState(false);
   useEffect(() => {
     defaultValue && setValue(defaultValue);
     defaultValue && setShowLabel(false);
@@ -284,10 +308,9 @@ export const Textarea = ({
     setShowLimit(false);
   };
   function change(e) {
-    Array.from(e.target.parentElement.children).forEach((child) => {
-      child.classList.contains("emptyFieldWarning") && child.remove();
-    });
-    const regex = pattern || defaultValidation;
+    setInvalidInput(false);
+    e.target.setCustomValidity("");
+    const regex = strict || defaultValidation;
     if (e.target.value === "" || regex.exec(e.target.value) !== null) {
       setValue(e.target.value);
       onChange && onChange(e.target);
@@ -309,6 +332,11 @@ export const Textarea = ({
         {invalidChar ? (warning ? warning : "অকার্যকর অক্ষর!") : label}
       </label>
       <TextareaAutosize
+        autoFocus={autoFocus}
+        onInvalid={(e) => {
+          e.target.setCustomValidity(" ");
+          setInvalidInput(true);
+        }}
         disabled={disabled}
         required={required}
         value={value}
@@ -316,18 +344,21 @@ export const Textarea = ({
         onBlur={blur}
         onChange={change}
         aria-label="minimum height"
+        minLength={min}
         maxLength={max}
+        pattern={pattern}
       />
       {max && showLimit && (
         <p className="charLimit">
           <FormattedMessage
-            id="form.jamiaReg.warning.charLimit"
+            id="charLimit"
             values={{ number: <FormattedNumber value={max - value.length} /> }}
             defaultValue={`${max - value.length} characters left!`}
           />
         </p>
       )}
       {children}
+      {invalidInput && <p className="emptyFieldWarning">{validationMessage}</p>}
     </section>
   );
 };
@@ -354,10 +385,10 @@ const Group = ({ id, inputs, clone, setGroupCount }) => {
           <Input
             dataId={input.id}
             key={input.id}
-            warning={"Letters & numbers only!"}
+            warning={input.type === "number" && "0-9, ০-৯"}
             defaultValue={input.value}
             required={input.clone ? false : true}
-            type={input.type}
+            strict={input.type === "number" && /^[০-৯0-9]+$/g}
             label={input.label}
             id={input.clone ? id : ""}
             onChange={(e) => {
@@ -459,6 +490,7 @@ export const Combobox = ({
   required,
   disabled,
   dataId,
+  validationMessage,
 }) => {
   const { locale } = useContext(SiteContext);
   const [value, setValue] = useState(() => {
@@ -470,8 +502,10 @@ export const Combobox = ({
       return "";
     }
   });
+  const [invalidInput, setInvalidInput] = useState(false);
   const [open, setOpen] = useState(false);
   const [data, setData] = useState("");
+  const input = useRef();
   return (
     <OutsideClick
       className={`combobox ${disabled ? "disabled" : ""}`}
@@ -482,12 +516,18 @@ export const Combobox = ({
     >
       <label className={`${value === "" ? "active" : ""}`}>{label}</label>
       <input
+        ref={input}
         required={required}
         data={JSON.stringify(data)}
         value={value}
         onFocus={(e) => e.target.blur()}
-        onChange={(e) => e.target.blur()}
+        onInvalid={(e) => {
+          setInvalidInput(true);
+          e.target.setCustomValidity(" ");
+        }}
+        onChange={() => {}}
       />
+      {invalidInput && <p className="emptyFieldWarning">{validationMessage}</p>}
       <ion-icon
         onClick={() => setOpen(!open)}
         name={`${icon ? icon : "chevron-down"}-outline`}
@@ -506,16 +546,12 @@ export const Combobox = ({
           <li
             key={option.label}
             onClick={(e) => {
-              Array.from(e.target.parentElement.parentElement.children).forEach(
-                (child) => {
-                  child.classList.contains("emptyFieldWarning") &&
-                    child.remove();
-                }
-              );
               setData(option.value);
               setValue(option.label);
               onChange && onChange(option);
               setOpen(false);
+              setInvalidInput(false);
+              input.current.setCustomValidity("");
             }}
             className={`option ${value === option.label ? "selected" : ""}`}
           >
@@ -529,13 +565,15 @@ export const Combobox = ({
 export const Checkbox = ({
   label,
   onChange,
-  defaultValue,
+  checked,
   required,
+  validationMessage,
   children,
 }) => {
-  const [checked, setChecked] = useState(defaultValue);
+  const [value, setValue] = useState(checked);
   function handleChange(e) {
-    setChecked(!checked);
+    e.target.setCustomValidity("");
+    setValue(!checked);
     onChange && onChange(e.target);
   }
   return (
@@ -544,7 +582,10 @@ export const Checkbox = ({
         onChange={handleChange}
         type="Checkbox"
         required={required}
-        defaultChecked={checked}
+        defaultChecked={value}
+        onInvalid={(e) => {
+          e.target.setCustomValidity(validationMessage || "");
+        }}
       />
       <label>
         {label}
@@ -554,10 +595,10 @@ export const Checkbox = ({
   );
 };
 
-export const Submit = ({ label, loading, onClick }) => {
+export const Submit = ({ className, label, loading, onClick }) => {
   return (
     <button
-      className={loading ? "loading" : ""}
+      className={`${className} ${loading ? "loading" : ""}`}
       type="submit"
       disabled={loading}
       onClick={onClick}

@@ -1,60 +1,138 @@
-const { Fatwa, FatwaSubmission } = require("../models/fatwaModel");
+const { DeletedFatwa } = require("../models/fatwaModel");
 const { Jamia } = require("../models/sourceModel");
 const { User } = require("../models/userModel");
 const { UserQuestion } = require("../models/userSubmissionModel");
 
 //-------------------------------NEW FATWA
 router
-  .route("/source/fatwa/new")
+  .route("/source/newFatwa")
   .post(passport.authenticate("jwt"), (req, res) => {
-    const { title, titleEn, ques, quesEn, ans, ansEn, translation } = req.body;
-    const newFatwa = new FatwaSubmission({
-      topic: req.body.topic,
-      title: {
-        "bn-BD": title,
-        ...(titleEn && { "en-US": titleEn }),
-      },
-      ques: {
-        "bn-BD": ques,
-        ...(quesEn && { "en-US": quesEn }),
-      },
-      ans: {
-        "bn-BD": ans,
-        ...(ansEn && { "en-US": ansEn }),
-      },
-      added: new Date(),
-      ref: req.body.ref,
-      img: req.body.img,
-      source: req.user._id,
-      translation: translation,
-    });
-    newFatwa
-      .save()
-      .then(() => res.send("fatwa added"))
-      .catch((err) => {
-        console.log(err);
-        if (err.code === 11000) {
-          res.status(400).json({
-            code: err.code,
-            field: Object.keys(err.keyValue)[0],
+    const { topic, title, ques, ans, ref, img } = req.body;
+    if (!title["en-US"] && !ques["en-US"] && !ans["en-US"]) {
+      TranslateAll([title["bn-BD"], ques["bn-BD"], ans["bn-BD"]])
+        .then((translations) => {
+          return new Fatwa({
+            topic: topic,
+            link: {
+              "bn-BD": title["bn-BD"].replace(/\s/g, "-"),
+              "en-US": translations[0].replace(/\s/g, "-"),
+            },
+            title: {
+              "bn-BD": title["bn-BD"],
+              "en-US": translations[0],
+            },
+            ques: {
+              "bn-BD": ques["bn-BD"],
+              "en-US": translations[1],
+            },
+            ans: {
+              "bn-BD": ans["bn-BD"],
+              "en-US": translations[2],
+            },
+            ref: ref,
+            img: img,
+            translation: false,
+            source: req.user._id,
           });
-        } else {
-          res.status(400).json(err);
-        }
-      });
+        })
+        .then((newFatwa) => newFatwa.save())
+        .then(() => res.send({ code: "ok", message: "fatwa added" }))
+        .catch((err) => {
+          console.log(err);
+          if (err.code === 11000) {
+            res.status(400).json({
+              code: err.code,
+              field: Object.keys(err.keyValue)[0],
+            });
+          } else {
+            res
+              .status(400)
+              .json({ code: 500, message: "something went wrong" });
+          }
+        });
+    } else {
+      newFatwa = new Fatwa({
+        topic: req.body.topic,
+        title: title,
+        ques: ques,
+        ans: ans,
+        ref: ref,
+        img: img,
+        source: req.user._id,
+        translation: true,
+      })
+        .save()
+        .then(() => res.send({ code: "ok", message: "fatwa added" }))
+        .catch((err) => {
+          console.log(err);
+          if (err.code === 11000) {
+            res.status(400).json({
+              code: err.code,
+              field: Object.keys(err.keyValue)[0],
+            });
+          } else {
+            res
+              .status(400)
+              .json({ code: 500, message: "something went wrong" });
+          }
+        });
+    }
+  });
+router
+  .route("/source/editSubmission/:_id")
+  .patch(passport.authenticate("jwt"), (req, res) => {
+    const newData = {
+      translation:
+        req.body["title.en-US"] &&
+        req.body["ques.en-US"] &&
+        req.body["ans.en-US"]
+          ? true
+          : false,
+      ...(req.body["title.bn-BD"] && {
+        ["link.bn-BD"]: req.body["title.bn-BD"].replace(/\s/g, "-"),
+      }),
+      ...(req.body["title.en-US"] && {
+        ["link.en-US"]: req.body["title.en-US"].replace(/\s/g, "-"),
+      }),
+      ...req.body,
+      status: "pending",
+    };
+    if (ObjectID.isValid(req.params._id)) {
+      Fatwa.findByIdAndUpdate(req.params._id, newData)
+        .then(() => {
+          res.json({ code: "ok", message: "updated" });
+        })
+        .catch((err) => {
+          if (err.code === 11000) {
+            res.status(400).json({
+              code: err.code,
+              field: Object.keys(err.keyValue)[0],
+            });
+          } else {
+            res
+              .status(500)
+              .json({ code: 500, message: "something went wrong" });
+          }
+        });
+    } else {
+      res.status(400).json({ code: 400, message: "invalid id" });
+    }
   });
 router
   .route("/source/fatwaSubmissions/filter")
   .get(passport.authenticate("jwt"), (req, res) => {
     const locale = req.headers["accept-language"];
-    const query = { source: req.user._id };
+    const query = {
+      $or: [{ status: "pending" }, { status: "pendingEdit" }],
+      source: req.user._id,
+    };
     const sort = { column: req.query.column, order: req.query.order };
     req.query.title && (query[`title.${locale}`] = RegExp(req.query.title));
     req.query.question &&
       (query[`ques.${locale}`] = RegExp(req.query.question));
     req.query.answer && (query[`ans.${locale}`] = RegExp(req.query.answer));
     req.query.topic && (query[`topic.${locale}`] = req.query.topic);
-    FatwaSubmission.find(query)
+    Fatwa.find(query)
       .sort(`${sort.order === "des" ? "-" : ""}${sort.column}`)
       .then((submissions) => {
         if (submissions.length === 0) {
@@ -66,9 +144,13 @@ router
       .catch((err) => res.status(400).json(err));
   });
 router.route("/fatwaSubmissions/:_id").delete((req, res) => {
-  FatwaSubmissions.findByIdAndDelete(req.params._id)
-    .then(() => res.json("successfully deleted"))
-    .catch((err) => res.status(400).json("Error: " + err));
+  if (ObjectID.isValid(req.params._id)) {
+    Fatwa.findByIdAndDelete(req.params._id)
+      .then(() => res.json("successfully deleted"))
+      .catch((err) => res.status(400).json("Error: " + err));
+  } else {
+    res.status(400).json("invalid id");
+  }
 });
 
 //----------------------------------------------ALL FATWA
@@ -99,6 +181,46 @@ router
         });
     } else {
       res.status(400).json("No language selected or formation is wrong");
+    }
+  });
+router
+  .route("/source/editFatwa/:_id")
+  .patch(passport.authenticate("jwt"), (req, res) => {
+    const newData = {
+      translation:
+        req.body["title.en-US"] &&
+        req.body["ques.en-US"] &&
+        req.body["ans.en-US"]
+          ? true
+          : false,
+      ...(req.body["title.bn-BD"] && {
+        ["link.bn-BD"]: req.body["title.bn-BD"].replace(/\s/g, "-"),
+      }),
+      ...(req.body["title.en-US"] && {
+        ["link.en-US"]: req.body["title.en-US"].replace(/\s/g, "-"),
+      }),
+      ...req.body,
+      status: req.user.verified ? "live" : "pendingEdit",
+    };
+    if (ObjectID.isValid(req.params._id)) {
+      Fatwa.findByIdAndUpdate(req.params._id, newData)
+        .then(() => {
+          res.json({ code: "ok", message: "updated" });
+        })
+        .catch((err) => {
+          if (err.code === 11000) {
+            res.status(400).json({
+              code: err.code,
+              field: Object.keys(err.keyValue)[0],
+            });
+          } else {
+            res
+              .status(500)
+              .json({ code: 500, message: "something went wrong" });
+          }
+        });
+    } else {
+      res.status(400).json({ code: 400, message: "invalid id" });
     }
   });
 
@@ -158,7 +280,7 @@ router
   .get(passport.authenticate("jwt"), (req, res) => {
     if (ObjectID.isValid(req.params._id)) {
       UserQuestion.findById(req.params._id)
-        .populate("ans.source", "name add")
+        .populate("ans.source reports.source", "name add")
         .then((ques) => res.json({ code: "ok", content: ques }))
         .catch((err) => {
           console.log(err);
@@ -173,19 +295,25 @@ router
   .post(passport.authenticate("jwt"), (req, res) => {
     if (ObjectID.isValid(req.params._id)) {
       UserQuestion.findById(req.params._id)
-        .then((ques) => ques.addAns(req.body))
+        .then((ques) => {
+          const newAns = {
+            source: req.user._id,
+            topic: req.body.topic,
+            title: req.body.title,
+            body: req.body.body,
+            ref: req.body.ref,
+          };
+          return ques.addAns(newAns);
+        })
         .then(() =>
           UserQuestion.findOne({ _id: req.params._id }).populate(
             "ans.source",
             "name primeMufti"
           )
         )
-        .then((saved) => {
-          res.status(200).json({ code: "ok", content: saved });
-        })
+        .then((saved) => res.status(200).json({ code: "ok", content: saved }))
         .catch((err) => {
-          console.log(err);
-          if (err === "already answered" || err === "answer exists") {
+          if (err.code === 11000) {
             res.status(400).json(err);
           } else {
             res.status(500).json("enternal error");
@@ -235,6 +363,34 @@ router
       res.status(400).json("invalid id");
     }
   });
+router
+  .route("/source/reportUserQues/:_id")
+  .post(passport.authenticate("jwt"), (req, res) => {
+    if (ObjectID.isValid(req.params._id)) {
+      UserQuestion.findById(req.params._id)
+        .then((ques) => {
+          if (ques) {
+            const newReport = {
+              source: req.user._id,
+              message: { subject: req.body.subject, body: req.body.message },
+            };
+            return ques.report(newReport);
+          } else {
+            res.status(400).json("question did not found");
+            return;
+          }
+        })
+        .then(() => {
+          res.json({ code: "ok", message: "successfully reported" });
+        })
+        .catch((err) => {
+          console.log(err);
+          res.status(500).json("internal error");
+        });
+    } else {
+      res.status(400).json("invalid id");
+    }
+  });
 
 //--------------------------------------------PROFILE
 router.route("/source/edit").patch(passport.authenticate("jwt"), (req, res) => {
@@ -264,5 +420,13 @@ router.route("/source/edit").patch(passport.authenticate("jwt"), (req, res) => {
       .catch((err) => res.status(500).json(err));
   }
 });
+
+// Fatwa.findByIdAndUpdate("5fd9994a8f33c070ecfe1a88", {
+//   "ques.en-US": " আস্কদফজ আসদ ফাসদ;ফ আ;স্ফদ কিছু না লিখলেই নয়",
+// })
+//   .then(() => Fatwa.findById("5fd9994a8f33c070ecfe1a88"))
+//   .then((fatwa) => {
+//     console.log(fatwa);
+//   });
 
 module.exports = router;

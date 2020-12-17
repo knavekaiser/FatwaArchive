@@ -14,6 +14,7 @@ const source = new Schema(
     meta: {
       needsApproval: { type: Boolean, default: true },
     },
+    verified: { type: Boolean, default: false },
   },
   {
     discriminatorKey: "type",

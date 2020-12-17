@@ -1,4 +1,4 @@
-const { Fatwa, FatwaSubmission } = require("../models/fatwaModel");
+const { FatwaSubmission } = require("../models/fatwaModel");
 const { Source, Jamia } = require("../models/sourceModel");
 const { UserQuestion } = require("../models/userSubmissionModel");
 const { User, Session } = require("../models/userModel");
@@ -64,7 +64,7 @@ router
   .route("/admin/allfatwa/filter")
   .get(passport.authenticate("jwt"), (req, res) => {
     const locale = req.headers["accept-language"];
-    const query = {};
+    const query = { status: "live" };
     const sort = { column: req.query.column, order: req.query.order };
     req.query.title && (query[`title.${locale}`] = RegExp(req.query.title));
     req.query.question &&
@@ -103,7 +103,7 @@ router
   .get(passport.authenticate("jwt"), (req, res) => {
     if (req.user.role !== "admin") return res.status("403").json("forbidden");
     const locale = req.headers["accept-language"];
-    const query = {};
+    const query = { $or: [{ status: "pending" }, { status: "pendingEdit" }] };
     const sort = { column: req.query.column, order: req.query.order };
     req.query.title && (query[`title.${locale}`] = RegExp(req.query.title));
     req.query.question &&
@@ -111,7 +111,7 @@ router
     req.query.answer && (query[`ans.${locale}`] = RegExp(req.query.answer));
     req.query.topic && (query[`topic.${locale}`] = req.query.topic);
     req.query.jamia && (query.jamia = req.query.jamia);
-    FatwaSubmission.find(query)
+    Fatwa.find(query)
       .populate("source", "name primeMufti role")
       .sort(`${sort.order === "des" ? "-" : ""}${sort.column}`)
       .then((submissions) => {
@@ -126,67 +126,22 @@ router
 router
   .route("/admin/fatwaSubmissions/accept/:_id")
   .post(passport.authenticate("jwt"), (req, res) => {
-    if (req.user.role !== "admin") return res.status("403").json("forbidden");
-    let titleEn = "Something went wrong with translation " + Math.random(),
-      quesEn = "Something went wrong with translation " + Math.random(),
-      ansEn = "Something went wrong with translation " + Math.random();
-    let submittedFatwa = {};
-    FatwaSubmission.findById(req.params._id)
-      .then((fatwa) => {
-        submittedFatwa = fatwa;
-        if (fatwa.title["en-US"]) return;
-        else
-          return Promise.all([
-            translate
-              .translate(
-                [fatwa.title["bn-BD"], fatwa.ques["bn-BD"], fatwa.ans["bn-BD"]],
-                "en"
-              )
-              .then((translation) => {
-                [titleEn, quesEn, ansEn] = translation[0];
-              }),
-          ]);
-      })
-      .then(() => {
-        const data = {
-          link: {
-            "bn-BD": submittedFatwa.title["bn-BD"].replace(/\s/g, "-"),
-            "en-US": titleEn.replace(/\s/g, "-"),
-          },
-          title: {
-            "bn-BD": submittedFatwa.title["bn-BD"],
-            "en-US": submittedFatwa.title["en-US"] || titleEn,
-          },
-          ques: {
-            "bn-BD": submittedFatwa.ques["bn-BD"],
-            "en-US": submittedFatwa.ques["en-US"] || quesEn,
-          },
-          ans: {
-            "bn-BD": submittedFatwa.ans["bn-BD"],
-            "en-US": submittedFatwa.ans["en-US"] || ansEn,
-          },
-        };
-        return new Fatwa({
-          added: new Date(),
-          topic: submittedFatwa.topic,
-          ref: submittedFatwa.ref,
-          img: submittedFatwa.img,
-          source: submittedFatwa.source,
-          updated: new Date(),
-          translation: submittedFatwa.title["en-US"] ? true : false,
-          ...data,
+    if (req.user.role !== "admin") return res.status(403).json("forbidden");
+    if (ObjectID.isValid(req.params._id)) {
+      Fatwa.findByIdAndUpdate(req.params._id, { status: "live" })
+        .then((fatwa) =>
+          Source.findByIdAndUpdate(fatwa.source, {
+            $inc: { fatwa: 1 },
+          })
+        )
+        .then(() => res.send({ code: "ok", message: "fatwa added" }))
+        .catch((err) => {
+          console.log(err);
+          res.status(500).json({ code: 500, message: "something went wrong" });
         });
-      })
-      .then((fatwa) => fatwa.save())
-      .then(() => FatwaSubmission.findByIdAndDelete(req.params._id))
-      .then(() =>
-        Source.findByIdAndUpdate(submittedFatwa.source, { $inc: { fatwa: 1 } })
-      )
-      .then(() => res.send("fatwa added"))
-      .catch((err) => {
-        console.log(err);
-        res.status(400).json({ err });
-      });
+    } else {
+      res.status(400).json({ code: 400, message: "invalid id" });
+    }
   });
 router
   .route("/admin/fatwaSubmissions/remove/:_id")
@@ -196,6 +151,25 @@ router
         res.json("submission successfully deleted.");
       })
       .catch((err) => res.status(500).json(err));
+  });
+
+//----------------------------------UESR QUESTION
+router
+  .route("/admin/userQues/approveAns/:_id")
+  .post(passport.authenticate("jwt"), (req, res) => {
+    if (ObjectID.isValid(req.params._id) && ObjectID.isValid(req.body.ans_id)) {
+      UserQuestion.findById(req.params._id)
+        .then((ques) => ques.approveAns(req.body.ans_id))
+        .then((data) => {
+          res.json({ code: "ok", message: "answer approved" });
+        })
+        .catch((err) => {
+          console.log(err);
+          res.status(500).json("internal error");
+        });
+    } else {
+      res.status(400).json("invalid id");
+    }
   });
 
 //----------------------------------NEW SOURCE

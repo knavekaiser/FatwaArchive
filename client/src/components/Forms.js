@@ -69,14 +69,12 @@ function JamiaDetail() {
     <>
       <Input
         defaultValue={SS.get("reg-name")}
-        onChange={(target) => {
-          SS.set("reg-name", target.value);
-        }}
+        onChange={(target) => SS.set("reg-name", target.value)}
         dataId="name"
+        strict={/^[ঀ-৾a-zA-Z\s(),]+$/}
+        pattern=".{10,}"
+        validationMessage="জামিয়ার নাম প্রবেশ করুন"
         required={true}
-        type="text"
-        pattern={/^[ঀ-৾a-zA-Z\s(),]+$/}
-        warning="Bangla"
         label=<FormattedMessage
           id="form.jamiaReg.name"
           defaultMessage="Jamia's Name (Bangla)"
@@ -84,10 +82,12 @@ function JamiaDetail() {
       />
       <Textarea
         defaultValue={SS.get("reg-add")}
-        onChange={(target) => {
-          SS.set("reg-add", target.value);
-        }}
+        onChange={(target) => SS.set("reg-add", target.value)}
         dataId="add"
+        strict={/^[ঀ-৾a-zA-Z\s(),]+$/}
+        min={10}
+        warning="বাংলা বা ইংরেজি অক্ষর"
+        validationMessage="সঠিক ঠিকানা প্রবেশ করুন"
         required={true}
         label=<FormattedMessage
           id="form.jamiaReg.add"
@@ -97,57 +97,82 @@ function JamiaDetail() {
       />
       <Input
         defaultValue={SS.get("reg-contact") || "+8801"}
-        onChange={(target) => {
-          SS.set("reg-contact", target.value);
-        }}
+        onChange={(target) => SS.set("reg-contact", target.value)}
         required={true}
         dataId="contact"
-        type="text"
-        pattern={/^\+\d{0,13}$/}
+        pattern="^\+8801\d{9}$"
+        strict={/^\+8801\d{0,9}$/}
         warning="+8801***"
-        max={14}
-        min={14}
-        label=<FormattedMessage
-          id="form.jamiaReg.contact"
-          defaultMessage="Contact"
-        />
+        validationMessage="সঠিক মোবাইল নম্বর প্রবেশ করুন"
+        label=<FormattedMessage id="contact" defaultMessage="Contact" />
       />
       <Input
         defaultValue={SS.get("reg-primeMufti")}
-        onChange={(target) => {
-          SS.set("reg-primeMufti", target.value);
-        }}
+        onChange={(target) => SS.set("reg-primeMufti", target.value)}
+        pattern=".{5,}"
+        strict={/^[ঀ-৾a-zA-Z\s(),]+$/}
+        validationMessage="প্রধান মুফতির নাম প্রবেশ করুন"
         dataId="primeMufti"
         required={true}
-        label=<FormattedMessage
-          id="form.jamiaReg.primeMufti"
-          defaultMessage="Prime Mufti"
-        />
+        label=<FormattedMessage id="primeMufti" defaultMessage="Prime Mufti" />
       />
     </>
   );
 }
-function LoginDetail({ idIsValid, validatingId, setIdIsValid }) {
+function LoginDetail({
+  idIsValid,
+  setValidatingId,
+  validatingId,
+  setIdIsValid,
+}) {
+  const [pattern, setPattern] = useState("[a-zA-Z0-9]{8,20}");
+  const [pass, setPass] = useState("");
+  const validateId = () => {
+    if (SS.get("reg-id").length >= 8 && idIsValid === null) {
+      setValidatingId(true);
+      fetch(`/api/validateId/${SS.get("reg-id")}`)
+        .then((res) => {
+          setValidatingId(false);
+          if (res.status === 200) {
+            setIdIsValid(true);
+          } else {
+            setIdIsValid(false);
+            setPattern(`[^${SS.get("reg-id")}$]`);
+          }
+        })
+        .catch((err) => console.log(err));
+    }
+  };
+  useEffect(() => {
+    validateId();
+    $(".reg #id input").addEventListener("blur", validateId);
+    return () => setIdIsValid(null);
+  }, []);
   return (
     <>
       <Input
         defaultValue={SS.get("reg-id")}
         onChange={(target) => {
           SS.set("reg-id", target.value);
-          $("#id .emptyFieldWarning") && $("#id .emptyFieldWarning").remove();
           setIdIsValid(null);
+          setPattern("[a-zA-Z0-9]{8,20}");
         }}
         required={true}
         dataId="id"
-        type="text"
         min={8}
         max={20}
         label=<FormattedMessage
           id="form.login.id"
           defaultMessage="Jamia's ID"
         />
-        pattern={/^[a-zA-Z0-9]+$/}
+        strict={/^[a-zA-Z0-9]+$/}
+        pattern={pattern}
         warning="a-z, A-Z, 0-9"
+        validationMessage={
+          pattern === "[a-zA-Z0-9]{8,20}"
+            ? "লগইন আইডি প্রবেশ করুন"
+            : "ভিন্ন আইডি প্রবেশ করুন"
+        }
       >
         {idIsValid === false && (
           <ion-icon name="close-circle-outline"></ion-icon>
@@ -169,23 +194,16 @@ function LoginDetail({ idIsValid, validatingId, setIdIsValid }) {
         match=".reg #confirmPass input"
         passwordStrength={true}
         dataId="pass"
-        label=<FormattedMessage
-          id="form.login.password"
-          defaultMessage="Password"
-        />
+        label=<FormattedMessage id="password" defaultMessage="Password" />
         onChange={(target) => {
+          setPass(target.value);
           SS.set("reg-pass", target.value);
-          $("#pass .emptyFieldWarning") &&
-            $("#pass .emptyFieldWarning").remove();
         }}
       />
       <PasswordInput
         match=".reg #pass input"
         dataId="confirmPass"
-        onChange={() => {
-          $("#confirmPass .emptyFieldWarning") &&
-            $("#confirmPass .emptyFieldWarning").remove();
-        }}
+        pattern={`^${pass}$`}
         label=<FormattedMessage
           id="form.login.passwordRepeat"
           defaultMessage="Confirm Password"
@@ -198,50 +216,64 @@ function ApplicantDetail() {
   return (
     <>
       <Input
+        required={true}
         defaultValue={SS.get("reg-applicant")}
-        onChange={(target) => {
-          SS.set("reg-applicant", target.value);
-          $("#applicant .emptyFieldWarning") &&
-            $("#applicant .emptyFieldWarning").remove();
-        }}
+        onChange={(target) => SS.set("reg-applicant", target.value)}
         dataId="applicant"
-        type="text"
-        pattern={/^[ঀ-ৣৰ-৾a-zA-Z\s(),-]+$/}
+        strict={/^[ঀ-ৣৰ-৾a-zA-Z\s(),-]+$/}
+        pattern=".{5,}"
+        validationMessage="আবেদনকারীর পূর্ণ নাম প্রবেশ করুন"
         label=<FormattedMessage
           id="form.jamiaReg.applicant"
           defaultMessage="Applicant's Name"
         />
       />
       <Input
+        required={true}
         defaultValue={SS.get("reg-applicantDesignation")}
-        onChange={(target) => {
-          SS.set("reg-applicantDesignation", target.value);
-          $("#applicantDesignation .emptyFieldWarning") &&
-            $("#applicantDesignation .emptyFieldWarning").remove();
-        }}
+        pattern=".{5,}"
+        onChange={(target) => SS.set("reg-applicantDesignation", target.value)}
+        validationMessage="আবেদনকারীর সঠিক পদ প্রবেশ করুন"
         dataId="applicantDesignation"
-        type="text"
         label=<FormattedMessage
           id="form.jamiaReg.applicantDesignation"
           defaultMessage="Applicant's designation in Jamia"
         />
       />
       <Input
+        required={true}
+        pattern="^\+8801\d{9}$"
+        strict={/^\+8801\d{0,9}$/}
+        validationMessage="সঠিক মোবাইল নম্বর প্রবেশ করুন"
         defaultValue={SS.get("reg-applicantMobile") || "+8801"}
-        onChange={(target) => {
-          SS.set("reg-applicantMobile", target.value);
-          $("#applicantMobile .emptyFieldWarning") &&
-            $("#applicantMobile .emptyFieldWarning").remove();
-        }}
+        onChange={(target) => SS.set("reg-applicantMobile", target.value)}
         dataId="applicantMobile"
-        type="text"
-        pattern={/^\+\d{0,13}$/}
         warning="+8801***"
         label=<FormattedMessage
           id="form.jamiaReg.applicantContact"
           defaultMessage="Applicant's Mobile"
         />
       />
+      <Checkbox
+        required={true}
+        checked={true}
+        validationMessage="এই বক্সে টিক দিন"
+      >
+        <FormattedMessage
+          id="form.jamiaReg.tcAgreement"
+          defaultMessage="I accept all terms & conditions."
+          values={{
+            link: (
+              <a href="/terms&conditions">
+                <FormattedMessage
+                  id="form.jamiaReg.tnc"
+                  defaultMessage="terms & conditions"
+                />
+              </a>
+            ),
+          }}
+        />
+      </Checkbox>
     </>
   );
 }
@@ -281,21 +313,6 @@ export const JamiaRegister = () => {
   const [loading, setLoading] = useState(false);
   const [idIsValid, setIdIsValid] = useState(null);
   const [validatingId, setValidatingId] = useState(false);
-  const validateId = () => {
-    if (SS.get("reg-id").length >= 8 && idIsValid === null) {
-      setValidatingId(true);
-      fetch(`/api/validateId/${SS.get("reg-id")}`)
-        .then((res) => {
-          setValidatingId(false);
-          if (res.status === 200) {
-            setIdIsValid(true);
-          } else {
-            setIdIsValid(false);
-          }
-        })
-        .catch((err) => console.log(err));
-    }
-  };
   function leftButton() {
     if (step === 2) {
       setStep(1);
@@ -303,119 +320,62 @@ export const JamiaRegister = () => {
       setStep(2);
     }
   }
-  function rightButton() {
-    if (step === 1) {
-      if (SS.get("reg-name").length < 5) {
-        emptyFieldWarning("#name", "input", "Enter a valid jamia");
-        return;
-      }
-      if (SS.get("reg-add").length < 10) {
-        emptyFieldWarning("#add", "textarea", "Enter a valid address");
-        return;
-      }
-      if (!validateMoblie(SS.get("reg-contact"))) {
-        emptyFieldWarning(
-          "#contact",
-          "input",
-          "Enter a valid mobile number. +8801***"
-        );
-        return;
-      }
-      if (SS.get("reg-primeMufti").length < 4) {
-        emptyFieldWarning("#primeMufti", "input", "Enter a valid name");
-        return;
-      }
-      setStep(2);
-    } else if (step === 2) {
-      if (SS.get("reg-id").length < 8) {
-        emptyFieldWarning("#id", "input", "Enter a valid id");
-        return;
-      }
-      if ($(".reg #pass input").value.length < 7) {
-        emptyFieldWarning("#pass", "input", "Enter a password");
-        return;
-      }
-      if ($(".reg #confirmPass input").value.length < 7) {
-        emptyFieldWarning("#confirmPass", "input", "confirm password");
-        return;
-      }
-      if ($(".reg #pass input").value !== $(".reg #confirmPass input").value) {
-        emptyFieldWarning("#confirmPass", "input", "Password did not match");
-        return;
-      }
-      if (!idIsValid) {
-        emptyFieldWarning("#id", "input", "id is already taken");
-        return;
-      }
-      setStep(3);
-    }
-  }
-  useEffect(() => {
-    if (step !== 2) return;
-    validateId();
-    $(".reg #id input").addEventListener("blur", validateId);
-  }, [step]);
   function submit(e) {
     e.preventDefault();
-    if (SS.get("reg-applicant").length < 5) {
-      emptyFieldWarning("#applicant", "input", "Add a valid name");
+    if (validatingId) return;
+    if (step === 1) {
+      setStep(2);
       return;
     }
-    if (SS.get("reg-applicantDesignation").length < 5) {
-      emptyFieldWarning("#applicantDesignation", "input", "Add a valid title.");
+    if (step === 2) {
+      setStep(3);
       return;
     }
-    if (!validateMoblie(SS.get("reg-applicantMobile"))) {
-      emptyFieldWarning(
-        "#applicantMobile",
-        "input",
-        "Enter a valid mobile number. +8801***"
-      );
-      return;
-    }
-    const data = {
-      name: { [getLan(SS.get("reg-name"))]: SS.get("reg-name") },
-      add: SS.get("reg-add"),
-      contact: SS.get("reg-contact"),
-      primeMufti: {
-        [getLan(SS.get("reg-primeMufti"))]: SS.get("reg-primeMufti"),
-      },
-      id: SS.get("reg-id"),
-      pass: SS.get("reg-pass"),
-      appl: {
-        name: SS.get("reg-applicant"),
-        des: SS.get("reg-applicantDesignation"),
-        mob: SS.get("reg-applicantMobile"),
-      },
-    };
-    const options = {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    };
-    setLoading(true);
-    fetch("/api/source/new", options)
-      .then((res) => {
-        setLoading(false);
-        if (res.status === 200) {
-          SS.remove("reg-name");
-          SS.remove("reg-add");
-          SS.remove("reg-contact");
-          SS.remove("reg-primeMufti");
-          SS.remove("reg-id");
-          SS.remove("reg-pass");
-          SS.remove("reg-applicantDesignation");
-          SS.remove("reg-applicant");
-          SS.remove("reg-applicantMobile");
-          setSuccess(true);
-        } else {
+    if (step === 3) {
+      const data = {
+        name: { [getLan(SS.get("reg-name"))]: SS.get("reg-name") },
+        add: SS.get("reg-add"),
+        contact: SS.get("reg-contact"),
+        primeMufti: {
+          [getLan(SS.get("reg-primeMufti"))]: SS.get("reg-primeMufti"),
+        },
+        id: SS.get("reg-id"),
+        pass: SS.get("reg-pass"),
+        appl: {
+          name: SS.get("reg-applicant"),
+          des: SS.get("reg-applicantDesignation"),
+          mob: SS.get("reg-applicantMobile"),
+        },
+      };
+      const options = {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      };
+      setLoading(true);
+      fetch("/api/source/new", options)
+        .then((res) => {
+          setLoading(false);
+          if (res.status === 200) {
+            SS.remove("reg-name");
+            SS.remove("reg-add");
+            SS.remove("reg-contact");
+            SS.remove("reg-primeMufti");
+            SS.remove("reg-id");
+            SS.remove("reg-pass");
+            SS.remove("reg-applicantDesignation");
+            SS.remove("reg-applicant");
+            SS.remove("reg-applicantMobile");
+            setSuccess(true);
+          } else {
+            alert("something went wrong");
+          }
+        })
+        .catch((err) => {
           alert("something went wrong");
-        }
-      })
-      .catch((err) => {
-        alert("something went wrong");
-        console.log(err);
-      });
+          console.log(err);
+        });
+    }
   }
   return !success ? (
     <div className={`main jamiaForms ${locale === "bn-BD" ? "bn-BD" : ""}`}>
@@ -434,47 +394,27 @@ export const JamiaRegister = () => {
             idIsValid={idIsValid}
             validatingId={validatingId}
             setIdIsValid={setIdIsValid}
+            setValidatingId={setValidatingId}
           />
         )}
         {step === 3 && <ApplicantDetail />}
-        {step === 3 && (
-          <Checkbox required={true}>
-            <FormattedMessage
-              id="form.jamiaReg.tcAgreement"
-              defaultMessage="I accept all terms & conditions."
-              values={{
-                link: (
-                  <a href="/terms&conditions">
-                    <FormattedMessage
-                      id="form.jamiaReg.tnc"
-                      defaultMessage="terms & conditions"
-                    />
-                  </a>
-                ),
-              }}
-            />
-          </Checkbox>
-        )}
         {(step === 2 || step === 3) && (
           <button type="button" className="left" onClick={leftButton}>
-            back
+            <FormattedMessage id="form.jamiaReg.back" defaultMessage="Back" />
           </button>
         )}
-        {(step === 1 || step === 2) && (
-          <button type="button" className="right" onClick={rightButton}>
-            next
-          </button>
-        )}
-        {step === 3 && (
-          <Submit
-            label=<FormattedMessage
-              id="form.jamiaReg.submit"
-              defaultMessage="Register"
-            />
-            loading={loading}
-            setLoading={setLoading}
-          />
-        )}
+        <Submit
+          className={(step === 1 || step === 2) && "right"}
+          label={
+            step === 1 || step === 2 ? (
+              <FormattedMessage id="form.jamiaReg.next" defaultMessage="Next" />
+            ) : (
+              <FormattedMessage id="register" defaultMessage="Register" />
+            )
+          }
+          loading={loading}
+          setLoading={setLoading}
+        />
       </form>
     </div>
   ) : (
@@ -519,7 +459,7 @@ export const JamiaLogin = () => {
       .then((data) => {
         setIsAuthenticated(data.isAuthenticated);
         setUser(data.user);
-        history.push("/source/fatwa");
+        history.push("/jamia/fatwa");
       });
   }
   return (
@@ -539,7 +479,9 @@ export const JamiaLogin = () => {
             id="form.login.id"
             defaultMessage="Jamia-ID"
           />
-          pattern={/^[a-zA-Z0-9]+$/}
+          strict={/^[a-zA-Z0-9]+$/}
+          min={8}
+          max={20}
           onChange={(target) => {
             setUserId(target.value);
             setInvalidCred(false);
@@ -556,10 +498,7 @@ export const JamiaLogin = () => {
             setPass(target.value);
             setInvalidCred(false);
           }}
-          label=<FormattedMessage
-            id="form.login.password"
-            defaultMessage="Password"
-          />
+          label=<FormattedMessage id="password" defaultMessage="Password" />
         >
           <Link className="forgotPass" to="/passwordRecovery">
             <FormattedMessage
@@ -571,9 +510,7 @@ export const JamiaLogin = () => {
         </PasswordInput>
         <Submit
           loading={loading}
-          label={
-            <FormattedMessage id="form.login.submit" defaultMessage="Login" />
-          }
+          label={<FormattedMessage id="login" defaultMessage="Login" />}
         />
       </form>
     </div>
@@ -592,7 +529,7 @@ export const PassRecovery = () => {
   const [sendingCode, setSendingCode] = useState(false);
   const [timer, setTimer] = useState(60);
   const [attempts, setAttempts] = useState(0);
-
+  const [pattern, setPattern] = useState(".{8,20}");
   let interval;
   useEffect(() => {
     if (step === 2 || step === 3) {
@@ -725,7 +662,8 @@ export const PassRecovery = () => {
               id="passRecoveryId"
               dataId="id"
               type="text"
-              pattern={/^[a-zA-Z0-9]+$/}
+              strict={/^[a-zA-Z0-9]+$/}
+              pattern={pattern}
               warning="a-z, A-Z, 0-9"
               onChange={(target) => {
                 setId(target.value);
@@ -913,7 +851,7 @@ export const PassRecovery = () => {
               (step === 3 && timer <= 0)
             }
           >
-            <FormattedMessage id="form.submit" defaultMessage="Submit" />
+            <FormattedMessage id="submit" defaultMessage="Submit" />
             {loading && <span className="loading"></span>}
           </button>
         )}
@@ -973,7 +911,10 @@ export const AdminLogin = () => {
             id="form.admin.login.id"
             defaultMessage="Username"
           />
-          pattern={/^[a-zA-Z0-9]+$/}
+          strict={/^[a-zA-Z0-9]+$/}
+          min={8}
+          max={20}
+          validationMessage="সঠিক লগইন আইডি প্রবেশ করুন"
           onChange={(target) => setUserId(target.value)}
           warning="a-z, A-Z, 0-9"
         >
@@ -982,16 +923,11 @@ export const AdminLogin = () => {
         <PasswordInput
           dataId="pass"
           onChange={(target) => setPass(target.value)}
-          label=<FormattedMessage
-            id="form.login.password"
-            defaultMessage="Password"
-          />
+          label=<FormattedMessage id="password" defaultMessage="Password" />
         />
         <Submit
           loading={loading}
-          label={
-            <FormattedMessage id="form.login.submit" defaultMessage="Login" />
-          }
+          label={<FormattedMessage id="login" defaultMessage="Login" />}
         />
       </form>
     </div>
@@ -1006,25 +942,31 @@ export const AddFatwaForm = ({ match }) => {
     if (fatwaToEdit === null) {
       return {
         translate: false,
-        inputBooks: refInputBook,
-        inputSura: refInputSura,
         topic: "",
-        title: "",
-        titleEn: "",
-        ques: "",
-        quesEn: "",
-        ans: "",
-        ansEn: "",
-        ref: [],
+        title: {
+          "bn-BD": "",
+          "en-US": "",
+        },
+        ques: {
+          "bn-BD": "",
+          "en-US": "",
+        },
+        ans: {
+          "bn-BD": "",
+          "en-US": "",
+        },
         img: [],
       };
     } else {
-      SS.set("newFatwa-topic", JSON.stringify(fatwaToEdit.topic));
-      SS.set("newFatwa-title", fatwaToEdit.title["bn-BD"]);
-      SS.set("newFatwa-ques", fatwaToEdit.ques["bn-BD"]);
-      SS.set("newFatwa-ans", fatwaToEdit.ans["bn-BD"]);
       let inputBooks = [];
       let inputSura = [];
+      SS.set("editFatwa-topic", JSON.stringify(fatwaToEdit.topic));
+      SS.set("editFatwa-title", fatwaToEdit.title["bn-BD"]);
+      SS.set("editFatwa-titleEn", fatwaToEdit.title["en-US"]);
+      SS.set("editFatwa-ques", fatwaToEdit.ques["bn-BD"]);
+      SS.set("editFatwa-quesEn", fatwaToEdit.ques["en-US"]);
+      SS.set("editFatwa-ans", fatwaToEdit.ans["bn-BD"]);
+      SS.set("editFatwa-ansEn", fatwaToEdit.ans["en-US"]);
       if (fatwaToEdit.ref.length > 0) {
         fatwaToEdit.ref.forEach((item) => {
           if (item.book) {
@@ -1063,74 +1005,101 @@ export const AddFatwaForm = ({ match }) => {
           inputBooks: [...inputBooks],
           inputSura: [...inputSura],
         }),
-        translate: fatwaToEdit.translation,
-        topic: fatwaToEdit.topic,
-        title: fatwaToEdit.title["bn-BD"],
-        titleEn: fatwaToEdit.title["en-US"],
-        ques: fatwaToEdit.ques["bn-BD"],
-        quesEn: fatwaToEdit.ques["en-US"],
-        ans: fatwaToEdit.ans["bn-BD"],
-        ansEn: fatwaToEdit.ans["en-US"],
-        ref: fatwaToEdit.ref,
-        img: fatwaToEdit.img,
+        ...fatwaToEdit,
       };
     }
   });
   const [sameExists, setSameExists] = useState("");
+  useEffect(() => {
+    return () => {
+      if (fatwaToEdit) {
+        setFatwaToEdit(null);
+        SS.remove("editFatwa-topic");
+        SS.remove("editFatwa-title");
+        SS.remove("editFatwa-titleEn");
+        SS.remove("editFatwa-ques");
+        SS.remove("editFatwa-quesEn");
+        SS.remove("editFatwa-ans");
+        SS.remove("editFatwa-ansEn");
+      }
+    };
+  }, []);
   function submit(e) {
     e.preventDefault();
-    if (!SS.get("newFatwa-topic")) {
-      emptyFieldWarning(".combobox#topic", "input", "Select a topic");
-      return;
+    let data, url, options;
+    if (fatwaToEdit) {
+      data = {
+        ...(fatwaToEdit.topic[locale] !==
+          JSON.parse(SS.get("editFatwa-topic"))[locale] && {
+          topic: JSON.parse(SS.get("editFatwa-topic")),
+        }),
+        ...(fatwaToEdit.title["bn-BD"] !== SS.get("editFatwa-title") && {
+          ["title.bn-BD"]: SS.get("editFatwa-title"),
+        }),
+        ...(fatwaToEdit.title["en-US"] !== SS.get("editFatwa-titleEn") && {
+          ["title.en-US"]: SS.get("editFatwa-titleEn"),
+        }),
+        ...(fatwaToEdit.ques["bn-BD"] !== SS.get("editFatwa-ques") && {
+          ["ques.bn-BD"]: SS.get("editFatwa-ques"),
+        }),
+        ...(fatwaToEdit.ques["en-US"] !== SS.get("editFatwa-quesEn") && {
+          ["ques.en-US"]: SS.get("editFatwa-quesEn"),
+        }),
+        ...(fatwaToEdit.ans["bn-BD"] !== SS.get("editFatwa-ans") && {
+          ["ans.bn-BD"]: SS.get("editFatwa-ans"),
+        }),
+        ...(fatwaToEdit.ans["en-US"] !== SS.get("editFatwa-ansEn") && {
+          ["ans.en-US"]: SS.get("editFatwa-ansEn"),
+        }),
+        ref: [
+          ...GetGroupData($(".addFatwa #books.multipleInput")),
+          ...GetGroupData($(".addFatwa #sura.multipleInput")),
+        ],
+        img: preFill.img,
+      };
+      url =
+        fatwaToEdit.status === "pending"
+          ? `/api/source/editSubmission/${match.params.id}`
+          : `/api/source/editFatwa/${match.params.id}`;
+      options = {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      };
+    } else {
+      data = {
+        topic: JSON.parse(SS.get("newFatwa-topic")),
+        title: {
+          "bn-BD": SS.get("newFatwa-title"),
+          "en-US": SS.get("newFatwa-titleEn"),
+        },
+        ques: {
+          "bn-BD": SS.get("newFatwa-ques"),
+          "en-US": SS.get("newFatwa-quesEn"),
+        },
+        ans: {
+          "bn-BD": SS.get("newFatwa-ans"),
+          "en-US": SS.get("newFatwa-ansEn"),
+        },
+        ref: [
+          ...GetGroupData($(".addFatwa #books.multipleInput")),
+          ...GetGroupData($(".addFatwa #sura.multipleInput")),
+        ],
+        img: preFill.img,
+      };
+      url = `/api/source/newFatwa`;
+      options = {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      };
     }
-    if (SS.get("newFatwa-title").length < 15) {
-      emptyFieldWarning(".input#title", "input", "Add a valid title");
-      return;
-    }
-    if (SS.get("newFatwa-ques").length < 15) {
-      emptyFieldWarning(".input#ques", "textarea", "Add a valid question");
-      return;
-    }
-    if (SS.get("newFatwa-ans").length < 15) {
-      emptyFieldWarning(".input#ans", "textarea", "Add a valid ans");
-      return;
-    }
-    const data = {
-      topic: JSON.parse(SS.get("newFatwa-topic")),
-      title: SS.get("newFatwa-title"),
-      ...(preFill.translate && {
-        titleEn: SS.get("newFatwa-titleEn"),
-      }),
-      ques: SS.get("newFatwa-ques"),
-      ...(preFill.translate && {
-        quesEn: SS.get("newFatwa-quesEn"),
-      }),
-      ans: SS.get("newFatwa-ans"),
-      ...(preFill.translate && { ansEn: SS.get("newFatwa-ansEn") }),
-      ref: [
-        ...GetGroupData($(".addFatwa #books.multipleInput")),
-        ...GetGroupData($(".addFatwa #sura.multipleInput")),
-      ],
-      translation:
-        (SS.get("newFatwa-ansEn") && SS.get("newFatwa-quesEn")) || false,
-      img: preFill.img,
-      source: user._id,
-    };
-    const url = !match.params.id
-      ? `/api/${user.role === "jamia" ? "source" : "admin"}/fatwa/new`
-      : `/api/${user.role === "jamia" ? "jamia" : "admin"}/fatwa/edit/${
-          match.params.id
-        }`;
-    const options = {
-      method: match.params.id ? "PATCH" : "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    };
     setLoading(true);
     fetch(url, options)
-      .then((res) => {
+      .then((res) => res.json())
+      .then((data) => {
         setLoading(false);
-        if (res.status === 200) {
+        if (data.code === "ok") {
           history.push("/jamia/fatwa/submissions");
           SS.remove("newFatwa-ansEn");
           SS.remove("newFatwa-topic");
@@ -1139,17 +1108,10 @@ export const AddFatwaForm = ({ match }) => {
           SS.remove("newFatwa-title");
           SS.remove("newFatwa-titleEn");
           SS.remove("newFatwa-ans");
-          setFatwaToEdit(null);
-          return;
-        } else if (res.status === 400) {
-          return res.json();
-        } else {
-          alert("something went wrong!");
-        }
-      })
-      .then((data) => {
-        if (data && data.code === 11000) {
+        } else if (data.code === 11000) {
           setSameExists(data.field);
+        } else {
+          throw data.code;
         }
       })
       .catch((err) => {
@@ -1162,7 +1124,11 @@ export const AddFatwaForm = ({ match }) => {
       className={`addFatwa ${preFill.translate ? "translate" : ""}`}
       onSubmit={submit}
     >
+      {match.params.id && !fatwaToEdit && (
+        <Redirect to="/jamia/fatwa/submissions" />
+      )}
       <Combobox
+        required={true}
         dataId="topic"
         defaultValue={
           preFill.topic ||
@@ -1170,9 +1136,12 @@ export const AddFatwaForm = ({ match }) => {
         }
         onChange={(target) => {
           SS.set("newFatwa-topic", JSON.stringify(target.value));
+          fatwaToEdit &&
+            SS.set("editFatwa-topic", JSON.stringify(target.value));
         }}
         maxHeight="15rem"
         label=<FormattedMessage id="topic" defaultMessage="Topic" />
+        validationMessage="বিষয়বস্তু নির্বাচন করুন"
         options={topics.map((topic) => {
           return {
             label: topic[locale],
@@ -1192,14 +1161,18 @@ export const AddFatwaForm = ({ match }) => {
         }
       />
       <Input
-        defaultValue={preFill.title || SS.get("newFatwa-title")}
+        required={true}
+        defaultValue={preFill.title["bn-BD"] || SS.get("newFatwa-title")}
         dataId="title"
+        min={10}
+        validationMessage="ফতোয়ার শিরোণাম প্রবেশ করুন"
         label=<FormattedMessage id="title" defaultMessage="Title" />
         max={200}
         className={sameExists === "title.bn-BD" ? "err" : ""}
         onChange={(target) => {
           SS.set("newFatwa-title", target.value);
           setSameExists("");
+          fatwaToEdit && SS.set("editFatwa-title", target.value);
         }}
       >
         {sameExists === "title.bn-BD" && (
@@ -1208,31 +1181,58 @@ export const AddFatwaForm = ({ match }) => {
       </Input>
       {preFill.translate && (
         <Input
-          defaultValue={preFill.titleEn || SS.get("newFatwa-titleEn")}
+          min={10}
+          required={true}
+          validationMessage="ফতোয়ার শিরোণাম প্রবেশ করুন"
+          defaultValue={preFill.title["en-US"] || SS.get("newFatwa-titleEn")}
           dataId="titleEn"
           label="Title in English"
+          className={sameExists === "title.en-US" ? "err" : ""}
           max={200}
-          onChange={(target) => SS.set("newFatwa-titleEn", target.value)}
-        />
+          onChange={(target) => {
+            SS.set("newFatwa-titleEn", target.value);
+            fatwaToEdit && SS.set("editFatwa-titleEn", target.value);
+          }}
+        >
+          {sameExists === "title.en-US" && (
+            <span className="errMessage">This title already exists!</span>
+          )}
+        </Input>
       )}
       <Textarea
-        defaultValue={preFill.ques || SS.get("newFatwa-ques")}
-        onChange={(target) => SS.set("newFatwa-ques", target.value)}
+        min="20"
+        required={true}
+        validationMessage="প্রশ্ন প্রবেশ করুন"
+        defaultValue={preFill.ques["bn-BD"] || SS.get("newFatwa-ques")}
+        onChange={(target) => {
+          SS.set("newFatwa-ques", target.value);
+          fatwaToEdit && SS.set("editFatwa-ques", target.value);
+        }}
         dataId="ques"
         label=<FormattedMessage id="question" defaultMessage="Question" />
       />
       {preFill.translate && (
         <Textarea
-          defaultValue={preFill.quesEn || SS.get("newFatwa-quesEn")}
-          onChange={(target) => SS.set("newFatwa-quesEn", target.value)}
+          min="20"
+          required={true}
+          validationMessage="প্রশ্ন প্রবেশ করুন"
+          defaultValue={preFill.ques["en-US"] || SS.get("newFatwa-quesEn")}
+          onChange={(target) => {
+            SS.set("newFatwa-quesEn", target.value);
+            fatwaToEdit && SS.set("editFatwa-quesEn", target.value);
+          }}
           dataId="quesEn"
           label="Question in English"
         />
       )}
       <Textarea
-        defaultValue={preFill.ans || SS.get("newFatwa-ans")}
+        min="20"
+        required={true}
+        validationMessage="উত্তর প্রবেশ করুন"
+        defaultValue={preFill.ans["bn-BD"] || SS.get("newFatwa-ans")}
         onChange={(target) => {
           SS.set("newFatwa-ans", target.value);
+          fatwaToEdit && SS.set("editFatwa-ans", target.value);
           setSameExists(false);
         }}
         dataId="ans"
@@ -1245,24 +1245,35 @@ export const AddFatwaForm = ({ match }) => {
       </Textarea>
       {preFill.translate && (
         <Textarea
-          defaultValue={preFill.ansEn || SS.get("newFatwa-ansEn")}
-          onChange={(target) => SS.set("newFatwa-ansEn", target.value)}
+          min="20"
+          required={true}
+          validationMessage="উত্তর প্রবেশ করুন"
+          defaultValue={preFill.ans["en-US"] || SS.get("newFatwa-ansEn")}
+          className={sameExists === "ans.en-US" ? "err" : ""}
+          onChange={(target) => {
+            SS.set("newFatwa-ansEn", target.value);
+            fatwaToEdit && SS.set("editFatwa-ansEn", target.value);
+          }}
           dataId="ansEn"
           label="Answer in Enlish"
-        />
+        >
+          {sameExists === "ans.en-US" && (
+            <span className="errMessage">this fatwa already exists</span>
+          )}
+        </Textarea>
       )}
       <MultipleInput
         id="books"
-        inputs={preFill.inputBooks}
+        inputs={preFill.inputBooks || refInputBook}
         refInput={refInputBook}
       />
       <MultipleInput
         id="sura"
-        inputs={preFill.inputSura}
+        inputs={preFill.inputSura || refInputSura}
         refInput={refInputSura}
       />
       <Submit
-        label=<FormattedMessage id="form.submit" defaultMessage="Submit" />
+        label=<FormattedMessage id="submit" defaultMessage="Submit" />
         loading={loading}
         setLoading={setLoading}
       />
@@ -1272,7 +1283,7 @@ export const AddFatwaForm = ({ match }) => {
 export const UserQuestionAnswerForm = ({ ques, setQues, _id }) => {
   const [loading, setLoading] = useState(false);
   const history = useHistory();
-  const { user, fatwaToEdit, setFatwaToEdit, locale } = useContext(SiteContext);
+  const { fatwaToEdit, setFatwaToEdit, locale } = useContext(SiteContext);
   const [sameExists, setSameExists] = useState("");
   const [preFill, setPreFill] = useState(() => {
     if (SS.get("ansFatwa-ref")) {
@@ -1316,16 +1327,7 @@ export const UserQuestionAnswerForm = ({ ques, setQues, _id }) => {
   });
   function submit(e) {
     e.preventDefault();
-    if (SS.get("ansFatwa-title").length < 15) {
-      emptyFieldWarning(".input#title", "input", "Add a title");
-      return;
-    }
-    if (SS.get("ansFatwa-ans").length < 15) {
-      emptyFieldWarning(".input#ans", "textarea", "Add a valid ans");
-      return;
-    }
     const data = {
-      source: user._id,
       topic: SS.get("ansFatwa-topic")
         ? JSON.parse(SS.get("ansFatwa-topic"))
         : ques.topic,
@@ -1359,7 +1361,7 @@ export const UserQuestionAnswerForm = ({ ques, setQues, _id }) => {
       })
       .catch((err) => {
         alert("something went wrong");
-        console.log(err);
+        console.log("this");
       });
   }
   return (
@@ -1373,13 +1375,11 @@ export const UserQuestionAnswerForm = ({ ques, setQues, _id }) => {
         maxHeight="15rem"
         label=<FormattedMessage id="topic" defaultMessage="Topic" />
         options={topics.map((topic) => {
-          return {
-            label: topic[locale],
-            value: topic,
-          };
+          return { label: topic[locale], value: topic };
         })}
       />
       <Input
+        autoFocus={true}
         defaultValue={SS.get("ansFatwa-title")}
         dataId="title"
         label=<FormattedMessage id="title" defaultMessage="Title" />
@@ -1389,6 +1389,8 @@ export const UserQuestionAnswerForm = ({ ques, setQues, _id }) => {
           SS.set("ansFatwa-title", target.value);
           setSameExists("");
         }}
+        required={true}
+        validationMessage="শিরোণাম প্রবেশ করুন"
       >
         {sameExists === "title.bn-BD" && (
           <span className="errMessage">This title already exists!</span>
@@ -1410,6 +1412,9 @@ export const UserQuestionAnswerForm = ({ ques, setQues, _id }) => {
         dataId="ans"
         className={sameExists === "ans.bn-BD" ? "err" : ""}
         label=<FormattedMessage id="answer" defaultMessage="Answer" />
+        required={true}
+        min={10}
+        validationMessage="উত্তর প্রবেশ করুন"
       >
         {sameExists === "ans.bn-BD" && (
           <span className="errMessage">this fatwa already exists</span>
@@ -1426,11 +1431,72 @@ export const UserQuestionAnswerForm = ({ ques, setQues, _id }) => {
         refInput={refInputSura}
       />
       <Submit
-        label=<FormattedMessage id="form.submit" defaultMessage="Submit" />
+        label=<FormattedMessage id="submit" defaultMessage="Submit" />
         loading={loading}
         setLoading={setLoading}
       />
       <section className="bottomPadding" />
+    </form>
+  );
+};
+export const UserQuestionReportForm = ({ _id }) => {
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [sub, setSub] = useState("");
+  const [msg, setMsg] = useState("");
+  const history = useHistory();
+  const { user } = useContext(SiteContext);
+  function submit(e) {
+    e.preventDefault();
+    setLoading(true);
+    const options = {
+      method: "POST",
+      headers: { "Content-type": "application/json" },
+      body: JSON.stringify({ subject: sub, message: msg }),
+    };
+    fetch(`/api/source/reportUserQues/${_id}`, options)
+      .then((res) => res.json())
+      .then((data) => {
+        setLoading(false);
+        if (data.code === "ok") {
+          setSuccess(true);
+        } else {
+          alert("something went wrong");
+        }
+      })
+      .catch((err) => {
+        setLoading(false);
+        console.log(err);
+        alert("something went wrong");
+      });
+  }
+  useEffect(() => {
+    success && history.goBack();
+  }, [success]);
+  return (
+    <form className="reportUserQues" onSubmit={submit}>
+      <h2>Report</h2>
+      <Input
+        label="Subject"
+        min={5}
+        onChange={(target) => setSub(target.value)}
+        validationMessage="enter the subject of this report"
+        required={true}
+      />
+      <Textarea
+        label="Message"
+        defaultValue={""}
+        onChange={(target) => setMsg(target.value)}
+        min={10}
+        max={300}
+        validationMessage="describe your issue with this question"
+        required={true}
+      />
+      <Submit
+        label=<FormattedMessage id="submit" defaultMessage="Submit" />
+        loading={loading}
+        setLoading={setLoading}
+      />
     </form>
   );
 };

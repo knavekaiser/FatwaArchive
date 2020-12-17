@@ -127,7 +127,7 @@ function UserQuestion() {
           defaultValue={SS.get("askFatwa-ques")}
         />
         <Submit
-          label=<FormattedMessage id="form.submit" defaultMessage="Submit" />
+          label=<FormattedMessage id="submit" defaultMessage="Submit" />
           loading={loading}
           setLoading={setLoading}
         />

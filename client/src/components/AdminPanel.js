@@ -1,12 +1,30 @@
-import React, { useState, useContext } from "react";
-import { Link, Route, Switch, useHistory } from "react-router-dom";
+import React, { useState, useContext, useRef, useEffect } from "react";
+import { Link, Route, Switch, useHistory, Redirect } from "react-router-dom";
 import { SiteContext } from "../Context.js";
 import "./CSS/AdminPanel.min.css";
-import { Input, Textarea, Combobox, topics, Submit, ID } from "./FormElements";
+import {
+  Input,
+  Textarea,
+  Combobox,
+  topics,
+  Submit,
+  ID,
+  SS,
+} from "./FormElements";
 import { DataEditForm, PasswordEditForm } from "./Forms";
-import { Tabs, Sidebar, View } from "./TableElements";
-import { FormattedDate, FormattedNumber, FormattedMessage } from "react-intl";
+import { Tabs, Sidebar, View, Actions, LoadingPost } from "./TableElements";
+import {
+  FormattedDate,
+  FormattedNumber,
+  FormattedMessage,
+  FormattedTimeParts,
+} from "react-intl";
 import FourOFour from "./FourOFour";
+
+const encodeURL = (obj) =>
+  Object.keys(obj)
+    .map((key) => `${key}=${obj[key]}`)
+    .join("&");
 
 function SingleFatwa({ data, setData }) {
   const { locale } = useContext(SiteContext);
@@ -149,9 +167,10 @@ function SingleFatwaSubmission({ data, setData }) {
   function acceptFatwa() {
     setLoading(true);
     fetch(`/api/admin/fatwaSubmissions/accept/${fatwa._id}`, { method: "POST" })
-      .then((res) => {
+      .then((res) => res.json())
+      .then((data) => {
         setLoading(false);
-        if (res.status === 200) {
+        if (data.code === "ok") {
           setData((prev) => {
             return prev.filter((item) => item._id !== fatwa._id);
           });
@@ -197,6 +216,8 @@ function SingleFatwaSubmission({ data, setData }) {
       </td>
       <td className="label">topic</td>
       <td className="data">{fatwa.topic[locale]}</td>
+      <td className="label">translation</td>
+      <td className="data">{fatwa.translation ? "Yes" : "No"}</td>
       <td className="label">title (Bangla)</td>
       <td className="data">{fatwa.title["bn-BD"]}</td>
       {fatwa.title["en-US"] && (
@@ -289,7 +310,19 @@ function AllFatwa({ history, location, match }) {
   return (
     <div className="view">
       <h1 className="viewTitle">Fatwa</h1>
-      <Tabs page="/admin/fatwa/" tabs={["Live", "Submissions"]} />
+      <Tabs
+        page="/admin/fatwa/"
+        tabs={[
+          {
+            label: <FormattedMessage id="live" defaultMessage="Live" />,
+            link: "live",
+          },
+          {
+            label: <FormattedMessage id="pending" defaultMessage="pending" />,
+            link: "submissions",
+          },
+        ]}
+      />
       <Switch>
         <Route path="/admin/fatwa" exact>
           <View
@@ -349,13 +382,40 @@ function AllFatwa({ history, location, match }) {
               },
             ]}
             columns={[
-              { column: "jamia", sort: true, colCode: "jamia" },
-              { column: "topic", sort: true, colCode: "topic" },
-              { column: "translation", sort: false, colCode: "translation" },
-              { column: "date", sort: true, colCode: "added" },
-              { column: "title", sort: false, colCode: "title" },
+              {
+                column: (
+                  <FormattedMessage id="source" defaultMessage="Source" />
+                ),
+                sort: true,
+                colCode: "source",
+              },
+              {
+                column: <FormattedMessage id="topic" defaultMessage="Topic" />,
+                sort: true,
+                colCode: "topic",
+              },
+              {
+                column: (
+                  <FormattedMessage
+                    id="translation"
+                    defaultMessage="Translation"
+                  />
+                ),
+                sort: true,
+                colCode: "translation",
+              },
+              {
+                column: <FormattedMessage id="date" defaultMessage="Date" />,
+                sort: true,
+                colCode: "createdAt",
+              },
+              {
+                column: <FormattedMessage id="title" defaultMessage="Title" />,
+                sort: false,
+                colCode: "title",
+              },
             ]}
-            defaultSort={{ column: "added", order: "des" }}
+            defaultSort={{ column: "createdAt", order: "des" }}
           />
         </Route>
         <Route path="/admin/fatwa/live">
@@ -416,13 +476,40 @@ function AllFatwa({ history, location, match }) {
               },
             ]}
             columns={[
-              { column: "jamia", sort: true, colCode: "jamia" },
-              { column: "topic", sort: true, colCode: "topic" },
-              { column: "translation", sort: false, colCode: "translation" },
-              { column: "date", sort: true, colCode: "added" },
-              { column: "title", sort: false, colCode: "title" },
+              {
+                column: (
+                  <FormattedMessage id="source" defaultMessage="Source" />
+                ),
+                sort: true,
+                colCode: "source",
+              },
+              {
+                column: <FormattedMessage id="topic" defaultMessage="Topic" />,
+                sort: true,
+                colCode: "topic",
+              },
+              {
+                column: (
+                  <FormattedMessage
+                    id="translation"
+                    defaultMessage="Translation"
+                  />
+                ),
+                sort: true,
+                colCode: "translation",
+              },
+              {
+                column: <FormattedMessage id="date" defaultMessage="Date" />,
+                sort: true,
+                colCode: "createdAt",
+              },
+              {
+                column: <FormattedMessage id="title" defaultMessage="Title" />,
+                sort: false,
+                colCode: "title",
+              },
             ]}
-            defaultSort={{ column: "added", order: "des" }}
+            defaultSort={{ column: "createdAt", order: "des" }}
           />
         </Route>
         <Route path="/admin/fatwa/submissions">
@@ -471,10 +558,27 @@ function AllFatwa({ history, location, match }) {
               },
             ]}
             columns={[
-              { column: "date", sort: true, colCode: "createdAt" },
-              { column: "topic", sort: true, colCode: "topic" },
-              { column: "jamia", sort: true, colCode: "jamia" },
-              { column: "title", sort: false },
+              {
+                column: <FormattedMessage id="date" defaultMessage="Date" />,
+                sort: true,
+                colCode: "createdAt",
+              },
+              {
+                column: <FormattedMessage id="topic" defaultMessage="Topic" />,
+                sort: true,
+                colCode: "topic",
+              },
+              {
+                column: (
+                  <FormattedMessage id="source" defaultMessage="Source" />
+                ),
+                sort: true,
+                colCode: "jamia",
+              },
+              {
+                column: <FormattedMessage id="title" defaultMessage="Title" />,
+                sort: false,
+              },
             ]}
             defaultSort={{ column: "createdAt", order: "des" }}
           />
@@ -820,7 +924,19 @@ function AllSources() {
   return (
     <div className="view">
       <h1 className="viewTitle">source</h1>
-      <Tabs page="/admin/sources/" tabs={["Active", "Submissions"]} />
+      <Tabs
+        page="/admin/sources/"
+        tabs={[
+          {
+            label: <FormattedMessage id="active" defaultMessage="Active" />,
+            link: "active",
+          },
+          {
+            label: <FormattedMessage id="pending" defaultMessage="Pending" />,
+            link: "Submissions",
+          },
+        ]}
+      />
       <Switch>
         <Route path="/admin/sources" exact>
           <View
@@ -835,7 +951,7 @@ function AllSources() {
                 bridge: "is",
                 input: (
                   <Combobox
-                    label="ধরন"
+                    label=<FormattedMessage id="type" defaultMessage="Type" />
                     options={[
                       { label: "Jamia", value: "jamia" },
                       { label: "Mufti", value: "mufti" },
@@ -845,13 +961,50 @@ function AllSources() {
               },
             ]}
             columns={[
-              { column: "id", sort: false, colCode: "id" },
-              { column: "type", sort: true, colCode: "role" },
-              { column: "name", sort: false, colCode: "name" },
-              { column: "prime mufti", sort: false, colCode: "primeMufti" },
-              { column: "joined", sort: true, colCode: "joined" },
-              { column: "fatwa", sort: true, colCode: "fatwa" },
-              { column: "contact", sort: false, colCode: "contact" },
+              {
+                column: <FormattedMessage id="id" defaultMessage="Id" />,
+                sort: false,
+                colCode: "id",
+              },
+              {
+                column: <FormattedMessage id="type" defaultMessage="Type" />,
+                sort: true,
+                colCode: "role",
+              },
+              {
+                column: <FormattedMessage id="name" defaultMessage="Name" />,
+                sort: false,
+                colCode: "name",
+              },
+              {
+                column: (
+                  <FormattedMessage
+                    id="primeMufti"
+                    defaultMessage="Prime Mufti"
+                  />
+                ),
+                sort: false,
+                colCode: "primeMufti",
+              },
+              {
+                column: (
+                  <FormattedMessage id="joined" defaultMessage="Joined" />
+                ),
+                sort: true,
+                colCode: "joined",
+              },
+              {
+                column: <FormattedMessage id="fatwa" defaultMessage="Fatwa" />,
+                sort: true,
+                colCode: "fatwa",
+              },
+              {
+                column: (
+                  <FormattedMessage id="contact" defaultMessage="Contact" />
+                ),
+                sort: false,
+                colCode: "contact",
+              },
             ]}
           />
         </Route>
@@ -868,7 +1021,7 @@ function AllSources() {
                 bridge: "is",
                 input: (
                   <Combobox
-                    label="ধরন"
+                    label=<FormattedMessage id="type" defaultMessage="Type" />
                     options={[
                       { label: "Jamia", value: "jamia" },
                       { label: "Mufti", value: "mufti" },
@@ -878,13 +1031,50 @@ function AllSources() {
               },
             ]}
             columns={[
-              { column: "id", sort: false, colCode: "id" },
-              { column: "type", sort: true, colCode: "role" },
-              { column: "name", sort: false, colCode: "name" },
-              { column: "prime mufti", sort: false, colCode: "primeMufti" },
-              { column: "joined", sort: true, colCode: "joined" },
-              { column: "fatwa", sort: true, colCode: "fatwa" },
-              { column: "contact", sort: false, colCode: "contact" },
+              {
+                column: <FormattedMessage id="id" defaultMessage="Id" />,
+                sort: false,
+                colCode: "id",
+              },
+              {
+                column: <FormattedMessage id="type" defaultMessage="Type" />,
+                sort: true,
+                colCode: "role",
+              },
+              {
+                column: <FormattedMessage id="name" defaultMessage="Name" />,
+                sort: false,
+                colCode: "name",
+              },
+              {
+                column: (
+                  <FormattedMessage
+                    id="primeMufti"
+                    defaultMessage="Prime Mufti"
+                  />
+                ),
+                sort: false,
+                colCode: "primeMufti",
+              },
+              {
+                column: (
+                  <FormattedMessage id="joined" defaultMessage="Joined" />
+                ),
+                sort: true,
+                colCode: "joined",
+              },
+              {
+                column: <FormattedMessage id="fatwa" defaultMessage="Fatwa" />,
+                sort: true,
+                colCode: "fatwa",
+              },
+              {
+                column: (
+                  <FormattedMessage id="contact" defaultMessage="Contact" />
+                ),
+                sort: false,
+                colCode: "contact",
+              },
             ]}
           />
         </Route>
@@ -900,7 +1090,7 @@ function AllSources() {
                 name: "role",
                 input: (
                   <Combobox
-                    label="ধরন"
+                    label=<FormattedMessage id="type" defaultMessage="Type" />
                     options={[
                       { label: "jamia", value: "jamia" },
                       { label: "mufti", value: "mufti" },
@@ -910,11 +1100,38 @@ function AllSources() {
               },
             ]}
             columns={[
-              { column: "joined", sort: true, colCode: "joined" },
-              { column: "name & address", sort: false, colCode: "name" },
-              { column: "type", sort: true, colCode: "role" },
-              { column: "prime mufti", sort: false, colCode: "primeMufti" },
-              { column: "contact", sort: false, colCode: "contact" },
+              {
+                column: <FormattedMessage id="date" defaultMessage="Date" />,
+                sort: true,
+                colCode: "joined",
+              },
+              {
+                column: <FormattedMessage id="name" defaultMessage="Name" />,
+                sort: false,
+                colCode: "name",
+              },
+              {
+                column: <FormattedMessage id="type" defaultMessage="Type" />,
+                sort: true,
+                colCode: "role",
+              },
+              {
+                column: (
+                  <FormattedMessage
+                    id="primeMufti"
+                    defaultMessage="primeMufti"
+                  />
+                ),
+                sort: false,
+                colCode: "primeMufti",
+              },
+              {
+                column: (
+                  <FormattedMessage id="contact" defaultMessage="Contact" />
+                ),
+                sort: false,
+                colCode: "contact",
+              },
             ]}
           />
         </Route>
@@ -1045,7 +1262,12 @@ function UserReview() {
       <h1>User Review</h1>
       <Tabs
         page="/admin/user/"
-        tabs={["Questions", "Answered Question", "Review", "report"]}
+        tabs={[
+          { label: "Questions", link: "questions" },
+          { label: "Answered Question", link: "answeredQuestion" },
+          { label: "Review", link: "review" },
+          { label: "Report", link: "report" },
+        ]}
       />
       <Switch>
         <Route path="/admin/user" exact>
@@ -1120,13 +1342,25 @@ function UserReview() {
             ]}
           />
         </Route>
+        <Route path="/admin/user/answeredQuestion">
+          <View
+            Element={SingleUserReview}
+            defaultSort={{ column: "date", order: "des" }}
+            id="answeredQuestion"
+            api="api/admin/userReview/filter?"
+            columns={[
+              { column: "name", sort: false, colCode: "name" },
+              { column: "date", sort: true, colCode: "date" },
+              { column: "message", sort: false, colCode: "message" },
+            ]}
+          />
+        </Route>
         <Route path="/admin/user/review">
           <View
             Element={SingleUserReview}
             defaultSort={{ column: "date", order: "des" }}
-            id="allPatreons"
+            id="answeredQuestion"
             api="api/admin/userReview/filter?"
-            categories={[]}
             columns={[
               { column: "name", sort: false, colCode: "name" },
               { column: "date", sort: true, colCode: "date" },
@@ -1138,9 +1372,8 @@ function UserReview() {
           <View
             Element={SingleUserReview}
             defaultSort={{ column: "date", order: "des" }}
-            id="allPatreons"
+            id="allReports"
             api="api/admin/userReview/filter?"
-            categories={[]}
             columns={[
               { column: "name", sort: false, colCode: "name" },
               { column: "date", sort: true, colCode: "date" },
@@ -1153,22 +1386,554 @@ function UserReview() {
   );
 }
 
+function QuestionFeed() {
+  return (
+    <div className="view questionFeed">
+      <h1 className="viewTitle">Question feed</h1>
+      <Tabs
+        page="/admin/questionFeed/"
+        tabs={[{ label: "New Questions", link: "newQuestions" }]}
+      />
+      <Switch>
+        <Route path="/admin/questionFeed" exact>
+          <NewQuestions />
+        </Route>
+        <Route path="/admin/questionFeed/newQuestions">
+          <NewQuestions />
+        </Route>
+      </Switch>
+    </div>
+  );
+}
+function NewQuestions() {
+  const abortController = new AbortController();
+  const signal = abortController.signal;
+  const { locale } = useContext(SiteContext);
+  const [loading, setLoading] = useState(true);
+  const [sort, setSort] = useState({ column: "createdAt", order: "des" });
+  const [filters, setFilters] = useState({});
+  const [data, setData] = useState([]);
+  function fetchData() {
+    !loading && setLoading(true);
+    const query = encodeURL(filters);
+    const sortOrder = encodeURL(sort);
+    const options = { headers: { "Accept-Language": locale }, signal: signal };
+    const url = `/api/source/questionFeed/filter?${query}&${sortOrder}`;
+    fetch(url, options)
+      .then((res) => res.json())
+      .then((data) => {
+        setLoading(false);
+        setData(data);
+      })
+      .catch((err) => {
+        console.log(err);
+        console.log("handle error!!");
+      });
+    return () => abortController.abort();
+  }
+  useEffect(fetchData, [sort, filters]);
+  return (
+    <>
+      <div className="filters">
+        <Combobox
+          disabled={loading}
+          defaultValue={1}
+          change={setSort}
+          maxHeight={200}
+          id="questionFeedSort"
+          icon="layers"
+          options={[
+            {
+              label: "New first",
+              value: { column: "submitted", order: "asc" },
+            },
+            {
+              label: "Old first",
+              value: { column: "submitted", order: "des" },
+            },
+          ]}
+        />
+      </div>
+      <ul className="feed">
+        {!loading ? (
+          data.map((item) => <SingleQuestion key={item._id} data={item} />)
+        ) : (
+          <LoadingPost />
+        )}
+      </ul>
+    </>
+  );
+}
+function SingleQuestion({ data }) {
+  const { locale } = useContext(SiteContext);
+  const history = useHistory();
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+  const container = useRef(null);
+  return (
+    <li
+      ref={container}
+      className={`question ${!open ? "mini" : ""}`}
+      onClick={(e) => {
+        if (e.target === container.current) {
+          history.push("/admin/questionFeed/" + data._id);
+        }
+      }}
+    >
+      <div className="user">
+        <p className="name">{data.user.name}</p>
+        <p className="date">
+          {new Date(data.submitted).getFullYear() !==
+          new Date().getFullYear() ? (
+            <FormattedDate
+              value={data.submitted}
+              day="numeric"
+              month="long"
+              year="numeric"
+            />
+          ) : (
+            <FormattedDate value={data.submitted} day="numeric" month="long" />
+          )}
+          <span className="separator" />
+          <FormattedTimeParts value={data.submitted}>
+            {(parts) => (
+              <>
+                {parts[0].value}
+                {parts[1].value}
+                {parts[2].value}
+                <small>{parts[4].value.toLowerCase()}</small>
+              </>
+            )}
+          </FormattedTimeParts>
+        </p>
+      </div>
+      <Actions
+        icon="reorder-two-outline"
+        actions={[
+          {
+            label: "Answer now",
+            action: () => {
+              SS.set("userAns-ques", data.ques.body);
+              SS.set("userAns-topic", JSON.stringify(data.ques.topic));
+              history.push(`/admin/userQuestion/${data._id}/add`);
+            },
+          },
+        ]}
+      />
+      <p className="ques">{data.ques.body}</p>
+      <ul className="tags">
+        <li className="tag">{data.ques.topic[locale]}</li>
+        <li className="tag">
+          <FormattedMessage
+            values={{ number: <FormattedNumber value={data.ans.length} /> }}
+            id="ans.tag.ansCount"
+            defaultMessage={`${data.ans.length} Answer(s)`}
+          />
+        </li>
+        <li className="tag">
+          <FormattedMessage
+            values={{ number: <FormattedNumber value={data.reports.length} /> }}
+            id="ans.tag.reportCount"
+            defaultMessage={`${data.reports.length} Reports(s)`}
+          />
+        </li>
+      </ul>
+    </li>
+  );
+}
+function UserQuestion({ history, match }) {
+  const { user } = useContext(SiteContext);
+  const [loading, setLoading] = useState(true);
+  const [userQues, setUserQues] = useState({});
+  const [answered, setAnswered] = useState(false);
+  useEffect(getData, []);
+  function getData() {
+    fetch("/api/source/userQues/" + match.params._id)
+      .then((res) => res.json())
+      .then((data) => {
+        setLoading(false);
+        if (data.code === "ok") {
+          setUserQues(data.content);
+          if (
+            data.content.ans.filter((item) => item.source._id === user._id)
+              .length > 0
+          ) {
+            setAnswered(true);
+          }
+        } else {
+          throw data;
+        }
+      })
+      .catch((err) => {
+        alert("something went wrong");
+        console.log(err);
+      });
+  }
+  if (userQues.ques) {
+    return (
+      <div className="view userQues">
+        <div className="container">
+          <div className="ques">
+            <div className="user">
+              <p className="name">
+                <b>{userQues.user.name}</b>
+                <span className="separator" />
+                <i>
+                  <span className="add">{userQues.user.add}</span>
+                </i>
+              </p>
+              <p className="date">
+                <FormattedDate
+                  value={userQues.createdAt}
+                  day="numeric"
+                  month="long"
+                  year="numeric"
+                />
+                <span className="separator" />
+                <FormattedTimeParts value={userQues.createdAt}>
+                  {(parts) => (
+                    <>
+                      {parts[0].value}
+                      {parts[1].value}
+                      {parts[2].value}
+                      <small>{parts[4].value.toLowerCase()}</small>
+                    </>
+                  )}
+                </FormattedTimeParts>
+              </p>
+            </div>
+            <p className="body">{userQues.ques.body}</p>
+          </div>
+          <Tabs
+            page={`/admin/questionFeed/${userQues._id}/`}
+            tabs={[
+              { label: "Answers", link: "answers" },
+              { label: "Reports", link: "reports" },
+              { label: "Add answer", link: "addAnswer" },
+            ]}
+          />
+          <Switch>
+            <Route path={`/admin/questionFeed/${userQues._id}`} exact>
+              {userQues.ans.map((item) => (
+                <Answer
+                  key={item._id}
+                  ques={userQues}
+                  ans={item}
+                  setQues={setUserQues}
+                />
+              ))}
+            </Route>
+            <Route path={`/admin/questionFeed/${userQues._id}/answers`}>
+              {userQues.ans.map((item) => (
+                <Answer
+                  key={item._id}
+                  ques={userQues}
+                  ans={item}
+                  setQues={setUserQues}
+                />
+              ))}
+            </Route>
+            <Route path={`/admin/questionFeed/${userQues._id}/reports`}>
+              {userQues.reports.map((report) => (
+                <Report key={report._id} report={report} />
+              ))}
+            </Route>
+          </Switch>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className="view">
+      {loading ? <h1>loading</h1> : <p>Question did not found!</p>}
+    </div>
+  );
+}
+function Answer({ ques, ans, setQues }) {
+  const { locale, user } = useContext(SiteContext);
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [voted, setVoted] = useState(() => {
+    let vote = false;
+    ans.vote.voters.some((voter) => {
+      if (voter.source === user._id) {
+        vote = voter.vote;
+      }
+    });
+    return vote;
+  });
+  useEffect(() => {
+    let vote = false;
+    ans.vote.voters.some((voter) => {
+      if (voter.source === user._id) {
+        vote = voter.vote;
+      }
+    });
+    setVoted(vote);
+  }, [ans]);
+  const history = useHistory();
+  function approve() {
+    setLoading(true);
+    const options = {
+      method: "POST",
+      headers: { "Content-type": "application/json" },
+      body: JSON.stringify({ ans_id: ans._id }),
+    };
+    fetch(`/api/admin/userQues/approveAns/${ques._id}`, options)
+      .then((res) => res.json())
+      .then((data) => {
+        setLoading(false);
+        if (data.code === "ok") {
+          history.push("/admin/questionFeed");
+        } else {
+          throw data.code;
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        alert("something went wrong");
+      });
+  }
+  function vote(e) {
+    setLoading(true);
+    const options = {
+      method: "PUT",
+      headers: { "Content-type": "application/json" },
+      body: JSON.stringify({
+        voter: user._id,
+        ans_id: ans._id,
+        vote: e.target.getAttribute("name").includes("up") ? "up" : "down",
+      }),
+    };
+    fetch(`/api/source/userQues/vote/${ques._id}`, options)
+      .then((res) => res.json())
+      .then((data) => {
+        setLoading(false);
+        if (data.code === "ok") {
+          setQues(data.content);
+        } else {
+          throw data.code;
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        alert("something went wrong");
+      });
+  }
+  function edit() {
+    SS.set("ansFatwa-ans", ans.body);
+    SS.set("ansFatwa-title", ans.title);
+    SS.set("ansFatwa-ref", JSON.stringify(ans.ref));
+    history.push(history.location.pathname + "/add");
+  }
+  function remove() {
+    const options = {
+      method: "DELETE",
+      headers: { "Content-type": "application/json" },
+      body: JSON.stringify({ source: ans.source._id, _id: ans._id }),
+    };
+    setLoading(true);
+    fetch(`/api/source/userQues/answer/${ques._id}`, options)
+      .then((res) => res.json())
+      .then((data) => {
+        setLoading(false);
+        if (data.code === "ok") {
+          setQues(data.content);
+        } else {
+          throw data.code;
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        alert("something went wrong");
+      });
+  }
+  return (
+    <div
+      className={`ans ${ans.source._id === user._id ? "mine" : ""} ${
+        !open ? "mini" : ""
+      }`}
+    >
+      <div className="vote">
+        <div className={`content ${voted}`}>
+          <ion-icon onClick={vote} name="chevron-up-outline"></ion-icon>
+          <p className="voteCount">
+            <FormattedNumber value={ans.vote.count} />
+          </p>
+          <ion-icon onClick={vote} name="chevron-down-outline"></ion-icon>
+        </div>
+      </div>
+      <div className="content">
+        <div className="source">
+          <p className="name">
+            <b>{ans.source.name[locale]}</b>
+          </p>
+          <p className="date">
+            <FormattedDate
+              value={ans.createdAt}
+              day="numeric"
+              month="long"
+              year="numeric"
+            />
+            <span className="separator" />
+            <FormattedTimeParts value={ans.createdAt}>
+              {(parts) => (
+                <>
+                  {parts[0].value}
+                  {parts[1].value}
+                  {parts[2].value}
+                  <small>{parts[4].value.toLowerCase()}</small>
+                </>
+              )}
+            </FormattedTimeParts>
+          </p>
+        </div>
+        <div className="body">
+          <p className="title">
+            {ans.topic[locale]}: {ans.title}
+          </p>
+          <p className="answer">{ans.body}</p>
+        </div>
+        {open && ans.ref.length > 0 && (
+          <div className="ref">
+            <p>
+              <FormattedMessage id="ref" value="Ref." />
+            </p>
+            <ul className="ref">
+              {ans.ref.map((ref, i) =>
+                ref.book ? (
+                  <li key={i}>
+                    <span>{ref.book}</span>,{" "}
+                    <FormattedMessage id="page" defaultMessage="Page" />{" "}
+                    <span>
+                      <FormattedNumber value={ref.part} />
+                    </span>
+                    , <FormattedMessage id="part" defaultMessage="Part" />{" "}
+                    <span>
+                      <FormattedNumber value={ref.page} />
+                    </span>
+                  </li>
+                ) : (
+                  <li key={i}>
+                    <span>{ref.sura}</span>,{" "}
+                    <FormattedMessage id="aayat" defaultMessage="Aayat" />{" "}
+                    <span>
+                      <FormattedNumber value={ref.aayat} />
+                    </span>
+                  </li>
+                )
+              )}
+            </ul>
+          </div>
+        )}
+        {!open && (
+          <div className="tags">
+            <p className="tag">
+              <FormattedMessage
+                values={{ number: <FormattedNumber value={ans.ref.length} /> }}
+                id="ans.tag.refCount"
+                defaultMessage={`${ans.ref.length} Reference(s)`}
+              />
+            </p>
+            <p className="tag">
+              <FormattedMessage
+                values={{
+                  number: <FormattedNumber value={ans.vote.voters.length} />,
+                }}
+                id="ans.tag.voteCount"
+                defaultMessage={`${ans.vote.voters.length} Vote(s)`}
+              />
+            </p>
+          </div>
+        )}
+        <span onClick={() => setOpen(!open)} className="showFull">
+          {open ? "পুরো উত্তর গোপন করুন" : "পুরো উত্তর দেখুন"}
+        </span>
+      </div>
+      <Actions
+        icon="reorder-two-outline"
+        actions={[
+          { label: "Edit", action: edit },
+          { label: "Approve", action: approve },
+          { label: "Remove", action: remove },
+        ]}
+      />
+    </div>
+  );
+}
+function Report({ report }) {
+  const { locale } = useContext(SiteContext);
+  const [loading, setLoading] = useState(false);
+  return (
+    <div className="quesReports">
+      <div className="user">
+        <p className="name">
+          <b>{report.source.name[locale]}</b>
+        </p>
+        <p className="date">
+          <FormattedDate
+            value={report.createdAt}
+            day="numeric"
+            month="long"
+            year="numeric"
+          />
+          <span className="separator" />
+          <FormattedTimeParts value={report.createdAt}>
+            {(parts) => (
+              <>
+                {parts[0].value}
+                {parts[1].value}
+                {parts[2].value}
+                <small>{parts[4].value.toLowerCase()}</small>
+              </>
+            )}
+          </FormattedTimeParts>
+        </p>
+      </div>
+      <div className="contect">
+        <p className="subject">{report.message.subject}</p>
+        <p className="body">{report.message.body}</p>
+      </div>
+    </div>
+  );
+}
+
 function AdminPanel() {
   return (
     <div className="main adminPanel">
       <Sidebar
         views={[
-          { label: "Sources", path: "/admin/sources", icon: "book" },
-          { label: "Fatwa", path: "/admin/fatwa", icon: "reader" },
           {
-            label: "User Area",
+            label: <FormattedMessage id="source" defaultMessage="Source" />,
+            path: "/admin/sources",
+            icon: "book",
+          },
+          {
+            label: <FormattedMessage id="fatwa" defaultMessage="Fatwa" />,
+            path: "/admin/fatwa",
+            icon: "reader",
+          },
+          {
+            label: (
+              <FormattedMessage id="userArea" defaultMessage="User Area" />
+            ),
             path: "/admin/user",
             icon: "people",
           },
           {
-            label: "Patreons",
+            label: <FormattedMessage id="patreons" defaultMessage="Patreons" />,
             path: "/admin/patreons",
             icon: "umbrella",
+          },
+          {
+            label: (
+              <FormattedMessage
+                id="questionFeed"
+                defaultMessage="Question Feed"
+              />
+            ),
+            path: "/admin/questionFeed",
+            icon: "mail",
           },
         ]}
       >
@@ -1182,6 +1947,8 @@ function AdminPanel() {
         <Route path="/admin/fatwa/:filter?" component={AllFatwa} />
         <Route path="/admin/patreons" component={Patreons} />
         <Route path="/admin/user" component={UserReview} />
+        <Route path="/admin/questionFeed/:_id" component={UserQuestion} />
+        <Route path="/admin/questionFeed" component={QuestionFeed} />
         <Route path="/" component={FourOFour} />
       </Switch>
     </div>

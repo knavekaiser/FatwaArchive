@@ -5,6 +5,7 @@ import { OutsideClick } from "./TableElements";
 import "./CSS/Nav.min.css";
 import Searchbar from "./Searchbar";
 import logo from "../logo.svg";
+import { FormattedMessage } from "react-intl";
 
 function Avatar() {
   const { locale, user, setUser, setIsAuthenticated } = useContext(SiteContext);
@@ -33,10 +34,14 @@ function Avatar() {
             }}
           >
             <li>
-              <Link to={`/${user.role}/fatwa`}>Dashboard</Link>
+              <Link to={`/${user.role}/fatwa`}>
+                <FormattedMessage id="dashboard" defaultMessage="Dashboard" />
+              </Link>
             </li>
             <li onClick={logout}>
-              <a>Logout</a>
+              <a>
+                <FormattedMessage id="logout" defaultMessage="logout" />
+              </a>
             </li>
           </ul>
         </OutsideClick>
@@ -105,12 +110,16 @@ function Nav({ location }) {
             <>
               {!(history.location.pathname === "/login") && (
                 <li>
-                  <Link to="/login">LOGIN</Link>
+                  <Link to="/login">
+                    <FormattedMessage id="login" defaultMessage="Login" />
+                  </Link>
                 </li>
               )}
               {!(history.location.pathname === "/register") && (
                 <li>
-                  <Link to="/register">REGISTER</Link>
+                  <Link to="/register">
+                    <FormattedMessage id="register" defaultMessage="Register" />
+                  </Link>
                 </li>
               )}
             </>

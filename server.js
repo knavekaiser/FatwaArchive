@@ -9,12 +9,12 @@ global.JwtStrategy = require("passport-jwt").Strategy;
 global.ExtractJwt = require("passport-jwt").ExtractJwt;
 global.jwt = require("jsonwebtoken");
 
-global.getLan = (sentence) => {
+global.getLan = (sentence, i) => {
   const str = sentence.replace(/[\s\-\.?।]/gi, "");
   if ((str.match(/[a-z0-9]/gi) || []).length / str.length > 0.9) {
-    return "en-US";
+    return !i ? "en-US" : "bn-BD";
   } else {
-    return "bn-BD";
+    return !i ? "bn-BD" : "en-US";
   }
 };
 global.TranslateAll = async function (arr) {

@@ -42,29 +42,55 @@ const userQuestion = new Schema(
         createdAt: { type: Date, default: Date.now },
       },
     ],
+    reports: [
+      {
+        source: { type: Schema.Types.ObjectId, ref: "Source", required: true },
+        message: {
+          subject: { type: String, required: true, trim: true },
+          body: { type: String, required: true, trim: true },
+        },
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
     status: { type: String, default: "pending" },
     ansCount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
-userQuestion.methods.addAns = function (ans) {
+userQuestion.methods.addAns = function (newAns) {
   this.ans = this.ans.filter(
-    (item) => item.source.toString() !== ans.source.toString()
+    (ans) => ans.source.toString() !== newAns.source.toString()
   );
-  if (this.ans.some((item) => item.body === ans.body)) {
-    throw "answer exsists";
+  if (this.ans.some((ans) => ans.body === newAns.body)) {
+    throw { code: 11000, field: `ans.bn-BD` };
+  } else {
+    return Fatwa.findOne({
+      $or: [
+        { [`title.${getLan(newAns.title)}`]: newAns.title },
+        { [`ans.${getLan(newAns.title)}`]: newAns.body },
+      ],
+    }).then((fatwa) => {
+      if (fatwa) {
+        if (fatwa.title[getLan(newAns.title)] === newAns.title) {
+          throw { code: 11000, field: `title.bn-BD` };
+        } else if (fatwa.ans[getLan(newAns.title)] === newAns.body) {
+          throw { code: 11000, field: `ans.bn-BD` };
+        }
+      } else {
+        this.status === "pending" && (this.status = "pendingApproval");
+        this.ansCount += 1;
+        this.ans.push(newAns);
+        this.ans.sort((a, b) => {
+          if (a.vote.count > b.vote.count) {
+            return 1;
+          } else {
+            return -1;
+          }
+        });
+        return this.save();
+      }
+    });
   }
-  this.status === "pending" && (this.status = "pendingApproval");
-  this.ansCount += 1;
-  this.ans.push(ans);
-  this.ans.sort((a, b) => {
-    if (a.vote.count > b.vote.count) {
-      return 1;
-    } else {
-      return -1;
-    }
-  });
-  return this.save();
 };
 userQuestion.methods.dltAns = function (detail) {
   this.ans = this.ans.filter(
@@ -98,6 +124,48 @@ userQuestion.methods.vote = function (detail) {
     }
   });
   return this.save();
+};
+userQuestion.methods.report = function (report) {
+  this.reports.push(report);
+  return this.save();
+};
+userQuestion.methods.approveAns = function (ans_id) {
+  const ans = this.ans.filter(
+    (ans) => ans._id.toString() === ans_id.toString()
+  )[0];
+  return TranslateAll([ans.title, this.ques.body, ans.body])
+    .then((translations) => {
+      const newFatwa = new Fatwa({
+        link: {
+          [getLan(ans.title)]: ans.title.replace(/\s/g, "-"),
+          [getLan(ans.title, true)]: translations[0].replace(/\s/g, "-"),
+        },
+        topic: ans.topic,
+        title: {
+          [getLan(ans.title)]: ans.title,
+          [getLan(ans.title, true)]: translations[0],
+        },
+        ques: {
+          [getLan(this.ques.body)]: this.ques.body,
+          [getLan(this.ques.body, true)]: translations[1],
+        },
+        ans: {
+          [getLan(ans.body)]: ans.body,
+          [getLan(ans.body, true)]: translations[2],
+        },
+        ref: this.ref,
+        img: this.img,
+        source: ans.source,
+        status: "live",
+      });
+      return newFatwa.save();
+    })
+    .then(() =>
+      UserQuestion.findByIdAndUpdate(this._id, { status: "answered" })
+    )
+    .catch((err) => {
+      throw err;
+    });
 };
 
 const UserQuestion = mongoose.model("UserQuestion", userQuestion);

@@ -255,7 +255,7 @@
           margin-right: 0;
           grid-column: 2/3;
         }
-        &[type="submit"] {
+        &[type="submit"]:not(.right):not(.left) {
           margin-right: 0;
           background: $accent;
           color: white;
