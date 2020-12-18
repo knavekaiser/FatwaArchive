@@ -60,12 +60,7 @@ function Fatwa({ match }) {
         <>
           <h1>{fatwa.title[locale]}</h1>
           <h4 className="jamia">
-            <Link
-              title={`Show other fatwas from ${fatwa.source._id}`}
-              to={`/jamia/${fatwa.source.name[locale]}`}
-            >
-              {fatwa.source.name[locale]}
-            </Link>
+            {fatwa.source.name[locale]}
             <br />
             <span>Mohammadpur, Dhaka, Bangladesh</span>
           </h4>
@@ -160,7 +155,7 @@ function Fatwa({ match }) {
             className="cla"
             onClick={() => history.push(`${history.location.pathname}/report`)}
           >
-            অভিযোগ
+            <FormattedMessage id="report" defaultMessage="Report" />
           </button>
           <br />
           <br />

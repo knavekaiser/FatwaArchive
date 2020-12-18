@@ -101,6 +101,7 @@ router.route("/searchSuggestions").get((req, res) => {
   if (req.query.q && req.query.q.length > 0) {
     const query = new RegExp(req.query.q.replace(" ", ".+"), "gi");
     Fatwa.find({
+      status: "live",
       $or: [
         { [`title.${locale}`]: query },
         { [`ques.${locale}`]: query },

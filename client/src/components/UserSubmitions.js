@@ -63,10 +63,7 @@ function UserQuestion() {
         <Input
           defaultValue={SS.get("askFatwa-name")}
           dataId="name"
-          label=<FormattedMessage
-            id="form.fullName"
-            defaultMessage="Full name"
-          />
+          label=<FormattedMessage id="fullName" defaultMessage="Full name" />
           onChange={(target) => SS.set("askFatwa-name", target.value)}
           required={true}
           validationMessage=<FormattedMessage
@@ -88,7 +85,7 @@ function UserQuestion() {
         <Input
           dataId="mobile"
           onChange={(target) => SS.set("askFatwa-mob", target.value)}
-          label=<FormattedMessage id="form.mobile" defaultMessage="Mobile" />
+          label=<FormattedMessage id="mobile" defaultMessage="Mobile" />
           type="text"
           required={true}
           strict={/^\+\d{0,13}$/}

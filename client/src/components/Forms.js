@@ -502,10 +502,11 @@ export const JamiaRegister = () => {
       <div className="successPromt">
         <ion-icon name="checkmark-circle-outline"></ion-icon>
         <p>
-          Your request has been successfully submitted. You will be notified via
-          SMS, when your account is ready to use.
+          <FormattedMessage id="regSuccess" />
         </p>
-        <Link to="/">Back to Home</Link>
+        <Link to="/">
+          <FormattedMessage id="backToHome" defaultMessage="Back to Home" />
+        </Link>
       </div>
     </div>
   );
@@ -1844,34 +1845,46 @@ export const Report = ({ fatwa, close }) => {
       ></ion-icon>
       <form onSubmit={submit} className="userReport">
         <section className="head">
-          <h2>User Report</h2>
+          <h2>
+            <FormattedMessage id="report" defaultMessage="Report" />
+          </h2>
           <p className="ps">
-            * Your message be will be sent to the Jamia or the Mufti who
-            submitted this fatwa.
+            <FormattedMessage id="reportPs" />
           </p>
         </section>
         <Input
-          label="Full name"
+          required={true}
+          label=<FormattedMessage id="fullName" defaultMessage="Full name" />
           dataId="name"
-          pattern={/^[ঀ-৾a-zA-Z\s(),]+$/}
+          strict={/^[ঀ-৾a-zA-Z\s(),]+$/}
           defaultValue={SS.get("reportFatwa-name")}
           onChange={(target) => {
             SS.set("reportFatwa-name", target.value);
           }}
-          type="text"
+          validationMessage=<FormattedMessage
+            id="fullNameValidation"
+            defaultMessage="Enter your full name"
+          />
         />
         <Input
-          label="Email"
+          label={
+            <>
+              <FormattedMessage id="email" defaultMessage="Email" />{" "}
+              <small>
+                (<FormattedMessage id="optional" />)
+              </small>
+            </>
+          }
           dataId="email"
           type="text"
           defaultValue={SS.get("reportFatwa-email")}
-          pattern={/^[a-zA-Z0-9.-_@]+$/}
           onChange={(target) => {
             SS.set("reportFatwa-email", target.value);
           }}
         />
         <Input
-          label="Mobile"
+          required={true}
+          label=<FormattedMessage id="mobile" defaultMessage="Mobile" />
           dataId="mobile"
           defaultValue={SS.get("reportFatwa-mobile") || "+8801"}
           onChange={(target) => {
@@ -1879,10 +1892,18 @@ export const Report = ({ fatwa, close }) => {
           }}
           type="text"
           warning="+8801..."
-          pattern={/^\+\d{0,13}$/}
+          strict={/^\+880\d{0,9}$/}
+          pattern={/^\+880\d{9}$/}
+          validationMessage=<FormattedMessage id="contactValidation" />
         />
         <Input
-          label="Subject"
+          required={true}
+          label=<FormattedMessage id="subject" defaultMessage="Subject" />
+          validationMessage=<FormattedMessage
+            id="subjectValidation"
+            defaultMessage="Enter Subject"
+          />
+          pattern=".{8,}"
           dataId="subject"
           defaultValue={SS.get("reportFatwa-subject")}
           onChange={(target) => {
@@ -1890,14 +1911,23 @@ export const Report = ({ fatwa, close }) => {
           }}
         />
         <Textarea
-          label="Message"
+          required={true}
+          label=<FormattedMessage id="message" defaultMessage="Message" />
           dataId="message"
+          validationMessage=<FormattedMessage
+            id="messageValidation"
+            defaultMessage="Enter messages"
+          />
+          pattern=".{15,}"
           defaultValue={SS.get("reportFatwa-message")}
           onChange={(target) => {
             SS.set("reportFatwa-message", target.value);
           }}
         />
-        <Submit loading={loading} label="Submit" />
+        <Submit
+          loading={loading}
+          label=<FormattedMessage id="report" defaultMessage="Report" />
+        />
         <section className="bottomPadding" />
       </form>
     </div>

@@ -116,6 +116,7 @@
     &.mini {
       grid-template-columns: min-content 1fr min-content;
       grid-template-areas: "bt lg nv";
+      grid-column-gap: 0;
       .navLogo {
         grid-area: lg;
         display: flex;

@@ -323,6 +323,10 @@
 .input,
 .combobox {
   .emptyFieldWarning {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     position: absolute;
     font-size: 0.8rem;
     color: red;
@@ -405,66 +409,6 @@
     }
     &::-webkit-scrollbar {
       width: 0;
-    }
-  }
-}
-
-@media only screen and (max-width: 480px) {
-  .main.jamiaForms {
-    padding: 0;
-    form {
-      padding: 2rem 1rem;
-      grid-row-gap: 3rem;
-      box-shadow: none;
-      margin-top: 0;
-      h2 {
-        margin: 1rem 0;
-        margin-bottom: 0rem;
-      }
-    }
-  }
-  .userReportContainer {
-    margin: 0;
-    .userReport {
-      padding: 1.5rem;
-      width: calc(100vw - 2rem);
-      max-height: calc(100vh - 2rem);
-      .head {
-        h2 {
-          margin-bottom: 0.5rem;
-        }
-        p {
-          font-size: 0.95rem;
-          &.ps {
-            font-size: 0.8rem;
-            color: $light-text;
-          }
-        }
-      }
-      #email {
-        grid-column: 1/3;
-        grid-row: 3/4;
-      }
-      #mobile {
-        grid-column: 1/3;
-        grid-row: 4/5;
-      }
-    }
-  }
-  .main.userQuestion {
-    padding: 2rem 1rem;
-  }
-  .success {
-    padding: 1rem;
-    width: 100%;
-    .successPromt {
-      grid-template-columns: 1fr !important;
-      grid-row-gap: 1rem;
-      place-items: center;
-      margin: auto 1rem !important;
-      a {
-        margin: auto;
-      }
     }
   }
 }
@@ -619,19 +563,19 @@ form {
   max-width: 100%;
   margin-left: 0 !important;
   .successPromt {
-    padding: 1.5rem 1.5rem 1rem 1rem;
+    padding: 2rem;
     margin: auto;
     box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.1);
-    max-width: 30rem;
+    max-width: 25rem;
     display: grid;
-    grid-template-columns: auto 1fr;
+    grid-template-columns: 1fr;
+    justify-content: center;
     align-items: center;
-    grid-column-gap: 1rem;
-    grid-row-gap: 0.5rem;
+    grid-row-gap: 1.5rem;
     border-radius: 8px;
     background: white;
     ion-icon {
-      grid-row: 1/3;
+      margin: auto;
       font-size: 5rem;
       color: $accent;
     }
@@ -805,5 +749,66 @@ form {
     text-transform: uppercase;
     font-size: 1.3em;
     margin-left: 0.5rem;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .main.jamiaForms {
+    padding: 0;
+    form {
+      padding: 2rem 1rem;
+      grid-row-gap: 3rem;
+      box-shadow: none;
+      margin-top: 0;
+      h2 {
+        margin: 1rem 0;
+        margin-bottom: 0rem;
+      }
+    }
+  }
+  .userReportContainer {
+    margin: 0;
+    .userReport {
+      padding: 1.5rem;
+      width: calc(100vw - 2rem);
+      max-height: calc(100vh - 2rem);
+      .head {
+        h2 {
+          margin-bottom: 0.5rem;
+        }
+        p {
+          font-size: 0.95rem;
+          &.ps {
+            font-size: 0.8rem;
+            color: $light-text;
+          }
+        }
+      }
+      #email {
+        grid-column: 1/3;
+        grid-row: 3/4;
+      }
+      #mobile {
+        grid-column: 1/3;
+        grid-row: 4/5;
+      }
+    }
+  }
+  .main.userQuestion {
+    padding: 2rem 1rem;
+  }
+  .success {
+    padding: 1rem;
+    width: 100%;
+    .successPromt {
+      grid-template-columns: 1fr;
+      grid-row-gap: 1rem;
+      padding: 1rem;
+      place-items: center;
+      margin: auto 1rem;
+      a {
+        margin: auto;
+      }
+    }
   }
 }
