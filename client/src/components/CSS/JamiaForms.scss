@@ -80,22 +80,15 @@
       }
     }
     &.invalidCred {
-      .warning {
-        position: absolute;
-        margin: auto;
-        color: white;
-        border: 1px solid rgba(255, 0, 0, 0.5);
-        left: 50%;
-        white-space: nowrap;
-        transform: translate(-50%, -300%);
-        padding: 0.3rem 0.7rem;
-        border-radius: 8px;
-        background: rgba(255, 0, 0, 1);
-      }
       .input {
+        animation: wrongCred 0.1s ease-in-out;
+        animation-iteration-count: 3;
         input {
           border-color: red;
         }
+      }
+      #pass {
+        animation-delay: 80ms;
       }
     }
     div.label {
@@ -183,12 +176,12 @@
         position: absolute;
         background: red;
         height: 2px;
-        width: 0;
+        max-width: calc(100% - 40px);
         transition: width 0.2s ease-in-out;
         bottom: 2px;
       }
       .passwordConfirm {
-        width: 100%;
+        width: calc(100% - 40px);
       }
     }
     &.reg {
@@ -333,6 +326,11 @@
     position: absolute;
     font-size: 0.8rem;
     color: red;
+    bottom: -1.15rem;
+  }
+}
+.textarea {
+  .emptyFieldWarning {
     bottom: -1rem;
   }
 }
@@ -471,6 +469,12 @@
   }
 }
 
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  font-size: 1.05rem;
+  // -webkit-box-shadow: 0 0 0px 1000px $base-white inset;
+}
 form {
   &.reg,
   &.login,
@@ -597,7 +601,20 @@ form {
     transform: translate(-50%, -50%);
   }
 }
-
+@keyframes wrongCred {
+  0% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
 .success {
   max-width: 100%;
   margin-left: 0 !important;

@@ -8,6 +8,7 @@ global.LocalStrategy = require("passport-local").Strategy;
 global.JwtStrategy = require("passport-jwt").Strategy;
 global.ExtractJwt = require("passport-jwt").ExtractJwt;
 global.jwt = require("jsonwebtoken");
+global.jwt_decode = require("jwt-decode");
 
 global.getLan = (sentence, i) => {
   const str = sentence.replace(/[\s\-\.?।]/gi, "");
@@ -31,6 +32,12 @@ global.TranslateAll = async function (arr) {
 };
 
 global.ObjectID = require("mongodb").ObjectID;
+
+const {} = require("./models/fatwaModel");
+const {} = require("./models/sourceModel");
+const {} = require("./models/userSubmissionModel");
+const {} = require("./models/userModel");
+global.fetch = require("node-fetch");
 
 const { Translate } = require("@google-cloud/translate").v2;
 

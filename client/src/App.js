@@ -52,37 +52,33 @@ function App() {
     }
   };
   const seeIfLoggedIn = () => {
-    fetch("/api/authenticate")
-      .then((res) => {
-        if (res.status !== 401) {
-          return res.json();
-        } else {
-          return { isAuthenticated: false, user: null };
-        }
-      })
-      .then((data) => {
-        setIsAuthenticated(data.isAuthenticated);
-        setUser(data.user);
-        history.push(link.current);
-      })
-      .catch((err) => 66);
-  };
-  const getSiteData = () => {
-    fetch("/api/siteData")
+    fetch("/api/auth")
       .then((res) => res.json())
       .then((data) => {
-        const jamias = {};
-        data.jamias.forEach((jamia) => (jamias[jamia.id] = jamia));
-        setJamias(jamias);
+        if (data.code === "ok") {
+          setIsAuthenticated(data.isAuthenticated);
+          setUser(data.user);
+          history.push(link.current);
+        }
       })
-      .catch((err) => {
-        console.log(
-          err,
-          "here put a toast saying site data could not be loaded. some features may not work properly."
-        );
-      });
+      .catch((err) => 69);
   };
-  useEffect(getSiteData, []);
+  // const getSiteData = () => {
+  //   fetch("/api/siteData")
+  //     .then((res) => res.json())
+  //     .then((data) => {
+  //       const jamias = {};
+  //       data.jamias.forEach((jamia) => (jamias[jamia.id] = jamia));
+  //       setJamias(jamias);
+  //     })
+  //     .catch((err) => {
+  //       console.log(
+  //         err,
+  //         "here put a toast saying site data could not be loaded. some features may not work properly."
+  //       );
+  //     });
+  // };
+  // useEffect(getSiteData, []);
   useEffect(setLan, []);
   useEffect(seeIfLoggedIn, []);
   const [messages, setMessages] = useState(null);

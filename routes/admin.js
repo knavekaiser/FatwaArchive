@@ -1,13 +1,6 @@
-const { FatwaSubmission } = require("../models/fatwaModel");
-const { Source, Jamia } = require("../models/sourceModel");
-const { UserQuestion } = require("../models/userSubmissionModel");
-const { User, Session } = require("../models/userModel");
-
-const fetch = require("node-fetch");
-
 // router
 //   .route("/admin/fatwa/new")
-//   .post(passport.authenticate("jwt"), (req, res) => {
+//   .post(passport.authenticate("AdminAuth"), (req, res) => {
 //     const { title, ques, ans } = req.body;
 //     console.log("fatwa add is called");
 //     let titleEn = "Something went wrong with translation " + Math.random(),
@@ -62,7 +55,7 @@ const fetch = require("node-fetch");
 //----------------------------------FATWA
 router
   .route("/admin/allfatwa/filter")
-  .get(passport.authenticate("jwt"), (req, res) => {
+  .get(passport.authenticate("AdminAuth"), (req, res) => {
     const locale = req.headers["accept-language"];
     const query = { status: "live" };
     const sort = { column: req.query.column, order: req.query.order };
@@ -89,8 +82,7 @@ router
   });
 router
   .route("/admin/fatwa/")
-  .delete(passport.authenticate("jwt"), (req, res) => {
-    console.log(req.body);
+  .delete(passport.authenticate("AdminAuth"), (req, res) => {
     Fatwa.findByIdAndDelete(req.body.fatwa)
       .then(() =>
         Source.findByIdAndUpdate(req.body.source, { $inc: { fatwa: -1 } })
@@ -100,7 +92,7 @@ router
   });
 router
   .route("/admin/fatwaSubmissions/filter")
-  .get(passport.authenticate("jwt"), (req, res) => {
+  .get(passport.authenticate("AdminAuth"), (req, res) => {
     if (req.user.role !== "admin") return res.status("403").json("forbidden");
     const locale = req.headers["accept-language"];
     const query = { $or: [{ status: "pending" }, { status: "pendingEdit" }] };
@@ -125,7 +117,7 @@ router
   });
 router
   .route("/admin/fatwaSubmissions/accept/:_id")
-  .post(passport.authenticate("jwt"), (req, res) => {
+  .post(passport.authenticate("AdminAuth"), (req, res) => {
     if (req.user.role !== "admin") return res.status(403).json("forbidden");
     if (ObjectID.isValid(req.params._id)) {
       Fatwa.findByIdAndUpdate(req.params._id, { status: "live" })
@@ -145,7 +137,7 @@ router
   });
 router
   .route("/admin/fatwaSubmissions/remove/:_id")
-  .delete(passport.authenticate("jwt"), (req, res) => {
+  .delete(passport.authenticate("AdminAuth"), (req, res) => {
     FatwaSubmission.findByIdAndDelete(req.params._id)
       .then(() => {
         res.json("submission successfully deleted.");
@@ -155,8 +147,37 @@ router
 
 //----------------------------------UESR QUESTION
 router
+  .route("/admin/questionFeed/filter")
+  .get(passport.authenticate("AdminAuth"), (req, res) => {
+    const sort = { column: req.query.column, order: req.query.order };
+    UserQuestion.find({
+      $or: [{ status: "pending" }, { status: "pendingApproval" }],
+    })
+      .sort(`${sort.order === "des" ? "-" : ""}${sort.column}`)
+      .then((questions) => res.json(questions))
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json("something went wrong");
+      });
+  });
+router
+  .route("/admin/userQues/:_id")
+  .get(passport.authenticate("AdminAuth"), (req, res) => {
+    if (ObjectID.isValid(req.params._id)) {
+      UserQuestion.findById(req.params._id)
+        .populate("ans.source reports.source", "name add")
+        .then((ques) => res.json({ code: "ok", content: ques }))
+        .catch((err) => {
+          console.log(err);
+          res.status(500).json("something went wrong");
+        });
+    } else {
+      res.status(400).json("invalid id");
+    }
+  });
+router
   .route("/admin/userQues/approveAns/:_id")
-  .post(passport.authenticate("jwt"), (req, res) => {
+  .post(passport.authenticate("AdminAuth"), (req, res) => {
     if (ObjectID.isValid(req.params._id) && ObjectID.isValid(req.body.ans_id)) {
       UserQuestion.findById(req.params._id)
         .then((ques) => ques.approveAns(req.body.ans_id))
@@ -171,11 +192,29 @@ router
       res.status(400).json("invalid id");
     }
   });
+router
+  .route("/admin/userQues/answer/:_id")
+  .delete(passport.authenticate("AdminAuth"), (req, res) => {
+    if (ObjectID.isValid(req.params._id)) {
+      UserQuestion.findById(req.params._id)
+        .populate("ans.source", "name primeMufti")
+        .then((ques) => ques.dltAns(req.body))
+        .then((saved) => {
+          res.json({ code: "ok", content: saved });
+        })
+        .catch((err) => {
+          console.log(err);
+          res.status(500).json("internal error");
+        });
+    } else {
+      res.status(400).json("invalid id");
+    }
+  });
 
 //----------------------------------NEW SOURCE
 router
   .route("/admin/sources/submissions/filter")
-  .get(passport.authenticate("jwt"), (req, res) => {
+  .get(passport.authenticate("AdminAuth"), (req, res) => {
     const locale = req.headers["accept-language"];
     const query = { status: "pending" };
     req.query.role && (query.role = RegExp(req.query.role));
@@ -200,7 +239,7 @@ router
 //----------------------------------JAMIA
 router
   .route("/admin/source/accept")
-  .post(passport.authenticate("jwt"), (req, res) => {
+  .post(passport.authenticate("AdminAuth"), (req, res) => {
     Jamia.findByIdAndUpdate(req.body._id, {
       status: "active",
       joined: new Date(),
@@ -220,7 +259,7 @@ router
   });
 router
   .route("/admin/sources/active/filter")
-  .get(passport.authenticate("jwt"), (req, res) => {
+  .get(passport.authenticate("AdminAuth"), (req, res) => {
     const query = { status: "active" };
     const sort = { column: req.query.column, order: req.query.order };
     req.query.role && (query.role = RegExp(req.query.role));
@@ -234,7 +273,7 @@ router
   });
 router
   .route("/admin/source/reject")
-  .delete(passport.authenticate("jwt"), (req, res) => {
+  .delete(passport.authenticate("AdminAuth"), (req, res) => {
     Jamia.findByIdAndDelete(req.body._id)
       .then(() => res.status(200).json("Jamia Submission deleted!"))
       .catch((err) => {
@@ -243,7 +282,7 @@ router
   });
 router
   .route("/admin/source/edit/:_id")
-  .patch(passport.authenticate("jwt"), (req, res) => {
+  .patch(passport.authenticate("AdminAuth"), (req, res) => {
     if (Object.keys(req.body).length === 1) {
       Jamia.findOneAndUpdate({ _id: req.params._id }, req.body)
         .then((jamia) => {
@@ -272,7 +311,7 @@ router
   });
 router
   .route("/admin/source")
-  .delete(passport.authenticate("jwt"), (req, res) => {
+  .delete(passport.authenticate("AdminAuth"), (req, res) => {
     Jamia.findByIdAndDelete(req.body._id)
       .then(() => res.json("jamia successfully deleted"))
       .catch((err) => res.status(500).json(err));
@@ -306,10 +345,10 @@ router.route("/admin/removeUserQuestion").delete((req, res) => {
 
 //-----------------------------------MORE
 router.route("/patreons/filter").get((req, res) => {
-  res.status(500).json([{ _id: 235252, item: "make patreons stuff" }]);
+  res.status(503).json([{ _id: 235252, item: "make patreons stuff" }]);
 });
 router.route("/userReview/filter").get((req, res) => {
-  res.status(500).json([{ _id: 235252, item: "make userReview stuff" }]);
+  res.status(503).json([{ _id: 235252, item: "make userReview stuff" }]);
 });
 
 module.exports = router;

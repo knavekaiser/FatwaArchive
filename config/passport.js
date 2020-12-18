@@ -1,6 +1,3 @@
-const { Jamia } = require("../models/sourceModel");
-const { User } = require("../models/userModel");
-
 const cookieExtractor = (req) => {
   let token = null;
   if (req && req.cookies) {
@@ -10,54 +7,53 @@ const cookieExtractor = (req) => {
 };
 
 passport.use(
-  new JwtStrategy(
-    {
-      jwtFromRequest: cookieExtractor,
-      secretOrKey: process.env.JWT_SECRET,
-      passReqToCallback: true,
-    },
-    (req, payload, done) => {
-      let Model = null;
-      payload.role === "jamia" && (Model = Jamia);
-      (payload.role === "admin" || payload.role === "mod") && (Model = User);
-      Model.findOne({ id: payload.sub }, (err, model) => {
-        if (err) return done(err, false);
-        if (model && model.ghost) return done(null, false);
-        if (model) {
-          req.role = payload.role;
-          return done(null, model);
-        } else return done(null, false);
-      });
-    }
-  )
+  "Admin",
+  new LocalStrategy((username, password, next) => {
+    User.findOne({ id: username })
+      .then((user) => {
+        if (user && bcrypt.compareSync(password, user.pass))
+          return next(null, user);
+        return next(null, false);
+      })
+      .catch((err) => next(err, false));
+  })
 );
-
 passport.use(
-  new LocalStrategy(
-    { passReqToCallback: true },
-    (req, username, password, next) => {
-      if (!req.body.role) return next(null, false);
-      let Model = null;
-      req.body.role === "jamia" && (Model = Jamia);
-      req.body.role === "admin" && (Model = User);
-      Model.findOne({ id: username })
-        .then((model) => {
-          if (!model || (model && model.ghost)) return next(null, false);
-          if (!bcrypt.compareSync(password, model.pass))
-            return next(null, false);
-          return next(null, model);
-        })
-        .catch((err) => {
-          console.log(err);
-          next(err);
-        });
+  "Source",
+  new LocalStrategy((username, password, next) => {
+    Source.findOne({ id: username, status: "active" })
+      .then((source) => {
+        if (source && bcrypt.compareSync(password, source.pass))
+          return next(null, source);
+        return next(null, false);
+      })
+      .catch((err) => next(err, false));
+  })
+);
+passport.use(
+  "SourceAuth",
+  new JwtStrategy(
+    { jwtFromRequest: cookieExtractor, secretOrKey: process.env.JWT_SECRET },
+    (payload, next) => {
+      Source.findOne({ _id: payload.sub, status: "active" })
+        .then((source) => (source ? next(null, source) : next(null, false)))
+        .catch((err) => next(err, false));
+    }
+  )
+);
+passport.use(
+  "AdminAuth",
+  new JwtStrategy(
+    { jwtFromRequest: cookieExtractor, secretOrKey: process.env.JWT_SECRET },
+    (payload, next) => {
+      User.findOne({ _id: payload.sub, role: "admin" })
+        .then((source) => (source ? next(null, source) : next(null, false)))
+        .catch((err) => next(err, false));
     }
   )
 );
 
-passport.serializeUser((user, next) => {
-  next(null, user._id);
-});
+passport.serializeUser((user, next) => next(null, user._id));
 passport.deserializeUser((userId, next) => {
   User.findById(userId)
     .then((user) => next(null, user))

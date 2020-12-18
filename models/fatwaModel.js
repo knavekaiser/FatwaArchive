@@ -73,4 +73,4 @@ const Fatwa = mongoose.model("Fatwa", fatwa);
 const DeletedFatwa = mongoose.model("DeletedFatwa", deletedFatwa);
 
 global.Fatwa = Fatwa;
-exports.DeletedFatwa = DeletedFatwa;
+global.DeletedFatwa = DeletedFatwa;

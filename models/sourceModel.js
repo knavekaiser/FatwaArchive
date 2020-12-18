@@ -69,8 +69,8 @@ const PassRecoveryToken = mongoose.model(
   passRecoveryToken
 );
 
-exports.PassRecoveryToken = PassRecoveryToken;
+global.PassRecoveryToken = PassRecoveryToken;
 
-exports.Source = Source;
-exports.Jamia = Jamia;
-exports.Mufti = Mufti;
+global.Source = Source;
+global.Jamia = Jamia;
+global.Mufti = Mufti;

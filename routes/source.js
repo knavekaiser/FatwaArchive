@@ -1,12 +1,7 @@
-const { DeletedFatwa } = require("../models/fatwaModel");
-const { Jamia } = require("../models/sourceModel");
-const { User } = require("../models/userModel");
-const { UserQuestion } = require("../models/userSubmissionModel");
-
 //-------------------------------NEW FATWA
 router
   .route("/source/newFatwa")
-  .post(passport.authenticate("jwt"), (req, res) => {
+  .post(passport.authenticate("SourceAuth"), (req, res) => {
     const { topic, title, ques, ans, ref, img } = req.body;
     if (!title["en-US"] && !ques["en-US"] && !ans["en-US"]) {
       TranslateAll([title["bn-BD"], ques["bn-BD"], ans["bn-BD"]])
@@ -80,7 +75,7 @@ router
   });
 router
   .route("/source/editSubmission/:_id")
-  .patch(passport.authenticate("jwt"), (req, res) => {
+  .patch(passport.authenticate("SourceAuth"), (req, res) => {
     const newData = {
       translation:
         req.body["title.en-US"] &&
@@ -120,7 +115,7 @@ router
   });
 router
   .route("/source/fatwaSubmissions/filter")
-  .get(passport.authenticate("jwt"), (req, res) => {
+  .get(passport.authenticate("SourceAuth"), (req, res) => {
     const locale = req.headers["accept-language"];
     const query = {
       $or: [{ status: "pending" }, { status: "pendingEdit" }],
@@ -156,7 +151,7 @@ router.route("/fatwaSubmissions/:_id").delete((req, res) => {
 //----------------------------------------------ALL FATWA
 router
   .route("/source/allfatwa/filter")
-  .get(passport.authenticate("jwt"), (req, res) => {
+  .get(passport.authenticate("SourceAuth"), (req, res) => {
     const locale = req.headers["accept-language"];
     const query = { status: "live", source: req.user._id };
     const sort = { column: req.query.column, order: req.query.order };
@@ -184,8 +179,15 @@ router
     }
   });
 router
+  .route("/fatwa/:id")
+  .get(passport.authenticate("SourceAuth"), (req, res) => {
+    Fatwa.findById(req.params.id)
+      .then((fatwa) => res.json(fatwa))
+      .catch((err) => res.status(400).json("Error: " + err));
+  });
+router
   .route("/source/editFatwa/:_id")
-  .patch(passport.authenticate("jwt"), (req, res) => {
+  .patch(passport.authenticate("SourceAuth"), (req, res) => {
     const newData = {
       translation:
         req.body["title.en-US"] &&
@@ -204,6 +206,9 @@ router
     };
     if (ObjectID.isValid(req.params._id)) {
       Fatwa.findByIdAndUpdate(req.params._id, newData)
+        .then(() =>
+          Source.findByIdAndUpdate(req.user._id, { $inc: { fatwa: -1 } })
+        )
         .then(() => {
           res.json({ code: "ok", message: "updated" });
         })
@@ -223,47 +228,21 @@ router
       res.status(400).json({ code: 400, message: "invalid id" });
     }
   });
-
-router.route("/fatwa/:id").get((req, res) => {
-  Fatwa.findById(req.params.id)
-    .then((fatwa) => res.json(fatwa))
-    .catch((err) => res.status(400).json("Error: " + err));
-});
-router.route("/fatwa/edit/:id").patch((req, res) => {
-  const query = { _id: req.params.id };
-  req.newData = {
-    link: {
-      "bn-BD": req.body.title["bn-BD"].replace(/\s/g, "-"),
-      "en-US": (req.body.title["en-US"] || titleEn).replace(/\s/g, "-"),
-    },
-    topic: req.body.topic,
-    title: req.body.title,
-    ques: req.body.ques,
-    ans: req.body.ans,
-    ref: req.body.ref,
-    img: req.body.img,
-    updated: new Date(),
-  };
-  Fatwa.findOneAndUpdate(query, req.newData, (err, doc) => {
-    if (err) return res.status(400).json({ error: err });
-    return res.send("successfully updated!");
+router
+  .route("/source/fatwa")
+  .delete(passport.authenticate("SourceAuth"), (req, res) => {
+    Fatwa.findOneAndUpdate(req.body.fatwa, { status: "deleted" })
+      .then(() =>
+        Source.findByIdAndUpdate(req.body.source, { $inc: { fatwa: -1 } })
+      )
+      .then(() => res.json("successfully deleted"))
+      .catch((err) => res.status(400).json("Error: " + err));
   });
-  // .then(() => res.json("fatwa updated"))
-  // .catch((err) => res.status(400).json("Error: " + err));
-});
-router.route("/source/fatwa").delete((req, res) => {
-  Fatwa.findOneAndUpdate(req.body.fatwa, { status: "deleted" })
-    .then(() =>
-      Source.findByIdAndUpdate(req.body.source, { $inc: { fatwa: -1 } })
-    )
-    .then(() => res.json("successfully deleted"))
-    .catch((err) => res.status(400).json("Error: " + err));
-});
 
 //---------------------------------------------USER QUESTION
 router
   .route("/source/questionFeed/filter")
-  .get(passport.authenticate("jwt"), (req, res) => {
+  .get(passport.authenticate("SourceAuth"), (req, res) => {
     const sort = { column: req.query.column, order: req.query.order };
     UserQuestion.find({
       $or: [{ status: "pending" }, { status: "pendingApproval" }],
@@ -277,7 +256,7 @@ router
   });
 router
   .route("/source/userQues/:_id")
-  .get(passport.authenticate("jwt"), (req, res) => {
+  .get(passport.authenticate("SourceAuth"), (req, res) => {
     if (ObjectID.isValid(req.params._id)) {
       UserQuestion.findById(req.params._id)
         .populate("ans.source reports.source", "name add")
@@ -292,7 +271,7 @@ router
   });
 router
   .route("/source/userQues/answer/:_id")
-  .post(passport.authenticate("jwt"), (req, res) => {
+  .post(passport.authenticate("SourceAuth"), (req, res) => {
     if (ObjectID.isValid(req.params._id)) {
       UserQuestion.findById(req.params._id)
         .then((ques) => {
@@ -325,7 +304,7 @@ router
   });
 router
   .route("/source/userQues/answer/:_id")
-  .delete(passport.authenticate("jwt"), (req, res) => {
+  .delete(passport.authenticate("SourceAuth"), (req, res) => {
     if (ObjectID.isValid(req.params._id)) {
       if (req.user._id.toString() === req.body.source.toString()) {
         UserQuestion.findById(req.params._id)
@@ -347,7 +326,7 @@ router
   });
 router
   .route("/source/userQues/vote/:_id")
-  .put(passport.authenticate("jwt"), (req, res) => {
+  .put(passport.authenticate("SourceAuth"), (req, res) => {
     if (ObjectID.isValid(req.params._id)) {
       UserQuestion.findById(req.params._id)
         .populate("ans.source", "name primeMufti")
@@ -365,7 +344,7 @@ router
   });
 router
   .route("/source/reportUserQues/:_id")
-  .post(passport.authenticate("jwt"), (req, res) => {
+  .post(passport.authenticate("SourceAuth"), (req, res) => {
     if (ObjectID.isValid(req.params._id)) {
       UserQuestion.findById(req.params._id)
         .then((ques) => {
@@ -393,40 +372,34 @@ router
   });
 
 //--------------------------------------------PROFILE
-router.route("/source/edit").patch(passport.authenticate("jwt"), (req, res) => {
-  console.log(req.body);
-  if (Object.keys(req.body).length === 1) {
-    Jamia.findOneAndUpdate({ _id: req.user._id }, req.body)
-      .then((jamia) => {
-        res.json("data successfully updated!");
-      })
-      .catch((err) => res.json(err));
-  } else if (Object.keys(req.body).length === 3) {
-    Jamia.findById(req.user._id)
-      .then((jamia) => {
-        if (bcrypt.compareSync(req.body.oldPass, jamia.pass)) {
-          Jamia.findOneAndUpdate(
-            { _id: req.user._id },
-            { pass: bcrypt.hashSync(req.body.newPass, 10) }
-          )
-            .then(() => res.json("password changed successfully"))
-            .catch((err) => {
-              res.status(500).json(err);
-            });
-        } else {
-          res.status(401).json("Old password does not match");
-        }
-      })
-      .catch((err) => res.status(500).json(err));
-  }
-});
-
-// Fatwa.findByIdAndUpdate("5fd9994a8f33c070ecfe1a88", {
-//   "ques.en-US": " আস্কদফজ আসদ ফাসদ;ফ আ;স্ফদ কিছু না লিখলেই নয়",
-// })
-//   .then(() => Fatwa.findById("5fd9994a8f33c070ecfe1a88"))
-//   .then((fatwa) => {
-//     console.log(fatwa);
-//   });
+router
+  .route("/source/edit")
+  .patch(passport.authenticate("SourceAuth"), (req, res) => {
+    console.log(req.body);
+    if (Object.keys(req.body).length === 1) {
+      Jamia.findOneAndUpdate({ _id: req.user._id }, req.body)
+        .then((jamia) => {
+          res.json("data successfully updated!");
+        })
+        .catch((err) => res.json(err));
+    } else if (Object.keys(req.body).length === 3) {
+      Jamia.findById(req.user._id)
+        .then((jamia) => {
+          if (bcrypt.compareSync(req.body.oldPass, jamia.pass)) {
+            Jamia.findOneAndUpdate(
+              { _id: req.user._id },
+              { pass: bcrypt.hashSync(req.body.newPass, 10) }
+            )
+              .then(() => res.json("password changed successfully"))
+              .catch((err) => {
+                res.status(500).json(err);
+              });
+          } else {
+            res.status(401).json("Old password does not match");
+          }
+        })
+        .catch((err) => res.status(500).json(err));
+    }
+  });
 
 module.exports = router;

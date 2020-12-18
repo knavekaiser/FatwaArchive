@@ -1,19 +1,9 @@
-const { FatwaSubmission } = require("../models/fatwaModel");
-const { UserQuestion, ReportFatwa } = require("../models/userSubmissionModel");
-const {
-  Source,
-  Jamia,
-  Mufti,
-  PassRecoveryToken,
-} = require("../models/sourceModel");
-const fetch = require("node-fetch");
-
 const regEx = (input) => new RegExp(input.replace(" ", ".+"), "gi");
-const signToken = (id, role) => {
+const signToken = (_id, role) => {
   return jwt.sign(
     {
       iss: "fatwaArchive",
-      sub: id,
+      sub: _id,
       role: role,
     },
     process.env.JWT_SECRET
@@ -236,16 +226,21 @@ router.route("/reportFatwa").post((req, res) => {
 
 //-------------------------------------------------------------NEW SOURCE
 router.route("/source/new").post((req, res) => {
+  const { name, primeMufti } = req.body;
   Promise.all([
-    TranslateAll([
-      req.body.name["en-US"] || req.body.name["bn-BD"],
-      req.body.primeMufti["en-US"] || req.body.primeMufti["bn-BD"],
-    ]),
+    TranslateAll([name, primeMufti]),
     bcrypt.hash(req.body.pass, 10),
   ])
     .then((data) => {
-      req.body.name[getLan(data[0][0])] = data[0][0];
-      req.body.primeMufti[getLan(data[0][1])] = data[0][1];
+      req.body.name = {
+        [getLan(name)]: name,
+        [getLan(name, true)]: data[0][0],
+      };
+      req.body.primeMufti = {
+        [getLan(primeMufti)]: primeMufti,
+        [getLan(primeMufti, true)]: data[0][1],
+      };
+      console.log(req.body);
       return new Jamia({
         ...req.body,
         pass: data[1],
@@ -273,74 +268,66 @@ router.route("/validateId/:id").get((req, res) => {
     });
 });
 
-//------------------------------------------------JAMIA ACCOUNT STUFF!!
-router
-  .route("/login")
-  .post(
-    passport.authenticate("local", { session: false }),
-    (req, res, next) => {
-      if (req.isAuthenticated()) {
-        const user = {};
-        let role;
-        if (req.body.role === "jamia") {
-          user.name = req.user.name;
-          user.appl = req.user.appl;
-          user.fatwa = req.user.fatwa;
-          user.joined = req.user.joined;
-          user.founder = req.user.founder;
-          user.est = req.user.est;
-          user.address = req.user.address;
-          user.contact = req.user.contact;
-          user.about = req.user.about;
-          user.primeMufti = req.user.primeMufti;
-          role = "jamia";
-        }
-        if (req.body.role === "admin") {
-          user.firstName = req.user.firstName;
-          user.lastName = req.user.lastName;
-          user.email = req.user.email;
-          user.mob = req.user.mob;
-          role = "admin";
-        }
-        user.id = req.user.id;
-        user._id = req.user._id;
-        user.role = req.user.role;
-        const token = signToken(req.user.id, role);
-        res.cookie("access_token", token, { httpOnly: true, sameSite: true });
-        res.status(200).json({ isAuthenticated: true, user });
-      }
-    }
-  );
-router.route("/authenticate").get(passport.authenticate("jwt"), (req, res) => {
-  const user = {};
-  if (req.user.role === "jamia") {
-    user.name = req.user.name;
-    user.appl = req.user.appl;
-    user.fatwa = req.user.fatwa;
-    user.joined = req.user.joined;
-    user.founder = req.user.founder;
-    user.est = req.user.est;
-    user.address = req.user.address;
-    user.contact = req.user.contact;
-    user.primeMufti = req.user.primeMufti;
-    user.about = req.user.about;
-  } else if (req.user.role === "admin") {
-    user.firstName = req.user.firstName;
-    user.lastName = req.user.lastName;
-    user.email = req.user.email;
-    user.mob = req.user.mob;
+//------------------------------------------------LOGIN STUFF!!
+router.route("/loginSource").post(
+  passport.authenticate("Source", { session: false, failWithError: true }),
+  (req, res, next) => {
+    const user = { ...req.user._doc };
+    ["pass", "meta", "type", "__v"].forEach((key) => delete user[key]);
+    const token = signToken(req.user._id, "source");
+    res.cookie("access_token", token, { httpOnly: true, sameSite: true });
+    res.status(200).json({ code: "ok", isAuthenticated: true, user: user });
+  },
+  (err, req, res, next) => {
+    res.status(401).json({ code: 401, message: "invalid credentials" });
   }
-  user.id = req.user.id;
-  user._id = req.user._id;
-  user.role = req.user.role;
-  res.status(200).json({ isAuthenticated: true, user });
+);
+router.route("/loginAdmin").post(
+  passport.authenticate("Admin", { session: false, failWithError: true }),
+  (req, res, next) => {
+    const user = { ...req.user._doc };
+    ["pass", "ghost"].forEach((key) => delete user[key]);
+    const token = signToken(req.user._id, "admin");
+    res.cookie("access_token", token, { httpOnly: true, sameSite: true });
+    res.status(200).json({ code: "ok", isAuthenticated: true, user: user });
+  },
+  (err, req, res, next) => {
+    console.log("this should ran");
+    res.status(401).json({ code: 401, message: "invalid credentials" });
+  }
+);
+
+router.route("/auth").get((req, res) => {
+  if (req.cookies && req.cookies.access_token) {
+    const token = jwt_decode(req.cookies.access_token);
+    if (ObjectID.isValid(token.sub) && token.role === "source") {
+      res.redirect("/api/authSource");
+    } else if (ObjectID.isValid(token.sub) && token.role === "admin") {
+      res.redirect("/api/authAdmin");
+    }
+  } else {
+    res.status(400).json({ code: 400, message: "bad request" });
+  }
 });
 router
-  .route("/logout")
-  .get(passport.authenticate("jwt", { session: false }), (req, res) => {
-    res.clearCookie("access_token");
-    res.json({ user: null, success: true });
+  .route("/authSource")
+  .get(passport.authenticate("SourceAuth"), (req, res) => {
+    const user = { ...req.user._doc };
+    ["pass", "meta", "type", "__v"].forEach((key) => delete user[key]);
+    res.status(200).json({ code: "ok", isAuthenticated: true, user });
   });
+router
+  .route("/authAdmin")
+  .get(passport.authenticate("AdminAuth"), (req, res) => {
+    const user = { ...req.user._doc };
+    ["pass", "ghost"].forEach((key) => delete user[key]);
+    res.status(200).json({ code: "ok", isAuthenticated: true, user });
+  });
+
+router.route("/logout").get((req, res) => {
+  res.clearCookie("access_token");
+  res.json({ user: null, success: true });
+});
 
 router.route("/passRecovery").put((req, res) => {
   Source.findOne({ id: req.body.id }).then((source) => {

@@ -11,4 +11,4 @@ const userModel = new Schema({
 
 const User = mongoose.model("User", userModel);
 
-exports.User = User;
+global.User = User;

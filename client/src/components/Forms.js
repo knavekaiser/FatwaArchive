@@ -73,7 +73,10 @@ function JamiaDetail() {
         dataId="name"
         strict={/^[ঀ-৾a-zA-Z\s(),]+$/}
         pattern=".{10,}"
-        validationMessage="জামিয়ার নাম প্রবেশ করুন"
+        validationMessage=<FormattedMessage
+          id="form.jamiaReg.nameValidation"
+          defaultMessage="Enter a name"
+        />
         required={true}
         label=<FormattedMessage
           id="form.jamiaReg.name"
@@ -86,13 +89,13 @@ function JamiaDetail() {
         dataId="add"
         strict={/^[ঀ-৾a-zA-Z\s(),]+$/}
         min={10}
-        warning="বাংলা বা ইংরেজি অক্ষর"
-        validationMessage="সঠিক ঠিকানা প্রবেশ করুন"
-        required={true}
-        label=<FormattedMessage
-          id="form.jamiaReg.add"
-          defaultMessage="Address"
+        warning="বাংলা বা ইংরেজি অক্ষর প্রবেশ করুন"
+        validationMessage=<FormattedMessage
+          id="form.jamiaReg.addValidation"
+          defaultMessage="Enter an address"
         />
+        required={true}
+        label=<FormattedMessage id="add" defaultMessage="Address" />
         max={200}
       />
       <Input
@@ -103,7 +106,10 @@ function JamiaDetail() {
         pattern="^\+8801\d{9}$"
         strict={/^\+8801\d{0,9}$/}
         warning="+8801***"
-        validationMessage="সঠিক মোবাইল নম্বর প্রবেশ করুন"
+        validationMessage=<FormattedMessage
+          id="form.jamiaReg.contactValidation"
+          defaultMessage="Enter contact detail"
+        />
         label=<FormattedMessage id="contact" defaultMessage="Contact" />
       />
       <Input
@@ -111,7 +117,10 @@ function JamiaDetail() {
         onChange={(target) => SS.set("reg-primeMufti", target.value)}
         pattern=".{5,}"
         strict={/^[ঀ-৾a-zA-Z\s(),]+$/}
-        validationMessage="প্রধান মুফতির নাম প্রবেশ করুন"
+        validationMessage=<FormattedMessage
+          id="form.jamiaReg.primeMuftiValidation"
+          defaultMessage="Enter Prime mufti's name"
+        />
         dataId="primeMufti"
         required={true}
         label=<FormattedMessage id="primeMufti" defaultMessage="Prime Mufti" />
@@ -126,7 +135,13 @@ function LoginDetail({
   setIdIsValid,
 }) {
   const [pattern, setPattern] = useState("[a-zA-Z0-9]{8,20}");
+  const [idValidationMessage, setIdValidationMessage] = useState(
+    <FormattedMessage id="idValidation" defaultMessage="Enter an ID" />
+  );
   const [pass, setPass] = useState("");
+  const [confirmPass, setConfirmPass] = useState("");
+  const [passMatch, setPassMatch] = useState(false);
+  const [value, setValue] = useState("");
   const validateId = () => {
     if (SS.get("reg-id").length >= 8 && idIsValid === null) {
       setValidatingId(true);
@@ -148,6 +163,36 @@ function LoginDetail({
     $(".reg #id input").addEventListener("blur", validateId);
     return () => setIdIsValid(null);
   }, []);
+  useEffect(() => {
+    if (pattern === "[a-zA-Z0-9]{8,20}") {
+      if (value.length < 8) {
+        setIdValidationMessage(
+          <FormattedMessage
+            id="idCountValidation"
+            defaultMessage="Enter must be between 8 & 20 charecters"
+          />
+        );
+      } else {
+        setIdValidationMessage(
+          <FormattedMessage id="idValidation" defaultMessage="Enter an ID" />
+        );
+      }
+    } else {
+      setIdValidationMessage(
+        <FormattedMessage
+          id="form.jamiaReg.idTakenValidation"
+          defaultMessage="Enter is taken"
+        />
+      );
+    }
+  }, [pattern, value]);
+  useEffect(() => {
+    if (confirmPass) {
+      pass === confirmPass ? setPassMatch(true) : setPassMatch(false);
+    } else {
+      setPassMatch(null);
+    }
+  }, [pass, confirmPass]);
   return (
     <>
       <Input
@@ -155,6 +200,7 @@ function LoginDetail({
         onChange={(target) => {
           SS.set("reg-id", target.value);
           setIdIsValid(null);
+          setValue(target.value);
           setPattern("[a-zA-Z0-9]{8,20}");
         }}
         required={true}
@@ -168,11 +214,7 @@ function LoginDetail({
         strict={/^[a-zA-Z0-9]+$/}
         pattern={pattern}
         warning="a-z, A-Z, 0-9"
-        validationMessage={
-          pattern === "[a-zA-Z0-9]{8,20}"
-            ? "লগইন আইডি প্রবেশ করুন"
-            : "ভিন্ন আইডি প্রবেশ করুন"
-        }
+        validationMessage={idValidationMessage}
       >
         {idIsValid === false && (
           <ion-icon name="close-circle-outline"></ion-icon>
@@ -191,7 +233,6 @@ function LoginDetail({
         )}
       </Input>
       <PasswordInput
-        match=".reg #confirmPass input"
         passwordStrength={true}
         dataId="pass"
         label=<FormattedMessage id="password" defaultMessage="Password" />
@@ -199,16 +240,57 @@ function LoginDetail({
           setPass(target.value);
           SS.set("reg-pass", target.value);
         }}
+        validationMessage={
+          pass ? (
+            <FormattedMessage
+              id="passCountValidaion"
+              defaultMessage="Password must be between 8 & 32 characters"
+            />
+          ) : (
+            <FormattedMessage
+              id="passValidation"
+              defaultMessage="Enter password"
+            />
+          )
+        }
       />
       <PasswordInput
-        match=".reg #pass input"
         dataId="confirmPass"
         pattern={`^${pass}$`}
+        onChange={(target) => {
+          setConfirmPass(target.value);
+        }}
         label=<FormattedMessage
           id="form.login.passwordRepeat"
           defaultMessage="Confirm Password"
         />
-      />
+        validationMessage={
+          passMatch === null ? (
+            <FormattedMessage
+              id="passConfirmValidation"
+              defaultMessage="Confirm password"
+            />
+          ) : (
+            <FormattedMessage
+              id="passUnmatchValidation"
+              defaultMessage="Password did not match"
+            />
+          )
+        }
+      >
+        {passMatch === true && (
+          <span
+            style={{ background: "rgb(12, 232, 100)" }}
+            className="passwordConfirm"
+          />
+        )}
+        {passMatch === false && (
+          <span
+            style={{ background: "rgb(245, 7, 0)" }}
+            className="passwordConfirm"
+          />
+        )}
+      </PasswordInput>
     </>
   );
 }
@@ -222,7 +304,10 @@ function ApplicantDetail() {
         dataId="applicant"
         strict={/^[ঀ-ৣৰ-৾a-zA-Z\s(),-]+$/}
         pattern=".{5,}"
-        validationMessage="আবেদনকারীর পূর্ণ নাম প্রবেশ করুন"
+        validationMessage=<FormattedMessage
+          id="applNameValidation"
+          defaultMessage="Enter applicant's name"
+        />
         label=<FormattedMessage
           id="form.jamiaReg.applicant"
           defaultMessage="Applicant's Name"
@@ -233,7 +318,10 @@ function ApplicantDetail() {
         defaultValue={SS.get("reg-applicantDesignation")}
         pattern=".{5,}"
         onChange={(target) => SS.set("reg-applicantDesignation", target.value)}
-        validationMessage="আবেদনকারীর সঠিক পদ প্রবেশ করুন"
+        validationMessage=<FormattedMessage
+          id="applDesValidation"
+          defaultMessage="Enter applicant's designation"
+        />
         dataId="applicantDesignation"
         label=<FormattedMessage
           id="form.jamiaReg.applicantDesignation"
@@ -244,7 +332,10 @@ function ApplicantDetail() {
         required={true}
         pattern="^\+8801\d{9}$"
         strict={/^\+8801\d{0,9}$/}
-        validationMessage="সঠিক মোবাইল নম্বর প্রবেশ করুন"
+        validationMessage=<FormattedMessage
+          id="applMobValidation"
+          defaultMessage="Enter applicant's mobile"
+        />
         defaultValue={SS.get("reg-applicantMobile") || "+8801"}
         onChange={(target) => SS.set("reg-applicantMobile", target.value)}
         dataId="applicantMobile"
@@ -306,9 +397,7 @@ export const JamiaRegister = () => {
   const history = useHistory();
   useEffect(() => {
     user && history.push("/");
-    return () => {
-      setSuccess(false);
-    };
+    return () => setSuccess(false);
   }, []);
   const [loading, setLoading] = useState(false);
   const [idIsValid, setIdIsValid] = useState(null);
@@ -333,12 +422,10 @@ export const JamiaRegister = () => {
     }
     if (step === 3) {
       const data = {
-        name: { [getLan(SS.get("reg-name"))]: SS.get("reg-name") },
+        name: SS.get("reg-name"),
         add: SS.get("reg-add"),
         contact: SS.get("reg-contact"),
-        primeMufti: {
-          [getLan(SS.get("reg-primeMufti"))]: SS.get("reg-primeMufti"),
-        },
+        primeMufti: SS.get("reg-primeMufti"),
         id: SS.get("reg-id"),
         pass: SS.get("reg-pass"),
         appl: {
@@ -407,7 +494,7 @@ export const JamiaRegister = () => {
           className={(step === 1 || step === 2) && "right"}
           label={
             step === 1 || step === 2 ? (
-              <FormattedMessage id="form.jamiaReg.next" defaultMessage="Next" />
+              <FormattedMessage id="next" defaultMessage="Next" />
             ) : (
               <FormattedMessage id="register" defaultMessage="Register" />
             )
@@ -442,24 +529,25 @@ export const JamiaLogin = () => {
   function submit(e) {
     e.preventDefault();
     setLoading(true);
-    fetch(`/api/login`, {
+    fetch(`/api/loginSource`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username: userId, password: pass, role: "jamia" }),
     })
-      .then((res) => {
+      .then((res) => res.json())
+      .then((data) => {
         setLoading(false);
-        if (res.status === 401) {
+        if (data.code === "ok") {
+          setIsAuthenticated(data.isAuthenticated);
+          setUser(data.user);
+          history.push("/jamia/fatwa");
+        } else {
           setInvalidCred(true);
         }
-        return res.json();
       })
-      .then((data) => {
-        setIsAuthenticated(data.isAuthenticated);
-        setUser(data.user);
-        history.push("/jamia/fatwa");
+      .catch((err) => {
+        console.log(err);
+        alert("something went wrong");
       });
   }
   return (
@@ -486,11 +574,10 @@ export const JamiaLogin = () => {
             setUserId(target.value);
             setInvalidCred(false);
           }}
+          validationMessage="আইডি প্রবেশ করুন"
           warning="a-z, A-Z, 0-9"
           id="jamiaLoginId"
-        >
-          {invalidCred && <p className="warning">Wrong Id or password</p>}
-        </Input>
+        />
         <PasswordInput
           id="jamiaLoginPass"
           dataId="pass"
@@ -509,6 +596,7 @@ export const JamiaLogin = () => {
           </Link>
         </PasswordInput>
         <Submit
+          disabled={invalidCred}
           loading={loading}
           label={<FormattedMessage id="login" defaultMessage="Login" />}
         />
@@ -520,7 +608,7 @@ export const JamiaLogin = () => {
 export const PassRecovery = () => {
   const { locale, user } = useContext(SiteContext);
   const [loading, setLoading] = useState(false);
-  const [noJamia, setNoJamia] = useState(false);
+  const [invalidId, setInvalidId] = useState(false);
   const [wrongCode, setWrongCode] = useState(false);
   const [id, setId] = useState("");
   const [code, setCode] = useState("");
@@ -581,7 +669,7 @@ export const PassRecovery = () => {
         .then((res) => {
           setLoading(false);
           if (res.status === 404) {
-            setNoJamia(true);
+            setInvalidId(true);
           } else if (res.status === 200) {
             setStep(2);
             setTimer(60);
@@ -667,16 +755,29 @@ export const PassRecovery = () => {
               warning="a-z, A-Z, 0-9"
               onChange={(target) => {
                 setId(target.value);
-                setNoJamia(false);
+                setInvalidId(false);
               }}
-              className={noJamia ? "err" : ""}
+              className={invalidId ? "err" : ""}
               label=<FormattedMessage id="form.login.id" defaultMessage="Id" />
+              validationMessage={
+                id ? (
+                  <FormattedMessage
+                    id="idInvalid"
+                    defaultMessage="Invalid ID"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="idValidation"
+                    defaultMessage="Enter login ID"
+                  />
+                )
+              }
             >
-              {noJamia && (
+              {invalidId && (
                 <span className="errMessage">
                   <FormattedMessage
-                    id="form.passRecovery.noJamia"
-                    defaultMessage="Jamia doesn't exists"
+                    id="passRecovery.invalidId"
+                    defaultMessage="ID could not be found"
                   />
                 </span>
               )}
@@ -729,8 +830,7 @@ export const PassRecovery = () => {
               required={true}
               id="passRecoveryVarificationCode"
               dataId="code"
-              type="text"
-              pattern={/^[0-9]+$/}
+              strict={/^[0-9]+$/}
               warning="0-9"
               min={4}
               max={4}
@@ -842,18 +942,23 @@ export const PassRecovery = () => {
           </p>
         )}
         {step !== "success" && (
-          <button
-            type="submit"
+          <Submit
             disabled={
               loading ||
               (step === 2 && timer <= 0) ||
               (step === 2 && attempts > 2) ||
               (step === 3 && timer <= 0)
             }
-          >
-            <FormattedMessage id="submit" defaultMessage="Submit" />
-            {loading && <span className="loading"></span>}
-          </button>
+            label={
+              step === 1 ? (
+                <FormattedMessage id="next" defaultMessage="Next" />
+              ) : (
+                <FormattedMessage id="submit" defaultMessage="Submit" />
+              )
+            }
+            loading={loading}
+            setLoading={setLoading}
+          />
         )}
       </form>
     </div>
@@ -873,26 +978,24 @@ export const AdminLogin = () => {
   function submit(e) {
     e.preventDefault();
     setLoading(true);
-    fetch(`/api/login`, {
+    fetch(`/api/loginAdmin`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username: userId, password: pass, role: "admin" }),
     })
-      .then((res) => {
+      .then((res) => res.json())
+      .then((data) => {
         setLoading(false);
-        if (res.status === 401) {
-          setInvalidCred(true);
-          throw 401;
+        if (data.code === "ok") {
+          setIsAuthenticated(data.isAuthenticated);
+          setUser(data.user);
+          history.push("/admin/sources");
         } else {
-          return res.json();
+          setInvalidCred(true);
         }
       })
-      .then((data) => {
-        setIsAuthenticated(data.isAuthenticated);
-        setUser(data.user);
-        history.push("/admin/sources");
-      })
       .catch((err) => {
+        alert("something went wrong");
         console.log(err);
       });
   }
@@ -907,25 +1010,37 @@ export const AdminLogin = () => {
         <Input
           required={true}
           type="text"
-          label=<FormattedMessage
-            id="form.admin.login.id"
-            defaultMessage="Username"
-          />
+          label=<FormattedMessage id="username" defaultMessage="Username" />
           strict={/^[a-zA-Z0-9]+$/}
           min={8}
           max={20}
-          validationMessage="সঠিক লগইন আইডি প্রবেশ করুন"
+          validationMessage=<FormattedMessage
+            id="usernameValidation"
+            defaultMessage="Enter username"
+          />
           onChange={(target) => setUserId(target.value)}
           warning="a-z, A-Z, 0-9"
-        >
-          {invalidCred && <p className="warning">Wrong Id or password</p>}
-        </Input>
+        />
         <PasswordInput
           dataId="pass"
           onChange={(target) => setPass(target.value)}
           label=<FormattedMessage id="password" defaultMessage="Password" />
+          validationMessage={
+            pass ? (
+              <FormattedMessage
+                id="passCountValidaion"
+                defaultMessage="Password must be between 8 & 32 charecters"
+              />
+            ) : (
+              <FormattedMessage
+                id="passValidation"
+                defaultMessage="Enter Password"
+              />
+            )
+          }
         />
         <Submit
+          disabled={invalidCred}
           loading={loading}
           label={<FormattedMessage id="login" defaultMessage="Login" />}
         />
@@ -1100,7 +1215,7 @@ export const AddFatwaForm = ({ match }) => {
       .then((data) => {
         setLoading(false);
         if (data.code === "ok") {
-          history.push("/jamia/fatwa/submissions");
+          history.push("/jamia/fatwa/pending");
           SS.remove("newFatwa-ansEn");
           SS.remove("newFatwa-topic");
           SS.remove("newFatwa-ques");

@@ -21,7 +21,9 @@ function Footer() {
         </li>
         {user === null && (
           <li>
-            <Link to="/admin">Admin</Link>
+            <Link to="/admin">
+              <FormattedMessage id="admin" defaultMessage="Admin" />
+            </Link>
           </li>
         )}
         <li

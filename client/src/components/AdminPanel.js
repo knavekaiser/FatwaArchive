@@ -26,533 +26,183 @@ const encodeURL = (obj) =>
     .map((key) => `${key}=${obj[key]}`)
     .join("&");
 
-function SingleFatwa({ data, setData }) {
-  const { locale } = useContext(SiteContext);
-  const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const fatwa = data;
-  const history = useHistory();
-  const editFatwa = (path) => history.push(path);
-  function deleteFatwa() {
-    setLoading(true);
-    fetch(`/api/admin/fatwa/`, {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ fatwa: fatwa._id, source: fatwa.source._id }),
-    })
-      .then((res) => {
-        setLoading(false);
-        if (res.status === 200) {
-          setData((prev) => {
-            return prev.filter((item) => item._id !== fatwa._id);
-          });
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }
-  return open ? (
-    <tr data-id={fatwa._id} className={`${open ? "full" : ""}`}>
-      <td className="label">Added</td>
-      <td className="data">
-        <FormattedDate
-          value={new Date(fatwa.createdAt)}
-          day="numeric"
-          month="numeric"
-          year="numeric"
-        />
-      </td>
-      <td className="label">jamia</td>
-      <td className="data">{fatwa.jamia}</td>
-      <td className="label">topic</td>
-      <td className="data">{fatwa.topic[locale]}</td>
-      <td className="label">title (Bangla)</td>
-      <td className="data">
-        <Link target="_blank" to={`/fatwa/${fatwa.link["bn-BD"]}`}>
-          {fatwa.title["bn-BD"]}
-        </Link>
-      </td>
-      {fatwa.title["en-US"] && (
-        <>
-          <td className="label">title (English)</td>
-          <td className="data">
-            <Link to={`/fatwa/${fatwa.link["en-US"]}`}>
-              {fatwa.title["en-US"]}
-            </Link>
-          </td>
-        </>
-      )}
-      <td className="label">question (Bangla)</td>
-      <td className="data">{fatwa.ques["bn-BD"]}</td>
-      {fatwa.ques["en-US"] && (
-        <>
-          <td className="label">question (English)</td>
-          <td className="data">{fatwa.ques["en-US"]}</td>
-        </>
-      )}
-      <td className="label">answer (Bangla)</td>
-      <td className="data">{fatwa.ans["bn-BD"]}</td>
-      {fatwa.ans["en-US"] && (
-        <>
-          <td className="label">answer (English)</td>
-          <td className="data">{fatwa.ans["en-US"]}</td>
-        </>
-      )}
-      <td className="label">Ref.</td>
-      <td className="data">
-        <ul>
-          {fatwa.ref &&
-            fatwa.ref.map((item, i) =>
-              item.book ? (
-                <li key={item.book + item.part + item.page}>
-                  <FormattedMessage id="book" defaultMessage="Book" />:{" "}
-                  {item.book},{" "}
-                  <FormattedMessage id="part" defaultMessage="Part" />:{" "}
-                  <FormattedNumber value={item.part} />,{" "}
-                  <FormattedMessage id="page" defaultMessage="Page" />:{" "}
-                  <FormattedNumber value={item.page} />
-                </li>
-              ) : (
-                <li key={item.sura + item.aayat}>
-                  sura: {item.sura}, aayat: {item.aayat}
-                </li>
-              )
-            )}
-        </ul>
-      </td>
-      <td className="btns data">
-        <button onClick={() => setOpen(false)}>
-          <ion-icon name="chevron-up-outline"></ion-icon> Hide Detail
-        </button>
-        <Submit
-          loading={loading}
-          onClick={deleteFatwa}
-          label={
-            <>
-              <ion-icon name="trash-outline"></ion-icon> Delete
-            </>
-          }
-        />
-      </td>
-    </tr>
-  ) : (
-    <tr data-id={fatwa._id} onClick={() => setOpen(true)}>
-      <td>{fatwa.source.name[locale]}</td>
-      <td>{fatwa.topic[locale]}</td>
-      <td>{fatwa.translation ? "Yes" : "No"}</td>
-      <td>
-        <FormattedDate
-          value={new Date(fatwa.createdAt)}
-          day="numeric"
-          month="numeric"
-          year="numeric"
-        />
-      </td>
-      <td>{fatwa.title[locale]}</td>
-    </tr>
-  );
-}
-function SingleFatwaSubmission({ data, setData }) {
-  const { locale, setFatwaToEdit } = useContext(SiteContext);
-  const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const fatwa = data;
-  const history = useHistory();
-  const editFatwa = (path) => history.push(path);
-  function editFatwaSubmission(id) {
-    setFatwaToEdit(fatwa);
-    history.push("/admin/add");
-  }
-  function acceptFatwa() {
-    setLoading(true);
-    fetch(`/api/admin/fatwaSubmissions/accept/${fatwa._id}`, { method: "POST" })
-      .then((res) => res.json())
-      .then((data) => {
-        setLoading(false);
-        if (data.code === "ok") {
-          setData((prev) => {
-            return prev.filter((item) => item._id !== fatwa._id);
-          });
-        } else {
-          alert("something went wrong");
-        }
-      })
-      .catch((err) => {
-        alert("something went wrong!");
-        console.log(err);
-      });
-  }
-  function removeSubmission() {
-    setLoading(true);
-    fetch(`/api/admin/fatwaSubmissions/remove/${fatwa._id}`, {
-      method: "DELETE",
-    })
-      .then((res) => {
-        setLoading(false);
-        if (res.status === 200) {
-          setData((prev) => {
-            return prev.filter((item) => item._id !== fatwa._id);
-          });
-        } else {
-          alert("something went wrong!");
-        }
-      })
-      .catch((err) => {
-        alert("something went wrong!");
-        console.log(err);
-      });
-  }
-  return open ? (
-    <tr data-id={fatwa._id} className={`full ${loading ? "loading" : ""}`}>
-      <td className="label">Submitted</td>
-      <td className="data">
-        <FormattedDate
-          value={new Date(fatwa.createdAt)}
-          day="numeric"
-          month="numeric"
-          year="numeric"
-        />
-      </td>
-      <td className="label">topic</td>
-      <td className="data">{fatwa.topic[locale]}</td>
-      <td className="label">translation</td>
-      <td className="data">{fatwa.translation ? "Yes" : "No"}</td>
-      <td className="label">title (Bangla)</td>
-      <td className="data">{fatwa.title["bn-BD"]}</td>
-      {fatwa.title["en-US"] && (
-        <>
-          <td className="label">title (English)</td>
-          <td className="data">{fatwa.title["en-US"]}</td>
-        </>
-      )}
-      <td className="label">question (Bangla)</td>
-      <td className="data">{fatwa.ques["bn-BD"]}</td>
-      {fatwa.ques["en-US"] && (
-        <>
-          <td className="label">question (English)</td>
-          <td className="data">{fatwa.ques["en-US"]}</td>
-        </>
-      )}
-      <td className="label">answer (Bangla)</td>
-      <td className="data">{fatwa.ans["bn-BD"]}</td>
-      {fatwa.ans["en-US"] && (
-        <>
-          <td className="label">answer (English)</td>
-          <td className="data">{fatwa.ans["en-US"]}</td>
-        </>
-      )}
-      <td className="label">Ref.</td>
-      <td className="data">
-        <ul>
-          {fatwa.ref.map((item, i) =>
-            item.book ? (
-              <li key={item.book + item.part + item.page}>
-                book: {item.book}, part: {item.part}, page: {item.page}
-              </li>
-            ) : (
-              <li key={item.sura + item.aayat}>
-                sura: {item.sura}, aayat: {item.aayat}
-              </li>
-            )
-          )}
-        </ul>
-      </td>
-      <td className="btns data">
-        <Submit
-          loading={loading}
-          onClick={acceptFatwa}
-          label={
-            <>
-              <ion-icon name="checkmark-outline"></ion-icon> Accept
-            </>
-          }
-        />
-        <button disabled={loading} onClick={() => setOpen(false)}>
-          <ion-icon name="chevron-up-outline"></ion-icon> Hide Detail
-        </button>
-        <button disabled={loading} onClick={editFatwaSubmission}>
-          <ion-icon name="pencil-outline"></ion-icon> Edit
-        </button>
-        <Submit
-          loading={loading}
-          onClick={removeSubmission}
-          label={
-            <>
-              <ion-icon name="trash-outline"></ion-icon> Delete
-            </>
-          }
-        />
-      </td>
-    </tr>
-  ) : (
-    <tr
-      className={loading ? "loading" : ""}
-      data-id={fatwa._id}
-      onClick={() => setOpen(true)}
-    >
-      <td>
-        <FormattedDate
-          value={new Date(fatwa.createdAt)}
-          day="numeric"
-          month="numeric"
-          year="numeric"
-        />
-      </td>
-      <td>{fatwa.topic[locale]}</td>
-      <td>{fatwa.source.name[locale]}</td>
-      <td>{fatwa.title[locale]}</td>
-    </tr>
-  );
-}
-function AllFatwa({ history, location, match }) {
-  const { locale } = useContext(SiteContext);
+function AllSources() {
   return (
     <div className="view">
-      <h1 className="viewTitle">Fatwa</h1>
+      <h1 className="viewTitle">
+        <FormattedMessage id="source" defaultMessage="Source" />
+      </h1>
       <Tabs
-        page="/admin/fatwa/"
+        page="/admin/sources/"
         tabs={[
           {
-            label: <FormattedMessage id="live" defaultMessage="Live" />,
-            link: "live",
+            label: <FormattedMessage id="active" defaultMessage="Active" />,
+            link: "active",
           },
           {
-            label: <FormattedMessage id="pending" defaultMessage="pending" />,
-            link: "submissions",
+            label: <FormattedMessage id="pending" defaultMessage="Pending" />,
+            link: "Submissions",
           },
         ]}
       />
       <Switch>
-        <Route path="/admin/fatwa" exact>
+        <Route path="/admin/sources" exact>
           <View
-            key="allFatwa"
-            Element={SingleFatwa}
-            id="allFatwa"
-            api="api/admin/allfatwa/filter?"
+            key="allJamia"
+            Element={SingleJamia}
+            defaultSort={{ column: "joined", order: "des" }}
+            id="allJamia"
+            api="api/admin/sources/active/filter?"
             categories={[
               {
-                name: "topic",
+                name: "role",
+                bridge: "is",
                 input: (
                   <Combobox
-                    options={topics.map((option) => {
-                      return {
-                        label: option[locale],
-                        value: option,
-                      };
-                    })}
-                  />
-                ),
-              },
-              {
-                name: "title",
-                input: <Input label="Title" type="text" required={true} />,
-              },
-              {
-                name: "question",
-                input: <Input label="Question" type="text" required={true} />,
-              },
-              {
-                name: "answer",
-                input: <Input label="Answer" type="text" required={true} />,
-              },
-              {
-                name: "jamia",
-                input: (
-                  <Combobox
-                    id={ID(8)}
-                    maxHeight={500}
-                    label="jamia"
-                    data={["jamia 1", "jamia 2", "jamia 3"]}
-                    required={true}
-                  />
-                ),
-              },
-              {
-                name: "translation",
-                input: (
-                  <Combobox
-                    id={ID(8)}
-                    maxHeight={500}
-                    label="jamia"
-                    data={["Generated", "Manual"]}
-                    required={true}
+                    label=<FormattedMessage id="type" defaultMessage="Type" />
+                    options={[
+                      { label: "Jamia", value: "jamia" },
+                      { label: "Mufti", value: "mufti" },
+                    ]}
                   />
                 ),
               },
             ]}
             columns={[
               {
-                column: (
-                  <FormattedMessage id="source" defaultMessage="Source" />
-                ),
-                sort: true,
-                colCode: "source",
+                column: <FormattedMessage id="id" defaultMessage="Id" />,
+                sort: false,
+                colCode: "id",
               },
               {
-                column: <FormattedMessage id="topic" defaultMessage="Topic" />,
+                column: <FormattedMessage id="type" defaultMessage="Type" />,
                 sort: true,
-                colCode: "topic",
+                colCode: "role",
+              },
+              {
+                column: <FormattedMessage id="name" defaultMessage="Name" />,
+                sort: false,
+                colCode: "name",
               },
               {
                 column: (
                   <FormattedMessage
-                    id="translation"
-                    defaultMessage="Translation"
+                    id="primeMufti"
+                    defaultMessage="Prime Mufti"
                   />
                 ),
-                sort: true,
-                colCode: "translation",
-              },
-              {
-                column: <FormattedMessage id="date" defaultMessage="Date" />,
-                sort: true,
-                colCode: "createdAt",
-              },
-              {
-                column: <FormattedMessage id="title" defaultMessage="Title" />,
                 sort: false,
-                colCode: "title",
+                colCode: "primeMufti",
+              },
+              {
+                column: (
+                  <FormattedMessage id="joined" defaultMessage="Joined" />
+                ),
+                sort: true,
+                colCode: "joined",
+              },
+              {
+                column: <FormattedMessage id="fatwa" defaultMessage="Fatwa" />,
+                sort: true,
+                colCode: "fatwa",
+              },
+              {
+                column: (
+                  <FormattedMessage id="contact" defaultMessage="Contact" />
+                ),
+                sort: false,
+                colCode: "contact",
               },
             ]}
-            defaultSort={{ column: "createdAt", order: "des" }}
           />
         </Route>
-        <Route path="/admin/fatwa/live">
+        <Route path="/admin/sources/active">
           <View
-            key="allFatwa"
-            Element={SingleFatwa}
-            id="allFatwa"
-            api="api/admin/allfatwa/filter?"
+            key="allJamia"
+            Element={SingleJamia}
+            defaultSort={{ column: "joined", order: "des" }}
+            id="allJamia"
+            api="api/admin/sources/active/filter?"
             categories={[
               {
-                name: "topic",
+                name: "role",
+                bridge: "is",
                 input: (
                   <Combobox
-                    options={topics.map((option) => {
-                      return {
-                        label: option[locale],
-                        value: option,
-                      };
-                    })}
-                  />
-                ),
-              },
-              {
-                name: "title",
-                input: <Input label="Title" type="text" required={true} />,
-              },
-              {
-                name: "question",
-                input: <Input label="Question" type="text" required={true} />,
-              },
-              {
-                name: "answer",
-                input: <Input label="Answer" type="text" required={true} />,
-              },
-              {
-                name: "jamia",
-                input: (
-                  <Combobox
-                    id={ID(8)}
-                    maxHeight={500}
-                    label="jamia"
-                    data={["jamia 1", "jamia 2", "jamia 3"]}
-                    required={true}
-                  />
-                ),
-              },
-              {
-                name: "translation",
-                input: (
-                  <Combobox
-                    id={ID(8)}
-                    maxHeight={500}
-                    label="jamia"
-                    data={["Generated", "Manual"]}
-                    required={true}
+                    label=<FormattedMessage id="type" defaultMessage="Type" />
+                    options={[
+                      { label: "Jamia", value: "jamia" },
+                      { label: "Mufti", value: "mufti" },
+                    ]}
                   />
                 ),
               },
             ]}
             columns={[
               {
-                column: (
-                  <FormattedMessage id="source" defaultMessage="Source" />
-                ),
-                sort: true,
-                colCode: "source",
+                column: <FormattedMessage id="id" defaultMessage="Id" />,
+                sort: false,
+                colCode: "id",
               },
               {
-                column: <FormattedMessage id="topic" defaultMessage="Topic" />,
+                column: <FormattedMessage id="type" defaultMessage="Type" />,
                 sort: true,
-                colCode: "topic",
+                colCode: "role",
+              },
+              {
+                column: <FormattedMessage id="name" defaultMessage="Name" />,
+                sort: false,
+                colCode: "name",
               },
               {
                 column: (
                   <FormattedMessage
-                    id="translation"
-                    defaultMessage="Translation"
+                    id="primeMufti"
+                    defaultMessage="Prime Mufti"
                   />
                 ),
-                sort: true,
-                colCode: "translation",
-              },
-              {
-                column: <FormattedMessage id="date" defaultMessage="Date" />,
-                sort: true,
-                colCode: "createdAt",
-              },
-              {
-                column: <FormattedMessage id="title" defaultMessage="Title" />,
                 sort: false,
-                colCode: "title",
+                colCode: "primeMufti",
+              },
+              {
+                column: (
+                  <FormattedMessage id="joined" defaultMessage="Joined" />
+                ),
+                sort: true,
+                colCode: "joined",
+              },
+              {
+                column: <FormattedMessage id="fatwa" defaultMessage="Fatwa" />,
+                sort: true,
+                colCode: "fatwa",
+              },
+              {
+                column: (
+                  <FormattedMessage id="contact" defaultMessage="Contact" />
+                ),
+                sort: false,
+                colCode: "contact",
               },
             ]}
-            defaultSort={{ column: "createdAt", order: "des" }}
           />
         </Route>
-        <Route path="/admin/fatwa/submissions">
+        <Route path="/admin/sources/submissions">
           <View
-            key="allFatwaSubmission"
-            Element={SingleFatwaSubmission}
-            id="fatwaSubmissions"
-            api="api/admin/fatwaSubmissions/filter?"
+            key="allSourceSubmissions"
+            Element={SingleSourceSubmission}
+            defaultSort={{ column: "joined", order: "des" }}
+            id="jamiaSubmissions"
+            api="api/admin/sources/submissions/filter?"
             categories={[
               {
-                name: "topic",
+                name: "role",
                 input: (
                   <Combobox
-                    options={topics.map((option) => {
-                      return {
-                        label: option[locale],
-                        value: option,
-                      };
-                    })}
-                  />
-                ),
-              },
-              {
-                name: "title",
-                input: <Input label="Title" type="text" required={true} />,
-              },
-              {
-                name: "question",
-                input: <Input label="Question" type="text" required={true} />,
-              },
-              {
-                name: "answer",
-                input: <Input label="Answer" type="text" required={true} />,
-              },
-              {
-                name: "jamia",
-                input: (
-                  <Combobox
-                    id={ID(8)}
-                    maxHeight={500}
-                    label="jamia"
-                    data={["jamia 1", "jamia 2", "jamia 3"]}
-                    required={true}
+                    label=<FormattedMessage id="type" defaultMessage="Type" />
+                    options={[
+                      { label: "jamia", value: "jamia" },
+                      { label: "mufti", value: "mufti" },
+                    ]}
                   />
                 ),
               },
@@ -561,34 +211,42 @@ function AllFatwa({ history, location, match }) {
               {
                 column: <FormattedMessage id="date" defaultMessage="Date" />,
                 sort: true,
-                colCode: "createdAt",
+                colCode: "joined",
               },
               {
-                column: <FormattedMessage id="topic" defaultMessage="Topic" />,
+                column: <FormattedMessage id="name" defaultMessage="Name" />,
+                sort: false,
+                colCode: "name",
+              },
+              {
+                column: <FormattedMessage id="type" defaultMessage="Type" />,
                 sort: true,
-                colCode: "topic",
+                colCode: "role",
               },
               {
                 column: (
-                  <FormattedMessage id="source" defaultMessage="Source" />
+                  <FormattedMessage
+                    id="primeMufti"
+                    defaultMessage="primeMufti"
+                  />
                 ),
-                sort: true,
-                colCode: "jamia",
+                sort: false,
+                colCode: "primeMufti",
               },
               {
-                column: <FormattedMessage id="title" defaultMessage="Title" />,
+                column: (
+                  <FormattedMessage id="contact" defaultMessage="Contact" />
+                ),
                 sort: false,
+                colCode: "contact",
               },
             ]}
-            defaultSort={{ column: "createdAt", order: "des" }}
           />
         </Route>
       </Switch>
     </div>
   );
 }
-
-function JamiaSubmission() {}
 function SingleSourceSubmission({ data, setData }) {
   const jamia = data;
   const { locale } = useContext(SiteContext);
@@ -920,181 +578,257 @@ function SingleJamia({ data, setData }) {
     </tr>
   );
 }
-function AllSources() {
+
+function AllFatwa({ history, location, match }) {
+  const { locale } = useContext(SiteContext);
   return (
     <div className="view">
-      <h1 className="viewTitle">source</h1>
+      <h1 className="viewTitle">
+        <FormattedMessage id="fatwa" defaultMessage="Fatwa" />
+      </h1>
       <Tabs
-        page="/admin/sources/"
+        page="/admin/fatwa/"
         tabs={[
           {
-            label: <FormattedMessage id="active" defaultMessage="Active" />,
-            link: "active",
+            label: <FormattedMessage id="live" defaultMessage="Live" />,
+            link: "live",
           },
           {
-            label: <FormattedMessage id="pending" defaultMessage="Pending" />,
-            link: "Submissions",
+            label: <FormattedMessage id="pending" defaultMessage="pending" />,
+            link: "pending",
           },
         ]}
       />
       <Switch>
-        <Route path="/admin/sources" exact>
+        <Route path="/admin/fatwa" exact>
           <View
-            key="allJamia"
-            Element={SingleJamia}
-            defaultSort={{ column: "joined", order: "des" }}
-            id="allJamia"
-            api="api/admin/sources/active/filter?"
+            key="allFatwa"
+            Element={SingleFatwa}
+            id="allFatwa"
+            api="api/admin/allfatwa/filter?"
             categories={[
               {
-                name: "role",
-                bridge: "is",
+                name: "topic",
                 input: (
                   <Combobox
-                    label=<FormattedMessage id="type" defaultMessage="Type" />
-                    options={[
-                      { label: "Jamia", value: "jamia" },
-                      { label: "Mufti", value: "mufti" },
-                    ]}
+                    options={topics.map((option) => {
+                      return {
+                        label: option[locale],
+                        value: option,
+                      };
+                    })}
+                  />
+                ),
+              },
+              {
+                name: "title",
+                input: <Input label="Title" type="text" required={true} />,
+              },
+              {
+                name: "question",
+                input: <Input label="Question" type="text" required={true} />,
+              },
+              {
+                name: "answer",
+                input: <Input label="Answer" type="text" required={true} />,
+              },
+              {
+                name: "jamia",
+                input: (
+                  <Combobox
+                    id={ID(8)}
+                    maxHeight={500}
+                    label="jamia"
+                    data={["jamia 1", "jamia 2", "jamia 3"]}
+                    required={true}
+                  />
+                ),
+              },
+              {
+                name: "translation",
+                input: (
+                  <Combobox
+                    id={ID(8)}
+                    maxHeight={500}
+                    label="jamia"
+                    data={["Generated", "Manual"]}
+                    required={true}
                   />
                 ),
               },
             ]}
             columns={[
               {
-                column: <FormattedMessage id="id" defaultMessage="Id" />,
-                sort: false,
-                colCode: "id",
-              },
-              {
-                column: <FormattedMessage id="type" defaultMessage="Type" />,
+                column: (
+                  <FormattedMessage id="source" defaultMessage="Source" />
+                ),
                 sort: true,
-                colCode: "role",
+                colCode: "source",
               },
               {
-                column: <FormattedMessage id="name" defaultMessage="Name" />,
-                sort: false,
-                colCode: "name",
+                column: <FormattedMessage id="topic" defaultMessage="Topic" />,
+                sort: true,
+                colCode: "topic",
               },
               {
                 column: (
                   <FormattedMessage
-                    id="primeMufti"
-                    defaultMessage="Prime Mufti"
+                    id="translation"
+                    defaultMessage="Translation"
                   />
                 ),
-                sort: false,
-                colCode: "primeMufti",
-              },
-              {
-                column: (
-                  <FormattedMessage id="joined" defaultMessage="Joined" />
-                ),
                 sort: true,
-                colCode: "joined",
+                colCode: "translation",
               },
               {
-                column: <FormattedMessage id="fatwa" defaultMessage="Fatwa" />,
+                column: <FormattedMessage id="date" defaultMessage="Date" />,
                 sort: true,
-                colCode: "fatwa",
+                colCode: "createdAt",
               },
               {
-                column: (
-                  <FormattedMessage id="contact" defaultMessage="Contact" />
-                ),
+                column: <FormattedMessage id="title" defaultMessage="Title" />,
                 sort: false,
-                colCode: "contact",
+                colCode: "title",
               },
             ]}
+            defaultSort={{ column: "createdAt", order: "des" }}
           />
         </Route>
-        <Route path="/admin/sources/active">
+        <Route path="/admin/fatwa/live">
           <View
-            key="allJamia"
-            Element={SingleJamia}
-            defaultSort={{ column: "joined", order: "des" }}
-            id="allJamia"
-            api="api/admin/sources/active/filter?"
+            key="allFatwa"
+            Element={SingleFatwa}
+            id="allFatwa"
+            api="api/admin/allfatwa/filter?"
             categories={[
               {
-                name: "role",
-                bridge: "is",
+                name: "topic",
                 input: (
                   <Combobox
-                    label=<FormattedMessage id="type" defaultMessage="Type" />
-                    options={[
-                      { label: "Jamia", value: "jamia" },
-                      { label: "Mufti", value: "mufti" },
-                    ]}
+                    options={topics.map((option) => {
+                      return {
+                        label: option[locale],
+                        value: option,
+                      };
+                    })}
+                  />
+                ),
+              },
+              {
+                name: "title",
+                input: <Input label="Title" type="text" required={true} />,
+              },
+              {
+                name: "question",
+                input: <Input label="Question" type="text" required={true} />,
+              },
+              {
+                name: "answer",
+                input: <Input label="Answer" type="text" required={true} />,
+              },
+              {
+                name: "jamia",
+                input: (
+                  <Combobox
+                    id={ID(8)}
+                    maxHeight={500}
+                    label="jamia"
+                    data={["jamia 1", "jamia 2", "jamia 3"]}
+                    required={true}
+                  />
+                ),
+              },
+              {
+                name: "translation",
+                input: (
+                  <Combobox
+                    id={ID(8)}
+                    maxHeight={500}
+                    label="jamia"
+                    data={["Generated", "Manual"]}
+                    required={true}
                   />
                 ),
               },
             ]}
             columns={[
               {
-                column: <FormattedMessage id="id" defaultMessage="Id" />,
-                sort: false,
-                colCode: "id",
-              },
-              {
-                column: <FormattedMessage id="type" defaultMessage="Type" />,
+                column: (
+                  <FormattedMessage id="source" defaultMessage="Source" />
+                ),
                 sort: true,
-                colCode: "role",
+                colCode: "source",
               },
               {
-                column: <FormattedMessage id="name" defaultMessage="Name" />,
-                sort: false,
-                colCode: "name",
+                column: <FormattedMessage id="topic" defaultMessage="Topic" />,
+                sort: true,
+                colCode: "topic",
               },
               {
                 column: (
                   <FormattedMessage
-                    id="primeMufti"
-                    defaultMessage="Prime Mufti"
+                    id="translation"
+                    defaultMessage="Translation"
                   />
                 ),
-                sort: false,
-                colCode: "primeMufti",
-              },
-              {
-                column: (
-                  <FormattedMessage id="joined" defaultMessage="Joined" />
-                ),
                 sort: true,
-                colCode: "joined",
+                colCode: "translation",
               },
               {
-                column: <FormattedMessage id="fatwa" defaultMessage="Fatwa" />,
+                column: <FormattedMessage id="date" defaultMessage="Date" />,
                 sort: true,
-                colCode: "fatwa",
+                colCode: "createdAt",
               },
               {
-                column: (
-                  <FormattedMessage id="contact" defaultMessage="Contact" />
-                ),
+                column: <FormattedMessage id="title" defaultMessage="Title" />,
                 sort: false,
-                colCode: "contact",
+                colCode: "title",
               },
             ]}
+            defaultSort={{ column: "createdAt", order: "des" }}
           />
         </Route>
-        <Route path="/admin/sources/submissions">
+        <Route path="/admin/fatwa/pending">
           <View
-            key="allSourceSubmissions"
-            Element={SingleSourceSubmission}
-            defaultSort={{ column: "joined", order: "des" }}
-            id="jamiaSubmissions"
-            api="api/admin/sources/submissions/filter?"
+            key="allFatwaSubmission"
+            Element={SingleFatwaSubmission}
+            id="fatwaSubmissions"
+            api="api/admin/fatwaSubmissions/filter?"
             categories={[
               {
-                name: "role",
+                name: "topic",
                 input: (
                   <Combobox
-                    label=<FormattedMessage id="type" defaultMessage="Type" />
-                    options={[
-                      { label: "jamia", value: "jamia" },
-                      { label: "mufti", value: "mufti" },
-                    ]}
+                    options={topics.map((option) => {
+                      return {
+                        label: option[locale],
+                        value: option,
+                      };
+                    })}
+                  />
+                ),
+              },
+              {
+                name: "title",
+                input: <Input label="Title" type="text" required={true} />,
+              },
+              {
+                name: "question",
+                input: <Input label="Question" type="text" required={true} />,
+              },
+              {
+                name: "answer",
+                input: <Input label="Answer" type="text" required={true} />,
+              },
+              {
+                name: "jamia",
+                input: (
+                  <Combobox
+                    id={ID(8)}
+                    maxHeight={500}
+                    label="jamia"
+                    data={["jamia 1", "jamia 2", "jamia 3"]}
+                    required={true}
                   />
                 ),
               },
@@ -1103,40 +837,309 @@ function AllSources() {
               {
                 column: <FormattedMessage id="date" defaultMessage="Date" />,
                 sort: true,
-                colCode: "joined",
+                colCode: "createdAt",
               },
               {
-                column: <FormattedMessage id="name" defaultMessage="Name" />,
-                sort: false,
-                colCode: "name",
-              },
-              {
-                column: <FormattedMessage id="type" defaultMessage="Type" />,
+                column: <FormattedMessage id="topic" defaultMessage="Topic" />,
                 sort: true,
-                colCode: "role",
+                colCode: "topic",
               },
               {
                 column: (
-                  <FormattedMessage
-                    id="primeMufti"
-                    defaultMessage="primeMufti"
-                  />
+                  <FormattedMessage id="source" defaultMessage="Source" />
                 ),
-                sort: false,
-                colCode: "primeMufti",
+                sort: true,
+                colCode: "jamia",
               },
               {
-                column: (
-                  <FormattedMessage id="contact" defaultMessage="Contact" />
-                ),
+                column: <FormattedMessage id="title" defaultMessage="Title" />,
                 sort: false,
-                colCode: "contact",
               },
             ]}
+            defaultSort={{ column: "createdAt", order: "des" }}
           />
         </Route>
       </Switch>
     </div>
+  );
+}
+function SingleFatwaSubmission({ data, setData }) {
+  const { locale, setFatwaToEdit } = useContext(SiteContext);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const fatwa = data;
+  const history = useHistory();
+  const editFatwa = (path) => history.push(path);
+  function editFatwaSubmission(id) {
+    setFatwaToEdit(fatwa);
+    history.push("/admin/add");
+  }
+  function acceptFatwa() {
+    setLoading(true);
+    fetch(`/api/admin/fatwaSubmissions/accept/${fatwa._id}`, { method: "POST" })
+      .then((res) => res.json())
+      .then((data) => {
+        setLoading(false);
+        if (data.code === "ok") {
+          setData((prev) => {
+            return prev.filter((item) => item._id !== fatwa._id);
+          });
+        } else {
+          alert("something went wrong");
+        }
+      })
+      .catch((err) => {
+        alert("something went wrong!");
+        console.log(err);
+      });
+  }
+  function removeSubmission() {
+    setLoading(true);
+    fetch(`/api/admin/fatwaSubmissions/remove/${fatwa._id}`, {
+      method: "DELETE",
+    })
+      .then((res) => {
+        setLoading(false);
+        if (res.status === 200) {
+          setData((prev) => {
+            return prev.filter((item) => item._id !== fatwa._id);
+          });
+        } else {
+          alert("something went wrong!");
+        }
+      })
+      .catch((err) => {
+        alert("something went wrong!");
+        console.log(err);
+      });
+  }
+  return open ? (
+    <tr data-id={fatwa._id} className={`full ${loading ? "loading" : ""}`}>
+      <td className="label">Submitted</td>
+      <td className="data">
+        <FormattedDate
+          value={new Date(fatwa.createdAt)}
+          day="numeric"
+          month="numeric"
+          year="numeric"
+        />
+      </td>
+      <td className="label">topic</td>
+      <td className="data">{fatwa.topic[locale]}</td>
+      <td className="label">translation</td>
+      <td className="data">{fatwa.translation ? "Yes" : "No"}</td>
+      <td className="label">title (Bangla)</td>
+      <td className="data">{fatwa.title["bn-BD"]}</td>
+      {fatwa.title["en-US"] && (
+        <>
+          <td className="label">title (English)</td>
+          <td className="data">{fatwa.title["en-US"]}</td>
+        </>
+      )}
+      <td className="label">question (Bangla)</td>
+      <td className="data">{fatwa.ques["bn-BD"]}</td>
+      {fatwa.ques["en-US"] && (
+        <>
+          <td className="label">question (English)</td>
+          <td className="data">{fatwa.ques["en-US"]}</td>
+        </>
+      )}
+      <td className="label">answer (Bangla)</td>
+      <td className="data">{fatwa.ans["bn-BD"]}</td>
+      {fatwa.ans["en-US"] && (
+        <>
+          <td className="label">answer (English)</td>
+          <td className="data">{fatwa.ans["en-US"]}</td>
+        </>
+      )}
+      <td className="label">Ref.</td>
+      <td className="data">
+        <ul>
+          {fatwa.ref.map((item, i) =>
+            item.book ? (
+              <li key={item.book + item.part + item.page}>
+                book: {item.book}, part: {item.part}, page: {item.page}
+              </li>
+            ) : (
+              <li key={item.sura + item.aayat}>
+                sura: {item.sura}, aayat: {item.aayat}
+              </li>
+            )
+          )}
+        </ul>
+      </td>
+      <td className="btns data">
+        <Submit
+          loading={loading}
+          onClick={acceptFatwa}
+          label={
+            <>
+              <ion-icon name="checkmark-outline"></ion-icon> Accept
+            </>
+          }
+        />
+        <button disabled={loading} onClick={() => setOpen(false)}>
+          <ion-icon name="chevron-up-outline"></ion-icon> Hide Detail
+        </button>
+        <button disabled={loading} onClick={editFatwaSubmission}>
+          <ion-icon name="pencil-outline"></ion-icon> Edit
+        </button>
+        <Submit
+          loading={loading}
+          onClick={removeSubmission}
+          label={
+            <>
+              <ion-icon name="trash-outline"></ion-icon> Delete
+            </>
+          }
+        />
+      </td>
+    </tr>
+  ) : (
+    <tr
+      className={loading ? "loading" : ""}
+      data-id={fatwa._id}
+      onClick={() => setOpen(true)}
+    >
+      <td>
+        <FormattedDate
+          value={new Date(fatwa.createdAt)}
+          day="numeric"
+          month="numeric"
+          year="numeric"
+        />
+      </td>
+      <td>{fatwa.topic[locale]}</td>
+      <td>{fatwa.source.name[locale]}</td>
+      <td>{fatwa.title[locale]}</td>
+    </tr>
+  );
+}
+function SingleFatwa({ data, setData }) {
+  const { locale } = useContext(SiteContext);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const fatwa = data;
+  const history = useHistory();
+  const editFatwa = (path) => history.push(path);
+  function deleteFatwa() {
+    setLoading(true);
+    fetch(`/api/admin/fatwa/`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fatwa: fatwa._id, source: fatwa.source._id }),
+    })
+      .then((res) => {
+        setLoading(false);
+        if (res.status === 200) {
+          setData((prev) => {
+            return prev.filter((item) => item._id !== fatwa._id);
+          });
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+  return open ? (
+    <tr data-id={fatwa._id} className={`${open ? "full" : ""}`}>
+      <td className="label">Added</td>
+      <td className="data">
+        <FormattedDate
+          value={new Date(fatwa.createdAt)}
+          day="numeric"
+          month="numeric"
+          year="numeric"
+        />
+      </td>
+      <td className="label">jamia</td>
+      <td className="data">{fatwa.jamia}</td>
+      <td className="label">topic</td>
+      <td className="data">{fatwa.topic[locale]}</td>
+      <td className="label">title (Bangla)</td>
+      <td className="data">
+        <Link target="_blank" to={`/fatwa/${fatwa.link["bn-BD"]}`}>
+          {fatwa.title["bn-BD"]}
+        </Link>
+      </td>
+      {fatwa.title["en-US"] && (
+        <>
+          <td className="label">title (English)</td>
+          <td className="data">
+            <Link to={`/fatwa/${fatwa.link["en-US"]}`}>
+              {fatwa.title["en-US"]}
+            </Link>
+          </td>
+        </>
+      )}
+      <td className="label">question (Bangla)</td>
+      <td className="data">{fatwa.ques["bn-BD"]}</td>
+      {fatwa.ques["en-US"] && (
+        <>
+          <td className="label">question (English)</td>
+          <td className="data">{fatwa.ques["en-US"]}</td>
+        </>
+      )}
+      <td className="label">answer (Bangla)</td>
+      <td className="data">{fatwa.ans["bn-BD"]}</td>
+      {fatwa.ans["en-US"] && (
+        <>
+          <td className="label">answer (English)</td>
+          <td className="data">{fatwa.ans["en-US"]}</td>
+        </>
+      )}
+      <td className="label">Ref.</td>
+      <td className="data">
+        <ul>
+          {fatwa.ref &&
+            fatwa.ref.map((item, i) =>
+              item.book ? (
+                <li key={item.book + item.part + item.page}>
+                  <FormattedMessage id="book" defaultMessage="Book" />:{" "}
+                  {item.book},{" "}
+                  <FormattedMessage id="part" defaultMessage="Part" />:{" "}
+                  <FormattedNumber value={item.part} />,{" "}
+                  <FormattedMessage id="page" defaultMessage="Page" />:{" "}
+                  <FormattedNumber value={item.page} />
+                </li>
+              ) : (
+                <li key={item.sura + item.aayat}>
+                  sura: {item.sura}, aayat: {item.aayat}
+                </li>
+              )
+            )}
+        </ul>
+      </td>
+      <td className="btns data">
+        <button onClick={() => setOpen(false)}>
+          <ion-icon name="chevron-up-outline"></ion-icon> Hide Detail
+        </button>
+        <Submit
+          loading={loading}
+          onClick={deleteFatwa}
+          label={
+            <>
+              <ion-icon name="trash-outline"></ion-icon> Delete
+            </>
+          }
+        />
+      </td>
+    </tr>
+  ) : (
+    <tr data-id={fatwa._id} onClick={() => setOpen(true)}>
+      <td>{fatwa.source.name[locale]}</td>
+      <td>{fatwa.topic[locale]}</td>
+      <td>{fatwa.translation ? "Yes" : "No"}</td>
+      <td>
+        <FormattedDate
+          value={new Date(fatwa.createdAt)}
+          day="numeric"
+          month="numeric"
+          year="numeric"
+        />
+      </td>
+      <td>{fatwa.title[locale]}</td>
+    </tr>
   );
 }
 
@@ -1172,94 +1175,13 @@ function Patreons() {
   );
 }
 
-function SingleUserReview() {
-  return (
-    <tr>
-      <td>Make user review rows</td>
-    </tr>
-  );
-}
-function SingleUserQuestions({ data, setData }) {
-  const { locale } = useContext(SiteContext);
-  const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const ques = data;
-  function remove() {
-    setLoading(true);
-    fetch("/api/admin/removeUserQuestion", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ _id: ques._id }),
-    })
-      .then((res) => {
-        setLoading(false);
-        if (res.status === 200) {
-          setData((prev) => prev.filter((item) => item._id !== ques._id));
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-        alert("something went wrong!");
-      });
-  }
-  return !open ? (
-    <tr onClick={() => setOpen(true)}>
-      <td>
-        <FormattedDate
-          value={ques.createdAt}
-          day="numeric"
-          month="numeric"
-          year="2-digit"
-        />
-      </td>
-      <td>
-        {ques.user.name}
-        <span>{ques.user.add}</span>
-      </td>
-      <td>{ques.ques.body}</td>
-      <td>
-        <FormattedNumber value={ques.ansCount} />
-      </td>
-    </tr>
-  ) : (
-    <tr className="full">
-      <td className="label">Submitted</td>
-      <td className="data">
-        <FormattedDate
-          value={ques.createdAt}
-          day="numeric"
-          month="numeric"
-          year="2-digit"
-        />
-      </td>
-      <td className="label">Name</td>
-      <td className="data">{ques.user.name}</td>
-      <td className="label">Address</td>
-      <td className="data">{ques.user.add}</td>
-      <td className="label">Mobile</td>
-      <td className="data">
-        <a href={`tel:${ques.user.mob}`}>{ques.user.mob}</a>
-      </td>
-      <td className="label">Topic</td>
-      <td className="data">{ques.ques.topic[locale]}</td>
-      <td className="label">Question</td>
-      <td className="data">{ques.ques.body}</td>
-      <td className="data btns">
-        <button className="hideDetail" onClick={() => setOpen(false)}>
-          <ion-icon name="chevron-up-outline"></ion-icon>Hide Detail
-        </button>
-        <button disabled={loading} className="remove" onClick={remove}>
-          <ion-icon name="trash-outline"></ion-icon>Remove
-        </button>
-      </td>
-    </tr>
-  );
-}
 function UserReview() {
   const { locale } = useContext(SiteContext);
   return (
     <div className="view">
-      <h1>User Review</h1>
+      <h1>
+        <FormattedMessage id="review" defaultMessage="User Review" />
+      </h1>
       <Tabs
         page="/admin/user/"
         tabs={[
@@ -1385,11 +1307,96 @@ function UserReview() {
     </div>
   );
 }
+function SingleUserReview() {
+  return (
+    <tr>
+      <td>Make user review rows</td>
+    </tr>
+  );
+}
+function SingleUserQuestions({ data, setData }) {
+  const { locale } = useContext(SiteContext);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const ques = data;
+  function remove() {
+    setLoading(true);
+    fetch("/api/admin/removeUserQuestion", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ _id: ques._id }),
+    })
+      .then((res) => {
+        setLoading(false);
+        if (res.status === 200) {
+          setData((prev) => prev.filter((item) => item._id !== ques._id));
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        alert("something went wrong!");
+      });
+  }
+  return !open ? (
+    <tr onClick={() => setOpen(true)}>
+      <td>
+        <FormattedDate
+          value={ques.createdAt}
+          day="numeric"
+          month="numeric"
+          year="2-digit"
+        />
+      </td>
+      <td>
+        {ques.user.name}
+        <span>{ques.user.add}</span>
+      </td>
+      <td>{ques.ques.body}</td>
+      <td>
+        <FormattedNumber value={ques.ansCount} />
+      </td>
+    </tr>
+  ) : (
+    <tr className="full">
+      <td className="label">Submitted</td>
+      <td className="data">
+        <FormattedDate
+          value={ques.createdAt}
+          day="numeric"
+          month="numeric"
+          year="2-digit"
+        />
+      </td>
+      <td className="label">Name</td>
+      <td className="data">{ques.user.name}</td>
+      <td className="label">Address</td>
+      <td className="data">{ques.user.add}</td>
+      <td className="label">Mobile</td>
+      <td className="data">
+        <a href={`tel:${ques.user.mob}`}>{ques.user.mob}</a>
+      </td>
+      <td className="label">Topic</td>
+      <td className="data">{ques.ques.topic[locale]}</td>
+      <td className="label">Question</td>
+      <td className="data">{ques.ques.body}</td>
+      <td className="data btns">
+        <button className="hideDetail" onClick={() => setOpen(false)}>
+          <ion-icon name="chevron-up-outline"></ion-icon>Hide Detail
+        </button>
+        <button disabled={loading} className="remove" onClick={remove}>
+          <ion-icon name="trash-outline"></ion-icon>Remove
+        </button>
+      </td>
+    </tr>
+  );
+}
 
 function QuestionFeed() {
   return (
     <div className="view questionFeed">
-      <h1 className="viewTitle">Question feed</h1>
+      <h1 className="viewTitle">
+        <FormattedMessage id="questionFeed" defaultMessage="Question Feed" />
+      </h1>
       <Tabs
         page="/admin/questionFeed/"
         tabs={[{ label: "New Questions", link: "newQuestions" }]}
@@ -1418,7 +1425,7 @@ function NewQuestions() {
     const query = encodeURL(filters);
     const sortOrder = encodeURL(sort);
     const options = { headers: { "Accept-Language": locale }, signal: signal };
-    const url = `/api/source/questionFeed/filter?${query}&${sortOrder}`;
+    const url = `/api/admin/questionFeed/filter?${query}&${sortOrder}`;
     fetch(url, options)
       .then((res) => res.json())
       .then((data) => {
@@ -1541,6 +1548,7 @@ function SingleQuestion({ data }) {
     </li>
   );
 }
+
 function UserQuestion({ history, match }) {
   const { user } = useContext(SiteContext);
   const [loading, setLoading] = useState(true);
@@ -1548,7 +1556,7 @@ function UserQuestion({ history, match }) {
   const [answered, setAnswered] = useState(false);
   useEffect(getData, []);
   function getData() {
-    fetch("/api/source/userQues/" + match.params._id)
+    fetch("/api/admin/userQues/" + match.params._id)
       .then((res) => res.json())
       .then((data) => {
         setLoading(false);
@@ -1694,32 +1702,6 @@ function Answer({ ques, ans, setQues }) {
         alert("something went wrong");
       });
   }
-  function vote(e) {
-    setLoading(true);
-    const options = {
-      method: "PUT",
-      headers: { "Content-type": "application/json" },
-      body: JSON.stringify({
-        voter: user._id,
-        ans_id: ans._id,
-        vote: e.target.getAttribute("name").includes("up") ? "up" : "down",
-      }),
-    };
-    fetch(`/api/source/userQues/vote/${ques._id}`, options)
-      .then((res) => res.json())
-      .then((data) => {
-        setLoading(false);
-        if (data.code === "ok") {
-          setQues(data.content);
-        } else {
-          throw data.code;
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-        alert("something went wrong");
-      });
-  }
   function edit() {
     SS.set("ansFatwa-ans", ans.body);
     SS.set("ansFatwa-title", ans.title);
@@ -1733,7 +1715,7 @@ function Answer({ ques, ans, setQues }) {
       body: JSON.stringify({ source: ans.source._id, _id: ans._id }),
     };
     setLoading(true);
-    fetch(`/api/source/userQues/answer/${ques._id}`, options)
+    fetch(`/api/admin/userQues/answer/${ques._id}`, options)
       .then((res) => res.json())
       .then((data) => {
         setLoading(false);
@@ -1756,11 +1738,11 @@ function Answer({ ques, ans, setQues }) {
     >
       <div className="vote">
         <div className={`content ${voted}`}>
-          <ion-icon onClick={vote} name="chevron-up-outline"></ion-icon>
+          <ion-icon name="chevron-up-outline"></ion-icon>
           <p className="voteCount">
             <FormattedNumber value={ans.vote.count} />
           </p>
-          <ion-icon onClick={vote} name="chevron-down-outline"></ion-icon>
+          <ion-icon name="chevron-down-outline"></ion-icon>
         </div>
       </div>
       <div className="content">
