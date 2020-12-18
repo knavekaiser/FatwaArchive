@@ -82,9 +82,11 @@
     ul {
       li {
         a {
-          padding: 0.5rem 1rem;
           display: block;
-          width: 100%;
+          overflow: hidden;
+          padding: 0.5rem 1rem;
+          white-space: nowrap;
+          text-overflow: ellipsis;
           &.hover {
             background-color: $light-hover;
           }

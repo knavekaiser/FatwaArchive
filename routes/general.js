@@ -36,8 +36,8 @@ router.route("/fatwa/:link").get((req, res) => {
     status: "live",
     [`link.${getLan(req.params.link)}`]: req.params.link,
   };
-  console.log(getLan(req.params.link));
-  Fatwa.findOne(query, "-status")
+  console.log(query);
+  Fatwa.findOne(query)
     .populate("source", "name primeMufti")
     .then((fatwa) => {
       console.log(fatwa);
@@ -330,10 +330,8 @@ router.route("/logout").get((req, res) => {
 });
 
 router.route("/passRecovery").put((req, res) => {
-  Source.findOne({ id: req.body.id }).then((source) => {
-    if (source === null) {
-      res.status(404).json("profile not found");
-    } else {
+  Source.findOne({ id: req.body.id, status: "active" }).then((source) => {
+    if (source) {
       const code = genCode(4);
       PassRecoveryToken.find({ id: req.body.id })
         .then((token) => {
@@ -344,29 +342,28 @@ router.route("/passRecovery").put((req, res) => {
           }
         })
         .then(() => bcrypt.hash(code, 10))
-        .then((hash) => {
-          return new PassRecoveryToken({
-            id: source.id,
-            code: hash,
-          });
-        })
-        .then((newToken) => newToken.save())
+        .then((hash) =>
+          new PassRecoveryToken({ id: source.id, code: hash }).save()
+        )
         .then(() => {
+          const url = "http://api.greenweb.com.bd/api.php/?";
           const message = encodeURI(
             `Hello,\nYour password reset code is ${code}. \nFatwa Archive.`
           );
           return fetch(
-            `http://api.greenweb.com.bd/api.php/?token=${process.env.SMS_TOKEN}&to=${source.appl.mob}&message=${message}`,
+            `token=${process.env.SMS_TOKEN}&to=${source.appl.mob}&message=${message}`,
             { method: "POST" }
           );
         })
         .then(() => {
-          res.json("code sent");
+          res.json({ code: "ok", message: "code sent" });
         })
         .catch((err) => {
           console.log(err);
-          res.status(500).json(err);
+          res.status(500).json({ code: 500, message: "internal error" });
         });
+    } else {
+      res.status(404).json({ code: 404, message: "profile not found" });
     }
   });
 });

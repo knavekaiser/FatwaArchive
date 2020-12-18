@@ -22,7 +22,6 @@ function Fatwa({ match }) {
   const history = useHistory();
   const [loading, setLoading] = useState(true);
   const [fatwa, setFatwa] = useState({});
-  const [report, setReport] = useState(false);
   const fixUrlOnLocaleChange = () =>
     fatwa.link && history.push(`/fatwa/${fatwa.link[locale]}`);
   useEffect(fixUrlOnLocaleChange, [locale]);

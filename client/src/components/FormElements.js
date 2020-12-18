@@ -88,12 +88,9 @@ function chkPass(pwd) {
     nConsecAlphaUC = 0,
     nConsecAlphaLC = 0,
     nConsecNumber = 0,
-    nConsecSymbol = 0,
-    nConsecCharType = 0,
     nSeqAlpha = 0,
     nSeqNumber = 0,
     nSeqSymbol = 0,
-    nSeqChar = 0,
     nReqChar = 0,
     nMultConsecCharType = 0;
   var nMultRepChar = 1,
@@ -147,18 +144,16 @@ function chkPass(pwd) {
     for (var a = 0; a < arrPwdLen; a++) {
       if (arrPwd[a].match(/[A-Z]/g)) {
         if (nTmpAlphaUC !== "") {
-          if (nTmpAlphaUC + 1 == a) {
+          if (nTmpAlphaUC + 1 === a) {
             nConsecAlphaUC++;
-            nConsecCharType++;
           }
         }
         nTmpAlphaUC = a;
         nAlphaUC++;
       } else if (arrPwd[a].match(/[a-z]/g)) {
         if (nTmpAlphaLC !== "") {
-          if (nTmpAlphaLC + 1 == a) {
+          if (nTmpAlphaLC + 1 === a) {
             nConsecAlphaLC++;
-            nConsecCharType++;
           }
         }
         nTmpAlphaLC = a;
@@ -168,9 +163,8 @@ function chkPass(pwd) {
           nMidChar++;
         }
         if (nTmpNumber !== "") {
-          if (nTmpNumber + 1 == a) {
+          if (nTmpNumber + 1 === a) {
             nConsecNumber++;
-            nConsecCharType++;
           }
         }
         nTmpNumber = a;
@@ -180,9 +174,7 @@ function chkPass(pwd) {
           nMidChar++;
         }
         if (nTmpSymbol !== "") {
-          if (nTmpSymbol + 1 == a) {
-            nConsecSymbol++;
-            nConsecCharType++;
+          if (nTmpSymbol + 1 === a) {
           }
         }
         nTmpSymbol = a;
@@ -191,7 +183,7 @@ function chkPass(pwd) {
       /* Internal loop through password to check for repeat characters */
       var bCharExists = false;
       for (var b = 0; b < arrPwdLen; b++) {
-        if (arrPwd[a] == arrPwd[b] && a != b) {
+        if (arrPwd[a] === arrPwd[b] && a !== b) {
           /* repeat character exists */
           bCharExists = true;
           /*
@@ -215,11 +207,10 @@ function chkPass(pwd) {
       var sFwd = sAlphas.substring(s, parseInt(s + 3));
       var sRev = sFwd.strReverse();
       if (
-        pwd.toLowerCase().indexOf(sFwd) != -1 ||
-        pwd.toLowerCase().indexOf(sRev) != -1
+        pwd.toLowerCase().indexOf(sFwd) !== -1 ||
+        pwd.toLowerCase().indexOf(sRev) !== -1
       ) {
         nSeqAlpha++;
-        nSeqChar++;
       }
     }
 
@@ -228,11 +219,10 @@ function chkPass(pwd) {
       var sFwd = sNumerics.substring(s, parseInt(s + 3));
       var sRev = sFwd.strReverse();
       if (
-        pwd.toLowerCase().indexOf(sFwd) != -1 ||
-        pwd.toLowerCase().indexOf(sRev) != -1
+        pwd.toLowerCase().indexOf(sFwd) !== -1 ||
+        pwd.toLowerCase().indexOf(sRev) !== -1
       ) {
         nSeqNumber++;
-        nSeqChar++;
       }
     }
 
@@ -241,11 +231,10 @@ function chkPass(pwd) {
       var sFwd = sSymbols.substring(s, parseInt(s + 3));
       var sRev = sFwd.strReverse();
       if (
-        pwd.toLowerCase().indexOf(sFwd) != -1 ||
-        pwd.toLowerCase().indexOf(sRev) != -1
+        pwd.toLowerCase().indexOf(sFwd) !== -1 ||
+        pwd.toLowerCase().indexOf(sRev) !== -1
       ) {
         nSeqSymbol++;
-        nSeqChar++;
       }
     }
 
@@ -327,12 +316,12 @@ function chkPass(pwd) {
     var arrCharsIds = ["nLength", "nAlphaUC", "nAlphaLC", "nNumber", "nSymbol"];
     var arrCharsLen = arrChars.length;
     for (var c = 0; c < arrCharsLen; c++) {
-      if (arrCharsIds[c] == "nLength") {
+      if (arrCharsIds[c] === "nLength") {
         var minVal = parseInt(nMinPwdLen - 1);
       } else {
         var minVal = 0;
       }
-      if (arrChars[c] == parseInt(minVal + 1)) {
+      if (arrChars[c] === parseInt(minVal + 1)) {
         nReqChar++;
       } else if (arrChars[c] > parseInt(minVal + 1)) {
         nReqChar++;
@@ -355,7 +344,7 @@ function chkPass(pwd) {
     var arrCharsIds = ["nMidChar", "nRequirements"];
     var arrCharsLen = arrChars.length;
     for (var c = 0; c < arrCharsLen; c++) {
-      if (arrCharsIds[c] == "nRequirements") {
+      if (arrCharsIds[c] === "nRequirements") {
         var minVal = nMinReqChars;
       } else {
         var minVal = 0;
@@ -398,6 +387,8 @@ function chkPass(pwd) {
     return 0;
   }
 }
+
+console.log(chkPass("adfasdfsddefdsf"));
 
 export const ID = (length) => {
   var result = "";

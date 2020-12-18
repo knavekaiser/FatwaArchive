@@ -7,15 +7,14 @@ import {
   Input,
   Combobox,
   Textarea,
-  Submit,
   topics,
   SS,
+  Submit,
 } from "./FormElements";
 import "./CSS/JamiaProfile.min.css";
 import {
   FormattedDate,
   FormattedNumber,
-  FormattedTime,
   FormattedTimeParts,
   FormattedMessage,
 } from "react-intl";
@@ -642,9 +641,16 @@ function SingleFatwa({ data, setData }) {
         <button onClick={edit}>
           <ion-icon name="pencil-outline"></ion-icon> Edit
         </button>
-        <button onClick={deleteFatwa}>
-          <ion-icon name="trash-outline"></ion-icon> Delete Fatwa
-        </button>
+        <Submit
+          label={
+            <>
+              <ion-icon name="trash-outline"></ion-icon> Delete Fatwa
+            </>
+          }
+          loading={loading}
+          setLoading={setLoading}
+          onClick={deleteFatwa}
+        />
       </td>
     </tr>
   ) : (
@@ -665,7 +671,6 @@ function SingleFatwa({ data, setData }) {
 }
 
 function UserSubmissions() {
-  const { locale } = useContext(SiteContext);
   return (
     <div className="view">
       <h1 className="viewTitle">
@@ -720,15 +725,12 @@ function NewQuestions() {
   const { locale } = useContext(SiteContext);
   const [loading, setLoading] = useState(true);
   const [sort, setSort] = useState({ column: "createdAt", order: "asc" });
-  const [filters, setFilters] = useState({});
   const [data, setData] = useState([]);
   function fetchData() {
-    !loading && setLoading(true);
-    console.log("ran");
-    const query = encodeURL(filters);
+    setLoading(true);
     const sortOrder = encodeURL(sort);
     const options = { headers: { "Accept-Language": locale }, signal: signal };
-    const url = `/api/source/questionFeed/filter?${query}&${sortOrder}`;
+    const url = `/api/source/questionFeed/filter?&${sortOrder}`;
     fetch(url, options)
       .then((res) => res.json())
       .then((data) => {
@@ -741,7 +743,7 @@ function NewQuestions() {
       });
     return () => abortController.abort();
   }
-  useEffect(fetchData, [sort, filters]);
+  useEffect(fetchData, [sort]);
   return (
     <>
       <div className="filters">
@@ -779,13 +781,11 @@ function NewQuestions() {
 function SingleQuestion({ data }) {
   const { locale, user } = useContext(SiteContext);
   const history = useHistory();
-  const [loading, setLoading] = useState(false);
-  const [open, setOpen] = useState(false);
   const container = useRef(null);
   return (
     <li
       ref={container}
-      className={`question ${!open ? "mini" : ""}`}
+      className={`question mini`}
       onClick={(e) => {
         if (e.target === container.current) {
           history.push("/jamia/userQuestion/" + data._id);
@@ -866,23 +866,19 @@ function Answer({ ques, ans, setQues }) {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [voted, setVoted] = useState(() => {
-    let vote = false;
-    ans.vote.voters.some((voter) => {
-      if (voter.source === user._id) {
-        vote = voter.vote;
-      }
-    });
+    let vote =
+      ans.vote.voters.some(
+        (voter) => voter.source === user._id && voter.vote
+      ) || false;
     return vote;
   });
   useEffect(() => {
-    let vote = false;
-    ans.vote.voters.some((voter) => {
-      if (voter.source === user._id) {
-        vote = voter.vote;
-      }
-    });
-    setVoted(vote);
-  }, [ans]);
+    setVoted(
+      ans.vote.voters.some(
+        (voter) => voter.source === user._id && voter.vote
+      ) || false
+    );
+  }, [ans, user._id]);
   const history = useHistory();
   function vote(e) {
     setLoading(true);
@@ -947,7 +943,7 @@ function Answer({ ques, ans, setQues }) {
         !open ? "mini" : ""
       }`}
     >
-      <div className="vote">
+      <div className="vote" disabled={loading}>
         <div className={`content ${voted}`}>
           <ion-icon onClick={vote} name="chevron-up-outline"></ion-icon>
           <p className="voteCount">

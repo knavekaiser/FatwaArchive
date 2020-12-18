@@ -29,6 +29,9 @@
   }
   .content {
     .result {
+      a {
+        white-space: normal;
+      }
       padding: 1rem 0.5rem;
       display: grid;
       grid-gap: 0.4rem;
@@ -45,6 +48,7 @@
         line-height: 19px;
       }
       .ques {
+        // display: none;
         line-height: 19px;
         max-height: 2.5rem;
         -webkit-line-clamp: 1;
@@ -55,6 +59,7 @@
         }
       }
       .ans {
+        display: none;
         cursor: default;
         color: rgba(0, 0, 0, 0.8);
         font-size: 0.85rem;

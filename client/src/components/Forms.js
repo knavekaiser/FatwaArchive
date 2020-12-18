@@ -17,7 +17,6 @@ import {
   emptyFieldWarning,
 } from "./FormElements";
 import { FormattedMessage, FormattedNumber } from "react-intl";
-import { Toast } from "./Modals";
 
 const refInputBook = [
   [
@@ -55,14 +54,6 @@ const refInputSura = [
   ],
 ];
 const validateMoblie = (str) => !!/\+8801\d{9}/.exec(str);
-const getLan = (sentence) => {
-  const str = sentence.replace(/\s/g, "");
-  if ((str.match(/[a-z0-9]/gi) || []).length / str.length > 0.9) {
-    return "en-US";
-  } else {
-    return "bn-BD";
-  }
-};
 
 function JamiaDetail() {
   return (
@@ -158,11 +149,12 @@ function LoginDetail({
         .catch((err) => console.log(err));
     }
   };
-  useEffect(() => {
+  function checkId() {
     validateId();
     $(".reg #id input").addEventListener("blur", validateId);
     return () => setIdIsValid(null);
-  }, []);
+  }
+  useEffect(checkId, []);
   useEffect(() => {
     if (pattern === "[a-zA-Z0-9]{8,20}") {
       if (value.length < 8) {
@@ -395,10 +387,11 @@ export const JamiaRegister = () => {
   const [step, setStep] = useState(1);
   const [success, setSuccess] = useState(false);
   const history = useHistory();
-  useEffect(() => {
+  function redirect() {
     user && history.push("/");
     return () => setSuccess(false);
-  }, []);
+  }
+  useEffect(redirect, [setSuccess]);
   const [loading, setLoading] = useState(false);
   const [idIsValid, setIdIsValid] = useState(null);
   const [validatingId, setValidatingId] = useState(false);
@@ -617,9 +610,8 @@ export const PassRecovery = () => {
   const [sendingCode, setSendingCode] = useState(false);
   const [timer, setTimer] = useState(60);
   const [attempts, setAttempts] = useState(0);
-  const [pattern, setPattern] = useState(".{8,20}");
-  let interval;
   useEffect(() => {
+    let interval;
     if (step === 2 || step === 3) {
       interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
     }
@@ -627,29 +619,29 @@ export const PassRecovery = () => {
       clearInterval(interval);
     };
   }, [step]);
-  useEffect(() => {
+  function resetTimer() {
     if (step === 2 && timer <= 0 && !resend) {
       setResend(true);
     }
-  }, [timer]);
+  }
+  useEffect(resetTimer, [timer]);
   function resendCode() {
     setSendingCode(true);
     fetch(`/api/passRecovery`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id: id }),
     })
-      .then((res) => {
+      .then((res) => res.json())
+      .then((data) => {
         setLoading(false);
         setSendingCode(false);
         setAttempts(0);
         setWrongCode(false);
-        if (res.status === 200) {
+        if (data.code === "ok") {
           setTimer(60);
         } else {
-          throw "something went worng";
+          alert("something went wrong");
         }
       })
       .catch((err) => {
@@ -751,7 +743,7 @@ export const PassRecovery = () => {
               dataId="id"
               type="text"
               strict={/^[a-zA-Z0-9]+$/}
-              pattern={pattern}
+              pattern=".{8,20}"
               warning="a-z, A-Z, 0-9"
               onChange={(target) => {
                 setId(target.value);
@@ -1052,7 +1044,7 @@ export const AdminLogin = () => {
 export const AddFatwaForm = ({ match }) => {
   const [loading, setLoading] = useState(false);
   const history = useHistory();
-  const { user, fatwaToEdit, setFatwaToEdit, locale } = useContext(SiteContext);
+  const { fatwaToEdit, setFatwaToEdit, locale } = useContext(SiteContext);
   const [preFill, setPreFill] = useState(() => {
     if (fatwaToEdit === null) {
       return {
@@ -1125,7 +1117,7 @@ export const AddFatwaForm = ({ match }) => {
     }
   });
   const [sameExists, setSameExists] = useState("");
-  useEffect(() => {
+  function setCleanup() {
     return () => {
       if (fatwaToEdit) {
         setFatwaToEdit(null);
@@ -1138,7 +1130,8 @@ export const AddFatwaForm = ({ match }) => {
         SS.remove("editFatwa-ansEn");
       }
     };
-  }, []);
+  }
+  useEffect(setCleanup, []);
   function submit(e) {
     e.preventDefault();
     let data, url, options;
@@ -1149,22 +1142,22 @@ export const AddFatwaForm = ({ match }) => {
           topic: JSON.parse(SS.get("editFatwa-topic")),
         }),
         ...(fatwaToEdit.title["bn-BD"] !== SS.get("editFatwa-title") && {
-          ["title.bn-BD"]: SS.get("editFatwa-title"),
+          "title.bn-BD": SS.get("editFatwa-title"),
         }),
         ...(fatwaToEdit.title["en-US"] !== SS.get("editFatwa-titleEn") && {
-          ["title.en-US"]: SS.get("editFatwa-titleEn"),
+          "title.en-US": SS.get("editFatwa-titleEn"),
         }),
         ...(fatwaToEdit.ques["bn-BD"] !== SS.get("editFatwa-ques") && {
-          ["ques.bn-BD"]: SS.get("editFatwa-ques"),
+          "ques.bn-BD": SS.get("editFatwa-ques"),
         }),
         ...(fatwaToEdit.ques["en-US"] !== SS.get("editFatwa-quesEn") && {
-          ["ques.en-US"]: SS.get("editFatwa-quesEn"),
+          "ques.en-US": SS.get("editFatwa-quesEn"),
         }),
         ...(fatwaToEdit.ans["bn-BD"] !== SS.get("editFatwa-ans") && {
-          ["ans.bn-BD"]: SS.get("editFatwa-ans"),
+          "ans.bn-BD": SS.get("editFatwa-ans"),
         }),
         ...(fatwaToEdit.ans["en-US"] !== SS.get("editFatwa-ansEn") && {
-          ["ans.en-US"]: SS.get("editFatwa-ansEn"),
+          "ans.en-US": SS.get("editFatwa-ansEn"),
         }),
         ref: [
           ...GetGroupData($(".addFatwa #books.multipleInput")),
@@ -1398,9 +1391,9 @@ export const AddFatwaForm = ({ match }) => {
 export const UserQuestionAnswerForm = ({ ques, setQues, _id }) => {
   const [loading, setLoading] = useState(false);
   const history = useHistory();
-  const { fatwaToEdit, setFatwaToEdit, locale } = useContext(SiteContext);
+  const { locale } = useContext(SiteContext);
   const [sameExists, setSameExists] = useState("");
-  const [preFill, setPreFill] = useState(() => {
+  const [preFill] = useState(() => {
     if (SS.get("ansFatwa-ref")) {
       let inputBooks = [];
       let inputSura = [];
@@ -1560,7 +1553,6 @@ export const UserQuestionReportForm = ({ _id }) => {
   const [sub, setSub] = useState("");
   const [msg, setMsg] = useState("");
   const history = useHistory();
-  const { user } = useContext(SiteContext);
   function submit(e) {
     e.preventDefault();
     setLoading(true);
@@ -1585,9 +1577,10 @@ export const UserQuestionReportForm = ({ _id }) => {
         alert("something went wrong");
       });
   }
-  useEffect(() => {
+  function redirect() {
     success && history.goBack();
-  }, [success]);
+  }
+  useEffect(redirect, [success]);
   return (
     <form className="reportUserQues" onSubmit={submit}>
       <h2>Report</h2>
@@ -1785,16 +1778,13 @@ export const PasswordEditForm = ({ api }) => {
 
 export const Report = ({ fatwa, close }) => {
   const [loading, setLoading] = useState(false);
-  const jamia = fatwa.jamia;
   function submit(e) {
     e.preventDefault();
     if (SS.get("reportFatwa-name").length < 3) {
       emptyFieldWarning("#name", "input", "Enter a valid name");
       return;
     }
-    if (
-      !/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g.exec(SS.get("reportFatwa-email"))
-    ) {
+    if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/g.exec(SS.get("reportFatwa-email"))) {
       emptyFieldWarning("#email", "input", "Enter a valid email");
       return;
     }

@@ -53,16 +53,18 @@ function Searchbar({ onFocus, children }) {
       setVisibleInput(e.target.value);
     }
   }
-  useEffect(() => {
+  function setInitialUrl() {
     setVisibleInput(
       decodeURI(history.location.search).replace("?q=", "").replaceAll("+", " ")
     );
-  }, []);
-  useEffect(() => {
+  }
+  useEffect(setInitialUrl, []);
+  function suggestionEffect() {
     history.location.pathname === "/" &&
       suggestions.length > 0 &&
       setShowSuggestion(true);
-  }, [suggestions]);
+  }
+  useEffect(suggestionEffect, [suggestions]);
   const abortController = new AbortController();
   const signal = abortController.signal;
   const fetchData = () => {
@@ -95,58 +97,65 @@ function Searchbar({ onFocus, children }) {
   return (
     <form ref={form} id="searchbar" onSubmit={submit}>
       {children}
-      <input
-        ref={input}
-        onFocus={handleFocus}
-        onKeyDown={(e) => {
-          if (e.keyCode === 38 || e.keyCode === 40) {
-            e.preventDefault();
-            const suggestions = $$(".suggestions ul li");
-            for (var i = 0; i < suggestions.length; i++) {
-              const currentItem = suggestions[i].children[0];
-              const nextItem =
-                suggestions[i + 1] && suggestions[i + 1].children[0];
-              const prevItem =
-                suggestions[i - 1] && suggestions[i - 1].children[0];
-              if (currentItem.classList.contains("hover")) {
-                currentItem.classList.remove("hover");
-                if (e.keyCode === 38) {
-                  if (i > 0) {
-                    prevItem.classList.add("hover");
-                    setVisibleInput(prevItem.textContent);
-                  }
-                } else {
-                  if (i < suggestions.length - 1) {
-                    nextItem.classList.add("hover");
-                    setVisibleInput(nextItem.textContent);
+      <FormattedMessage
+        id="searchbar.placeholder"
+        defaultMessage="Question or topic..."
+      >
+        {(msg) => (
+          <input
+            ref={input}
+            onFocus={handleFocus}
+            onKeyDown={(e) => {
+              if (e.keyCode === 38 || e.keyCode === 40) {
+                e.preventDefault();
+                const suggestions = $$(".suggestions ul li");
+                for (var i = 0; i < suggestions.length; i++) {
+                  const currentItem = suggestions[i].children[0];
+                  const nextItem =
+                    suggestions[i + 1] && suggestions[i + 1].children[0];
+                  const prevItem =
+                    suggestions[i - 1] && suggestions[i - 1].children[0];
+                  if (currentItem.classList.contains("hover")) {
+                    currentItem.classList.remove("hover");
+                    if (e.keyCode === 38) {
+                      if (i > 0) {
+                        prevItem.classList.add("hover");
+                        setVisibleInput(prevItem.textContent);
+                      }
+                    } else {
+                      if (i < suggestions.length - 1) {
+                        nextItem.classList.add("hover");
+                        setVisibleInput(nextItem.textContent);
+                      }
+                    }
+                    break;
+                  } else if (i === suggestions.length - 1) {
+                    if (e.keyCode === 38) {
+                      suggestions[suggestions.length - 1]
+                        .querySelector("a")
+                        .classList.add("hover");
+                    } else {
+                      suggestions[0].querySelector("a").classList.add("hover");
+                    }
+                    break;
                   }
                 }
-                break;
-              } else if (i === suggestions.length - 1) {
-                if (e.keyCode === 38) {
-                  suggestions[suggestions.length - 1]
-                    .querySelector("a")
-                    .classList.add("hover");
-                } else {
-                  suggestions[0].querySelector("a").classList.add("hover");
-                }
-                break;
+              } else if (e.keyCode === 13) {
+                setSearchInput(visibleInput);
               }
+            }}
+            className={
+              suggestions.length === 0 || !showSuggestion
+                ? ""
+                : "suggestionVisible"
             }
-          } else if (e.keyCode === 13) {
-            setSearchInput(visibleInput);
-          }
-        }}
-        className={
-          suggestions.length === 0 || !showSuggestion ? "" : "suggestionVisible"
-        }
-        onChange={change}
-        type="text"
-        placeholder={
-          locale === "bn-BD" ? "প্রশ্ন বা বিষয়বস্তু..." : "Question or topic..."
-        }
-        value={visibleInput}
-      />
+            onChange={change}
+            type="text"
+            placeholder={msg}
+            value={visibleInput}
+          />
+        )}
+      </FormattedMessage>
       <span className="warning">
         {locale === "bn-BD" ? "বাংলায় খুঁজুন" : "Search in English"}
       </span>

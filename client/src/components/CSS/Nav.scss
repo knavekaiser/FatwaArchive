@@ -57,6 +57,7 @@
   nav {
     grid-area: nv;
     .avatar {
+      z-index: 10;
       text-transform: uppercase;
       background: $blue;
       color: white;
@@ -65,8 +66,12 @@
       display: grid;
       place-items: center;
       position: relative;
+      grid-template-rows: 1fr;
       &:hover {
         background: rgba($blue, 0.7);
+      }
+      section {
+        height: 0;
       }
       .avatarOptions {
         position: absolute;

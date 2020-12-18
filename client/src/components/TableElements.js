@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useContext } from "react";
 import { SiteContext } from "../Context";
 import { Link, useHistory } from "react-router-dom";
 import { FormattedMessage } from "react-intl";
-import { camelize } from "./FormElements";
 import Footer from "./Footer";
 
 export const Sidebar = ({ views, children }) => {
@@ -10,11 +9,12 @@ export const Sidebar = ({ views, children }) => {
   const history = useHistory();
   const onResize = () =>
     window.innerWidth <= 1080 ? setSidebarSize("mini") : setSidebarSize("full");
-  useEffect(() => {
+  function initResize() {
     onResize();
     window.addEventListener("resize", onResize);
     return () => window.addEventListener("resize", onResize);
-  }, []);
+  }
+  useEffect(initResize, []);
   function switchView(e) {
     Array.from(e.target.parentElement.children).forEach((element) => {
       element.classList.contains("active") &&

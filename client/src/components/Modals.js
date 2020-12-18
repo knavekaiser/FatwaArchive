@@ -1,5 +1,5 @@
 import React from "react";
-import ReactDom, { createPortal } from "react-dom";
+import { createPortal } from "react-dom";
 
 export const Modal = ({ open, setOpen, children, className }) => {
   if (!open) return null;

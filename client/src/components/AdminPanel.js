@@ -1,5 +1,5 @@
 import React, { useState, useContext, useRef, useEffect } from "react";
-import { Link, Route, Switch, useHistory, Redirect } from "react-router-dom";
+import { Link, Route, Switch, useHistory } from "react-router-dom";
 import { SiteContext } from "../Context.js";
 import "./CSS/AdminPanel.min.css";
 import {
@@ -371,6 +371,7 @@ function SingleJamia({ data, setData }) {
     console.log(_id);
   }
   function remove() {
+    setLoading(true);
     if (window.confirm("You want to delete this jamia")) {
       fetch(`/api/admin/source/`, {
         method: "DELETE",
@@ -378,6 +379,7 @@ function SingleJamia({ data, setData }) {
         body: JSON.stringify({ _id: jamia._id }),
       })
         .then((res) => {
+          setLoading(false);
           if (res.status === 200) {
             setData((prev) => {
               return prev.filter((item) => item._id !== jamia._id);
@@ -869,7 +871,6 @@ function SingleFatwaSubmission({ data, setData }) {
   const [loading, setLoading] = useState(false);
   const fatwa = data;
   const history = useHistory();
-  const editFatwa = (path) => history.push(path);
   function editFatwaSubmission(id) {
     setFatwaToEdit(fatwa);
     history.push("/admin/add");
@@ -1020,8 +1021,6 @@ function SingleFatwa({ data, setData }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const fatwa = data;
-  const history = useHistory();
-  const editFatwa = (path) => history.push(path);
   function deleteFatwa() {
     setLoading(true);
     fetch(`/api/admin/fatwa/`, {
@@ -1418,14 +1417,12 @@ function NewQuestions() {
   const { locale } = useContext(SiteContext);
   const [loading, setLoading] = useState(true);
   const [sort, setSort] = useState({ column: "createdAt", order: "des" });
-  const [filters, setFilters] = useState({});
   const [data, setData] = useState([]);
   function fetchData() {
-    !loading && setLoading(true);
-    const query = encodeURL(filters);
+    setLoading(true);
     const sortOrder = encodeURL(sort);
     const options = { headers: { "Accept-Language": locale }, signal: signal };
-    const url = `/api/admin/questionFeed/filter?${query}&${sortOrder}`;
+    const url = `/api/admin/questionFeed/filter?&${sortOrder}`;
     fetch(url, options)
       .then((res) => res.json())
       .then((data) => {
@@ -1438,7 +1435,7 @@ function NewQuestions() {
       });
     return () => abortController.abort();
   }
-  useEffect(fetchData, [sort, filters]);
+  useEffect(fetchData, [sort]);
   return (
     <>
       <div className="filters">
@@ -1474,13 +1471,11 @@ function NewQuestions() {
 function SingleQuestion({ data }) {
   const { locale } = useContext(SiteContext);
   const history = useHistory();
-  const [loading, setLoading] = useState(false);
-  const [open, setOpen] = useState(false);
   const container = useRef(null);
   return (
     <li
       ref={container}
-      className={`question ${!open ? "mini" : ""}`}
+      className={`question mini`}
       onClick={(e) => {
         if (e.target === container.current) {
           history.push("/admin/questionFeed/" + data._id);
@@ -1550,10 +1545,8 @@ function SingleQuestion({ data }) {
 }
 
 function UserQuestion({ history, match }) {
-  const { user } = useContext(SiteContext);
   const [loading, setLoading] = useState(true);
   const [userQues, setUserQues] = useState({});
-  const [answered, setAnswered] = useState(false);
   useEffect(getData, []);
   function getData() {
     fetch("/api/admin/userQues/" + match.params._id)
@@ -1562,12 +1555,6 @@ function UserQuestion({ history, match }) {
         setLoading(false);
         if (data.code === "ok") {
           setUserQues(data.content);
-          if (
-            data.content.ans.filter((item) => item.source._id === user._id)
-              .length > 0
-          ) {
-            setAnswered(true);
-          }
         } else {
           throw data;
         }
@@ -1661,24 +1648,6 @@ function Answer({ ques, ans, setQues }) {
   const { locale, user } = useContext(SiteContext);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
-  const [voted, setVoted] = useState(() => {
-    let vote = false;
-    ans.vote.voters.some((voter) => {
-      if (voter.source === user._id) {
-        vote = voter.vote;
-      }
-    });
-    return vote;
-  });
-  useEffect(() => {
-    let vote = false;
-    ans.vote.voters.some((voter) => {
-      if (voter.source === user._id) {
-        vote = voter.vote;
-      }
-    });
-    setVoted(vote);
-  }, [ans]);
   const history = useHistory();
   function approve() {
     setLoading(true);
@@ -1737,7 +1706,7 @@ function Answer({ ques, ans, setQues }) {
       }`}
     >
       <div className="vote">
-        <div className={`content ${voted}`}>
+        <div className={`content`}>
           <ion-icon name="chevron-up-outline"></ion-icon>
           <p className="voteCount">
             <FormattedNumber value={ans.vote.count} />
@@ -1757,6 +1726,7 @@ function Answer({ ques, ans, setQues }) {
               month="long"
               year="numeric"
             />
+            {loading && <p>loading</p>}
             <span className="separator" />
             <FormattedTimeParts value={ans.createdAt}>
               {(parts) => (
@@ -1845,7 +1815,6 @@ function Answer({ ques, ans, setQues }) {
 }
 function Report({ report }) {
   const { locale } = useContext(SiteContext);
-  const [loading, setLoading] = useState(false);
   return (
     <div className="quesReports">
       <div className="user">

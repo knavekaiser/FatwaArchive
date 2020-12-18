@@ -5,7 +5,6 @@ import {
   Input,
   Textarea,
   Submit,
-  $,
   Combobox,
   topics,
   SS,
@@ -19,26 +18,6 @@ function UserQuestion() {
   const { locale } = useContext(SiteContext);
   function submit(e) {
     e.preventDefault();
-    if (SS.get("askFatwa-name").length < 5) {
-      emptyFieldWarning("#name", "input", "Enter your full name");
-      return;
-    }
-    if (SS.get("askFatwa-add").length < 10) {
-      emptyFieldWarning("#address", "input", "Enter valid address");
-      return;
-    }
-    if (SS.get("askFatwa-mob").length < 14) {
-      emptyFieldWarning("#mobile", "input", "Enter your mobile number");
-      return;
-    }
-    if (!SS.get("askFatwa-topic")) {
-      emptyFieldWarning("#topic", "", "Select a topic");
-      return;
-    }
-    if (SS.get("askFatwa-ques").length < 15) {
-      emptyFieldWarning("#question", "textarea", "Enter your question.");
-      return;
-    }
     const userInput = {
       user: {
         name: SS.get("askFatwa-name"),
@@ -77,7 +56,9 @@ function UserQuestion() {
   }
   return !success ? (
     <div className={`main userQuestion ${success ? "success" : ""}`}>
-      <h2>User Question</h2>
+      <h2>
+        <FormattedMessage id="askFatwa" defaultMessage="Ask Fatwa" />
+      </h2>
       <form onSubmit={submit}>
         <Input
           defaultValue={SS.get("askFatwa-name")}
@@ -87,25 +68,46 @@ function UserQuestion() {
             defaultMessage="Full name"
           />
           onChange={(target) => SS.set("askFatwa-name", target.value)}
+          required={true}
+          validationMessage=<FormattedMessage
+            id="fullNameValidation"
+            defaultMessage="Enter your full name"
+          />
         />
         <Input
+          required={true}
+          validationMessage=<FormattedMessage
+            id="addValidation"
+            defaultMessage="Enter your address"
+          />
           defaultValue={SS.get("askFatwa-add")}
           dataId="address"
           onChange={(target) => SS.set("askFatwa-add", target.value)}
-          label=<FormattedMessage id="form.add" defaultMessage="Address" />
+          label=<FormattedMessage id="add" defaultMessage="Address" />
         />
         <Input
           dataId="mobile"
           onChange={(target) => SS.set("askFatwa-mob", target.value)}
           label=<FormattedMessage id="form.mobile" defaultMessage="Mobile" />
           type="text"
-          pattern={/^\+\d{0,13}$/}
-          defaultValue={SS.get("askFatwa-mob")}
+          required={true}
+          strict={/^\+\d{0,13}$/}
+          pattern="^\+8801\d{9}$"
+          defaultValue={SS.get("askFatwa-mob") || "+8801"}
+          validationMessage=<FormattedMessage
+            id="contactValidation"
+            defaultMessage="Enter your mobile number"
+          />
           warning="+8801..."
         />
         <Combobox
           dataId="topic"
           maxHeight={200}
+          required={true}
+          validationMessage=<FormattedMessage
+            id="topicValidation"
+            defaultMessage="Select a topic"
+          />
           options={topics.map((topic) => {
             return {
               label: topic[locale],
@@ -121,6 +123,11 @@ function UserQuestion() {
           }
         />
         <Textarea
+          required={true}
+          validationMessage=<FormattedMessage
+            id="quesValidation"
+            defaultMessage="Enter your question"
+          />
           onChange={(target) => SS.set("askFatwa-ques", target.value)}
           dataId="question"
           label=<FormattedMessage id="question" defaultMessage="Question" />
@@ -136,17 +143,26 @@ function UserQuestion() {
       <br />
       <div className="note">
         <p>
-          প্রশ্নের উত্তর ৭-১০ দিনের মধ্যে দেওয়ার চেষ্টা করা হবে। সে পর্যন্ত
-          ধৈর্য সহকারে অপেক্ষা করার অনুরোধ রইল।
+          <FormattedMessage id="askFatwaPs1" />
         </p>
         <br />
         <p>
-          উত্তর দ্রুত পাওয়ার জন্য কল করুন{" "}
-          <a href="tel:+8801305487161">+8801305487161</a>
+          <FormattedMessage
+            id="askFatwaContact"
+            values={{ link: <a href="tel:+8801305487161">01305487161</a> }}
+          />
         </p>
         <p className="mufti">
-          মুফতি আব্দুর রহমান আব্দে রাব্বি{" "}
-          <span>প্রধান মুফতি, ফতোয়া আর্কাইভ</span>
+          <FormattedMessage
+            id="arRabbi"
+            defaultMessage="Mufti Abdur Rahman Abde rabbi"
+          />
+          <span>
+            <FormattedMessage
+              id="arRabbiDes"
+              defaultMessage="Prime Mufti, Fatwa Archive"
+            />
+          </span>
         </p>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import React, { useState, useHistory, useEffect } from "react";
+import React from "react";
 import { Route } from "react-router";
 import "./CSS/LandingPage.min.css";
 import Searchbar from "./Searchbar";

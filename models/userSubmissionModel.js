@@ -197,6 +197,6 @@ const reportFatwa = new Schema({
 const UserReview = mongoose.model("UserReview", userReview);
 const ReportFatwa = mongoose.model("ReportFatwa", reportFatwa);
 
-exports.UserQuestion = UserQuestion;
-exports.UserReview = UserReview;
-exports.ReportFatwa = ReportFatwa;
+global.UserQuestion = UserQuestion;
+global.UserReview = UserReview;
+global.ReportFatwa = ReportFatwa;
