@@ -13,7 +13,6 @@ const signToken = (_id, role) => {
 //----------------------------------------------------GENERAL USER
 router.route("/siteData").get((req, res) => {
   Source.find({ status: "active" }, "name id -type").then((sources) => {
-    // console.log(sources);
     res.status(200).json({ sources: sources });
   });
 });
@@ -42,7 +41,6 @@ router.route("/search").get((req, res) => {
   const locale = req.headers["accept-language"];
   const perpage = 10;
   req.query.page <= 0 && (req.query.page = 1);
-  console.log(req.query);
   if (req.query.q && req.query.q.length > 0) {
     Fatwa.aggregate([
       {
@@ -52,10 +50,13 @@ router.route("/search").get((req, res) => {
             path: [`title.${locale}`, `ques.${locale}`, `ans.${locale}`],
             query: req.query.q,
             fuzzy: {
-              maxEdits: 2,
+              maxEdits: 1,
             },
           },
         },
+      },
+      {
+        $match: { status: "live" },
       },
       {
         $lookup: {
@@ -104,85 +105,62 @@ router.route("/search").get((req, res) => {
 router.route("/searchSuggestions").get((req, res) => {
   const locale = req.headers["accept-language"];
   if (req.query.q && req.query.q.length > 0) {
-    const query = new RegExp(req.query.q.replace(" ", ".+"), "gi");
-    Fatwa.find({
-      status: "live",
-      $or: [
-        { [`title.${locale}`]: query },
-        { [`ques.${locale}`]: query },
-        { [`ans.${locale}`]: query },
-      ],
-    })
+    Fatwa.aggregate([
+      {
+        $search: {
+          index: `auto.${locale}`,
+          compound: {
+            should: [
+              {
+                autocomplete: {
+                  query: req.query.q,
+                  path: `title.${locale}`,
+                  tokenOrder: "sequential",
+                  fuzzy: { maxEdits: 1, prefixLength: 3 },
+                },
+              },
+              {
+                autocomplete: {
+                  query: req.query.q,
+                  path: `ques.${locale}`,
+                  tokenOrder: "sequential",
+                  fuzzy: { maxEdits: 1, prefixLength: 3 },
+                },
+              },
+              {
+                autocomplete: {
+                  query: req.query.q,
+                  path: `ans.${locale}`,
+                  tokenOrder: "sequential",
+                  fuzzy: { maxEdits: 1, prefixLength: 3 },
+                },
+              },
+            ],
+          },
+        },
+      },
+      {
+        $match: { status: "live" },
+      },
+      {
+        $limit: 8,
+      },
+      {
+        $project: {
+          [`link.${locale}`]: 1,
+          [`title.${locale}`]: 1,
+        },
+      },
+    ])
       .then((fatwas) => {
-        const dataToReturn = fatwas.sort((a, b) => {
-          let c = 0;
-          let d = 0;
-          `${a.title[locale]} ${a.ques[locale]} ${a.ans[locale]}`
-            .split(" ")
-            .forEach((word) => req.query.q.includes(word) && (c += 1));
-          `${b.title[locale]} ${b.ques[locale]} ${b.ans[locale]}`
-            .split(" ")
-            .forEach((word) => req.query.q.includes(word) && (d += 1));
-          return c > d ? -1 : 1;
-        });
-        dataToReturn.length > 8 && (dataToReturn.length = 8);
-        const dataToSend = dataToReturn.map((item) => {
-          return {
-            link: item.link[locale],
-            title: item.title[locale],
-          };
-        });
-        res.json(dataToSend);
+        res.json({ code: "ok", data: fatwas });
       })
       .catch((err) => {
         console.log(err);
-        res.json(err);
+        res.status(500).json({ code: 500, message: "something went wrong" });
       });
   } else {
-    res.status(400).json("nope");
-  }
-});
-router.route("/suggestions?").get((req, res) => {
-  const locale = req.headers["accept-language"];
-  if (locale === "bn-BD" || locale === "en-US") {
-    const query = new RegExp(`${req.query.q.replace(" ", "[ .।?!]+")}`, "giu");
-    Fatwa.getSuggestions(
-      {
-        status: "live",
-        $or: [
-          { [`title.${locale}`]: query },
-          { [`ques.${locale}`]: query },
-          { [`ans.${locale}`]: query },
-        ],
-      },
-      (err, fatwas) => {
-        if (fatwas.length === 0) {
-          res.json([]);
-          return;
-        }
-        const dataToReturn = fatwas.sort((a, b) => {
-          let c = 0;
-          let d = 0;
-          `${a.title[locale]} ${a.ques[locale]} ${a.ans[locale]}`
-            .split(" ")
-            .forEach((word) => req.query.q.includes(word) && (c += 1));
-          `${b.title[locale]} ${b.ques[locale]} ${b.ans[locale]}`
-            .split(" ")
-            .forEach((word) => req.query.q.includes(word) && (d += 1));
-          return c > d ? -1 : 1;
-        });
-        dataToReturn.length > 8 && (dataToReturn.length = 8);
-        const dataToSend = dataToReturn.map((item) => {
-          return {
-            link: item.link[locale],
-            title: item.title[locale],
-          };
-        });
-        res.json(dataToSend);
-      }
-    );
-  } else {
-    res.status(400).json("select a language in currect format");
+    res.status(400).json({ code: 400, message: "something went wrong" });
   }
 });
 
@@ -213,7 +191,6 @@ router.route("/askFatwa").post((req, res) => {
   }
 });
 router.route("/reportFatwa").post((req, res) => {
-  console.log(req.body);
   new ReportFatwa({ ...req.body })
     .save()
     .then((response) => {
@@ -464,40 +441,3 @@ router.route("/sources").get((req, res) => {
 });
 
 module.exports = router;
-
-// Fatwa.aggregate([
-//   {
-//     $search: {
-//       compound: {
-//         should: [
-//           {
-//             autocomplete: {
-//               query: ["নামায", "পবিত্র"],
-//               path: "ques.bn-BD",
-//               fuzzy: { maxEdits: 2, prefixLength: 3 },
-//             },
-//           },
-//           {
-//             autocomplete: {
-//               query: ["নামায", "পবিত্র"],
-//               path: "ans.bn-BD",
-//               fuzzy: { maxEdits: 2, prefixLength: 3 },
-//             },
-//           },
-//         ],
-//       },
-//     },
-//   },
-//   {
-//     $limit: 10,
-//   },
-//   {
-//     $project: {
-//       _id: 0,
-//       "ans.bn-BD": 1,
-//       score: { $meta: "searchScore" },
-//     },
-//   },
-// ])
-//   .then((res) => console.log(res))
-//   .catch((err) => console.log("error " + err));

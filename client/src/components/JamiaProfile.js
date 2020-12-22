@@ -598,9 +598,10 @@ function SingleFatwa({ data, setData }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ fatwa: fatwa._id, source: fatwa.source }),
       })
-        .then((res) => {
+        .then((res) => res.json())
+        .then((data) => {
           setLoading(false);
-          if (res.status === 200) {
+          if (data.code === "ok") {
             setData((prev) => {
               return prev.filter((item) => item._id !== fatwa._id);
             });

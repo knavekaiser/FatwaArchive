@@ -122,7 +122,7 @@ input::-webkit-inner-spin-button {
   height: 3rem;
   border-radius: 8px;
   white-space: nowrap;
-  z-index: 100;
+  z-index: 10;
   &:hover {
     background: $base-white;
     ion-icon {

@@ -508,7 +508,7 @@
     position: sticky;
     top: 0;
     background: $base-white;
-    z-index: 5;
+    z-index: 15;
   }
   .tableFilter {
     z-index: 10;
@@ -705,6 +705,23 @@
       tr:hover {
         background: $light-hover;
       }
+      .noData {
+        pointer-events: none;
+        border: none;
+        grid-template-columns: 1fr !important;
+        td {
+          padding: 2rem;
+          display: grid;
+          grid-gap: 0.5rem;
+          place-items: center;
+          font-size: 1.2rem;
+          font-style: italic;
+          color: $light-border;
+          ion-icon {
+            font-size: 4rem;
+          }
+        }
+      }
     }
     tr {
       padding: 0.8rem 0.5rem;
@@ -765,7 +782,7 @@
     &.full {
       box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
       background: $base-white;
-      z-index: 15;
+      z-index: 50;
     }
   }
 }

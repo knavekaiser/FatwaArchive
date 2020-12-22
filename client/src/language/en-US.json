@@ -38,6 +38,10 @@
   "page": "Page",
   "sura": "Sura",
   "aayat": "Aayat",
+  "write": "Write",
+  "atts": "Attestation",
+  "writeValidation": "Enter the name who wrote the fatwa",
+  "attsValidation": "Enter the name who attestated the fatwa",
   "id": "ID",
   "name": "Name",
   "joined": "Joined",
@@ -135,5 +139,6 @@
   "reportPs": "Your message will reach the Jamia of Mufti who submitted this Fatwa",
   "regSuccess": "Your request has been successfully submitted. You will be notified via SMS, when your account is ready.",
   "noResult": "Nothing found. you can ask your question {link}.",
-  "backToHome": "Back to Home"
+  "backToHome": "Back to Home",
+  "nothingHere": "Nothing here"
 }

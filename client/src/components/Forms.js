@@ -1055,6 +1055,8 @@ export const AddFatwaForm = ({ match }) => {
           "bn-BD": "",
           "en-US": "",
         },
+        write: "",
+        atts: "",
         img: [],
       };
     } else {
@@ -1067,6 +1069,8 @@ export const AddFatwaForm = ({ match }) => {
       SS.set("editFatwa-quesEn", fatwaToEdit.ques["en-US"]);
       SS.set("editFatwa-ans", fatwaToEdit.ans["bn-BD"]);
       SS.set("editFatwa-ansEn", fatwaToEdit.ans["en-US"]);
+      SS.set("editFatwa-write", fatwaToEdit.write);
+      SS.set("editFatwa-atts", fatwaToEdit.atts);
       if (fatwaToEdit.ref.length > 0) {
         fatwaToEdit.ref.forEach((item) => {
           if (item.book) {
@@ -1121,6 +1125,8 @@ export const AddFatwaForm = ({ match }) => {
         SS.remove("editFatwa-quesEn");
         SS.remove("editFatwa-ans");
         SS.remove("editFatwa-ansEn");
+        SS.remove("editFatwa-atts");
+        SS.remove("editFatwa-write");
       }
     };
   }
@@ -1151,6 +1157,12 @@ export const AddFatwaForm = ({ match }) => {
         }),
         ...(fatwaToEdit.ans["en-US"] !== SS.get("editFatwa-ansEn") && {
           "ans.en-US": SS.get("editFatwa-ansEn"),
+        }),
+        ...(fatwaToEdit.write !== SS.get("editFatwa-write") && {
+          write: SS.get("editFatwa-write"),
+        }),
+        ...(fatwaToEdit.atts !== SS.get("editFatwa-atts") && {
+          atts: SS.get("editFatwa-atts"),
         }),
         ref: [
           ...GetGroupData($(".addFatwa #books.multipleInput")),
@@ -1186,6 +1198,8 @@ export const AddFatwaForm = ({ match }) => {
           ...GetGroupData($(".addFatwa #books.multipleInput")),
           ...GetGroupData($(".addFatwa #sura.multipleInput")),
         ],
+        write: SS.get("newFatwa-write"),
+        atts: SS.get("newFatwa-atts"),
         img: preFill.img,
       };
       url = `/api/source/newFatwa`;
@@ -1363,6 +1377,40 @@ export const AddFatwaForm = ({ match }) => {
           )}
         </Textarea>
       )}
+      <Input
+        min={5}
+        required={true}
+        validationMessage="test"
+        defaultValue={preFill.write}
+        dataId="write"
+        onChange={(target) => {
+          SS.set("newFatwa-write", target.value);
+          fatwaToEdit && SS.set("editFatwa-write", target.value);
+          setSameExists(false);
+        }}
+        label=<FormattedMessage id="write" defaultMessage="Write" />
+        validationMessage=<FormattedMessage
+          id="writeValidation"
+          defaultMessage="who wrote the fatwa"
+        />
+      />
+      <Input
+        min={5}
+        required={true}
+        validationMessage="test"
+        defaultValue={preFill.atts}
+        dataId="write"
+        onChange={(target) => {
+          SS.set("newFatwa-atts", target.value);
+          fatwaToEdit && SS.set("editFatwa-atts", target.value);
+          setSameExists(false);
+        }}
+        label=<FormattedMessage id="atts" defaultMessage="Attestation" />
+        validationMessage=<FormattedMessage
+          id="attsValidation"
+          defaultMessage="who attestated the fatwa"
+        />
+      />
       <MultipleInput
         id="books"
         inputs={preFill.inputBooks || refInputBook}

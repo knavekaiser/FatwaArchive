@@ -25,6 +25,8 @@ const fatwa = new Schema(
     source: { type: Schema.Types.ObjectId, ref: "Source", required: true },
     status: { type: String, default: "pending" },
     translation: { type: Boolean, enum: [true, false], default: false },
+    write: { type: String, required: true, trim: true },
+    atts: { type: String, required: true, trim: true },
     meta: {
       comments: [{ type: Schema.Types.ObjectId, ref: "FatwaComment" }],
     },
@@ -35,30 +37,32 @@ const fatwa = new Schema(
 const deletedFatwa = new Schema(
   {
     link: {
-      "en-US": { type: String, require: true },
-      "bn-BD": { type: String, require: true },
+      "en-US": { type: String },
+      "bn-BD": { type: String },
     },
     topic: {
-      "en-US": { type: String, required: true },
-      "bn-BD": { type: String, required: true },
+      "en-US": { type: String },
+      "bn-BD": { type: String },
     },
     title: {
-      "en-US": { type: String, required: true, trim: true },
-      "bn-BD": { type: String, required: true, trim: true },
+      "en-US": { type: String },
+      "bn-BD": { type: String },
     },
     ques: {
-      "en-US": { type: String, required: true, trim: true },
-      "bn-BD": { type: String, required: true, trim: true },
+      "en-US": { type: String },
+      "bn-BD": { type: String },
     },
     ans: {
-      "en-US": { type: String, required: true, trim: true },
-      "bn-BD": { type: String, required: true, trim: true },
+      "en-US": { type: String },
+      "bn-BD": { type: String },
     },
-    ref: { type: Array, required: true },
-    img: { type: Array, require: true },
-    source: { type: Schema.Types.ObjectId, ref: "Source", required: true },
+    ref: { type: Array },
+    img: { type: Array },
+    source: { type: Schema.Types.ObjectId, ref: "Source" },
     status: { type: String, default: "deleted" },
     translation: { type: Boolean, default: false },
+    atts: { type: String },
+    write: { type: String },
     meta: {
       comments: [{ type: Schema.Types.ObjectId, ref: "FatwaComment" }],
     },

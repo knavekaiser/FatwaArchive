@@ -1,5 +1,5 @@
 import React from "react";
-import { Route } from "react-router";
+import { Route, Redirect } from "react-router";
 import "./CSS/LandingPage.min.css";
 import Searchbar from "./Searchbar";
 import logo from "../logo.svg";
@@ -20,6 +20,7 @@ function LandingPage({ history }) {
       </div>
       <Route path="/moblieSearch">
         <div className="fullscreenSearch">
+          {window.innerWidth > 480 && <Redirect to="/" />}
           <Searchbar key="mobileLandingPageSearchbar">
             <div
               className="back"

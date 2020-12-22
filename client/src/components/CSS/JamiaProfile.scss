@@ -277,11 +277,11 @@
   .filters {
     padding: 0.5rem;
     position: sticky;
-    top: 44px;
+    top: 46px;
     background: $base-white;
     border-bottom: 1px solid $light-border;
     display: flex;
-    z-index: 5;
+    z-index: 15;
     box-shadow: 0 0px 5px rgba(0, 0, 0, 0.05);
     .combobox {
       width: min-content;

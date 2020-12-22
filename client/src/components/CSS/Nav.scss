@@ -1,7 +1,7 @@
 @import "variables";
 
 .navbar {
-  z-index: 20;
+  z-index: 100;
   position: sticky;
   top: 0;
   padding: 0.5rem 1rem;
@@ -29,6 +29,8 @@
     }
   }
   .navLogo {
+    width: min-content;
+    height: min-content;
     img {
       width: 125px;
       object-fit: contain;
@@ -113,6 +115,7 @@
     padding: 0.5rem 1rem;
     grid-template-columns: 1fr auto;
     grid-template-areas: "lg nv" "sr sr";
+    grid-gap: 0.5rem;
     &.mini {
       grid-template-columns: min-content 1fr min-content;
       grid-template-areas: "bt lg nv";

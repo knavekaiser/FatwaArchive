@@ -409,8 +409,11 @@ export const View = ({
         setLoading(false);
       })
       .catch((err) => {
-        alert("something went wrong");
+        if (err.name === "AbortError") {
+          return;
+        }
         console.log(err);
+        alert("something went wrong");
       });
     return () => abortController.abort();
   }
@@ -434,10 +437,10 @@ export const View = ({
       <Table id={id} sort={sort} setSort={setSort}>
         {loading && <LoadingColumn />}
         {!loading &&
-          data.length > 0 &&
           data.map((item) => (
             <Element setData={setData} key={item._id} data={item} />
           ))}
+        {!loading && data.length === 0 && <NothingHere />}
       </Table>
     </>
   );
@@ -450,5 +453,15 @@ export const LoadingPost = () => {
       <div className="ques"></div>
       <div className="tags"></div>
     </div>
+  );
+};
+export const NothingHere = ({ icon }) => {
+  return (
+    <tr className="noData">
+      <td>
+        <ion-icon name="trail-sign-outline"></ion-icon> -{" "}
+        <FormattedMessage id="nothingHere" defaultMessage="Nothing here" /> -
+      </td>
+    </tr>
   );
 };

@@ -2,7 +2,7 @@
 router
   .route("/source/newFatwa")
   .post(passport.authenticate("SourceAuth"), (req, res) => {
-    const { topic, title, ques, ans, ref, img } = req.body;
+    const { topic, title, ques, ans, ref, img, write, atts } = req.body;
     if (!title["en-US"] && !ques["en-US"] && !ans["en-US"]) {
       TranslateAll([title["bn-BD"], ques["bn-BD"], ans["bn-BD"]], true)
         .then((translations) => {
@@ -12,20 +12,13 @@ router
               "bn-BD": title["bn-BD"].replace(/\s/g, "-"),
               "en-US": translations[0].replace(/\s/g, "-"),
             },
-            title: {
-              "bn-BD": title["bn-BD"],
-              "en-US": translations[0],
-            },
-            ques: {
-              "bn-BD": ques["bn-BD"],
-              "en-US": translations[1],
-            },
-            ans: {
-              "bn-BD": ans["bn-BD"],
-              "en-US": translations[2],
-            },
+            title: { "bn-BD": title["bn-BD"], "en-US": translations[0] },
+            ques: { "bn-BD": ques["bn-BD"], "en-US": translations[1] },
+            ans: { "bn-BD": ans["bn-BD"], "en-US": translations[2] },
             ref: ref,
             img: img,
+            write: write,
+            atts: atts,
             translation: false,
             source: req.user._id,
           });
@@ -53,6 +46,8 @@ router
         ans: ans,
         ref: ref,
         img: img,
+        write: write,
+        atts: atts,
         source: req.user._id,
         translation: true,
       })
@@ -179,11 +174,15 @@ router
     }
   });
 router
-  .route("/fatwa/:id")
+  .route("/fatwa/:_id")
   .get(passport.authenticate("SourceAuth"), (req, res) => {
-    Fatwa.findById(req.params.id)
-      .then((fatwa) => res.json(fatwa))
-      .catch((err) => res.status(400).json("Error: " + err));
+    if (ObjectID.isValid(req.params._id)) {
+      Fatwa.findById(req.params._id)
+        .then((fatwa) => res.json(fatwa))
+        .catch((err) => res.status(400).json("Error: " + err));
+    } else {
+      res.status(400).json({ code: 400, message: "invalid id" });
+    }
   });
 router
   .route("/source/editFatwa/:_id")
@@ -231,12 +230,22 @@ router
 router
   .route("/source/fatwa")
   .delete(passport.authenticate("SourceAuth"), (req, res) => {
-    Fatwa.findOneAndUpdate(req.body.fatwa, { status: "deleted" })
-      .then(() =>
-        Source.findByIdAndUpdate(req.body.source, { $inc: { fatwa: -1 } })
-      )
-      .then(() => res.json("successfully deleted"))
-      .catch((err) => res.status(400).json("Error: " + err));
+    if (ObjectID.isValid(req.body.fatwa)) {
+      Fatwa.findById(req.body.fatwa)
+        .then((fatwa) => new DeletedFatwa({ ...fatwa }).save())
+        .then(() => Fatwa.findByIdAndDelete(req.body.fatwa))
+        .then(() =>
+          Source.findByIdAndUpdate(req.body.source, { $inc: { fatwa: -1 } })
+        )
+        .then(() => {
+          res.json({ code: "ok", message: "fatwa successfully deleted" });
+        })
+        .catch((err) => {
+          res.status(500).json({ code: 500, message: "something went wrong" });
+        });
+    } else {
+      res.status(400).json({ code: 400, message: "invalid id" });
+    }
   });
 
 //---------------------------------------------USER QUESTION

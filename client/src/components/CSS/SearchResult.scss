@@ -38,6 +38,7 @@
       display: grid;
       grid-gap: 0.4rem;
       p {
+        padding: 0 0.1rem;
         display: -webkit-box;
         line-height: 1rem;
         max-height: 2.2rem;
@@ -48,6 +49,10 @@
       .title {
         font-weight: 600;
         line-height: 19px;
+        &:hover {
+          text-decoration: underline;
+          cursor: pointer;
+        }
       }
       .ques {
         // display: none;
@@ -55,10 +60,6 @@
         max-height: 2.5rem;
         -webkit-line-clamp: 2;
         color: #444;
-        &:hover {
-          text-decoration: underline;
-          cursor: pointer;
-        }
       }
       .ans {
         display: none;

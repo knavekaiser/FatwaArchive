@@ -81,7 +81,11 @@
     border: 1px solid $light-hover;
     ul {
       li {
+        position: relative;
+        align-items: center;
+        display: flex;
         a {
+          flex: 1;
           display: block;
           overflow: hidden;
           padding: 0.5rem 1rem;
@@ -89,6 +93,23 @@
           text-overflow: ellipsis;
           &.hover {
             background-color: $light-hover;
+          }
+          &:hover {
+            & ~ .direct {
+              display: grid;
+            }
+          }
+        }
+        a.direct {
+          display: none;
+          place-items: center;
+          z-index: 1;
+          position: absolute;
+          right: 0;
+          color: $light-text;
+          &:hover {
+            color: #333;
+            display: grid;
           }
         }
       }

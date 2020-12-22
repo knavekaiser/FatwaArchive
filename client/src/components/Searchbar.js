@@ -3,31 +3,48 @@ import { Link, useHistory } from "react-router-dom";
 import { SiteContext } from "../Context";
 import "./CSS/Searchbar.min.css";
 import { FormattedMessage } from "react-intl";
+import { OutsideClick } from "./TableElements";
 import { $$ } from "./FormElements";
 
 const defaultValidation = /^[ঀ-৾ا-ﻰa-zA-Z0-9\s:;"',.।?-]+$/;
+const getLan = (sentence, i) => {
+  const str = sentence.replace(/[\s\-\.?।]/gi, "");
+  if ((str.match(/[a-z0-9]/gi) || []).length / str.length > 0.9) {
+    return !i ? "en-US" : "bn-BD";
+  } else {
+    return !i ? "bn-BD" : "en-US";
+  }
+};
 
 function Searchbar({ onFocus, children }) {
-  const [suggestions, setSuggestions] = useState([]);
   const [showSuggestion, setShowSuggestion] = useState(false);
-  const { searchInput, setSearchInput, locale } = useContext(SiteContext);
-  const [visibleInput, setVisibleInput] = useState(searchInput);
+  const [value, setValue] = useState("");
+  const { locale } = useContext(SiteContext);
+  const [visibleInput, setVisibleInput] = useState(value);
+  const [wrongLan, setWrongLan] = useState(false);
   const history = useHistory();
   const form = useRef(null);
   const input = useRef(null);
+  const [suggestions, setSuggestions] = useState([]);
+  useEffect(() => {
+    if (getLan(value) !== locale) {
+      setWrongLan(true);
+    } else {
+      setWrongLan(false);
+    }
+  }, [value]);
   function submit(e) {
     e.preventDefault();
-    setSearchInput((prev) => prev.replaceAll(/\s{2,}/g, " ").trim());
-    setVisibleInput((prev) => prev.replaceAll(/\s{2,}/g, " ").trim());
-    if (searchInput !== "") {
+    setShowSuggestion(false);
+    console.log(value);
+    if (value !== "") {
       input.current.blur();
-      setShowSuggestion(false);
       history.push({
         pathname: "/search",
         search:
           "?" +
           new URLSearchParams({
-            q: searchInput.replaceAll(/\s{2,}/g, " ").trim(),
+            q: value.replaceAll(/\s{2,}/g, " ").trim(),
             page: 1,
           }).toString(),
       });
@@ -38,21 +55,8 @@ function Searchbar({ onFocus, children }) {
     onFocus && onFocus(e.target);
   }
   function change(e) {
-    if (
-      (locale === "bn-BD" && /[a-z0-9]/gi.test(e.target.value)) ||
-      (locale === "en-US" && /[ঀ-৾]/gi.test(e.target.value))
-    ) {
-      form.current.classList.add("wrong");
-    } else {
-      form.current.classList.remove("wrong");
-    }
-    if (
-      e.target.value.trim() === "" ||
-      defaultValidation.exec(e.target.value) !== null
-    ) {
-      setSearchInput(e.target.value);
-      setVisibleInput(e.target.value);
-    }
+    setValue(e.target.value);
+    setVisibleInput(e.target.value);
   }
   function getQueryFromUrl() {
     if (history.location.pathname === "/search") {
@@ -69,32 +73,34 @@ function Searchbar({ onFocus, children }) {
   }
   useEffect(getQueryFromUrl, []);
   function suggestionEffect() {
-    history.location.pathname === "/" &&
-      suggestions.length > 0 &&
-      setShowSuggestion(true);
+    suggestions.length > 0 && setShowSuggestion(true);
   }
   useEffect(suggestionEffect, [suggestions]);
   const abortController = new AbortController();
   const signal = abortController.signal;
   const fetchData = () => {
-    if (
-      searchInput.trim() !== "" &&
-      !form.current.classList.contains("wrong")
-    ) {
-      fetch(`/api/searchSuggestions?q=${searchInput}`, {
-        method: "GET",
-        headers: { "Accept-Language": locale },
-        signal: signal,
-      })
-        .then((res) => res.json())
-        .then((data) => setSuggestions(data))
-        .catch((err) => console.log("Error: " + err));
+    if (wrongLan || value.trim() === "") {
+      return;
     }
+    fetch(`/api/searchSuggestions?q=${value}`, {
+      method: "GET",
+      headers: { "Accept-Language": locale },
+      signal: signal,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.code === "ok") {
+          setSuggestions(data.data);
+        }
+      })
+      .catch((err) => console.log("Error: " + err));
     return () => abortController.abort();
   };
-  useEffect(fetchData, [searchInput]);
-
+  useEffect(fetchData, [value]);
   useEffect(() => {
+    if (window.location.pathname === "/" && window.innerWidth > 480) {
+      input.current.focus();
+    }
     const outsideClick = (e) => {
       !e.path.includes(input.current) && setShowSuggestion(false);
     };
@@ -104,7 +110,12 @@ function Searchbar({ onFocus, children }) {
     };
   }, []);
   return (
-    <form ref={form} id="searchbar" onSubmit={submit}>
+    <form
+      ref={form}
+      id="searchbar"
+      onSubmit={submit}
+      className={`${wrongLan ? "wrong" : ""}`}
+    >
       {children}
       <FormattedMessage
         id="searchbar.placeholder"
@@ -150,7 +161,7 @@ function Searchbar({ onFocus, children }) {
                   }
                 }
               } else if (e.keyCode === 13) {
-                setSearchInput(visibleInput);
+                setValue(visibleInput);
               }
             }}
             className={
@@ -168,7 +179,7 @@ function Searchbar({ onFocus, children }) {
       <span className="warning">
         {locale === "bn-BD" ? "বাংলায় খুঁজুন" : "Search in English"}
       </span>
-      <button type="submit">
+      <button type="submit" disabled={wrongLan}>
         <ion-icon name="search-outline"></ion-icon>
       </button>
       {showSuggestion && suggestions.length > 0 && (
@@ -176,7 +187,10 @@ function Searchbar({ onFocus, children }) {
           <ul>
             {suggestions.map((item, i) => (
               <li key={i}>
-                <Link
+                <a
+                  onClick={() => {
+                    history.push(`/search?q=${item.title[locale]}&page=1`);
+                  }}
                   onMouseEnter={(e) => {
                     e.target.classList.add("hover");
                   }}
@@ -191,9 +205,11 @@ function Searchbar({ onFocus, children }) {
                     }
                   }}
                   onMouseLeave={(e) => e.target.classList.remove("hover")}
-                  to={`/fatwa/${item.link}`}
                 >
-                  {item.title}
+                  {item.title[locale]}
+                </a>
+                <Link className="direct" to={`/fatwa/${item.link[locale]}`}>
+                  <ion-icon name="arrow-forward-outline"></ion-icon>
                 </Link>
               </li>
             ))}
