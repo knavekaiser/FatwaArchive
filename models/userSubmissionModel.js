@@ -179,20 +179,22 @@ const userReview = new Schema({
   submitted: { type: Date, default: Date.now },
 });
 
-const reportFatwa = new Schema({
-  fatwa: { type: Schema.Types.ObjectId, ref: "Fatwa" },
-  jamia: { type: Schema.Types.ObjectId, ref: "Source" },
-  submitted: { type: Date, default: Date.now },
-  user: {
-    name: { type: String, required: true, trim: true },
-    email: { type: String, required: true, trim: true },
-    mobile: { type: String, trim: true },
+const reportFatwa = new Schema(
+  {
+    fatwa: { type: Schema.Types.ObjectId, ref: "Fatwa" },
+    source: { type: Schema.Types.ObjectId, ref: "Source" },
+    user: {
+      name: { type: String, required: true, trim: true },
+      email: { type: String, trim: true },
+      mob: { type: String, trim: true },
+    },
+    message: {
+      subject: { type: String, required: true, trim: true },
+      body: { type: String, required: true, trim: true },
+    },
   },
-  message: {
-    subject: { type: String, required: true, trim: true },
-    body: { type: String, required: true, trim: true },
-  },
-});
+  { timestamps: true }
+);
 
 const UserReview = mongoose.model("UserReview", userReview);
 const ReportFatwa = mongoose.model("ReportFatwa", reportFatwa);

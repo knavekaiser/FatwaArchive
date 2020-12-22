@@ -10,6 +10,13 @@ global.ExtractJwt = require("passport-jwt").ExtractJwt;
 global.jwt = require("jsonwebtoken");
 global.jwt_decode = require("jwt-decode");
 
+global.genCode = (n) => {
+  code = "";
+  while (code.length < n) {
+    code += Math.ceil(Math.random() * 9);
+  }
+  return code;
+};
 global.getLan = (sentence, i) => {
   const str = sentence.replace(/[\s\-\.?।]/gi, "");
   if ((str.match(/[a-z0-9]/gi) || []).length / str.length > 0.9) {
@@ -18,17 +25,17 @@ global.getLan = (sentence, i) => {
     return !i ? "bn-BD" : "en-US";
   }
 };
-global.TranslateAll = async function (arr) {
-  const allTans = Promise.all(
+global.TranslateAll = async function (arr, salt) {
+  const allTrans = Promise.all(
     arr.map((item) =>
       translate.translate(item, getLan(item) === "en-US" ? "bn" : "en")
     )
   )
-    .then((res) => res.map((item) => item[0]))
+    .then((res) => res.map((item) => item[0] + (salt ? ` ${genCode(10)}` : "")))
     .catch((err) => {
       throw err;
     });
-  return await allTans;
+  return await allTrans;
 };
 
 global.ObjectID = require("mongodb").ObjectID;

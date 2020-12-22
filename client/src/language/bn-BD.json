@@ -120,7 +120,7 @@
   "form.passRecovery.timeout": "সময় শেষ",
   "form.passRecovery.startOver": "আবার শুরু করুন ।",
   "form.passRecovery.success": "পাসওয়ার্ড পরিবর্তন সফল, লগ ইন করতে {link} ক্লিক করুন ।",
-  "form.passRecovery.redirect": "এখানে",
+  "here": "এখানে",
   "results.count": "{number}টি ফতোয়া পাওয়া গেছে",
   "ans.tag.refCount": "{number}টি সুত্র",
   "ans.tag.voteCount": "{number}টি ভোট",
@@ -134,5 +134,6 @@
   "optional": "ঐচ্ছিক",
   "reportPs": "আপনার বার্তা উক্ত জামিয়া বা মুফতি সাহেবের নিকট পৌছবে, যিনি এই ফতোয়া সাবমিট করেছেন",
   "regSuccess": "আপনার আবেদন সাবমিট হয়েছে । আবেদন গৃহীত হলে এসএমএসের মাধ্যমে আপনাকে জানিয়ে দেওয়া হবে ।",
+  "noResult": "কোনো ফতোয়া পাওয়া যায়নি । প্রশ্ন করতে {link} ক্লিক করুন ।",
   "backToHome": "হোমে ফিরে যান"
 }

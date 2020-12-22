@@ -38,7 +38,7 @@ function ProtectedRoute({
 }
 
 function App() {
-  const { setUser, setIsAuthenticated, setJamias } = useContext(SiteContext);
+  const { setUser, setIsAuthenticated, setSources } = useContext(SiteContext);
   const { locale, setLocale } = useContext(SiteContext);
   const history = useHistory();
   const link = useRef(window.location.href.replace(window.location.origin, ""));
@@ -63,22 +63,20 @@ function App() {
       })
       .catch((err) => 69);
   };
-  const getSiteData = () => {
-    fetch("/api/siteData")
-      .then((res) => res.json())
-      .then((data) => {
-        const jamias = {};
-        data.jamias.forEach((jamia) => (jamias[jamia.id] = jamia));
-        setJamias(jamias);
-      })
-      .catch((err) => {
-        console.log(
-          err,
-          "here put a toast saying site data could not be loaded. some features may not work properly."
-        );
-      });
-  };
-  useEffect(getSiteData, []);
+  // const getSiteData = () => {
+  //   fetch("/api/siteData")
+  //     .then((res) => res.json())
+  //     .then((data) => {
+  //       setSources(data.sources);
+  //     })
+  //     .catch((err) => {
+  //       console.log(
+  //         err,
+  //         "here put a toast saying site data could not be loaded. some features may not work properly."
+  //       );
+  //     });
+  // };
+  // useEffect(getSiteData, []);
   useEffect(setLan, []);
   useEffect(seeIfLoggedIn, []);
   const [messages, setMessages] = useState(null);
@@ -90,7 +88,19 @@ function App() {
         <Switch>
           <Route path="/" exact component={LandingPage} />
           <Route path="/moblieSearch" component={LandingPage} />
-          <Route path="/search" component={SearchResult} />
+          <Route path="/search">
+            {(props) => {
+              const url = window.location.href.replace(
+                window.location.origin,
+                ""
+              );
+              if (url.match(/^\/search\?q=.+&page=\d+$/)) {
+                return <SearchResult />;
+              } else {
+                return <Redirect to="/" />;
+              }
+            }}
+          </Route>
           <Route path="/fatwa/:id" component={Fatwa} />
           <Route path="/about" component={About} />
           <Route path="/login" component={JamiaLogin} />

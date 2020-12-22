@@ -388,8 +388,6 @@ function chkPass(pwd) {
   }
 }
 
-console.log(chkPass("adfasdfsddefdsf"));
-
 export const ID = (length) => {
   var result = "";
   var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -549,6 +547,49 @@ export const PasswordInput = ({
       )}
       {children}
     </Input>
+  );
+};
+export const Mobile = ({
+  required,
+  label,
+  dataId,
+  defaultValue,
+  onChange,
+  validationMessage,
+}) => {
+  const [strict, setStrict] = useState(() =>
+    defaultValue[0] === "0" ? /^\+?\d{0,11}$/ : /^\+?\d{0,14}$/
+  );
+  const [pattern, setPattern] = useState(() =>
+    defaultValue[0] === "0" ? "^01\\d{9}$" : "^\\+8801\\d{9}$"
+  );
+  const [warning, setWarning] = useState(() =>
+    defaultValue[0] === "0" ? "01***" : "+8801***"
+  );
+  return (
+    <Input
+      required={required}
+      label={label}
+      dataId={dataId}
+      defaultValue={defaultValue || "01"}
+      onChange={(target) => {
+        if (target.value[0] === "0") {
+          setStrict(/^\+?\d{0,11}$/);
+          setPattern("^01\\d{9}$");
+          setWarning("01***");
+          target.value = "+88" + target.value;
+        } else if (target.value[0] === "+") {
+          setStrict(/^\+?\d{0,14}$/);
+          setPattern("^\\+8801\\d{9}$");
+          setWarning("+8801***");
+        }
+        onChange(target);
+      }}
+      warning={warning}
+      strict={strict}
+      pattern={pattern}
+      validationMessage={validationMessage}
+    />
   );
 };
 export const Textarea = ({

@@ -9,25 +9,13 @@ const signToken = (_id, role) => {
     process.env.JWT_SECRET
   );
 };
-const genCode = (n) => {
-  code = "";
-  while (code.length < n) {
-    code += Math.ceil(Math.random() * 9);
-  }
-  return code;
-};
 
 //----------------------------------------------------GENERAL USER
 router.route("/siteData").get((req, res) => {
-  Jamia.find()
-    .then((jamias) =>
-      jamias.map((jamia) => {
-        return { id: jamia.id, name: jamia.name };
-      })
-    )
-    .then((jamias) => {
-      res.status(200).json({ jamias: jamias });
-    });
+  Source.find({ status: "active" }, "name id -type").then((sources) => {
+    // console.log(sources);
+    res.status(200).json({ sources: sources });
+  });
 });
 router.route("/fatwa/:link").get((req, res) => {
   const locale = req.headers["accept-language"];
@@ -36,11 +24,9 @@ router.route("/fatwa/:link").get((req, res) => {
     status: "live",
     [`link.${getLan(req.params.link)}`]: req.params.link,
   };
-  console.log(query);
   Fatwa.findOne(query)
     .populate("source", "name primeMufti")
     .then((fatwa) => {
-      console.log(fatwa);
       if (fatwa) {
         res.json(fatwa);
       } else {
@@ -54,43 +40,62 @@ router.route("/fatwa/:link").get((req, res) => {
 });
 router.route("/search").get((req, res) => {
   const locale = req.headers["accept-language"];
+  const perpage = 10;
+  req.query.page <= 0 && (req.query.page = 1);
+  console.log(req.query);
   if (req.query.q && req.query.q.length > 0) {
-    const query = new RegExp(req.query.q.replace(" ", ".+"), "gi");
-    Fatwa.find({
-      $or: [
-        { [`title.${locale}`]: query },
-        { [`ques.${locale}`]: query },
-        { [`ans.${locale}`]: query },
-      ],
-    })
-      .then((fatwas) => {
-        const dataToReturn = fatwas.sort((a, b) => {
-          let c = 0;
-          let d = 0;
-          `${a.title[locale]} ${a.ques[locale]} ${a.ans[locale]}`
-            .split(" ")
-            .forEach((word) => req.query.q.includes(word) && (c += 1));
-          `${b.title[locale]} ${b.ques[locale]} ${b.ans[locale]}`
-            .split(" ")
-            .forEach((word) => req.query.q.includes(word) && (d += 1));
-          return c > d ? -1 : 1;
+    Fatwa.aggregate([
+      {
+        $search: {
+          index: "SearchIndex",
+          text: {
+            path: [`title.${locale}`, `ques.${locale}`, `ans.${locale}`],
+            query: req.query.q,
+            fuzzy: {
+              maxEdits: 2,
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "sources",
+          localField: "source",
+          foreignField: "_id",
+          as: "source",
+        },
+      },
+      { $unwind: "$source" },
+      {
+        $project: {
+          _id: 1,
+          [`link.${locale}`]: 1,
+          [`title.${locale}`]: 1,
+          [`ques.${locale}`]: 1,
+          // [`ans.${locale}`]: 1,
+          [`source.name.${locale}`]: 1,
+        },
+      },
+      {
+        $facet: {
+          fatwas: [
+            { $skip: perpage * (req.query.page - 1) },
+            { $limit: perpage },
+          ],
+          pageInfo: [{ $group: { _id: null, count: { $sum: 1 } } }],
+        },
+      },
+    ])
+      .then((data) => {
+        res.json({
+          code: "ok",
+          total: data[0].pageInfo[0] ? data[0].pageInfo[0].count : 0,
+          fatwas: data[0].fatwas,
         });
-        dataToReturn.length > 8 && (dataToReturn.length = 8);
-        const dataToSend = dataToReturn.map((item) => {
-          return {
-            _id: item.id,
-            link: item.link[locale],
-            title: item.title[locale],
-            ques: item.ques[locale],
-            ans: item.ans[locale],
-            jamia: item.jamia,
-          };
-        });
-        res.json(dataToSend);
       })
       .catch((err) => {
         console.log(err);
-        res.json(err);
+        res.status(500).json({ code: 500, message: err });
       });
   } else {
     res.status(400).json("nope");
@@ -208,12 +213,12 @@ router.route("/askFatwa").post((req, res) => {
   }
 });
 router.route("/reportFatwa").post((req, res) => {
+  console.log(req.body);
   new ReportFatwa({ ...req.body })
     .save()
     .then((response) => {
       //here send the notification to jamia and admin.
       //then
-      console.log(response);
       if (true) {
         res.json("report has been submitted");
       } else {
@@ -352,11 +357,11 @@ router.route("/passRecovery").put((req, res) => {
             `Hello,\nYour password reset code is ${code}. \nFatwa Archive.`
           );
           return fetch(
-            `token=${process.env.SMS_TOKEN}&to=${source.appl.mob}&message=${message}`,
+            `${url}token=${process.env.SMS_TOKEN}&to=${source.appl.mob}&message=${message}`,
             { method: "POST" }
           );
         })
-        .then(() => {
+        .then((smsRes) => {
           res.json({ code: "ok", message: "code sent" });
         })
         .catch((err) => {
@@ -459,3 +464,40 @@ router.route("/sources").get((req, res) => {
 });
 
 module.exports = router;
+
+// Fatwa.aggregate([
+//   {
+//     $search: {
+//       compound: {
+//         should: [
+//           {
+//             autocomplete: {
+//               query: ["নামায", "পবিত্র"],
+//               path: "ques.bn-BD",
+//               fuzzy: { maxEdits: 2, prefixLength: 3 },
+//             },
+//           },
+//           {
+//             autocomplete: {
+//               query: ["নামায", "পবিত্র"],
+//               path: "ans.bn-BD",
+//               fuzzy: { maxEdits: 2, prefixLength: 3 },
+//             },
+//           },
+//         ],
+//       },
+//     },
+//   },
+//   {
+//     $limit: 10,
+//   },
+//   {
+//     $project: {
+//       _id: 0,
+//       "ans.bn-BD": 1,
+//       score: { $meta: "searchScore" },
+//     },
+//   },
+// ])
+//   .then((res) => console.log(res))
+//   .catch((err) => console.log("error " + err));

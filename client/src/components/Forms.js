@@ -11,6 +11,7 @@ import {
   MultipleInput,
   topics,
   PasswordInput,
+  Mobile,
   Submit,
   $,
   SS,
@@ -53,7 +54,6 @@ const refInputSura = [
     },
   ],
 ];
-const validateMoblie = (str) => !!/\+8801\d{9}/.exec(str);
 
 function JamiaDetail() {
   return (
@@ -89,19 +89,16 @@ function JamiaDetail() {
         label=<FormattedMessage id="add" defaultMessage="Address" />
         max={200}
       />
-      <Input
-        defaultValue={SS.get("reg-contact") || "+8801"}
+      <Mobile
+        defaultValue={SS.get("reg-contact")}
         onChange={(target) => SS.set("reg-contact", target.value)}
         required={true}
         dataId="contact"
-        pattern="^\+8801\d{9}$"
-        strict={/^\+8801\d{0,9}$/}
-        warning="+8801***"
         validationMessage=<FormattedMessage
           id="form.jamiaReg.contactValidation"
           defaultMessage="Enter contact detail"
         />
-        label=<FormattedMessage id="contact" defaultMessage="Contact" />
+        label=<FormattedMessage id="mobile" defaultMessage="Mobile" />
       />
       <Input
         defaultValue={SS.get("reg-primeMufti")}
@@ -320,18 +317,15 @@ function ApplicantDetail() {
           defaultMessage="Applicant's designation in Jamia"
         />
       />
-      <Input
+      <Mobile
         required={true}
-        pattern="^\+8801\d{9}$"
-        strict={/^\+8801\d{0,9}$/}
         validationMessage=<FormattedMessage
           id="applMobValidation"
           defaultMessage="Enter applicant's mobile"
         />
-        defaultValue={SS.get("reg-applicantMobile") || "+8801"}
+        defaultValue={SS.get("reg-applicantMobile")}
         onChange={(target) => SS.set("reg-applicantMobile", target.value)}
         dataId="applicantMobile"
-        warning="+8801***"
         label=<FormattedMessage
           id="form.jamiaReg.applicantContact"
           defaultMessage="Applicant's Mobile"
@@ -923,10 +917,7 @@ export const PassRecovery = () => {
               values={{
                 link: (
                   <a href="/login">
-                    <FormattedMessage
-                      id="form.passRecovery.redirect"
-                      defaultMessage="here"
-                    />
+                    <FormattedMessage id="here" defaultMessage="here" />
                   </a>
                 ),
               }}
@@ -937,6 +928,7 @@ export const PassRecovery = () => {
         {step !== "success" && (
           <Submit
             disabled={
+              wrongCode ||
               loading ||
               (step === 2 && timer <= 0) ||
               (step === 2 && attempts > 2) ||
@@ -1781,41 +1773,17 @@ export const Report = ({ fatwa, close }) => {
   const [loading, setLoading] = useState(false);
   function submit(e) {
     e.preventDefault();
-    if (SS.get("reportFatwa-name").length < 3) {
-      emptyFieldWarning("#name", "input", "Enter a valid name");
-      return;
-    }
-    if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/g.exec(SS.get("reportFatwa-email"))) {
-      emptyFieldWarning("#email", "input", "Enter a valid email");
-      return;
-    }
-    if (!validateMoblie(SS.get("reportFatwa-mobile"))) {
-      emptyFieldWarning(
-        "#mobile",
-        "input",
-        "Enter a valid mobile number. +8801***"
-      );
-      return;
-    }
-    if (SS.get("reportFatwa-subject").length < 5) {
-      emptyFieldWarning("#subject", "input", "Enter a subject.");
-      return;
-    }
-    if (SS.get("reportFatwa-message").length < 10) {
-      emptyFieldWarning("#message", "textarea", "Enter a message.");
-      return;
-    }
     setLoading(true);
     fetch("/api/reportFatwa", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         fatwa: fatwa._id,
-        jamia: fatwa.jamia.id,
+        source: fatwa.source._id,
         user: {
           name: SS.get("reportFatwa-name"),
           email: SS.get("reportFatwa-email"),
-          mobile: SS.get("reportFatwa-mobile"),
+          mob: SS.get("reportFatwa-mobile"),
         },
         message: {
           subject: SS.get("reportFatwa-subject"),
@@ -1882,18 +1850,14 @@ export const Report = ({ fatwa, close }) => {
             SS.set("reportFatwa-email", target.value);
           }}
         />
-        <Input
+        <Mobile
           required={true}
           label=<FormattedMessage id="mobile" defaultMessage="Mobile" />
           dataId="mobile"
-          defaultValue={SS.get("reportFatwa-mobile") || "+8801"}
+          defaultValue={SS.get("reportFatwa-mobile")}
           onChange={(target) => {
             SS.set("reportFatwa-mobile", target.value);
           }}
-          type="text"
-          warning="+8801..."
-          strict={/^\+880\d{0,9}$/}
-          pattern={/^\+880\d{9}$/}
           validationMessage=<FormattedMessage id="contactValidation" />
         />
         <Input

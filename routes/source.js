@@ -4,7 +4,7 @@ router
   .post(passport.authenticate("SourceAuth"), (req, res) => {
     const { topic, title, ques, ans, ref, img } = req.body;
     if (!title["en-US"] && !ques["en-US"] && !ans["en-US"]) {
-      TranslateAll([title["bn-BD"], ques["bn-BD"], ans["bn-BD"]])
+      TranslateAll([title["bn-BD"], ques["bn-BD"], ans["bn-BD"]], true)
         .then((translations) => {
           return new Fatwa({
             topic: topic,

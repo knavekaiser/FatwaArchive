@@ -63,7 +63,8 @@ function Nav({ location }) {
       location.pathname.startsWith("/jamia") ||
       location.pathname.startsWith("/admin") ||
       location.pathname.startsWith("/login") ||
-      location.pathname.startsWith("/register")
+      location.pathname.startsWith("/register") ||
+      location.pathname.startsWith("/passwordRecovery")
     ) {
       setShowSearchbar(false);
     } else {

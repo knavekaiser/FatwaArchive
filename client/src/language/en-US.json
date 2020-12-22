@@ -120,7 +120,7 @@
   "form.passRecovery.timeout": "Timeout.",
   "form.passRecovery.startOver": "Start over.",
   "form.passRecovery.success": "Password has been successfully changed, click {link} to login.",
-  "form.passRecovery.redirect": "here",
+  "here": "here",
   "results.count": "{number} fatwas found.",
   "ans.tag.refCount": "{number} reference(s)",
   "ans.tag.voteCount": "{number} vote(s)",
@@ -134,5 +134,6 @@
   "optional": "Optional",
   "reportPs": "Your message will reach the Jamia of Mufti who submitted this Fatwa",
   "regSuccess": "Your request has been successfully submitted. You will be notified via SMS, when your account is ready.",
+  "noResult": "Nothing found. you can ask your question {link}.",
   "backToHome": "Back to Home"
 }

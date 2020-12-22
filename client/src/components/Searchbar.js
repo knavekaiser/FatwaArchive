@@ -19,7 +19,7 @@ function Searchbar({ onFocus, children }) {
     e.preventDefault();
     setSearchInput((prev) => prev.replaceAll(/\s{2,}/g, " ").trim());
     setVisibleInput((prev) => prev.replaceAll(/\s{2,}/g, " ").trim());
-    if (searchInput.trim() !== "") {
+    if (searchInput !== "") {
       input.current.blur();
       setShowSuggestion(false);
       history.push({
@@ -28,6 +28,7 @@ function Searchbar({ onFocus, children }) {
           "?" +
           new URLSearchParams({
             q: searchInput.replaceAll(/\s{2,}/g, " ").trim(),
+            page: 1,
           }).toString(),
       });
     }
@@ -53,12 +54,20 @@ function Searchbar({ onFocus, children }) {
       setVisibleInput(e.target.value);
     }
   }
-  function setInitialUrl() {
-    setVisibleInput(
-      decodeURI(history.location.search).replace("?q=", "").replaceAll("+", " ")
-    );
+  function getQueryFromUrl() {
+    if (history.location.pathname === "/search") {
+      const params = JSON.parse(
+        '{"' +
+          decodeURI(history.location.search.substring(1))
+            .replace(/"/g, '\\"')
+            .replace(/&/g, '","')
+            .replace(/=/g, '":"') +
+          '"}'
+      );
+      setVisibleInput(params.q.replaceAll("+", " "));
+    }
   }
-  useEffect(setInitialUrl, []);
+  useEffect(getQueryFromUrl, []);
   function suggestionEffect() {
     history.location.pathname === "/" &&
       suggestions.length > 0 &&
