@@ -140,5 +140,12 @@
   "regSuccess": "Your request has been successfully submitted. You will be notified via SMS, when your account is ready.",
   "noResult": "Nothing found. you can ask your question {link}.",
   "backToHome": "Back to Home",
-  "nothingHere": "Nothing here"
+  "nothingHere": "Nothing here",
+  "titleChip": "Title contains:",
+  "topicChip": "Topic is",
+  "quesChip": "Question contains",
+  "ansChip": "Answer contains",
+  "translationChip": "Translation:",
+  "translationManual": "Manual",
+  "translationAuto": "Auto"
 }

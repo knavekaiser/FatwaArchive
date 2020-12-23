@@ -980,6 +980,7 @@ export const AdminLogin = () => {
         }
       })
       .catch((err) => {
+        setLoading(false);
         alert("something went wrong");
         console.log(err);
       });

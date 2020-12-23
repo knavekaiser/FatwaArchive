@@ -18,6 +18,7 @@ import {
   FormattedNumber,
   FormattedMessage,
   FormattedTimeParts,
+  injectIntl,
 } from "react-intl";
 import FourOFour from "./FourOFour";
 
@@ -581,7 +582,7 @@ function SingleJamia({ data, setData }) {
   );
 }
 
-function AllFatwa({ history, location, match }) {
+const AllFatwa = injectIntl(({ history, location, match, intl }) => {
   const { locale } = useContext(SiteContext);
   return (
     <div className="view">
@@ -610,9 +611,45 @@ function AllFatwa({ history, location, match }) {
             api="api/admin/allfatwa/filter?"
             categories={[
               {
-                name: "topic",
+                default: true,
+                fieldName: "title",
+                name: intl.formatMessage({
+                  id: "title",
+                  defaultMessage: "Title",
+                }),
+                chip: intl.formatMessage({
+                  id: "titleChip",
+                  defaultMessage: "Title contains:",
+                }),
+                input: (
+                  <Input
+                    autoFocus={true}
+                    label=<FormattedMessage
+                      id="titleChip"
+                      defaultMessage="Title contains:"
+                    />
+                    required={true}
+                  />
+                ),
+              },
+              {
+                fieldName: "topic",
+                name: intl.formatMessage({
+                  id: "topic",
+                  defaultMessage: "Topic",
+                }),
+                chip: intl.formatMessage({
+                  id: "topicChip",
+                  defaultMessage: "Topic is",
+                }),
                 input: (
                   <Combobox
+                    id={ID(8)}
+                    maxHeight={300}
+                    label=<FormattedMessage
+                      id="topicChip"
+                      defaultMessage="topic is"
+                    />
                     options={topics.map((option) => {
                       return {
                         label: option[locale],
@@ -623,38 +660,80 @@ function AllFatwa({ history, location, match }) {
                 ),
               },
               {
-                name: "title",
-                input: <Input label="Title" type="text" required={true} />,
-              },
-              {
-                name: "question",
-                input: <Input label="Question" type="text" required={true} />,
-              },
-              {
-                name: "answer",
-                input: <Input label="Answer" type="text" required={true} />,
-              },
-              {
-                name: "jamia",
+                fieldName: "ques",
+                name: intl.formatMessage({
+                  id: "question",
+                  defaultMessage: "Question",
+                }),
+                chip: intl.formatMessage({
+                  id: "quesChip",
+                  defaultMessage: "Question contains",
+                }),
                 input: (
-                  <Combobox
-                    id={ID(8)}
-                    maxHeight={500}
-                    label="jamia"
-                    data={["jamia 1", "jamia 2", "jamia 3"]}
+                  <Input
+                    autoFocus={true}
+                    label=<FormattedMessage
+                      id="quesChip"
+                      defaultMessage="Question contains"
+                    />
                     required={true}
                   />
                 ),
               },
               {
-                name: "translation",
+                fieldName: "ans",
+                name: intl.formatMessage({
+                  id: "answer",
+                  defaultMessage: "Answer",
+                }),
+                display: intl.formatMessage({
+                  id: "ansChip",
+                  defaultMessage: "Answer contains",
+                }),
+                input: (
+                  <Input
+                    autoFocus={true}
+                    label=<FormattedMessage
+                      id="ansChip"
+                      defaultMessage="Answer contains"
+                    />
+                    required={true}
+                  />
+                ),
+              },
+              {
+                fieldName: "translation",
+                name: intl.formatMessage({
+                  id: "translation",
+                  defaultMessage: "Translation",
+                }),
+                chip: intl.formatMessage({
+                  id: "translationChip",
+                  defaultMessage: "Translation:",
+                }),
                 input: (
                   <Combobox
-                    id={ID(8)}
                     maxHeight={500}
-                    label="jamia"
-                    data={["Generated", "Manual"]}
-                    required={true}
+                    label=<FormattedMessage
+                      id="translation"
+                      defaultMessage="Translation:"
+                    />
+                    options={[
+                      {
+                        label: intl.formatMessage({
+                          id: "translationAuto",
+                          defaultMessage: "Auto",
+                        }),
+                        value: "generated",
+                      },
+                      {
+                        label: intl.formatMessage({
+                          id: "translationManual",
+                          defaultMessage: "Manual",
+                        }),
+                        value: "manual",
+                      },
+                    ]}
                   />
                 ),
               },
@@ -704,9 +783,45 @@ function AllFatwa({ history, location, match }) {
             api="api/admin/allfatwa/filter?"
             categories={[
               {
-                name: "topic",
+                default: true,
+                fieldName: "title",
+                name: intl.formatMessage({
+                  id: "title",
+                  defaultMessage: "Title",
+                }),
+                chip: intl.formatMessage({
+                  id: "titleChip",
+                  defaultMessage: "Title contains:",
+                }),
+                input: (
+                  <Input
+                    autoFocus={true}
+                    label=<FormattedMessage
+                      id="titleChip"
+                      defaultMessage="Title contains:"
+                    />
+                    required={true}
+                  />
+                ),
+              },
+              {
+                fieldName: "topic",
+                name: intl.formatMessage({
+                  id: "topic",
+                  defaultMessage: "Topic",
+                }),
+                chip: intl.formatMessage({
+                  id: "topicChip",
+                  defaultMessage: "Topic is",
+                }),
                 input: (
                   <Combobox
+                    id={ID(8)}
+                    maxHeight={300}
+                    label=<FormattedMessage
+                      id="topicChip"
+                      defaultMessage="topic is"
+                    />
                     options={topics.map((option) => {
                       return {
                         label: option[locale],
@@ -717,38 +832,80 @@ function AllFatwa({ history, location, match }) {
                 ),
               },
               {
-                name: "title",
-                input: <Input label="Title" type="text" required={true} />,
-              },
-              {
-                name: "question",
-                input: <Input label="Question" type="text" required={true} />,
-              },
-              {
-                name: "answer",
-                input: <Input label="Answer" type="text" required={true} />,
-              },
-              {
-                name: "jamia",
+                fieldName: "ques",
+                name: intl.formatMessage({
+                  id: "question",
+                  defaultMessage: "Question",
+                }),
+                chip: intl.formatMessage({
+                  id: "quesChip",
+                  defaultMessage: "Question contains",
+                }),
                 input: (
-                  <Combobox
-                    id={ID(8)}
-                    maxHeight={500}
-                    label="jamia"
-                    data={["jamia 1", "jamia 2", "jamia 3"]}
+                  <Input
+                    autoFocus={true}
+                    label=<FormattedMessage
+                      id="quesChip"
+                      defaultMessage="Question contains"
+                    />
                     required={true}
                   />
                 ),
               },
               {
-                name: "translation",
+                fieldName: "ans",
+                name: intl.formatMessage({
+                  id: "answer",
+                  defaultMessage: "Answer",
+                }),
+                display: intl.formatMessage({
+                  id: "ansChip",
+                  defaultMessage: "Answer contains",
+                }),
+                input: (
+                  <Input
+                    autoFocus={true}
+                    label=<FormattedMessage
+                      id="ansChip"
+                      defaultMessage="Answer contains"
+                    />
+                    required={true}
+                  />
+                ),
+              },
+              {
+                fieldName: "translation",
+                name: intl.formatMessage({
+                  id: "translation",
+                  defaultMessage: "Translation",
+                }),
+                chip: intl.formatMessage({
+                  id: "translationChip",
+                  defaultMessage: "Translation:",
+                }),
                 input: (
                   <Combobox
-                    id={ID(8)}
                     maxHeight={500}
-                    label="jamia"
-                    data={["Generated", "Manual"]}
-                    required={true}
+                    label=<FormattedMessage
+                      id="translation"
+                      defaultMessage="Translation:"
+                    />
+                    options={[
+                      {
+                        label: intl.formatMessage({
+                          id: "translationAuto",
+                          defaultMessage: "Auto",
+                        }),
+                        value: "generated",
+                      },
+                      {
+                        label: intl.formatMessage({
+                          id: "translationManual",
+                          defaultMessage: "Manual",
+                        }),
+                        value: "manual",
+                      },
+                    ]}
                   />
                 ),
               },
@@ -798,9 +955,45 @@ function AllFatwa({ history, location, match }) {
             api="api/admin/fatwaSubmissions/filter?"
             categories={[
               {
-                name: "topic",
+                default: true,
+                fieldName: "title",
+                name: intl.formatMessage({
+                  id: "title",
+                  defaultMessage: "Title",
+                }),
+                chip: intl.formatMessage({
+                  id: "titleChip",
+                  defaultMessage: "Title contains:",
+                }),
+                input: (
+                  <Input
+                    autoFocus={true}
+                    label=<FormattedMessage
+                      id="titleChip"
+                      defaultMessage="Title contains:"
+                    />
+                    required={true}
+                  />
+                ),
+              },
+              {
+                fieldName: "topic",
+                name: intl.formatMessage({
+                  id: "topic",
+                  defaultMessage: "Topic",
+                }),
+                chip: intl.formatMessage({
+                  id: "topicChip",
+                  defaultMessage: "Topic is",
+                }),
                 input: (
                   <Combobox
+                    id={ID(8)}
+                    maxHeight={300}
+                    label=<FormattedMessage
+                      id="topicChip"
+                      defaultMessage="topic is"
+                    />
                     options={topics.map((option) => {
                       return {
                         label: option[locale],
@@ -811,26 +1004,80 @@ function AllFatwa({ history, location, match }) {
                 ),
               },
               {
-                name: "title",
-                input: <Input label="Title" type="text" required={true} />,
+                fieldName: "ques",
+                name: intl.formatMessage({
+                  id: "question",
+                  defaultMessage: "Question",
+                }),
+                chip: intl.formatMessage({
+                  id: "quesChip",
+                  defaultMessage: "Question contains",
+                }),
+                input: (
+                  <Input
+                    autoFocus={true}
+                    label=<FormattedMessage
+                      id="quesChip"
+                      defaultMessage="Question contains"
+                    />
+                    required={true}
+                  />
+                ),
               },
               {
-                name: "question",
-                input: <Input label="Question" type="text" required={true} />,
+                fieldName: "ans",
+                name: intl.formatMessage({
+                  id: "answer",
+                  defaultMessage: "Answer",
+                }),
+                display: intl.formatMessage({
+                  id: "ansChip",
+                  defaultMessage: "Answer contains",
+                }),
+                input: (
+                  <Input
+                    autoFocus={true}
+                    label=<FormattedMessage
+                      id="ansChip"
+                      defaultMessage="Answer contains"
+                    />
+                    required={true}
+                  />
+                ),
               },
               {
-                name: "answer",
-                input: <Input label="Answer" type="text" required={true} />,
-              },
-              {
-                name: "jamia",
+                fieldName: "translation",
+                name: intl.formatMessage({
+                  id: "translation",
+                  defaultMessage: "Translation",
+                }),
+                chip: intl.formatMessage({
+                  id: "translationChip",
+                  defaultMessage: "Translation:",
+                }),
                 input: (
                   <Combobox
-                    id={ID(8)}
                     maxHeight={500}
-                    label="jamia"
-                    data={["jamia 1", "jamia 2", "jamia 3"]}
-                    required={true}
+                    label=<FormattedMessage
+                      id="translation"
+                      defaultMessage="Translation:"
+                    />
+                    options={[
+                      {
+                        label: intl.formatMessage({
+                          id: "translationAuto",
+                          defaultMessage: "Auto",
+                        }),
+                        value: "generated",
+                      },
+                      {
+                        label: intl.formatMessage({
+                          id: "translationManual",
+                          defaultMessage: "Manual",
+                        }),
+                        value: "manual",
+                      },
+                    ]}
                   />
                 ),
               },
@@ -864,7 +1111,7 @@ function AllFatwa({ history, location, match }) {
       </Switch>
     </div>
   );
-}
+});
 function SingleFatwaSubmission({ data, setData }) {
   const { locale, setFatwaToEdit } = useContext(SiteContext);
   const [open, setOpen] = useState(false);
@@ -1460,7 +1707,9 @@ function NewQuestions() {
       </div>
       <ul className="feed">
         {!loading ? (
-          data.map((item) => <SingleQuestion key={item._id} data={item} />)
+          data.map((item) => (
+            <SingleQuestion key={item._id} data={item} setQues={setData} />
+          ))
         ) : (
           <LoadingPost />
         )}
@@ -1468,10 +1717,33 @@ function NewQuestions() {
     </>
   );
 }
-function SingleQuestion({ data }) {
+function SingleQuestion({ data, setQues }) {
   const { locale } = useContext(SiteContext);
+  const [loading, setLoading] = useState(false);
   const history = useHistory();
   const container = useRef(null);
+  function remove() {
+    setLoading(true);
+    fetch("/api/admin/userQues", {
+      method: "DELETE",
+      headers: { "Content-type": "application/json" },
+      body: JSON.stringify({ _id: data._id }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setLoading(false);
+        if (data.code === "ok") {
+          setQues((prev) => prev.filter((ques) => ques._id !== data._id));
+        } else {
+          alert("something went wrong");
+        }
+      })
+      .catch((err) => {
+        setLoading(false);
+        console.log(err);
+        alert("something went wrong");
+      });
+  }
   return (
     <li
       ref={container}
@@ -1518,6 +1790,12 @@ function SingleQuestion({ data }) {
               SS.set("userAns-ques", data.ques.body);
               SS.set("userAns-topic", JSON.stringify(data.ques.topic));
               history.push(`/admin/userQuestion/${data._id}/add`);
+            },
+          },
+          {
+            label: "Remove",
+            action: () => {
+              remove();
             },
           },
         ]}

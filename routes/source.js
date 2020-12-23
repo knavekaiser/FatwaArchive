@@ -125,13 +125,11 @@ router
     Fatwa.find(query)
       .sort(`${sort.order === "des" ? "-" : ""}${sort.column}`)
       .then((submissions) => {
-        if (submissions.length === 0) {
-          res.json([]);
-          return;
-        }
-        res.json(submissions);
+        res.json({ code: "ok", data: submissions });
       })
-      .catch((err) => res.status(400).json(err));
+      .catch((err) =>
+        res.status(500).json({ code: 500, message: "something went wrong" })
+      );
   });
 router.route("/fatwaSubmissions/:_id").delete((req, res) => {
   if (ObjectID.isValid(req.params._id)) {
@@ -155,22 +153,25 @@ router
     ques && (query[`ques.${locale}`] = RegExp(ques));
     ans && (query[`ans.${locale}`] = RegExp(ans));
     topic && (query[`topic.${locale}`] = topic);
-    translation &&
-      (translation === "Manual"
-        ? (query.translation = "manual")
-        : (query.translation = "google translate"));
+    (translation === "Auto" || translation === "গুগল") &&
+      (query.translation = false);
+    (translation === "Manual" || translation === "ব্যক্তি") &&
+      (query.translation = true);
     if (locale === "bn-BD" || locale === "en-US") {
       Fatwa.find(query, "-status -meta -img")
         .sort(`${sort.order === "des" ? "-" : ""}${sort.column}`)
         .then((fatwas) => {
-          res.json(fatwas);
+          res.json({ code: "ok", data: fatwas });
         })
         .catch((err) => {
-          res.status(400).json("Error: " + err);
+          res.status(500).json({ code: 500, message: "something went wrong" });
           console.log(err);
         });
     } else {
-      res.status(400).json("No language selected or formation is wrong");
+      res.status(400).json({
+        code: 400,
+        message: "No language selected or formation is wrong",
+      });
     }
   });
 router

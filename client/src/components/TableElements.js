@@ -56,6 +56,7 @@ export const Filter = ({ categories, filters, setFilters }) => {
   const [value, setValue] = useState("");
   const [showMiniForm, setShowMiniForm] = useState(false);
   const [miniForm, setMiniForm] = useState({ name: "", input: "" });
+  const [defaultFilter, setDefaultFilter] = useState({});
   const filterInput = useRef();
   const input = useRef();
   function change(e) {
@@ -64,21 +65,21 @@ export const Filter = ({ categories, filters, setFilters }) => {
   }
   function submit(e) {
     e.preventDefault();
-    if (filters.title) {
+    if (filters.some((item) => item.field === defaultFilter.fieldName)) {
       return;
     }
-    addChip("title", value);
+    addFilter(defaultFilter.fieldName, value, defaultFilter.chip);
     setValue("");
     filterInput.current.focus();
     setShowCategories(false);
   }
   function miniFormSubmit(e) {
     e.preventDefault();
-    if (filters[miniForm.name]) {
-      // --------- NEED LOOKUP
-      return;
-    }
-    addChip(miniForm.fieldName, e.target.querySelector("input").value);
+    addFilter(
+      miniForm.fieldName,
+      e.target.querySelector("input").value,
+      miniForm.chip
+    );
     setValue("");
     setShowCategories(false);
   }
@@ -86,17 +87,26 @@ export const Filter = ({ categories, filters, setFilters }) => {
     setMiniForm(item);
     setShowMiniForm(true);
   }
-  function addChip(category, value) {
+  function addFilter(field, value, chip) {
     setFilters((prev) => {
-      const newChips = { ...prev };
-      newChips[category] = value.toLowerCase();
-      return newChips;
+      const newFilters = [...prev];
+      newFilters.push({
+        field: field,
+        value: value,
+        chip: chip,
+      });
+      return newFilters;
     });
     setShowCategories(false);
   }
   useEffect(() => {
     !showCategories && setShowMiniForm(false);
   }, [showCategories]);
+  useEffect(() => {
+    categories.forEach((item) => {
+      item.default && setDefaultFilter(item);
+    });
+  }, [categories]);
   return (
     <div className="tableFilter">
       <form onSubmit={submit}>
@@ -105,23 +115,23 @@ export const Filter = ({ categories, filters, setFilters }) => {
           name="filter-outline"
         ></ion-icon>
         <div className="chips">
-          {Object.entries(filters).map((item, i) => (
-            <div key={item[1]} className="chip">
-              <p>
-                {item[0]} contains '<b>{item[1]}</b>'
-              </p>
-              <ion-icon
-                onClick={() =>
-                  setFilters((prev) => {
-                    const newChips = { ...prev };
-                    delete newChips[item[0]];
-                    return newChips;
-                  })
-                }
-                name="close-outline"
-              ></ion-icon>
-            </div>
-          ))}
+          {filters.map((item, i) => {
+            return (
+              <div key={item.field} className="chip">
+                <p>
+                  {item.chip} '<b>{item.value}</b>'
+                </p>
+                <ion-icon
+                  onClick={() =>
+                    setFilters((prev) => {
+                      return prev.filter((i) => i.field !== item.field);
+                    })
+                  }
+                  name="close-outline"
+                ></ion-icon>
+              </div>
+            );
+          })}
           <FormattedMessage id="filter">
             {(msg) => (
               <input
@@ -136,7 +146,7 @@ export const Filter = ({ categories, filters, setFilters }) => {
         </div>
         {Object.values(filters).length > 0 && (
           <ion-icon
-            onClick={() => setFilters({})}
+            onClick={() => setFilters([])}
             name="close-outline"
           ></ion-icon>
         )}
@@ -154,7 +164,12 @@ export const Filter = ({ categories, filters, setFilters }) => {
               <>
                 {value === "" &&
                   categories
-                    .filter((item) => !filters[item.fieldName])
+                    .filter(
+                      (item) =>
+                        !filters.some(
+                          (filter) => filter.field === item.fieldName
+                        )
+                    )
                     .map((item) => (
                       <li
                         key={item.name}
@@ -163,14 +178,22 @@ export const Filter = ({ categories, filters, setFilters }) => {
                         {item.name}
                       </li>
                     ))}
-                {value !== "" && !filters.title && (
-                  <li onClick={submit}>
-                    Title contains '<b>{value}</b>'
-                  </li>
-                )}
+                {value !== "" &&
+                  !filters.some(
+                    (item) => item.field === defaultFilter.fieldName
+                  ) && (
+                    <li onClick={submit}>
+                      {defaultFilter.chip} '<b>{value}</b>'
+                    </li>
+                  )}
                 {value !== "" &&
                   categories
-                    .filter((item) => !filters[item.fieldName])
+                    .filter(
+                      (item) =>
+                        !filters.some(
+                          (filter) => filter.field === item.fieldName
+                        )
+                    )
                     .filter((item) => item.name.includes(value.toLowerCase()))
                     .map((item, i) => (
                       <React.Fragment key={item.name}>
@@ -181,12 +204,18 @@ export const Filter = ({ categories, filters, setFilters }) => {
                       </React.Fragment>
                     ))}
                 {value !== "" &&
-                  categories.filter((item) =>
-                    item.name.includes(value.toLowerCase())
-                  ).length === 0 &&
-                  filters.title && (
-                    <li className="noFilter">No matching filter</li>
-                  )}
+                  categories
+                    .filter(
+                      (item) =>
+                        !filters.some(
+                          (filter) => filter.field === item.fieldName
+                        )
+                    )
+                    .filter((item) => item.name.includes(value.toLowerCase()))
+                    .length === 0 &&
+                  filters.some(
+                    (item) => item.field === defaultFilter.fieldName
+                  ) && <li className="noFilter">No matching filter</li>}
               </>
             ) : (
               <div className="miniForm">
@@ -349,10 +378,8 @@ export const Actions = ({ actions, icon }) => {
   );
 };
 
-const encodeURL = (obj) =>
-  Object.keys(obj)
-    .map((key) => `${key}=${obj[key]}`)
-    .join("&");
+const encodeURI = (arr) =>
+  arr.map((item) => `${item.field}=${item.value}`).join("&");
 
 export const LoadingColumn = () => {
   return (
@@ -373,14 +400,6 @@ export const ErrorColumn = () => {
   );
 };
 
-export const EmptyColumn = () => {
-  return (
-    <tr>
-      <td>Nothing here for now.</td>
-    </tr>
-  );
-};
-
 export const View = ({
   id,
   api,
@@ -392,23 +411,27 @@ export const View = ({
   const abortController = new AbortController();
   const signal = abortController.signal;
   const { locale } = useContext(SiteContext);
-  const [filters, setFilters] = useState({});
+  const [filters, setFilters] = useState([]);
   const [sort, setSort] = useState(defaultSort);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   function fetchData() {
     !loading && setLoading(true);
-    const query = encodeURL(filters);
-    const sortOrder = encodeURL(sort);
+    const query = encodeURI(filters);
     const options = { headers: { "Accept-Language": locale }, signal: signal };
-    const url = `/${api}${query}&${sortOrder}`;
+    const url = `/${api}${query}&column=${sort.column}&order=${sort.order}`;
     fetch(url, options)
       .then((res) => res.json())
       .then((data) => {
-        setData(data);
         setLoading(false);
+        if (data.code === "ok") {
+          setData(data.data);
+        } else {
+          alert("something went wrong");
+        }
       })
       .catch((err) => {
+        setLoading(false);
         if (err.name === "AbortError") {
           return;
         }

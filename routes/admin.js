@@ -57,26 +57,32 @@ router
   .route("/admin/allfatwa/filter")
   .get(passport.authenticate("AdminAuth"), (req, res) => {
     const locale = req.headers["accept-language"];
+    const { title, ques, ans, topic, translation } = req.query;
     const query = { status: "live" };
     const sort = { column: req.query.column, order: req.query.order };
-    req.query.title && (query[`title.${locale}`] = RegExp(req.query.title));
-    req.query.question &&
-      (query[`ques.${locale}`] = RegExp(req.query.question));
-    req.query.answer && (query[`ans.${locale}`] = RegExp(req.query.answer));
-    req.query.topic && (query[`topic.${locale}`] = req.query.topic);
-    req.query.jamia && (query.jamia = req.query.jamia);
+    title && (query[`title.${locale}`] = RegExp(title));
+    ques && (query[`ques.${locale}`] = RegExp(ques));
+    ans && (query[`ans.${locale}`] = RegExp(ans));
+    topic && (query[`topic.${locale}`] = topic);
+    (translation === "Auto" || translation === "গুগল") &&
+      (query.translation = false);
+    (translation === "Manual" || translation === "ব্যক্তি") &&
+      (query.translation = true);
     if (locale.length > 5) {
-      res.status(400).json("No language selected or formation is wrong");
+      res.status(400).json({
+        code: 400,
+        message: "No language selected or formation is wrong",
+      });
       return;
     }
     Fatwa.find(query)
       .populate("source", "name primeMufti role")
       .sort(`${sort.order === "des" ? "-" : ""}${sort.column}`)
       .then((fatwas) => {
-        res.json(fatwas);
+        res.json({ code: "ok", data: fatwas });
       })
       .catch((err) => {
-        res.status(400).json("Error: " + err);
+        res.status(500).json({ code: 500, message: "something went wrong" });
         console.log(err);
       });
   });
@@ -93,27 +99,23 @@ router
 router
   .route("/admin/fatwaSubmissions/filter")
   .get(passport.authenticate("AdminAuth"), (req, res) => {
-    if (req.user.role !== "admin") return res.status("403").json("forbidden");
+    const { title, ques, ans, topic, translation } = req.query;
     const locale = req.headers["accept-language"];
     const query = { $or: [{ status: "pending" }, { status: "pendingEdit" }] };
     const sort = { column: req.query.column, order: req.query.order };
-    req.query.title && (query[`title.${locale}`] = RegExp(req.query.title));
-    req.query.question &&
-      (query[`ques.${locale}`] = RegExp(req.query.question));
-    req.query.answer && (query[`ans.${locale}`] = RegExp(req.query.answer));
-    req.query.topic && (query[`topic.${locale}`] = req.query.topic);
-    req.query.jamia && (query.jamia = req.query.jamia);
+    title && (query[`title.${locale}`] = RegExp(title));
+    ques && (query[`ques.${locale}`] = RegExp(ques));
+    ans && (query[`ans.${locale}`] = RegExp(ans));
+    topic && (query[`topic.${locale}`] = topic);
     Fatwa.find(query)
       .populate("source", "name primeMufti role")
       .sort(`${sort.order === "des" ? "-" : ""}${sort.column}`)
       .then((submissions) => {
-        if (submissions.length === 0) {
-          res.json([]);
-          return;
-        }
-        res.json(submissions);
+        res.json({ code: "ok", data: submissions });
       })
-      .catch((err) => res.status(500).json(err));
+      .catch((err) =>
+        res.status(500).json({ code: 500, message: "something went wrong" })
+      );
   });
 router
   .route("/admin/fatwaSubmissions/accept/:_id")
@@ -176,6 +178,21 @@ router
     }
   });
 router
+  .route("/admin/userQues")
+  .delete(passport.authenticate("AdminAuth"), (req, res) => {
+    if (ObjectID.isValid(req.body._id)) {
+      UserQuestion.findByIdAndDelete(req.body._id)
+        .then(() => {
+          res.json({ code: "ok", message: "successfully deleted" });
+        })
+        .catch((err) => {
+          res.status(500).json({ code: 500, message: "something went wrong" });
+        });
+    } else {
+      res.status(400).json({ code: 400, message: "invalid id" });
+    }
+  });
+router
   .route("/admin/userQues/approveAns/:_id")
   .post(passport.authenticate("AdminAuth"), (req, res) => {
     if (ObjectID.isValid(req.params._id) && ObjectID.isValid(req.body.ans_id)) {
@@ -227,13 +244,11 @@ router
       .select("-pass -type")
       .sort(`${sort.order === "des" ? "-" : ""}${sort.column}`)
       .then((submissions) => {
-        if (submissions.length === 0) {
-          res.json([]);
-          return;
-        }
-        res.json(submissions);
+        res.json({ code: "ok", data: submissions });
       })
-      .catch((err) => res.status(400).json(err));
+      .catch((err) =>
+        res.status(500).json({ code: 500, message: "something went wrong" })
+      );
   });
 
 //----------------------------------JAMIA
@@ -267,9 +282,11 @@ router
       .sort(`${sort.order === "des" ? "-" : ""}${sort.column}`)
       .select("-pass -type")
       .then((sources) => {
-        res.status(200).json(sources);
+        res.json({ code: "ok", data: sources });
       })
-      .catch((err) => res.status(400).json(err));
+      .catch((err) =>
+        res.status(500).json({ code: 500, data: "something went wrong" })
+      );
   });
 router
   .route("/admin/source/reject")

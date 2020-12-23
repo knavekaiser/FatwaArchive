@@ -140,5 +140,12 @@
   "regSuccess": "আপনার আবেদন সাবমিট হয়েছে । আবেদন গৃহীত হলে এসএমএসের মাধ্যমে আপনাকে জানিয়ে দেওয়া হবে ।",
   "noResult": "কোনো ফতোয়া পাওয়া যায়নি । প্রশ্ন করতে {link} ক্লিক করুন ।",
   "backToHome": "হোমে ফিরে যান",
-  "nothingHere": "কিছুই নেই"
+  "nothingHere": "কিছুই নেই",
+  "titleChip": "শিরোনামে রয়েছেঃ",
+  "topicChip": "বিষয়বস্তু হল",
+  "quesChip": "প্রশ্নে রয়েছে",
+  "ansChip": "উত্তরে রয়েছে",
+  "translationChip": "অনুবাদ:",
+  "translationManual": "ব্যক্তি",
+  "translationAuto": "গুগল"
 }

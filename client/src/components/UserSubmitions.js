@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import {
   Input,
   Textarea,
+  Mobile,
   Submit,
   Combobox,
   topics,
@@ -82,20 +83,16 @@ function UserQuestion() {
           onChange={(target) => SS.set("askFatwa-add", target.value)}
           label=<FormattedMessage id="add" defaultMessage="Address" />
         />
-        <Input
+        <Mobile
           dataId="mobile"
           onChange={(target) => SS.set("askFatwa-mob", target.value)}
           label=<FormattedMessage id="mobile" defaultMessage="Mobile" />
-          type="text"
           required={true}
-          strict={/^\+\d{0,13}$/}
-          pattern="^\+8801\d{9}$"
-          defaultValue={SS.get("askFatwa-mob") || "+8801"}
+          defaultValue={SS.get("askFatwa-mob")}
           validationMessage=<FormattedMessage
             id="contactValidation"
             defaultMessage="Enter your mobile number"
           />
-          warning="+8801..."
         />
         <Combobox
           dataId="topic"
