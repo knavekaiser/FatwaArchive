@@ -117,14 +117,11 @@
     grid-template-areas: "lg nv" "sr sr";
     grid-gap: 0.5rem;
     &.mini {
-      grid-template-columns: min-content 1fr min-content;
-      grid-template-areas: "bt lg nv";
+      display: flex;
+      justify-content: space-between;
       grid-column-gap: 0;
       .navLogo {
-        grid-area: lg;
-        display: flex;
-        justify-content: center;
-        width: min-content;
+        flex: 0;
       }
       .sidebarToggleBtn + .navLogo {
         width: 100%;

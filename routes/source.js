@@ -2,7 +2,7 @@
 router
   .route("/source/newFatwa")
   .post(passport.authenticate("SourceAuth"), (req, res) => {
-    const { topic, title, ques, ans, ref, img, write, atts } = req.body;
+    const { topic, title, ques, ans, ref, img, meta } = req.body;
     if (!title["en-US"] && !ques["en-US"] && !ans["en-US"]) {
       TranslateAll([title["bn-BD"], ques["bn-BD"], ans["bn-BD"]], true)
         .then((translations) => {
@@ -17,8 +17,7 @@ router
             ans: { "bn-BD": ans["bn-BD"], "en-US": translations[2] },
             ref: ref,
             img: img,
-            write: write,
-            atts: atts,
+            meta: meta,
             translation: false,
             source: req.user._id,
           });
@@ -158,7 +157,7 @@ router
     (translation === "Manual" || translation === "ব্যক্তি") &&
       (query.translation = true);
     if (locale === "bn-BD" || locale === "en-US") {
-      Fatwa.find(query, "-status -meta -img")
+      Fatwa.find(query, "-status -img")
         .sort(`${sort.order === "des" ? "-" : ""}${sort.column}`)
         .then((fatwas) => {
           res.json({ code: "ok", data: fatwas });
@@ -206,9 +205,7 @@ router
     };
     if (ObjectID.isValid(req.params._id)) {
       Fatwa.findByIdAndUpdate(req.params._id, newData)
-        .then(() =>
-          Source.findByIdAndUpdate(req.user._id, { $inc: { fatwa: -1 } })
-        )
+        .then(() => Source.updateFatwaCount(req.user._id))
         .then(() => {
           res.json({ code: "ok", message: "updated" });
         })
@@ -235,9 +232,7 @@ router
       Fatwa.findById(req.body.fatwa)
         .then((fatwa) => new DeletedFatwa({ ...fatwa }).save())
         .then(() => Fatwa.findByIdAndDelete(req.body.fatwa))
-        .then(() =>
-          Source.findByIdAndUpdate(req.body.source, { $inc: { fatwa: -1 } })
-        )
+        .then(() => Source.updateFatwaCount(req.user._id))
         .then(() => {
           res.json({ code: "ok", message: "fatwa successfully deleted" });
         })

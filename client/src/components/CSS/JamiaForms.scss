@@ -419,6 +419,15 @@ input:-webkit-autofill:focus {
   font-size: 1.05rem;
   // -webkit-box-shadow: 0 0 0px 1000px $base-white inset;
 }
+input[type="date"]:required:invalid::-webkit-datetime-edit {
+  color: transparent;
+}
+input[type="date"]:focus::-webkit-datetime-edit {
+  color: black !important;
+}
+input[type="date"] {
+  height: 34px;
+}
 form {
   &.reg,
   &.login,
@@ -638,6 +647,9 @@ form {
     left: 0rem;
     color: $light-border;
     transition: font-size, transform, 0.2s ease-in-out;
+    small {
+      pointer-events: none;
+    }
     &.active {
       color: $light-text;
       font-size: 1rem;

@@ -1708,7 +1708,7 @@ function NewQuestions() {
       <ul className="feed">
         {!loading ? (
           data.map((item) => (
-            <SingleQuestion key={item._id} data={item} setQues={setData} />
+            <SingleQuestion key={item._id} ques={item} setQues={setData} />
           ))
         ) : (
           <LoadingPost />
@@ -1717,7 +1717,7 @@ function NewQuestions() {
     </>
   );
 }
-function SingleQuestion({ data, setQues }) {
+function SingleQuestion({ ques, setQues }) {
   const { locale } = useContext(SiteContext);
   const [loading, setLoading] = useState(false);
   const history = useHistory();
@@ -1727,13 +1727,13 @@ function SingleQuestion({ data, setQues }) {
     fetch("/api/admin/userQues", {
       method: "DELETE",
       headers: { "Content-type": "application/json" },
-      body: JSON.stringify({ _id: data._id }),
+      body: JSON.stringify({ _id: ques._id }),
     })
       .then((res) => res.json())
       .then((data) => {
         setLoading(false);
         if (data.code === "ok") {
-          setQues((prev) => prev.filter((ques) => ques._id !== data._id));
+          setQues((prev) => prev.filter((item) => item._id !== ques._id));
         } else {
           alert("something went wrong");
         }
@@ -1750,26 +1750,26 @@ function SingleQuestion({ data, setQues }) {
       className={`question mini`}
       onClick={(e) => {
         if (e.target === container.current) {
-          history.push("/admin/questionFeed/" + data._id);
+          history.push("/admin/questionFeed/" + ques._id);
         }
       }}
     >
       <div className="user">
-        <p className="name">{data.user.name}</p>
+        <p className="name">{ques.user.name}</p>
         <p className="date">
-          {new Date(data.submitted).getFullYear() !==
+          {new Date(ques.submitted).getFullYear() !==
           new Date().getFullYear() ? (
             <FormattedDate
-              value={data.submitted}
+              value={ques.submitted}
               day="numeric"
               month="long"
               year="numeric"
             />
           ) : (
-            <FormattedDate value={data.submitted} day="numeric" month="long" />
+            <FormattedDate value={ques.submitted} day="numeric" month="long" />
           )}
           <span className="separator" />
-          <FormattedTimeParts value={data.submitted}>
+          <FormattedTimeParts value={ques.submitted}>
             {(parts) => (
               <>
                 {parts[0].value}
@@ -1787,9 +1787,9 @@ function SingleQuestion({ data, setQues }) {
           {
             label: "Answer now",
             action: () => {
-              SS.set("userAns-ques", data.ques.body);
-              SS.set("userAns-topic", JSON.stringify(data.ques.topic));
-              history.push(`/admin/userQuestion/${data._id}/add`);
+              SS.set("userAns-ques", ques.ques.body);
+              SS.set("userAns-topic", JSON.stringify(ques.ques.topic));
+              history.push(`/admin/userQuestion/${ques._id}/add`);
             },
           },
           {
@@ -1800,21 +1800,21 @@ function SingleQuestion({ data, setQues }) {
           },
         ]}
       />
-      <p className="ques">{data.ques.body}</p>
+      <p className="ques">{ques.ques.body}</p>
       <ul className="tags">
-        <li className="tag">{data.ques.topic[locale]}</li>
+        <li className="tag">{ques.ques.topic[locale]}</li>
         <li className="tag">
           <FormattedMessage
-            values={{ number: <FormattedNumber value={data.ans.length} /> }}
+            values={{ number: <FormattedNumber value={ques.ans.length} /> }}
             id="ans.tag.ansCount"
-            defaultMessage={`${data.ans.length} Answer(s)`}
+            defaultMessage={`${ques.ans.length} Answer(s)`}
           />
         </li>
         <li className="tag">
           <FormattedMessage
-            values={{ number: <FormattedNumber value={data.reports.length} /> }}
+            values={{ number: <FormattedNumber value={ques.reports.length} /> }}
             id="ans.tag.reportCount"
-            defaultMessage={`${data.reports.length} Reports(s)`}
+            defaultMessage={`${ques.reports.length} Reports(s)`}
           />
         </li>
       </ul>

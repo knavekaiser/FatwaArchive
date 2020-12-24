@@ -21,8 +21,14 @@ const source = new Schema(
   }
 );
 
-const Source = mongoose.model("Source", source);
+source.statics.updateFatwaCount = (_id) => {
+  if (!ObjectID.isValid(_id)) return;
+  return Fatwa.countDocuments({ source: _id, status: "live" }).then((count) =>
+    Source.findByIdAndUpdate(_id, { fatwa: count })
+  );
+};
 
+const Source = mongoose.model("Source", source);
 const Jamia = Source.discriminator(
   "Jamia",
   new Schema({

@@ -4,6 +4,7 @@ import { SiteContext } from "../Context";
 import "./CSS/JamiaForms.min.css";
 import {
   Input,
+  DateInput,
   Textarea,
   Checkbox,
   GetGroupData,
@@ -1056,8 +1057,11 @@ export const AddFatwaForm = ({ match }) => {
           "bn-BD": "",
           "en-US": "",
         },
-        write: "",
-        atts: "",
+        meta: {
+          date: "",
+          atts: "",
+          write: "",
+        },
         img: [],
       };
     } else {
@@ -1070,8 +1074,9 @@ export const AddFatwaForm = ({ match }) => {
       SS.set("editFatwa-quesEn", fatwaToEdit.ques["en-US"]);
       SS.set("editFatwa-ans", fatwaToEdit.ans["bn-BD"]);
       SS.set("editFatwa-ansEn", fatwaToEdit.ans["en-US"]);
-      SS.set("editFatwa-write", fatwaToEdit.write);
-      SS.set("editFatwa-atts", fatwaToEdit.atts);
+      SS.set("editFatwa-date", fatwaToEdit.meta.date);
+      SS.set("editFatwa-write", fatwaToEdit.meta.write);
+      SS.set("editFatwa-atts", fatwaToEdit.meta.atts);
       if (fatwaToEdit.ref.length > 0) {
         fatwaToEdit.ref.forEach((item) => {
           if (item.book) {
@@ -1128,6 +1133,7 @@ export const AddFatwaForm = ({ match }) => {
         SS.remove("editFatwa-ansEn");
         SS.remove("editFatwa-atts");
         SS.remove("editFatwa-write");
+        SS.remove("editFatwa-date");
       }
     };
   }
@@ -1159,17 +1165,24 @@ export const AddFatwaForm = ({ match }) => {
         ...(fatwaToEdit.ans["en-US"] !== SS.get("editFatwa-ansEn") && {
           "ans.en-US": SS.get("editFatwa-ansEn"),
         }),
-        ...(fatwaToEdit.write !== SS.get("editFatwa-write") && {
-          write: SS.get("editFatwa-write"),
+        ...(fatwaToEdit.meta.write !== SS.get("editFatwa-write") && {
+          "meta.write": SS.get("editFatwa-write"),
         }),
-        ...(fatwaToEdit.atts !== SS.get("editFatwa-atts") && {
-          atts: SS.get("editFatwa-atts"),
+        ...(fatwaToEdit.meta.atts !== SS.get("editFatwa-atts") && {
+          "meta.atts": SS.get("editFatwa-atts"),
         }),
-        ref: [
+        ...(fatwaToEdit.meta.date !== SS.get("editFatwa-date") && {
+          "meta.date": SS.get("editFatwa-date"),
+        }),
+        ...(JSON.stringify([
           ...GetGroupData($(".addFatwa #books.multipleInput")),
           ...GetGroupData($(".addFatwa #sura.multipleInput")),
-        ],
-        img: preFill.img,
+        ]) !== JSON.stringify(fatwaToEdit.ref) && {
+          ref: [
+            ...GetGroupData($(".addFatwa #books.multipleInput")),
+            ...GetGroupData($(".addFatwa #sura.multipleInput")),
+          ],
+        }),
       };
       url =
         fatwaToEdit.status === "pending"
@@ -1195,12 +1208,15 @@ export const AddFatwaForm = ({ match }) => {
           "bn-BD": SS.get("newFatwa-ans"),
           "en-US": SS.get("newFatwa-ansEn"),
         },
+        meta: {
+          write: SS.get("newFatwa-write"),
+          atts: SS.get("newFatwa-atts"),
+          date: SS.get("newFatwa-date"),
+        },
         ref: [
           ...GetGroupData($(".addFatwa #books.multipleInput")),
           ...GetGroupData($(".addFatwa #sura.multipleInput")),
         ],
-        write: SS.get("newFatwa-write"),
-        atts: SS.get("newFatwa-atts"),
         img: preFill.img,
       };
       url = `/api/source/newFatwa`;
@@ -1211,6 +1227,7 @@ export const AddFatwaForm = ({ match }) => {
       };
     }
     setLoading(true);
+    console.log(data);
     fetch(url, options)
       .then((res) => res.json())
       .then((data) => {
@@ -1224,6 +1241,9 @@ export const AddFatwaForm = ({ match }) => {
           SS.remove("newFatwa-title");
           SS.remove("newFatwa-titleEn");
           SS.remove("newFatwa-ans");
+          SS.remove("newFatwa-date");
+          SS.remove("newFatwa-write");
+          SS.remove("newFatwa-atts");
         } else if (data.code === 11000) {
           setSameExists(data.field);
         } else {
@@ -1378,50 +1398,71 @@ export const AddFatwaForm = ({ match }) => {
           )}
         </Textarea>
       )}
-      <Input
-        min={5}
-        required={true}
-        validationMessage="test"
-        defaultValue={preFill.write}
-        dataId="write"
-        onChange={(target) => {
-          SS.set("newFatwa-write", target.value);
-          fatwaToEdit && SS.set("editFatwa-write", target.value);
-          setSameExists(false);
-        }}
-        label=<FormattedMessage id="write" defaultMessage="Write" />
-        validationMessage=<FormattedMessage
-          id="writeValidation"
-          defaultMessage="who wrote the fatwa"
+      <div className="ref">
+        <MultipleInput
+          id="books"
+          inputs={preFill.inputBooks || refInputBook}
+          refInput={refInputBook}
         />
-      />
-      <Input
-        min={5}
-        required={true}
-        validationMessage="test"
-        defaultValue={preFill.atts}
-        dataId="write"
-        onChange={(target) => {
-          SS.set("newFatwa-atts", target.value);
-          fatwaToEdit && SS.set("editFatwa-atts", target.value);
-          setSameExists(false);
-        }}
-        label=<FormattedMessage id="atts" defaultMessage="Attestation" />
-        validationMessage=<FormattedMessage
-          id="attsValidation"
-          defaultMessage="who attestated the fatwa"
+        <MultipleInput
+          id="sura"
+          inputs={preFill.inputSura || refInputSura}
+          refInput={refInputSura}
         />
-      />
-      <MultipleInput
-        id="books"
-        inputs={preFill.inputBooks || refInputBook}
-        refInput={refInputBook}
-      />
-      <MultipleInput
-        id="sura"
-        inputs={preFill.inputSura || refInputSura}
-        refInput={refInputSura}
-      />
+      </div>
+      <div className="meta">
+        <DateInput
+          required={true}
+          dataId="date"
+          label=<FormattedMessage
+            id="dOWriting"
+            defaultMessage="Fatwa was written in"
+          />
+          max={new Date()}
+          onChange={(target) => {
+            SS.set("newFatwa-date", target.value);
+            fatwaToEdit && SS.set("editFatwa-date", target.value);
+          }}
+          defaultValue={preFill.meta.date || SS.get("newFatwa-date")}
+          validationMessage=<FormattedMessage
+            id="dOWritingValidation"
+            defaultMessage="When was the fatwa written originally?"
+          />
+        />
+        <Input
+          min={5}
+          required={true}
+          defaultValue={preFill.meta.write || SS.get("newFatwa-write")}
+          dataId="write"
+          onChange={(target) => {
+            SS.set("newFatwa-write", target.value);
+            fatwaToEdit && SS.set("editFatwa-write", target.value);
+            setSameExists(false);
+          }}
+          label=<FormattedMessage id="write" defaultMessage="Write" />
+          validationMessage=<FormattedMessage
+            id="writeValidation"
+            defaultMessage="who wrote the fatwa"
+          />
+        />
+        <Input
+          min={5}
+          required={true}
+          validationMessage="test"
+          defaultValue={preFill.meta.atts || SS.get("newFatwa-atts")}
+          dataId="write"
+          onChange={(target) => {
+            SS.set("newFatwa-atts", target.value);
+            fatwaToEdit && SS.set("editFatwa-atts", target.value);
+            setSameExists(false);
+          }}
+          label=<FormattedMessage id="atts" defaultMessage="Attestation" />
+          validationMessage=<FormattedMessage
+            id="attsValidation"
+            defaultMessage="who attestated the fatwa"
+          />
+        />
+      </div>
       <Submit
         label=<FormattedMessage id="submit" defaultMessage="Submit" />
         loading={loading}
@@ -1820,6 +1861,7 @@ export const PasswordEditForm = ({ api }) => {
 
 export const Report = ({ fatwa, close }) => {
   const [loading, setLoading] = useState(false);
+  const [emailReq, setEmailReq] = useState(false);
   function submit(e) {
     e.preventDefault();
     setLoading(true);
@@ -1884,6 +1926,7 @@ export const Report = ({ fatwa, close }) => {
           />
         />
         <Input
+          required={emailReq}
           label={
             <>
               <FormattedMessage id="email" defaultMessage="Email" />{" "}
@@ -1894,9 +1937,19 @@ export const Report = ({ fatwa, close }) => {
           }
           dataId="email"
           type="text"
+          pattern="^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$"
           defaultValue={SS.get("reportFatwa-email")}
+          validationMessage=<FormattedMessage
+            id="optionalEmailValidation"
+            defaultMessage="Enter currect email"
+          />
           onChange={(target) => {
             SS.set("reportFatwa-email", target.value);
+            if (target.value === "") {
+              setEmailReq(false);
+            } else {
+              setEmailReq(true);
+            }
           }}
         />
         <Mobile

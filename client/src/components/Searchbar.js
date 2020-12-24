@@ -154,14 +154,23 @@ function Searchbar({ onFocus, children }) {
                       suggestions[suggestions.length - 1]
                         .querySelector("a")
                         .classList.add("hover");
+                      setVisibleInput(
+                        suggestions[suggestions.length - 1].querySelector("a")
+                          .textContent
+                      );
                     } else {
                       suggestions[0].querySelector("a").classList.add("hover");
+                      setVisibleInput(
+                        suggestions[0].querySelector("a").textContent
+                      );
                     }
                     break;
                   }
                 }
               } else if (e.keyCode === 13) {
                 setValue(visibleInput);
+              } else if (e.keyCode === 27) {
+                setShowSuggestion(false);
               }
             }}
             className={
@@ -189,6 +198,7 @@ function Searchbar({ onFocus, children }) {
               <li key={i}>
                 <a
                   onClick={() => {
+                    setVisibleInput(item.title[locale]);
                     history.push(`/search?q=${item.title[locale]}&page=1`);
                   }}
                   onMouseEnter={(e) => {

@@ -724,7 +724,7 @@ function JamiaSingleFatwaSubmission({ data, setData }) {
           value={fatwa.submitted}
           day="numeric"
           month="numeric"
-          year="numeric"
+          year="2-digit"
         />
       </td>
       <td className="label">topic</td>
@@ -742,7 +742,7 @@ function JamiaSingleFatwaSubmission({ data, setData }) {
       {fatwa.ques["en-US"] && (
         <>
           <td className="label">question (English)</td>
-          <td>{fatwa.ques["en-US"]}</td>
+          <td className="data">{fatwa.ques["en-US"]}</td>
         </>
       )}
       <td className="label">answer (Bangla)</td>
@@ -759,11 +759,14 @@ function JamiaSingleFatwaSubmission({ data, setData }) {
           {fatwa.ref.map((item, i) =>
             item.book ? (
               <li key={item.book + item.part + item.page}>
-                book: {item.book}, part: {item.part}, page: {item.page}
+                <FormattedMessage id="book" />: {item.book},{" "}
+                <FormattedMessage id="part" />: {item.part},{" "}
+                <FormattedMessage id="page" />: {item.page}
               </li>
             ) : (
               <li key={item.sura + item.aayat}>
-                sura: {item.sura}, aayat: {item.aayat}
+                <FormattedMessage id="sura" />: {item.sura},{" "}
+                <FormattedMessage id="aayat" />: {item.aayat}
               </li>
             )
           )}
@@ -788,7 +791,7 @@ function JamiaSingleFatwaSubmission({ data, setData }) {
           value={fatwa.submitted}
           day="numeric"
           month="numeric"
-          year="numeric"
+          year="2-digit"
         />
       </td>
       <td>{fatwa.topic[locale]}</td>
@@ -839,7 +842,7 @@ function SingleFatwa({ data, setData }) {
           value={fatwa.added}
           day="numeric"
           month="numeric"
-          year="numeric"
+          year="2-digit"
         />
       </td>
       <td className="label">title</td>
@@ -878,7 +881,7 @@ function SingleFatwa({ data, setData }) {
           value={fatwa.createdAt}
           day="numeric"
           month="numeric"
-          year="numeric"
+          year="2-digit"
         />
       </td>
       <td>{fatwa.title[locale]}</td>
@@ -1018,7 +1021,7 @@ function SingleQuestion({ data }) {
               value={data.createdAt}
               day="numeric"
               month="long"
-              year="numeric"
+              year="2-digit"
             />
           ) : (
             <FormattedDate value={data.createdAt} day="numeric" month="long" />
@@ -1179,7 +1182,7 @@ function Answer({ ques, ans, setQues }) {
               value={ans.createdAt}
               day="numeric"
               month="long"
-              year="numeric"
+              year="2-digit"
             />
             <span className="separator" />
             <FormattedTimeParts value={ans.createdAt}>
@@ -1320,7 +1323,7 @@ function UserQuestion({ history, match }) {
                   value={userQues.createdAt}
                   day="numeric"
                   month="long"
-                  year="numeric"
+                  year="2-digit"
                 />
                 <span className="separator" />
                 <FormattedTimeParts value={userQues.createdAt}>

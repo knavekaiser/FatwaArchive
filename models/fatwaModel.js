@@ -25,9 +25,10 @@ const fatwa = new Schema(
     source: { type: Schema.Types.ObjectId, ref: "Source", required: true },
     status: { type: String, default: "pending" },
     translation: { type: Boolean, enum: [true, false], default: false },
-    write: { type: String, required: true, trim: true },
-    atts: { type: String, required: true, trim: true },
     meta: {
+      date: { type: Date, required: true },
+      write: { type: String, required: true, trim: true },
+      atts: { type: String, required: true, trim: true },
       comments: [{ type: Schema.Types.ObjectId, ref: "FatwaComment" }],
     },
   },
@@ -69,9 +70,6 @@ const deletedFatwa = new Schema(
   },
   { timestamps: true }
 );
-
-fatwa.statics.getSuggestions = (img, callback) =>
-  Fatwa.find(img, callback).select("title link");
 
 const Fatwa = mongoose.model("Fatwa", fatwa);
 const DeletedFatwa = mongoose.model("DeletedFatwa", deletedFatwa);

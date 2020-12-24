@@ -90,9 +90,7 @@ router
   .route("/admin/fatwa/")
   .delete(passport.authenticate("AdminAuth"), (req, res) => {
     Fatwa.findByIdAndDelete(req.body.fatwa)
-      .then(() =>
-        Source.findByIdAndUpdate(req.body.source, { $inc: { fatwa: -1 } })
-      )
+      .then(() => Source.updateFatwaCount(req.body.source))
       .then(() => res.status(200).json("Item Deleted!"))
       .catch((err) => res.status(400).json("Error: " + err));
   });
@@ -123,11 +121,7 @@ router
     if (req.user.role !== "admin") return res.status(403).json("forbidden");
     if (ObjectID.isValid(req.params._id)) {
       Fatwa.findByIdAndUpdate(req.params._id, { status: "live" })
-        .then((fatwa) =>
-          Source.findByIdAndUpdate(fatwa.source, {
-            $inc: { fatwa: 1 },
-          })
-        )
+        .then((fatwa) => Source.updateFatwaCount(fatwa.source))
         .then(() => res.send({ code: "ok", message: "fatwa added" }))
         .catch((err) => {
           console.log(err);

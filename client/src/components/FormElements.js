@@ -387,6 +387,12 @@ function chkPass(pwd) {
     return 0;
   }
 }
+function formatDate(input) {
+  let date = new Date(input);
+  return `${date.getFullYear()}-${
+    date.getMonth() + 1 < 10 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1
+  }-${date.getDate() < 10 ? "0" + date.getDate() : date.getDate()}`;
+}
 
 export const ID = (length) => {
   var result = "";
@@ -486,6 +492,65 @@ export const Input = ({
         disabled={disabled}
         placeholder={placeholder}
         pattern={pattern}
+      />
+      {children}
+      {invalidInput && <p className="emptyFieldWarning">{validationMessage}</p>}
+    </section>
+  );
+};
+export const DateInput = ({
+  dataId,
+  label,
+  defaultValue,
+  warning,
+  required,
+  onChange,
+  disabled,
+  children,
+  placeholder,
+  validationMessage,
+  min,
+  max,
+}) => {
+  const [value, setValue] = useState(
+    defaultValue ? formatDate(defaultValue) : ""
+  );
+  const [showLabel, setShowLabel] = useState(!defaultValue);
+  const [invalidChar, setInvalidChar] = useState(false);
+  const [invalidInput, setInvalidInput] = useState(false);
+  const changeHandler = (e) => {
+    e.target.setCustomValidity("");
+    setInvalidInput(false);
+    setValue(e.target.value);
+    onChange && onChange(e.target);
+  };
+  const focus = () => setShowLabel(false);
+  const blur = () => !value && setShowLabel(true);
+  return (
+    <section
+      id={dataId}
+      className={`input date ${invalidChar ? "invalid" : ""} ${
+        disabled ? "disabled" : ""
+      }`}
+    >
+      <label className={`label ${showLabel ? "active" : ""}`}>
+        {invalidChar ? (warning ? warning : "অকার্যকর অক্ষর!") : label}
+      </label>
+      <input
+        onInvalid={(e) => {
+          e.target.setCustomValidity(" ");
+          setInvalidInput(true);
+        }}
+        min={formatDate(min)}
+        max={formatDate(max)}
+        value={value}
+        required={required}
+        type={"date"}
+        onChange={changeHandler}
+        onFocus={focus}
+        onBlur={blur}
+        disabled={disabled}
+        placeholder={placeholder}
       />
       {children}
       {invalidInput && <p className="emptyFieldWarning">{validationMessage}</p>}
