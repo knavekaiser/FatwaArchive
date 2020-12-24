@@ -1750,7 +1750,7 @@ function SingleQuestion({ ques, setQues }) {
       className={`question mini`}
       onClick={(e) => {
         if (e.target === container.current) {
-          history.push("/admin/questionFeed/" + ques._id);
+          history.push("/admin/userQuestion/" + ques._id);
         }
       }}
     >
@@ -1878,7 +1878,7 @@ function UserQuestion({ history, match }) {
             <p className="body">{userQues.ques.body}</p>
           </div>
           <Tabs
-            page={`/admin/questionFeed/${userQues._id}/`}
+            page={`/admin/userQuestion/${userQues._id}/`}
             tabs={[
               { label: "Answers", link: "answers" },
               { label: "Reports", link: "reports" },
@@ -1886,7 +1886,7 @@ function UserQuestion({ history, match }) {
             ]}
           />
           <Switch>
-            <Route path={`/admin/questionFeed/${userQues._id}`} exact>
+            <Route path={`/admin/userQuestion/${userQues._id}`} exact>
               {userQues.ans.map((item) => (
                 <Answer
                   key={item._id}
@@ -1896,7 +1896,7 @@ function UserQuestion({ history, match }) {
                 />
               ))}
             </Route>
-            <Route path={`/admin/questionFeed/${userQues._id}/answers`}>
+            <Route path={`/admin/userQuestion/${userQues._id}/answers`}>
               {userQues.ans.map((item) => (
                 <Answer
                   key={item._id}
@@ -1906,7 +1906,7 @@ function UserQuestion({ history, match }) {
                 />
               ))}
             </Route>
-            <Route path={`/admin/questionFeed/${userQues._id}/reports`}>
+            <Route path={`/admin/UserQuestion/${userQues._id}/reports`}>
               {userQues.reports.map((report) => (
                 <Report key={report._id} report={report} />
               ))}
@@ -1981,7 +1981,7 @@ function Answer({ ques, ans, setQues }) {
     <div
       className={`ans ${ans.source._id === user._id ? "mine" : ""} ${
         !open ? "mini" : ""
-      }`}
+      } ${loading ? "loading" : ""}`}
     >
       <div className="vote">
         <div className={`content`}>
@@ -2004,7 +2004,6 @@ function Answer({ ques, ans, setQues }) {
               month="long"
               year="numeric"
             />
-            {loading && <p>loading</p>}
             <span className="separator" />
             <FormattedTimeParts value={ans.createdAt}>
               {(parts) => (
@@ -2176,7 +2175,7 @@ function AdminPanel() {
         <Route path="/admin/fatwa/:filter?" component={AllFatwa} />
         <Route path="/admin/patreons" component={Patreons} />
         <Route path="/admin/user" component={UserReview} />
-        <Route path="/admin/questionFeed/:_id" component={UserQuestion} />
+        <Route path="/admin/userQuestion/:_id" component={UserQuestion} />
         <Route path="/admin/questionFeed" component={QuestionFeed} />
         <Route path="/" component={FourOFour} />
       </Switch>

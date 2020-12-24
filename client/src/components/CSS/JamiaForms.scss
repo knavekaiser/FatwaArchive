@@ -571,6 +571,7 @@ form {
 .success {
   max-width: 100%;
   margin-left: 0 !important;
+  display: flex !important;
   .successPromt {
     padding: 2rem;
     margin: auto;
@@ -588,9 +589,19 @@ form {
       font-size: 5rem;
       color: $accent;
     }
-    a {
-      margin: auto;
-      margin-right: 0;
+    .act {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+    }
+    a,
+    button {
+      white-space: nowrap;
+      cursor: pointer;
+      font-size: 1rem;
+      background: none;
+      border: none;
       color: $blue;
       border-radius: 8px;
       padding: 0.5rem 1rem;

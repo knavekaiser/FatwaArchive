@@ -62,9 +62,10 @@ const deletedFatwa = new Schema(
     source: { type: Schema.Types.ObjectId, ref: "Source" },
     status: { type: String, default: "deleted" },
     translation: { type: Boolean, default: false },
-    atts: { type: String },
-    write: { type: String },
     meta: {
+      date: { type: String },
+      atts: { type: String },
+      write: { type: String },
       comments: [{ type: Schema.Types.ObjectId, ref: "FatwaComment" }],
     },
   },

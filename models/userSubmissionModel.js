@@ -39,6 +39,11 @@ const userQuestion = new Schema(
             },
           ],
         },
+        meta: {
+          date: { type: Date, required: true },
+          write: { type: String, required: true },
+          atts: { type: String, required: true },
+        },
         createdAt: { type: Date, default: Date.now },
       },
     ],
@@ -153,8 +158,9 @@ userQuestion.methods.approveAns = function (ans_id) {
           [getLan(ans.body)]: ans.body,
           [getLan(ans.body, true)]: translations[2],
         },
-        ref: this.ref,
-        img: this.img,
+        ref: ans.ref,
+        img: ans.img,
+        meta: ans.meta,
         source: ans.source,
         status: "live",
       });

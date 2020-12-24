@@ -23,7 +23,7 @@ router.route("/fatwa/:link").get((req, res) => {
     status: "live",
     [`link.${getLan(req.params.link)}`]: req.params.link,
   };
-  Fatwa.findOne(query)
+  Fatwa.findOne(query, "-status")
     .populate("source", "name primeMufti")
     .then((fatwa) => {
       if (fatwa) {

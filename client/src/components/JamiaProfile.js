@@ -1081,6 +1081,120 @@ function SingleQuestion({ data }) {
   );
 }
 
+function UserQuestion({ history, match }) {
+  const { user } = useContext(SiteContext);
+  const [loading, setLoading] = useState(true);
+  const [userQues, setUserQues] = useState({});
+  const [answered, setAnswered] = useState(false);
+  useEffect(getData, []);
+  function getData() {
+    fetch("/api/source/userQues/" + match.params._id)
+      .then((res) => res.json())
+      .then((data) => {
+        setLoading(false);
+        if (data.code === "ok") {
+          setUserQues(data.content);
+          if (
+            data.content.ans.filter((item) => item.source._id === user._id)
+              .length > 0
+          ) {
+            setAnswered(true);
+          }
+        } else {
+          throw data;
+        }
+      })
+      .catch((err) => {
+        alert("something went wrong");
+        console.log(err);
+      });
+  }
+  if (userQues.ques) {
+    return (
+      <div className="view userQues">
+        <div className="container">
+          <div className="ques">
+            <div className="user">
+              <p className="name">
+                <b>{userQues.user.name}</b>
+                <span className="separator" />
+                <i>
+                  <span className="add">{userQues.user.add}</span>
+                </i>
+              </p>
+              <p className="date">
+                <FormattedDate
+                  value={userQues.createdAt}
+                  day="numeric"
+                  month="long"
+                  year="2-digit"
+                />
+                <span className="separator" />
+                <FormattedTimeParts value={userQues.createdAt}>
+                  {(parts) => (
+                    <>
+                      {parts[0].value}
+                      {parts[1].value}
+                      {parts[2].value}
+                      <small>{parts[4].value.toLowerCase()}</small>
+                    </>
+                  )}
+                </FormattedTimeParts>
+              </p>
+            </div>
+            <p className="body">{userQues.ques.body}</p>
+          </div>
+          {!answered ? (
+            <Link className="addAns" to={`${match.url}/add`}>
+              Add Answer
+            </Link>
+          ) : (
+            <div className="HR">
+              <span className="hr" />
+              <span className="content">নিবেদিত উত্তর সমূহ</span>
+              <span className="hr" />
+            </div>
+          )}
+          {userQues.ans.map((item) => (
+            <Answer
+              key={item._id}
+              ques={userQues}
+              ans={item}
+              setQues={setUserQues}
+            />
+          ))}
+          <Route path={`${match.url}/add`}>
+            <Modal
+              open={true}
+              setOpen={() => history.push(match.url)}
+              className="answerForm"
+            >
+              <UserQuestionAnswerForm
+                setQues={setUserQues}
+                ques={userQues.ques}
+                _id={userQues._id}
+              />
+            </Modal>
+          </Route>
+          <Route path={`${match.url}/report`}>
+            <Modal
+              open={true}
+              setOpen={() => history.push(match.url)}
+              className="answerForm"
+            >
+              <UserQuestionReportForm _id={userQues._id} />
+            </Modal>
+          </Route>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className="view">
+      {loading ? <h1>loading</h1> : <p>Question did not found!</p>}
+    </div>
+  );
+}
 function Answer({ ques, ans, setQues }) {
   const { locale, user } = useContext(SiteContext);
   const [loading, setLoading] = useState(false);
@@ -1130,6 +1244,9 @@ function Answer({ ques, ans, setQues }) {
     SS.set("ansFatwa-ans", ans.body);
     SS.set("ansFatwa-title", ans.title);
     SS.set("ansFatwa-ref", JSON.stringify(ans.ref));
+    SS.set("ansFatwa-date", ans.meta.date);
+    SS.set("ansFatwa-write", ans.meta.write);
+    SS.set("ansFatwa-atts", ans.meta.atts);
     history.push(history.location.pathname + "/add");
   }
   function report() {
@@ -1273,125 +1390,6 @@ function Answer({ ques, ans, setQues }) {
           actions={[{ label: "Report", action: report }]}
         />
       )}
-    </div>
-  );
-}
-
-function UserQuestion({ history, match }) {
-  const { user } = useContext(SiteContext);
-  const [loading, setLoading] = useState(true);
-  const [userQues, setUserQues] = useState({});
-  const [answered, setAnswered] = useState(false);
-  useEffect(getData, []);
-  function getData() {
-    fetch("/api/source/userQues/" + match.params._id)
-      .then((res) => res.json())
-      .then((data) => {
-        setLoading(false);
-        if (data.code === "ok") {
-          setUserQues(data.content);
-          if (
-            data.content.ans.filter((item) => item.source._id === user._id)
-              .length > 0
-          ) {
-            setAnswered(true);
-          }
-        } else {
-          throw data;
-        }
-      })
-      .catch((err) => {
-        alert("something went wrong");
-        console.log(err);
-      });
-  }
-  if (userQues.ques) {
-    return (
-      <div className="view userQues">
-        <div className="container">
-          <div className="ques">
-            <div className="user">
-              <p className="name">
-                <b>{userQues.user.name}</b>
-                <span className="separator" />
-                <i>
-                  <span className="add">{userQues.user.add}</span>
-                </i>
-              </p>
-              <p className="date">
-                <FormattedDate
-                  value={userQues.createdAt}
-                  day="numeric"
-                  month="long"
-                  year="2-digit"
-                />
-                <span className="separator" />
-                <FormattedTimeParts value={userQues.createdAt}>
-                  {(parts) => (
-                    <>
-                      {parts[0].value}
-                      {parts[1].value}
-                      {parts[2].value}
-                      <small>{parts[4].value.toLowerCase()}</small>
-                    </>
-                  )}
-                </FormattedTimeParts>
-              </p>
-            </div>
-            <p className="body">{userQues.ques.body}</p>
-          </div>
-          {!answered ? (
-            <Link className="addAns" to={`${match.url}/add`}>
-              Add Answer
-            </Link>
-          ) : (
-            <div className="HR">
-              <span className="hr" />
-              <span className="content">নিবেদিত উত্তর সমূহ</span>
-              <span className="hr" />
-            </div>
-          )}
-          {userQues.ans.map((item) => (
-            <Answer
-              key={item._id}
-              ques={userQues}
-              ans={item}
-              setQues={setUserQues}
-            />
-          ))}
-          <Route path={`${match.url}/add`}>
-            {!answered ? (
-              <Modal
-                open={true}
-                setOpen={() => history.push(match.url)}
-                className="answerForm"
-              >
-                <UserQuestionAnswerForm
-                  setQues={setUserQues}
-                  ques={userQues.ques}
-                  _id={userQues._id}
-                />
-              </Modal>
-            ) : (
-              <Redirect to={history.location.pathname.replace("/add", "")} />
-            )}
-          </Route>
-          <Route path={`${match.url}/report`}>
-            <Modal
-              open={true}
-              setOpen={() => history.push(match.url)}
-              className="answerForm"
-            >
-              <UserQuestionReportForm _id={userQues._id} />
-            </Modal>
-          </Route>
-        </div>
-      </div>
-    );
-  }
-  return (
-    <div className="view">
-      {loading ? <h1>loading</h1> : <p>Question did not found!</p>}
     </div>
   );
 }

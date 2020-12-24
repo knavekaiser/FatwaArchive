@@ -286,7 +286,9 @@ router
             title: req.body.title,
             body: req.body.body,
             ref: req.body.ref,
+            meta: req.body.meta,
           };
+          console.log(newAns);
           return ques.addAns(newAns);
         })
         .then(() =>
@@ -300,7 +302,8 @@ router
           if (err.code === 11000) {
             res.status(400).json(err);
           } else {
-            res.status(500).json("enternal error");
+            console.log(err);
+            res.status(500).json({ code: 500, message: "enternal error" });
           }
         });
     } else {

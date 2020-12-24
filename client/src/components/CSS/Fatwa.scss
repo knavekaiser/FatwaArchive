@@ -36,10 +36,10 @@
       text-decoration: underline;
     }
     span {
-      display: none;
+      // display: none;
       color: $light-text;
-      font-weight: lighter;
-      font-size: 0.7em;
+      // font-weight: lighter;
+      // font-size: 0.7em;
       text-decoration: none !important;
       &:hover {
       }
@@ -64,7 +64,8 @@
         width: min-content;
       }
     }
-    &.sub {
+    &.sub,
+    &.meta {
       position: relative;
       text-align: left;
       &::before {

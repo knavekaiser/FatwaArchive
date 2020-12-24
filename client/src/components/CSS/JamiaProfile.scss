@@ -607,6 +607,13 @@
           color: $light-border;
         }
       }
+      &.loading {
+        .content,
+        .vote {
+          pointer-events: none;
+          animation: 0.4s ansApprove alternate infinite linear;
+        }
+      }
     }
   }
 }
@@ -629,9 +636,6 @@
       height: 1px;
       grid-row-start: 0;
       grid-column: 1/3;
-    }
-    button[type="submit"] {
-      grid-row-start: -1;
     }
   }
   .reportUserQues {
@@ -944,4 +948,12 @@ ion-icon[name="save-outline"] {
   background: $light-text;
   border-radius: 1rem;
   margin: 0 0.3em;
+}
+@keyframes ansApprove {
+  0% {
+    border-color: $light-border;
+  }
+  100% {
+    border-color: $accent;
+  }
 }

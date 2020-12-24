@@ -377,6 +377,18 @@ function StepProgress({ step }) {
   );
 }
 
+function SuccessPage({ className, message, children }) {
+  return (
+    <div className={`${className || ""} success`}>
+      <div className="successPromt">
+        <ion-icon name="checkmark-circle-outline"></ion-icon>
+        <p>{message}</p>
+        {children}
+      </div>
+    </div>
+  );
+}
+
 export const JamiaRegister = () => {
   const { locale, user } = useContext(SiteContext);
   const [step, setStep] = useState(1);
@@ -452,7 +464,19 @@ export const JamiaRegister = () => {
         });
     }
   }
-  return !success ? (
+  if (success) {
+    return (
+      <SuccessPage
+        className="main"
+        message=<FormattedMessage id="regSuccess" />
+      >
+        <Link to="/">
+          <FormattedMessage id="backToHome" defaultMessage="Back to Home" />
+        </Link>
+      </SuccessPage>
+    );
+  }
+  return (
     <div className={`main jamiaForms ${locale === "bn-BD" ? "bn-BD" : ""}`}>
       {user && <Redirect to="/" />}
       <form className="reg" onSubmit={submit} autofill="false">
@@ -491,18 +515,6 @@ export const JamiaRegister = () => {
           setLoading={setLoading}
         />
       </form>
-    </div>
-  ) : (
-    <div className="main jamiaForms success">
-      <div className="successPromt">
-        <ion-icon name="checkmark-circle-outline"></ion-icon>
-        <p>
-          <FormattedMessage id="regSuccess" />
-        </p>
-        <Link to="/">
-          <FormattedMessage id="backToHome" defaultMessage="Back to Home" />
-        </Link>
-      </div>
     </div>
   );
 };
@@ -1120,6 +1132,7 @@ export const AddFatwaForm = ({ match }) => {
     }
   });
   const [sameExists, setSameExists] = useState("");
+  const [success, setSuccess] = useState(true);
   function setCleanup() {
     return () => {
       if (fatwaToEdit) {
@@ -1227,13 +1240,11 @@ export const AddFatwaForm = ({ match }) => {
       };
     }
     setLoading(true);
-    console.log(data);
     fetch(url, options)
       .then((res) => res.json())
       .then((data) => {
         setLoading(false);
         if (data.code === "ok") {
-          history.push("/jamia/fatwa/pending");
           SS.remove("newFatwa-ansEn");
           SS.remove("newFatwa-topic");
           SS.remove("newFatwa-ques");
@@ -1254,6 +1265,23 @@ export const AddFatwaForm = ({ match }) => {
         alert("something went wrong");
         console.log(err);
       });
+  }
+  if (success) {
+    return (
+      <SuccessPage
+        className="addFatwa"
+        message=<FormattedMessage id="fatwaSubmissionSuccess" />
+      >
+        <div className="act">
+          <button onClick={() => setSuccess(false)}>
+            <FormattedMessage id="addMoreFatwa" />
+          </button>
+          <Link to="/jamia/fatwa/pending">
+            <FormattedMessage id="showPending" />
+          </Link>
+        </div>
+      </SuccessPage>
+    );
   }
   return (
     <form
@@ -1312,7 +1340,9 @@ export const AddFatwaForm = ({ match }) => {
         }}
       >
         {sameExists === "title.bn-BD" && (
-          <span className="errMessage">This title already exists!</span>
+          <span className="errMessage">
+            <FormattedMessage id="sameTitleErr" />
+          </span>
         )}
       </Input>
       {preFill.translate && (
@@ -1331,7 +1361,9 @@ export const AddFatwaForm = ({ match }) => {
           }}
         >
           {sameExists === "title.en-US" && (
-            <span className="errMessage">This title already exists!</span>
+            <span className="errMessage">
+              <FormattedMessage id="sameTitleErr" />
+            </span>
           )}
         </Input>
       )}
@@ -1376,7 +1408,9 @@ export const AddFatwaForm = ({ match }) => {
         label=<FormattedMessage id="answer" defaultMessage="Answer" />
       >
         {sameExists === "ans.bn-BD" && (
-          <span className="errMessage">this fatwa already exists</span>
+          <span className="errMessage">
+            <FormattedMessage id="sameAnsErr" />
+          </span>
         )}
       </Textarea>
       {preFill.translate && (
@@ -1394,7 +1428,9 @@ export const AddFatwaForm = ({ match }) => {
           label="Answer in Enlish"
         >
           {sameExists === "ans.en-US" && (
-            <span className="errMessage">this fatwa already exists</span>
+            <span className="errMessage">
+              <FormattedMessage id="sameAnsErr" />
+            </span>
           )}
         </Textarea>
       )}
@@ -1512,8 +1548,6 @@ export const UserQuestionAnswerForm = ({ ques, setQues, _id }) => {
       inputBooks.push(...refInputBook);
       inputSura.push(...refInputSura);
       return { inputBooks: [...inputBooks], inputSura: [...inputSura] };
-    } else {
-      return { inputBooks: refInputBook, inputSura: refInputSura };
     }
   });
   function submit(e) {
@@ -1524,6 +1558,11 @@ export const UserQuestionAnswerForm = ({ ques, setQues, _id }) => {
         : ques.topic,
       title: SS.get("ansFatwa-title"),
       body: SS.get("ansFatwa-ans"),
+      meta: {
+        date: SS.get("ansFatwa-date"),
+        write: SS.get("ansFatwa-write"),
+        atts: SS.get("ansFatwa-atts"),
+      },
       ref: [
         ...GetGroupData($(".addFatwa #books.multipleInput")),
         ...GetGroupData($(".addFatwa #sura.multipleInput")),
@@ -1548,11 +1587,12 @@ export const UserQuestionAnswerForm = ({ ques, setQues, _id }) => {
           history.goBack();
         } else if (data.code === 11000) {
           setSameExists(data.field);
+        } else {
+          alert("something went wrong");
         }
       })
       .catch((err) => {
         alert("something went wrong");
-        console.log("this");
       });
   }
   return (
@@ -1584,7 +1624,9 @@ export const UserQuestionAnswerForm = ({ ques, setQues, _id }) => {
         validationMessage="শিরোণাম প্রবেশ করুন"
       >
         {sameExists === "title.bn-BD" && (
-          <span className="errMessage">This title already exists!</span>
+          <span className="errMessage">
+            <FormattedMessage id="sameTitleErr" />
+          </span>
         )}
       </Input>
       <Textarea
@@ -1608,19 +1650,73 @@ export const UserQuestionAnswerForm = ({ ques, setQues, _id }) => {
         validationMessage="উত্তর প্রবেশ করুন"
       >
         {sameExists === "ans.bn-BD" && (
-          <span className="errMessage">this fatwa already exists</span>
+          <span className="errMessage">
+            <FormattedMessage id="sameAnsErr" />
+          </span>
         )}
       </Textarea>
-      <MultipleInput
-        id="books"
-        inputs={preFill.inputBooks}
-        refInput={refInputBook}
-      />
-      <MultipleInput
-        id="sura"
-        inputs={preFill.inputSura}
-        refInput={refInputSura}
-      />
+      <div className="ref">
+        <MultipleInput
+          id="books"
+          inputs={preFill.inputBooks || refInputBook}
+          refInput={refInputBook}
+        />
+        <MultipleInput
+          id="sura"
+          inputs={preFill.inputSura || refInputSura}
+          refInput={refInputSura}
+        />
+      </div>
+      <div className="meta">
+        <DateInput
+          required={true}
+          dataId="date"
+          label=<FormattedMessage
+            id="dOWriting"
+            defaultMessage="Fatwa was written in"
+          />
+          max={new Date()}
+          onChange={(target) => {
+            SS.set("ansFatwa-date", target.value);
+          }}
+          defaultValue={SS.get("ansFatwa-date")}
+          validationMessage=<FormattedMessage
+            id="dOWritingValidation"
+            defaultMessage="When was the fatwa written originally?"
+          />
+        />
+        <Input
+          min={5}
+          required={true}
+          defaultValue={SS.get("ansFatwa-write")}
+          dataId="write"
+          onChange={(target) => {
+            SS.set("ansFatwa-write", target.value);
+            setSameExists(false);
+          }}
+          label=<FormattedMessage id="write" defaultMessage="Write" />
+          validationMessage=<FormattedMessage
+            id="writeValidation"
+            defaultMessage="who wrote the fatwa"
+          />
+        />
+        <Input
+          min={5}
+          required={true}
+          validationMessage="test"
+          defaultValue={SS.get("ansFatwa-atts")}
+          dataId="write"
+          onChange={(target) => {
+            SS.set("ansFatwa-atts", target.value);
+            setSameExists(false);
+          }}
+          label=<FormattedMessage id="atts" defaultMessage="Attestation" />
+          validationMessage=<FormattedMessage
+            id="attsValidation"
+            defaultMessage="who attestated the fatwa"
+          />
+        />
+      </div>
       <Submit
         label=<FormattedMessage id="submit" defaultMessage="Submit" />
         loading={loading}
@@ -1671,16 +1767,15 @@ export const UserQuestionReportForm = ({ _id }) => {
         label="Subject"
         min={5}
         onChange={(target) => setSub(target.value)}
-        validationMessage="enter the subject of this report"
+        validationMessage=<FormattedMessage id="userQuesReportSubValidation" />
         required={true}
       />
       <Textarea
         label="Message"
-        defaultValue={""}
         onChange={(target) => setMsg(target.value)}
         min={10}
         max={300}
-        validationMessage="describe your issue with this question"
+        validationMessage=<FormattedMessage id="userQuesReportMsgValidation" />
         required={true}
       />
       <Submit

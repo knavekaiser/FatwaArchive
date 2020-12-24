@@ -2,7 +2,7 @@ import React, { useEffect, Fragment, useState, useContext } from "react";
 import { Route, Link, useHistory } from "react-router-dom";
 import { SiteContext } from "../Context";
 import "./CSS/Fatwa.min.css";
-import { FormattedNumber, FormattedMessage } from "react-intl";
+import { FormattedNumber, FormattedMessage, FormattedDate } from "react-intl";
 import { Modal } from "./Modals";
 import { Helmet } from "react-helmet";
 import { Report } from "./Forms";
@@ -38,6 +38,7 @@ function Fatwa({ match }) {
         return res.json();
       })
       .then((data) => {
+        console.log(data);
         setFatwa(data);
       })
       .catch((err) => console.log(err));
@@ -61,8 +62,13 @@ function Fatwa({ match }) {
           <h1>{fatwa.title[locale]}</h1>
           <h4 className="jamia">
             {fatwa.source.name[locale]}
+            <span className="separator" />
+            <FormattedDate value={fatwa.createdAt} />
             <br />
-            <span>Mohammadpur, Dhaka, Bangladesh</span>
+            <span>
+              <FormattedMessage id="primeMufti" defaultMessage="Prime Mufti" />:{" "}
+              {fatwa.source.primeMufti[locale]}
+            </span>
           </h4>
           <br />
           <br />
@@ -121,33 +127,58 @@ function Fatwa({ match }) {
             <FormattedMessage id="ref" value="Ref." />
           </h3>
           <br />
-          {fatwa.ref.length > 0 && (
-            <ul className="ref">
-              {fatwa.ref.map((ref, i) =>
-                ref.book ? (
-                  <li key={i}>
-                    <span>{ref.book}</span>,{" "}
-                    <FormattedMessage id="page" defaultMessage="Page" />{" "}
-                    <span>
-                      <FormattedNumber value={ref.part} />
-                    </span>
-                    , <FormattedMessage id="part" defaultMessage="Part" />{" "}
-                    <span>
-                      <FormattedNumber value={ref.page} />
-                    </span>
-                  </li>
-                ) : (
-                  <li key={i}>
-                    <span>{ref.sura}</span>,{" "}
-                    <FormattedMessage id="aayat" defaultMessage="Aayat" />{" "}
-                    <span>
-                      <FormattedNumber value={ref.aayat} />
-                    </span>
-                  </li>
-                )
-              )}
-            </ul>
-          )}
+          <ul className="ref">
+            {fatwa.ref.map((ref, i) =>
+              ref.book ? (
+                <li key={i}>
+                  <span>{ref.book}</span>,{" "}
+                  <FormattedMessage id="page" defaultMessage="Page" />{" "}
+                  <span>
+                    <FormattedNumber value={ref.part} />
+                  </span>
+                  , <FormattedMessage id="part" defaultMessage="Part" />{" "}
+                  <span>
+                    <FormattedNumber value={ref.page} />
+                  </span>
+                </li>
+              ) : (
+                <li key={i}>
+                  <span>{ref.sura}</span>,{" "}
+                  <FormattedMessage id="aayat" defaultMessage="Aayat" />{" "}
+                  <span>
+                    <FormattedNumber value={ref.aayat} />
+                  </span>
+                </li>
+              )
+            )}
+          </ul>
+          <br />
+          <br />
+          <br />
+          <h3 className="meta">
+            <FormattedMessage
+              id="additionalInfo"
+              value="Additional information"
+            />
+          </h3>
+          <br />
+          <p>
+            <FormattedMessage id="write" defaultMessage="Writer" />
+            {":  "}
+            <b>{fatwa.meta.write}</b>
+          </p>
+          <p>
+            <FormattedMessage id="atts" defaultMessage="Attestation" />
+            {":  "}
+            <b>{fatwa.meta.atts}</b>
+          </p>
+          <p>
+            <FormattedMessage id="dOWriting" defaultMessage="Original date" />
+            {":  "}
+            <b>
+              <FormattedDate value={fatwa.meta.date} />
+            </b>
+          </p>
           <br />
           <br />
           <br />
