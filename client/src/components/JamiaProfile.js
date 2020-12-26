@@ -939,7 +939,7 @@ function QuestionFeed() {
     </div>
   );
 }
-function NewQuestions() {
+const NewQuestions = injectIntl(({ intl }) => {
   const abortController = new AbortController();
   const signal = abortController.signal;
   const { locale } = useContext(SiteContext);
@@ -970,19 +970,17 @@ function NewQuestions() {
         <Combobox
           disabled={loading}
           defaultValue={1}
-          onChange={(option) => {
-            setSort(option.value);
-          }}
+          onChange={(option) => setSort(option.value)}
           maxHeight={200}
           id="questionFeedSort"
           icon="layers"
           options={[
             {
-              label: "New first",
+              label: intl.formatMessage({ id: "newFirts" }),
               value: { column: "createdAt", order: "des" },
             },
             {
-              label: "Old first",
+              label: intl.formatMessage({ id: "oldFirst" }),
               value: { column: "createdAt", order: "asc" },
             },
           ]}
@@ -997,7 +995,7 @@ function NewQuestions() {
       </ul>
     </>
   );
-}
+});
 function SingleQuestion({ data }) {
   const { locale, user } = useContext(SiteContext);
   const history = useHistory();

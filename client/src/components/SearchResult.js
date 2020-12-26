@@ -14,7 +14,18 @@ function Loading() {
     </div>
   );
 }
-
+const parseParams = (querystring) => {
+  const params = new URLSearchParams(querystring);
+  const obj = {};
+  for (const key of params.keys()) {
+    if (params.getAll(key).length > 1) {
+      obj[key] = params.getAll(key);
+    } else {
+      obj[key] = params.get(key);
+    }
+  }
+  return obj;
+};
 function SearchResult() {
   const { locale, sources, searchInput } = useContext(SiteContext);
   const history = useHistory();
@@ -23,14 +34,7 @@ function SearchResult() {
   const [wrongLan, setWrongLan] = useState(null);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const url = JSON.parse(
-    '{"' +
-      decodeURI(history.location.search.substring(1))
-        .replace(/"/g, '\\"')
-        .replace(/&/g, '","')
-        .replace(/=/g, '":"') +
-      '"}'
-  );
+  const url = parseParams(history.location.search);
   const fetchData = () => {
     setLoading(true);
     setResults([]);

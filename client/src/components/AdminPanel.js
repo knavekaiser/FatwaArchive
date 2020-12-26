@@ -1658,7 +1658,7 @@ function QuestionFeed() {
     </div>
   );
 }
-function NewQuestions() {
+const NewQuestions = injectIntl(({ intl }) => {
   const abortController = new AbortController();
   const signal = abortController.signal;
   const { locale } = useContext(SiteContext);
@@ -1689,18 +1689,18 @@ function NewQuestions() {
         <Combobox
           disabled={loading}
           defaultValue={1}
-          change={setSort}
+          onChange={(option) => setSort(option.value)}
           maxHeight={200}
           id="questionFeedSort"
           icon="layers"
           options={[
             {
-              label: "New first",
-              value: { column: "submitted", order: "asc" },
+              label: intl.formatMessage({ id: "newFirts" }),
+              value: { column: "createdAt", order: "des" },
             },
             {
-              label: "Old first",
-              value: { column: "submitted", order: "des" },
+              label: intl.formatMessage({ id: "oldFirst" }),
+              value: { column: "createdAt", order: "asc" },
             },
           ]}
         />
@@ -1716,7 +1716,7 @@ function NewQuestions() {
       </ul>
     </>
   );
-}
+});
 function SingleQuestion({ ques, setQues }) {
   const { locale } = useContext(SiteContext);
   const [loading, setLoading] = useState(false);
@@ -1760,7 +1760,7 @@ function SingleQuestion({ ques, setQues }) {
           {new Date(ques.submitted).getFullYear() !==
           new Date().getFullYear() ? (
             <FormattedDate
-              value={ques.submitted}
+              value={ques.createdAt}
               day="numeric"
               month="long"
               year="numeric"

@@ -15,6 +15,18 @@ const getLan = (sentence, i) => {
     return !i ? "bn-BD" : "en-US";
   }
 };
+const parseParams = (querystring) => {
+  const params = new URLSearchParams(querystring);
+  const obj = {};
+  for (const key of params.keys()) {
+    if (params.getAll(key).length > 1) {
+      obj[key] = params.getAll(key);
+    } else {
+      obj[key] = params.get(key);
+    }
+  }
+  return obj;
+};
 
 function Searchbar({ onFocus, children }) {
   const [showSuggestion, setShowSuggestion] = useState(false);
@@ -36,7 +48,6 @@ function Searchbar({ onFocus, children }) {
   function submit(e) {
     e.preventDefault();
     setShowSuggestion(false);
-    console.log(value);
     if (value !== "") {
       input.current.blur();
       history.push({
@@ -60,14 +71,7 @@ function Searchbar({ onFocus, children }) {
   }
   function getQueryFromUrl() {
     if (history.location.pathname === "/search") {
-      const params = JSON.parse(
-        '{"' +
-          decodeURI(history.location.search.substring(1))
-            .replace(/"/g, '\\"')
-            .replace(/&/g, '","')
-            .replace(/=/g, '":"') +
-          '"}'
-      );
+      const params = parseParams(history.location.search);
       setVisibleInput(params.q.replaceAll("+", " "));
     }
   }
@@ -93,7 +97,9 @@ function Searchbar({ onFocus, children }) {
           setSuggestions(data.data);
         }
       })
-      .catch((err) => console.log("Error: " + err));
+      .catch((err) => {
+        console.log("Error: " + err);
+      });
     return () => abortController.abort();
   };
   useEffect(fetchData, [value]);
