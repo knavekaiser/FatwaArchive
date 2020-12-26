@@ -431,13 +431,4 @@ router.route("/jamiaNewPass").patch((req, res) => {
     });
 });
 
-//------------------------------------------------------------TESTS
-router.route("/sources").get((req, res) => {
-  const source = new Source();
-  const jamia = new Jamia();
-  const mufti = new Mufti();
-  console.log({ source, jamia, mufti });
-  res.json("test done");
-});
-
 module.exports = router;

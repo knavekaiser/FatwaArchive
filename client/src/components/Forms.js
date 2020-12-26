@@ -1050,8 +1050,9 @@ export const AdminLogin = () => {
 
 export const AddFatwaForm = ({ match }) => {
   const [loading, setLoading] = useState(false);
+  const [sources, setSources] = useState([]);
   const history = useHistory();
-  const { fatwaToEdit, setFatwaToEdit, locale } = useContext(SiteContext);
+  const { fatwaToEdit, setFatwaToEdit, locale, user } = useContext(SiteContext);
   const [preFill, setPreFill] = useState(() => {
     if (fatwaToEdit === null) {
       return {
@@ -1089,6 +1090,13 @@ export const AddFatwaForm = ({ match }) => {
       SS.set("editFatwa-date", fatwaToEdit.meta.date);
       SS.set("editFatwa-write", fatwaToEdit.meta.write);
       SS.set("editFatwa-atts", fatwaToEdit.meta.atts);
+      SS.set(
+        "editFatwa-source",
+        JSON.stringify({
+          name: fatwaToEdit.source.name,
+          _id: fatwaToEdit.source._id,
+        })
+      );
       if (fatwaToEdit.ref.length > 0) {
         fatwaToEdit.ref.forEach((item) => {
           if (item.book) {
@@ -1132,7 +1140,7 @@ export const AddFatwaForm = ({ match }) => {
     }
   });
   const [sameExists, setSameExists] = useState("");
-  const [success, setSuccess] = useState(true);
+  const [success, setSuccess] = useState(false);
   function setCleanup() {
     return () => {
       if (fatwaToEdit) {
@@ -1147,9 +1155,26 @@ export const AddFatwaForm = ({ match }) => {
         SS.remove("editFatwa-atts");
         SS.remove("editFatwa-write");
         SS.remove("editFatwa-date");
+        SS.remove("editFatwa-source");
       }
     };
   }
+  useEffect(() => {
+    if (user.role !== "admin") return;
+    fetch("/api/admin/sources")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.code === "ok") {
+          setSources(data.data);
+        } else {
+          alert("someting went wrong");
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        alert("something went wrong");
+      });
+  }, []);
   useEffect(setCleanup, []);
   function submit(e) {
     e.preventDefault();
@@ -1187,6 +1212,12 @@ export const AddFatwaForm = ({ match }) => {
         ...(fatwaToEdit.meta.date !== SS.get("editFatwa-date") && {
           "meta.date": SS.get("editFatwa-date"),
         }),
+        ...(user.role === "admin" &&
+          fatwaToEdit.source._id !==
+            JSON.parse(SS.get("editFatwa-source"))._id && {
+            source: JSON.parse(SS.get("editFatwa-source"))._id,
+            oldSource: fatwaToEdit.source,
+          }),
         ...(JSON.stringify([
           ...GetGroupData($(".addFatwa #books.multipleInput")),
           ...GetGroupData($(".addFatwa #sura.multipleInput")),
@@ -1197,10 +1228,15 @@ export const AddFatwaForm = ({ match }) => {
           ],
         }),
       };
-      url =
-        fatwaToEdit.status === "pending"
-          ? `/api/source/editSubmission/${match.params.id}`
-          : `/api/source/editFatwa/${match.params.id}`;
+
+      if (user.role === "admin") {
+        url = `/api/admin/editFatwa/${match.params.id}`;
+      } else {
+        url =
+          fatwaToEdit.status === "pending"
+            ? `/api/source/editSubmission/${match.params.id}`
+            : `/api/source/editFatwa/${match.params.id}`;
+      }
       options = {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -1226,13 +1262,16 @@ export const AddFatwaForm = ({ match }) => {
           atts: SS.get("newFatwa-atts"),
           date: SS.get("newFatwa-date"),
         },
+        ...(user.role === "admin" && {
+          source: JSON.parse(SS.get("newFatwa-source"))._id,
+        }),
         ref: [
           ...GetGroupData($(".addFatwa #books.multipleInput")),
           ...GetGroupData($(".addFatwa #sura.multipleInput")),
         ],
         img: preFill.img,
       };
-      url = `/api/source/newFatwa`;
+      url = `/api/${user.role === "admin" ? "admin" : "source"}/newFatwa`;
       options = {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1255,6 +1294,8 @@ export const AddFatwaForm = ({ match }) => {
           SS.remove("newFatwa-date");
           SS.remove("newFatwa-write");
           SS.remove("newFatwa-atts");
+          SS.remove("newFatwa-source");
+          setSuccess(true);
         } else if (data.code === 11000) {
           setSameExists(data.field);
         } else {
@@ -1290,6 +1331,39 @@ export const AddFatwaForm = ({ match }) => {
     >
       {match.params.id && !fatwaToEdit && (
         <Redirect to="/jamia/fatwa/submissions" />
+      )}
+      {user.role === "admin" && (
+        <Combobox
+          defaultValue={
+            (preFill.source && preFill.source.name) ||
+            (SS.get("newFatwa-source") &&
+              JSON.parse(SS.get("newFatwa-source")).name) ||
+            ""
+          }
+          label=<FormattedMessage id="source" defaultMessage="Source" />
+          maxHeight="13rem"
+          disabled={sources.length === 0}
+          options={sources.map((source) => {
+            return {
+              label: source.name[locale],
+              value: source,
+            };
+          })}
+          validationMessage=<FormattedMessage
+            id="sourceValidation"
+            defaultMessage="Select a jamia"
+          />
+          required={true}
+          dataId="source"
+          onChange={(target) => {
+            const value = {
+              name: target.value.name,
+              _id: target.value._id,
+            };
+            SS.set("newFatwa-source", JSON.stringify(value));
+            fatwaToEdit && SS.set("editFatwa-source", JSON.stringify(value));
+          }}
+        />
       )}
       <Combobox
         required={true}

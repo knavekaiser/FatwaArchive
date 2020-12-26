@@ -63,20 +63,6 @@ function App() {
       })
       .catch((err) => 69);
   };
-  // const getSiteData = () => {
-  //   fetch("/api/siteData")
-  //     .then((res) => res.json())
-  //     .then((data) => {
-  //       setSources(data.sources);
-  //     })
-  //     .catch((err) => {
-  //       console.log(
-  //         err,
-  //         "here put a toast saying site data could not be loaded. some features may not work properly."
-  //       );
-  //     });
-  // };
-  // useEffect(getSiteData, []);
   useEffect(setLan, []);
   useEffect(seeIfLoggedIn, []);
   const [messages, setMessages] = useState(null);

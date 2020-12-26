@@ -1,57 +1,133 @@
-// router
-//   .route("/admin/fatwa/new")
-//   .post(passport.authenticate("AdminAuth"), (req, res) => {
-//     const { title, ques, ans } = req.body;
-//     console.log("fatwa add is called");
-//     let titleEn = "Something went wrong with translation " + Math.random(),
-//       quesEn = "Something went wrong with translation " + Math.random(),
-//       ansEn = "Something went wrong with translation " + Math.random();
-//     Promise.all([
-//       // translate.translate([title, ques, ans], "en").then((translation) => {
-//       //   [titleEn, quesEn, ansEn] = translation[0];
-//       // }),
-//     ])
-//       .then(() => {
-//         const data = {
-//           link: {
-//             "bn-BD": req.body.title.replace(/\s/g, "-"),
-//             "en-US": (req.body.titleEn || titleEn).replace(/\s/g, "-"),
-//           },
-//           topic: {
-//             "bn-BD": req.body.topic,
-//             "en-US": req.body.topicEn,
-//           },
-//           title: {
-//             "bn-BD": title,
-//             "en-US": req.body.titleEn || titleEn,
-//           },
-//           ques: {
-//             "bn-BD": ques,
-//             "en-US": req.body.quesEn || quesEn,
-//           },
-//           ans: {
-//             "bn-BD": ans,
-//             "en-US": req.body.ansEn || ansEn,
-//           },
-//         };
-//         return new FatwaSubmissions({
-//           added: new Date(),
-//           ref: req.body.ref,
-//           img: req.body.img,
-//           jamia: req.body.jamia,
-//           updated: new Date(),
-//           translation: req.body.titleEn ? "manual" : "google translate",
-//           ...data,
-//         });
-//       })
-//       .then((fatwa) => fatwa.save())
-//       .then(() => res.send("fatwa added"))
-//       .catch((err) => {
-//         console.log(err);
-//         res.status(400).json({ err });
-//       });
-//   });
+router
+  .route("/admin/sources")
+  .get(passport.authenticate("AdminAuth"), (req, res) => {
+    Source.find({ status: "active" }, "name varified")
+      .then((sources) => {
+        res.json({ code: "ok", data: sources });
+      })
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json({ code: 500, message: "something went wrong" });
+      });
+  });
 
+router
+  .route("/admin/newFatwa")
+  .post(passport.authenticate("AdminAuth"), (req, res) => {
+    const { topic, title, ques, ans, ref, img, meta, source } = req.body;
+    if (!title["en-US"] && !ques["en-US"] && !ans["en-US"]) {
+      TranslateAll([title["bn-BD"], ques["bn-BD"], ans["bn-BD"]], true)
+        .then((translations) => {
+          return new Fatwa({
+            topic: topic,
+            link: {
+              "bn-BD": title["bn-BD"].replace(/\s/g, "-"),
+              "en-US": translations[0].replace(/\s/g, "-"),
+            },
+            title: { "bn-BD": title["bn-BD"], "en-US": translations[0] },
+            ques: { "bn-BD": ques["bn-BD"], "en-US": translations[1] },
+            ans: { "bn-BD": ans["bn-BD"], "en-US": translations[2] },
+            ref: ref,
+            img: img,
+            meta: meta,
+            status: "live",
+            translation: false,
+            source: source,
+          });
+        })
+        .then((newFatwa) => newFatwa.save())
+        .then(() => Source.updateFatwaCount(source))
+        .then(() => res.send({ code: "ok", message: "fatwa added" }))
+        .catch((err) => {
+          console.log(err);
+          if (err.code === 11000) {
+            res.status(400).json({
+              code: err.code,
+              field: Object.keys(err.keyValue)[0],
+            });
+          } else {
+            res
+              .status(400)
+              .json({ code: 500, message: "something went wrong" });
+          }
+        });
+    } else {
+      newFatwa = new Fatwa({
+        topic: req.body.topic,
+        title: title,
+        ques: ques,
+        ans: ans,
+        ref: ref,
+        img: img,
+        write: write,
+        atts: atts,
+        source: req.user._id,
+        translation: true,
+      })
+        .save()
+        .then(() => res.send({ code: "ok", message: "fatwa added" }))
+        .catch((err) => {
+          console.log(err);
+          if (err.code === 11000) {
+            res.status(400).json({
+              code: err.code,
+              field: Object.keys(err.keyValue)[0],
+            });
+          } else {
+            res
+              .status(400)
+              .json({ code: 500, message: "something went wrong" });
+          }
+        });
+    }
+  });
+
+router
+  .route("/admin/editFatwa/:_id")
+  .patch(passport.authenticate("AdminAuth"), (req, res) => {
+    const newData = {
+      translation:
+        req.body["title.en-US"] &&
+        req.body["ques.en-US"] &&
+        req.body["ans.en-US"]
+          ? true
+          : false,
+      ...(req.body["title.bn-BD"] && {
+        ["link.bn-BD"]: req.body["title.bn-BD"].replace(/\s/g, "-"),
+      }),
+      ...(req.body["title.en-US"] && {
+        ["link.en-US"]: req.body["title.en-US"].replace(/\s/g, "-"),
+      }),
+      ...req.body,
+      status: "live",
+    };
+    if (ObjectID.isValid(req.params._id)) {
+      Fatwa.findByIdAndUpdate(req.params._id, newData)
+        .then(() =>
+          Promise.all([
+            Source.updateFatwaCount(req.body.source),
+            Source.updateFatwaCount(req.body.oldSource),
+          ])
+        )
+        .then(() => {
+          res.json({ code: "ok", message: "updated" });
+        })
+        .catch((err) => {
+          if (err.code === 11000) {
+            res.status(400).json({
+              code: err.code,
+              field: Object.keys(err.keyValue)[0],
+            });
+          } else {
+            res
+              .status(500)
+              .json({ code: 500, message: "something went wrong" });
+          }
+        });
+    } else {
+      res.status(400).json({ code: 400, message: "invalid id" });
+    }
+  });
 //----------------------------------FATWA
 router
   .route("/admin/allfatwa/filter")

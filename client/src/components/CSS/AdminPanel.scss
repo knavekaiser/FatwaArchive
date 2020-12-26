@@ -4,6 +4,9 @@
   display: grid;
   grid-template-columns: auto 1fr;
   grid-template-rows: 100%;
+  #addFatwa {
+    padding: 0.5rem;
+  }
   #allFatwa {
     tr {
       grid-template-columns: 8rem 8rem 5rem 6rem 1fr;

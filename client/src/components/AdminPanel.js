@@ -11,7 +11,7 @@ import {
   ID,
   SS,
 } from "./FormElements";
-import { DataEditForm, PasswordEditForm } from "./Forms";
+import { DataEditForm, PasswordEditForm, AddFatwaForm } from "./Forms";
 import { Tabs, Sidebar, View, Actions, LoadingPost } from "./TableElements";
 import {
   FormattedDate,
@@ -1264,7 +1264,8 @@ function SingleFatwaSubmission({ data, setData }) {
   );
 }
 function SingleFatwa({ data, setData }) {
-  const { locale } = useContext(SiteContext);
+  const { locale, setFatwaToEdit } = useContext(SiteContext);
+  const history = useHistory();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const fatwa = data;
@@ -1357,6 +1358,14 @@ function SingleFatwa({ data, setData }) {
         </ul>
       </td>
       <td className="btns data">
+        <button
+          onClick={() => {
+            setFatwaToEdit(fatwa);
+            history.push("/admin/editFatwa/" + fatwa._id);
+          }}
+        >
+          <ion-icon name="create-outline"></ion-icon> Edit
+        </button>
         <button onClick={() => setOpen(false)}>
           <ion-icon name="chevron-up-outline"></ion-icon> Hide Detail
         </button>
@@ -1373,7 +1382,7 @@ function SingleFatwa({ data, setData }) {
     </tr>
   ) : (
     <tr data-id={fatwa._id} onClick={() => setOpen(true)}>
-      <td>{fatwa.source.name[locale]}</td>
+      <td>{fatwa.source ? fatwa.source.name[locale] : "null"}</td>
       <td>{fatwa.topic[locale]}</td>
       <td>{fatwa.translation ? "Yes" : "No"}</td>
       <td>
@@ -2132,6 +2141,13 @@ function AdminPanel() {
       <Sidebar
         views={[
           {
+            label: (
+              <FormattedMessage id="newFatwa" defaultMessage="New Fatwa" />
+            ),
+            path: "/admin/newFatwa",
+            icon: "add",
+          },
+          {
             label: <FormattedMessage id="source" defaultMessage="Source" />,
             path: "/admin/sources",
             icon: "book",
@@ -2175,6 +2191,31 @@ function AdminPanel() {
         <Route path="/admin/fatwa/:filter?" component={AllFatwa} />
         <Route path="/admin/patreons" component={Patreons} />
         <Route path="/admin/user" component={UserReview} />
+        <Route
+          path="/admin/newFatwa"
+          component={(props) => (
+            <div className="view" id="addFatwa">
+              <h1>
+                <FormattedMessage
+                  id="addNewFatwa"
+                  defaultMessage="Add new Fatwa"
+                />
+              </h1>
+              <AddFatwaForm {...props} />
+            </div>
+          )}
+        />
+        <Route
+          path="/admin/editFatwa/:id"
+          component={(props) => (
+            <div className="view" id="addFatwa">
+              <h1>
+                <FormattedMessage id="editFatwa" defaultMessage="Edit Fatwa" />
+              </h1>
+              <AddFatwaForm {...props} />
+            </div>
+          )}
+        />
         <Route path="/admin/userQuestion/:_id" component={UserQuestion} />
         <Route path="/admin/questionFeed" component={QuestionFeed} />
         <Route path="/" component={FourOFour} />
