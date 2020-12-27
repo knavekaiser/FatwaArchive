@@ -1,6 +1,6 @@
 @import "variables";
 
-.jamiaForms {
+.sourceForms {
   padding: 2rem 0;
   display: grid;
   height: 0rem;
@@ -24,6 +24,50 @@
     box-shadow: 0 0 80px -30px rgba(0, 0, 0, 0.4);
     margin: auto;
     max-width: 24rem;
+    .head {
+      grid-column: 1/3;
+      display: grid;
+      grid-template-columns: 1fr;
+      align-items: center;
+      h2 {
+        font-family: "Roboto", SolaimanLipi;
+        font-size: 2.3rem;
+        text-align: right;
+        margin: 1rem 0;
+        margin-bottom: 2rem;
+        letter-spacing: normal;
+        position: relative;
+        &::after {
+          font-weight: lighter;
+          content: attr(data-bn);
+          display: block;
+          font-size: 0.35em;
+          color: $light-text;
+          font-family: "SolaimanLipi";
+          max-width: 80%;
+          position: absolute;
+          right: 0;
+        }
+      }
+      ul {
+        display: flex;
+        justify-content: center;
+        li {
+          padding: 0.6rem 1.25rem;
+          cursor: pointer;
+          border-radius: 0.5rem;
+          position: relative;
+          &:not(.active):hover {
+            background: $light-hover;
+          }
+          &.active {
+            box-shadow: inset 0 2px 3px rgba(#000, 0.2),
+              inset 0 -3px 3px rgba(#fff, 1);
+            color: $light-text;
+          }
+        }
+      }
+    }
     h2 {
       font-family: "Roboto", SolaimanLipi;
       font-size: 2.3rem;
@@ -776,7 +820,7 @@ form {
 }
 
 @media only screen and (max-width: 480px) {
-  .main.jamiaForms {
+  .main.sourceForms {
     padding: 0;
     form {
       padding: 2rem 1rem;

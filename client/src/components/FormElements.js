@@ -443,6 +443,8 @@ export const Input = ({
   className,
   validationMessage,
   autoFocus,
+  name,
+  autoComplete,
 }) => {
   const [value, setValue] = useState(defaultValue);
   const [showLabel, setShowLabel] = useState(!defaultValue);
@@ -480,6 +482,7 @@ export const Input = ({
           e.target.setCustomValidity(" ");
           setInvalidInput(true);
         }}
+        name={name}
         minLength={min}
         value={value || ""}
         required={required}
@@ -492,6 +495,7 @@ export const Input = ({
         disabled={disabled}
         placeholder={placeholder}
         pattern={pattern}
+        autoComplete={autoComplete}
       />
       {children}
       {invalidInput && <p className="emptyFieldWarning">{validationMessage}</p>}
@@ -568,6 +572,8 @@ export const PasswordInput = ({
   id,
   pattern,
   children,
+  name,
+  autoComplete,
 }) => {
   const [showPass, setShowPass] = useState(false);
   const [style, setStyle] = useState({ width: 0 });
@@ -601,6 +607,8 @@ export const PasswordInput = ({
       onChange={change}
       placeholder={placeholder}
       validationMessage={validationMessage}
+      name={name}
+      autoComplete={autoComplete}
     >
       {passwordStrength && (
         <span style={style} className="passwordStrength"></span>

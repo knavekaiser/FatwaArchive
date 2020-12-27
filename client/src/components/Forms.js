@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect, useRef } from "react";
 import { Link, useHistory, Redirect } from "react-router-dom";
 import { SiteContext } from "../Context";
-import "./CSS/JamiaForms.min.css";
+import "./CSS/SourceForms.min.css";
 import {
   Input,
   DateInput,
@@ -79,9 +79,7 @@ function JamiaDetail() {
         defaultValue={SS.get("reg-add")}
         onChange={(target) => SS.set("reg-add", target.value)}
         dataId="add"
-        strict={/^[ঀ-৾a-zA-Z\s(),]+$/}
         min={10}
-        warning="বাংলা বা ইংরেজি অক্ষর প্রবেশ করুন"
         validationMessage=<FormattedMessage
           id="form.jamiaReg.addValidation"
           defaultMessage="Enter an address"
@@ -223,13 +221,16 @@ function LoginDetail({
         )}
       </Input>
       <PasswordInput
+        id="password"
         passwordStrength={true}
         dataId="pass"
+        autoComplete="new-password"
         label=<FormattedMessage id="password" defaultMessage="Password" />
         onChange={(target) => {
           setPass(target.value);
           SS.set("reg-pass", target.value);
         }}
+        name="password"
         validationMessage={
           pass ? (
             <FormattedMessage
@@ -245,8 +246,11 @@ function LoginDetail({
         }
       />
       <PasswordInput
+        autoComplete="new-password"
         dataId="confirmPass"
         pattern={`^${pass}$`}
+        id="confirmedPassword"
+        name="confirmedPassword"
         onChange={(target) => {
           setConfirmPass(target.value);
         }}
@@ -377,6 +381,81 @@ function StepProgress({ step }) {
   );
 }
 
+function MuftiDetail() {
+  return (
+    <>
+      <Input
+        defaultValue={SS.get("reg-mufti-name")}
+        onChange={(target) => SS.set("reg-mufti-name", target.value)}
+        dataId="name"
+        strict={/^[ঀ-৾a-zA-Z\s(),]+$/}
+        pattern=".{10,}"
+        validationMessage=<FormattedMessage
+          id="fullNameValidation"
+          defaultMessage="Enter your full name"
+        />
+        required={true}
+        label=<FormattedMessage id="fullName" defaultMessage="Full Name" />
+      />
+      <Textarea
+        defaultValue={SS.get("reg-mufti-add")}
+        onChange={(target) => SS.set("reg-mufti-add", target.value)}
+        dataId="add"
+        min={10}
+        validationMessage=<FormattedMessage
+          id="muftiAddValidation"
+          defaultMessage="Enter an address"
+        />
+        required={true}
+        label=<FormattedMessage id="add" defaultMessage="Address" />
+        max={200}
+      />
+      <Mobile
+        defaultValue={SS.get("reg-mufti-contact")}
+        onChange={(target) => SS.set("reg-mufti-contact", target.value)}
+        required={true}
+        dataId="contact"
+        validationMessage=<FormattedMessage
+          id="contactValidation"
+          defaultMessage="Enter contact detail"
+        />
+        label=<FormattedMessage id="mobile" defaultMessage="Mobile" />
+      />
+      <Input
+        defaultValue={SS.get("reg-grad")}
+        onChange={(target) => SS.set("reg-grad", target.value)}
+        pattern=".{5,}"
+        strict={/^[ঀ-৾a-zA-Z\s(),]+$/}
+        validationMessage=<FormattedMessage
+          id="gradFromValidation"
+          defaultMessage="Enter the versity you graduated from"
+        />
+        dataId="gradFrom"
+        required={true}
+        label=<FormattedMessage id="gradFrom" defaultMessage="Graduation" />
+      />
+      <Input
+        defaultValue={SS.get("reg-gradYear")}
+        onChange={(target) => SS.set("reg-gradYear", target.value)}
+        strict={/^[০-৯0-9]+$/}
+        validationMessage=<FormattedMessage
+          id="gradYearValidation"
+          defaultMessage="When did you gradutated"
+        />
+        max={4}
+        min={4}
+        warning="0-9, ০-৯"
+        dataId="gradYear"
+        required={true}
+        label=<FormattedMessage
+          id="gradYear"
+          defaultMessage="Graduation year"
+        />
+      />
+    </>
+  );
+}
+
 function SuccessPage({ className, message, children }) {
   return (
     <div className={`${className || ""} success`}>
@@ -391,6 +470,7 @@ function SuccessPage({ className, message, children }) {
 
 export const JamiaRegister = () => {
   const { locale, user } = useContext(SiteContext);
+  const [source, setSource] = useState("jamia");
   const [step, setStep] = useState(1);
   const [success, setSuccess] = useState(false);
   const history = useHistory();
@@ -411,27 +491,68 @@ export const JamiaRegister = () => {
   }
   function submit(e) {
     e.preventDefault();
-    if (validatingId) return;
     if (step === 1) {
       setStep(2);
       return;
     }
-    if (step === 2) {
-      setStep(3);
-      return;
-    }
-    if (step === 3) {
+    if (source === "jamia") {
+      if (step === 2) {
+        setStep(3);
+        return;
+      }
+      if (step === 3) {
+        const data = {
+          name: SS.get("reg-name"),
+          add: SS.get("reg-add"),
+          contact: SS.get("reg-contact"),
+          primeMufti: SS.get("reg-primeMufti"),
+          id: SS.get("reg-id"),
+          pass: SS.get("reg-pass"),
+          appl: {
+            name: SS.get("reg-applicant"),
+            des: SS.get("reg-applicantDesignation"),
+            mob: SS.get("reg-applicantMobile"),
+          },
+        };
+        const options = {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        };
+        setLoading(true);
+        fetch("/api/jamia/new", options)
+          .then((res) => {
+            setLoading(false);
+            if (res.status === 200) {
+              SS.remove("reg-name");
+              SS.remove("reg-add");
+              SS.remove("reg-contact");
+              SS.remove("reg-primeMufti");
+              SS.remove("reg-id");
+              SS.remove("reg-pass");
+              SS.remove("reg-applicantDesignation");
+              SS.remove("reg-applicant");
+              SS.remove("reg-applicantMobile");
+              setSuccess(true);
+            } else {
+              alert("something went wrong");
+            }
+          })
+          .catch((err) => {
+            alert("something went wrong");
+            console.log(err);
+          });
+      }
+    } else {
       const data = {
-        name: SS.get("reg-name"),
-        add: SS.get("reg-add"),
-        contact: SS.get("reg-contact"),
-        primeMufti: SS.get("reg-primeMufti"),
+        name: SS.get("reg-mufti-name"),
+        add: SS.get("reg-mufti-add"),
+        mob: SS.get("reg-mufti-contact"),
         id: SS.get("reg-id"),
         pass: SS.get("reg-pass"),
-        appl: {
-          name: SS.get("reg-applicant"),
-          des: SS.get("reg-applicantDesignation"),
-          mob: SS.get("reg-applicantMobile"),
+        grad: {
+          versity: SS.get("reg-grad"),
+          year: SS.get("reg-gradYear"),
         },
       };
       const options = {
@@ -440,19 +561,17 @@ export const JamiaRegister = () => {
         body: JSON.stringify(data),
       };
       setLoading(true);
-      fetch("/api/source/new", options)
+      fetch("/api/mufti/new", options)
         .then((res) => {
           setLoading(false);
           if (res.status === 200) {
-            SS.remove("reg-name");
-            SS.remove("reg-add");
-            SS.remove("reg-contact");
-            SS.remove("reg-primeMufti");
+            SS.remove("reg-mufti-name");
+            SS.remove("reg-mufti-add");
+            SS.remove("reg-mufti-contact");
             SS.remove("reg-id");
             SS.remove("reg-pass");
-            SS.remove("reg-applicantDesignation");
-            SS.remove("reg-applicant");
-            SS.remove("reg-applicantMobile");
+            SS.remove("reg-grad");
+            SS.remove("reg-gradYear");
             setSuccess(true);
           } else {
             alert("something went wrong");
@@ -477,43 +596,101 @@ export const JamiaRegister = () => {
     );
   }
   return (
-    <div className={`main jamiaForms ${locale === "bn-BD" ? "bn-BD" : ""}`}>
+    <div className={`main sourceForms ${locale === "bn-BD" ? "bn-BD" : ""}`}>
       {user && <Redirect to="/" />}
-      <form className="reg" onSubmit={submit} autofill="false">
-        <h2>
-          <FormattedMessage
-            id="form.jamiaReg.head"
-            defaultMessage="REGISTRATION"
-          />
-        </h2>
-        <StepProgress step={step} />
-        {step === 1 && <JamiaDetail />}
-        {step === 2 && (
-          <LoginDetail
-            idIsValid={idIsValid}
-            validatingId={validatingId}
-            setIdIsValid={setIdIsValid}
-            setValidatingId={setValidatingId}
-          />
+      <form className="reg" onSubmit={submit} autoComplete="off">
+        <input type="hidden" value="prayer" />
+        <div className="head">
+          <h2>
+            <FormattedMessage id="registration" defaultMessage="REGISTRATION" />
+          </h2>
+          {step === 1 && (
+            <ul>
+              <li
+                className={source === "jamia" ? "active" : ""}
+                onClick={() => setSource("jamia")}
+              >
+                Jamia
+              </li>
+              <li
+                className={source === "mufti" ? "active" : ""}
+                onClick={() => setSource("mufti")}
+              >
+                Mufti
+              </li>
+            </ul>
+          )}
+        </div>
+        {source === "jamia" && (
+          <>
+            <StepProgress step={step} />
+            {step === 1 && <JamiaDetail />}
+            {step === 2 && (
+              <LoginDetail
+                idIsValid={idIsValid}
+                validatingId={validatingId}
+                setIdIsValid={setIdIsValid}
+                setValidatingId={setValidatingId}
+              />
+            )}
+            {step === 3 && <ApplicantDetail />}
+            {(step === 2 || step === 3) && (
+              <button type="button" className="left" onClick={leftButton}>
+                <FormattedMessage
+                  id="form.jamiaReg.back"
+                  defaultMessage="Back"
+                />
+              </button>
+            )}
+            <Submit
+              disabled={validatingId}
+              className={(step === 1 || step === 2) && "right"}
+              label={
+                step === 1 || step === 2 ? (
+                  <FormattedMessage id="next" defaultMessage="Next" />
+                ) : (
+                  <FormattedMessage id="register" defaultMessage="Register" />
+                )
+              }
+              loading={loading}
+              setLoading={setLoading}
+            />
+          </>
         )}
-        {step === 3 && <ApplicantDetail />}
-        {(step === 2 || step === 3) && (
-          <button type="button" className="left" onClick={leftButton}>
-            <FormattedMessage id="form.jamiaReg.back" defaultMessage="Back" />
-          </button>
+        {source === "mufti" && (
+          <>
+            {step === 1 && <MuftiDetail />}
+            {step === 2 && (
+              <LoginDetail
+                idIsValid={idIsValid}
+                validatingId={validatingId}
+                setIdIsValid={setIdIsValid}
+                setValidatingId={setValidatingId}
+              />
+            )}
+            {step === 2 && (
+              <button type="button" className="left" onClick={leftButton}>
+                <FormattedMessage
+                  id="form.jamiaReg.back"
+                  defaultMessage="Back"
+                />
+              </button>
+            )}
+            <Submit
+              disabled={validatingId}
+              className={step === 1 && "right"}
+              label={
+                step === 1 ? (
+                  <FormattedMessage id="next" defaultMessage="Next" />
+                ) : (
+                  <FormattedMessage id="register" defaultMessage="Register" />
+                )
+              }
+              loading={loading}
+              setLoading={setLoading}
+            />
+          </>
         )}
-        <Submit
-          className={(step === 1 || step === 2) && "right"}
-          label={
-            step === 1 || step === 2 ? (
-              <FormattedMessage id="next" defaultMessage="Next" />
-            ) : (
-              <FormattedMessage id="register" defaultMessage="Register" />
-            )
-          }
-          loading={loading}
-          setLoading={setLoading}
-        />
       </form>
     </div>
   );
@@ -552,7 +729,7 @@ export const JamiaLogin = () => {
       });
   }
   return (
-    <div className={`main jamiaForms ${locale === "bn-BD" ? "bn-BD" : ""}`}>
+    <div className={`main sourceForms ${locale === "bn-BD" ? "bn-BD" : ""}`}>
       {user && <Redirect to="/" />}
       <form
         className={`login ${invalidCred ? "invalidCred" : ""}`}
@@ -728,7 +905,7 @@ export const PassRecovery = () => {
     }
   }
   return (
-    <div className={`main jamiaForms ${locale === "bn-BD" ? "bn-BD" : ""}`}>
+    <div className={`main sourceForms ${locale === "bn-BD" ? "bn-BD" : ""}`}>
       {user && <Redirect to="/" />}
       <form className={`passRecovery`} onSubmit={submit}>
         <h3>
@@ -999,7 +1176,7 @@ export const AdminLogin = () => {
       });
   }
   return (
-    <div className={`main jamiaForms ${locale === "bn-BD" ? "bn-BD" : ""}`}>
+    <div className={`main sourceForms ${locale === "bn-BD" ? "bn-BD" : ""}`}>
       {user && <Redirect to="/" />}
       <form
         className={`adminLogin ${invalidCred ? "invalidCred" : ""}`}

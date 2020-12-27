@@ -53,9 +53,16 @@ const Mufti = Source.discriminator(
   new Schema({
     role: { type: String, default: "mufti" },
     mob: { type: String, required: true, trim: true },
+    grad: {
+      versity: {
+        "bn-BD": { type: String, required: true },
+        "en-US": { type: String, required: true },
+      },
+      year: { type: Number, required: true },
+    },
     inst: {
-      "en-US": { type: String, required: true, trim: true },
-      "bn-BD": { type: String, required: true, trim: true },
+      "en-US": { type: String, trim: true },
+      "bn-BD": { type: String, trim: true },
     },
   })
 );

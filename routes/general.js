@@ -208,7 +208,7 @@ router.route("/reportFatwa").post((req, res) => {
 });
 
 //-------------------------------------------------------------NEW SOURCE
-router.route("/source/new").post((req, res) => {
+router.route("/jamia/new").post((req, res) => {
   const { name, primeMufti } = req.body;
   Promise.all([
     TranslateAll([name, primeMufti]),
@@ -223,12 +223,39 @@ router.route("/source/new").post((req, res) => {
         [getLan(primeMufti)]: primeMufti,
         [getLan(primeMufti, true)]: data[0][1],
       };
-      console.log(req.body);
       return new Jamia({
         ...req.body,
         pass: data[1],
         role: "jamia",
       });
+    })
+    .then((submission) => submission.save())
+    .then(() => res.status(200).json("application submitted!"))
+    .catch((err) => {
+      console.log(err);
+      res.status(400).json(err);
+    });
+});
+router.route("/mufti/new").post((req, res) => {
+  const name = req.body.name;
+  const versity = req.body.grad.versity;
+  Promise.all([TranslateAll([name, versity]), bcrypt.hash(req.body.pass, 10)])
+    .then((data) => {
+      req.body.name = {
+        [getLan(name)]: name,
+        [getLan(name, true)]: data[0][0],
+      };
+      req.body.grad.versity = {
+        [getLan(versity)]: versity,
+        [getLan(versity, true)]: data[0][1],
+      };
+      const newMufti = new Mufti({
+        ...req.body,
+        pass: data[1],
+        role: "mufti",
+      });
+      console.log(newMufti);
+      return newMufti;
     })
     .then((submission) => submission.save())
     .then(() => res.status(200).json("application submitted!"))
