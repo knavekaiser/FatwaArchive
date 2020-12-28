@@ -89,7 +89,7 @@ function About({ history }) {
           <div className="body">
             <p className="name">মুফতি আব্দুর রহমান আব্দে রাব্বি</p>
             <div className="links">
-              <a href="email:arabderabbi@gmail.com">
+              <a href="mailto:arabderabbi@gmail.com">
                 <ion-icon name="mail-outline"></ion-icon>
               </a>
               <a href="tel:+8801305487161">
@@ -105,7 +105,7 @@ function About({ history }) {
           <div className="body">
             <p className="name">নাঈম আহমাদ</p>
             <div className="links">
-              <a href="email:naeem.ahmad.9m@gmail.com">
+              <a href="mailto:naeem.ahmad.9m@gmail.com">
                 <ion-icon name="mail-outline"></ion-icon>
               </a>
               <a href="tel:+8801989479749">
