@@ -1612,7 +1612,10 @@ export const AddFatwaForm = ({ match }) => {
         }}
         maxHeight="15rem"
         label=<FormattedMessage id="topic" defaultMessage="Topic" />
-        validationMessage="বিষয়বস্তু নির্বাচন করুন"
+        validationMessage=<FormattedMessage
+          id="topicValidation"
+          defaultMessage="Select a topic"
+        />
         options={topics.map((topic) => {
           return {
             label: topic[locale],
@@ -1636,7 +1639,10 @@ export const AddFatwaForm = ({ match }) => {
         defaultValue={preFill.title["bn-BD"] || SS.get("newFatwa-title")}
         dataId="title"
         min={10}
-        validationMessage="ফতোয়ার শিরোণাম প্রবেশ করুন"
+        validationMessage=<FormattedMessage
+          id="titleValidation"
+          defaultMessage="Enter a title"
+        />
         label=<FormattedMessage id="title" defaultMessage="Title" />
         max={200}
         className={sameExists === "title.bn-BD" ? "err" : ""}
@@ -1656,7 +1662,10 @@ export const AddFatwaForm = ({ match }) => {
         <Input
           min={10}
           required={true}
-          validationMessage="ফতোয়ার শিরোণাম প্রবেশ করুন"
+          validationMessage=<FormattedMessage
+            id="titleValidation"
+            defaultMessage="Enter a title"
+          />
           defaultValue={preFill.title["en-US"] || SS.get("newFatwa-titleEn")}
           dataId="titleEn"
           label="Title in English"
@@ -1677,7 +1686,10 @@ export const AddFatwaForm = ({ match }) => {
       <Textarea
         min="20"
         required={true}
-        validationMessage="প্রশ্ন প্রবেশ করুন"
+        validationMessage=<FormattedMessage
+          id="addFatwa.quesValidation"
+          defaultMessage="Enter a question"
+        />
         defaultValue={preFill.ques["bn-BD"] || SS.get("newFatwa-ques")}
         onChange={(target) => {
           SS.set("newFatwa-ques", target.value);
@@ -1690,7 +1702,10 @@ export const AddFatwaForm = ({ match }) => {
         <Textarea
           min="20"
           required={true}
-          validationMessage="প্রশ্ন প্রবেশ করুন"
+          validationMessage=<FormattedMessage
+            id="addFatwa.quesValidation"
+            defaultMessage="Enter a question"
+          />
           defaultValue={preFill.ques["en-US"] || SS.get("newFatwa-quesEn")}
           onChange={(target) => {
             SS.set("newFatwa-quesEn", target.value);
@@ -1703,7 +1718,10 @@ export const AddFatwaForm = ({ match }) => {
       <Textarea
         min="20"
         required={true}
-        validationMessage="উত্তর প্রবেশ করুন"
+        validationMessage=<FormattedMessage
+          id="addFatwa.ansValidation"
+          defaultMessage="Enter an answer"
+        />
         defaultValue={preFill.ans["bn-BD"] || SS.get("newFatwa-ans")}
         onChange={(target) => {
           SS.set("newFatwa-ans", target.value);
@@ -1724,7 +1742,10 @@ export const AddFatwaForm = ({ match }) => {
         <Textarea
           min="20"
           required={true}
-          validationMessage="উত্তর প্রবেশ করুন"
+          validationMessage=<FormattedMessage
+            id="addFatwa.ansValidation"
+            defaultMessage="Enter an answer"
+          />
           defaultValue={preFill.ans["en-US"] || SS.get("newFatwa-ansEn")}
           className={sameExists === "ans.en-US" ? "err" : ""}
           onChange={(target) => {
@@ -1861,6 +1882,8 @@ export const UserQuestionAnswerForm = ({ ques, setQues, _id }) => {
       inputBooks.push(...refInputBook);
       inputSura.push(...refInputSura);
       return { inputBooks: [...inputBooks], inputSura: [...inputSura] };
+    } else {
+      return {};
     }
   });
   function submit(e) {
@@ -1934,7 +1957,10 @@ export const UserQuestionAnswerForm = ({ ques, setQues, _id }) => {
           setSameExists("");
         }}
         required={true}
-        validationMessage="শিরোণাম প্রবেশ করুন"
+        validationMessage=<FormattedMessage
+          id="titleValidation"
+          defaultMessage="Enter a title"
+        />
       >
         {sameExists === "title.bn-BD" && (
           <span className="errMessage">
@@ -1960,7 +1986,10 @@ export const UserQuestionAnswerForm = ({ ques, setQues, _id }) => {
         label=<FormattedMessage id="answer" defaultMessage="Answer" />
         required={true}
         min={10}
-        validationMessage="উত্তর প্রবেশ করুন"
+        validationMessage=<FormattedMessage
+          id="addFatwa.ansValidation"
+          defaultMessage="Enter an answer"
+        />
       >
         {sameExists === "ans.bn-BD" && (
           <span className="errMessage">
@@ -2015,7 +2044,6 @@ export const UserQuestionAnswerForm = ({ ques, setQues, _id }) => {
         />
         <Input
           min={5}
-          required={true}
           validationMessage="test"
           defaultValue={SS.get("ansFatwa-atts")}
           dataId="write"
@@ -2023,7 +2051,14 @@ export const UserQuestionAnswerForm = ({ ques, setQues, _id }) => {
             SS.set("ansFatwa-atts", target.value);
             setSameExists(false);
           }}
-          label=<FormattedMessage id="atts" defaultMessage="Attestation" />
+          label={
+            <>
+              <FormattedMessage id="atts" defaultMessage="Attestation" />{" "}
+              <small>
+                (<FormattedMessage id="optional" />)
+              </small>
+            </>
+          }
           validationMessage=<FormattedMessage
             id="attsValidation"
             defaultMessage="who attestated the fatwa"

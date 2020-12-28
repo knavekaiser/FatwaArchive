@@ -42,7 +42,7 @@ const userQuestion = new Schema(
         meta: {
           date: { type: Date, required: true },
           write: { type: String, required: true },
-          atts: { type: String, required: true },
+          atts: { type: String, default: "" },
         },
         createdAt: { type: Date, default: Date.now },
       },
