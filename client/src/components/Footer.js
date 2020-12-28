@@ -26,6 +26,11 @@ function Footer() {
             </Link>
           </li>
         )}
+        <li>
+          <Link to="/tableOfContent">
+            <FormattedMessage id="tableOfContent" />
+          </Link>
+        </li>
         <li
           onClick={() => {
             locale === "bn-BD" ? setLocale("en-US") : setLocale("bn-BD");
@@ -48,8 +53,5 @@ export default Footer;
 // </li>
 // <li>
 // <Link to="/contact">Contact</Link>
-// </li>
-// <li>
-// <Link to="/table_of_content">Table of content</Link>
 // </li>
 //

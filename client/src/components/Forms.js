@@ -1790,7 +1790,6 @@ export const AddFatwaForm = ({ match }) => {
         />
         <Input
           min={5}
-          required={true}
           validationMessage="test"
           defaultValue={preFill.meta.atts || SS.get("newFatwa-atts")}
           dataId="write"
@@ -1799,7 +1798,14 @@ export const AddFatwaForm = ({ match }) => {
             fatwaToEdit && SS.set("editFatwa-atts", target.value);
             setSameExists(false);
           }}
-          label=<FormattedMessage id="atts" defaultMessage="Attestation" />
+          label={
+            <>
+              <FormattedMessage id="atts" defaultMessage="Attestation" />{" "}
+              <small>
+                (<FormattedMessage id="optional" />)
+              </small>
+            </>
+          }
           validationMessage=<FormattedMessage
             id="attsValidation"
             defaultMessage="who attestated the fatwa"

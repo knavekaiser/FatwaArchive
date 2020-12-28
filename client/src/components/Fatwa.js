@@ -34,24 +34,12 @@ function Fatwa({ match }) {
   };
   const fetchData = () => {
     fetch(`/api/fatwa/${match.params.id}`, options)
-      .then((res) => {
-        setLoading(false);
-        return res.json();
-      })
-      .then((data) => {
-        setFatwa(data);
-      })
-      .catch((err) => console.log(err));
-    return () => abortController.abort();
-  };
-  const fetchRelatedFatwa = () => {
-    if (loading) return;
-    const options = { headers: { "Accept-Language": locale }, signal: signal };
-    fetch("/api/relatedFatwas")
       .then((res) => res.json())
       .then((data) => {
+        setLoading(false);
         if (data.code === "ok") {
-          setRelatedFatwa(data.data);
+          setFatwa(data.fatwa);
+          setRelatedFatwa(data.relatedFatwas);
         }
       })
       .catch((err) => {
@@ -60,7 +48,6 @@ function Fatwa({ match }) {
     return () => abortController.abort();
   };
   useEffect(fetchData, [match]);
-  useEffect(fetchRelatedFatwa, [fatwa]);
   if (loading) {
     return (
       <div className={`main fatwa ${loading ? "loading" : ""}`}>
@@ -205,11 +192,13 @@ function Fatwa({ match }) {
             {":  "}
             <b>{fatwa.meta.write}</b>
           </p>
-          <p>
-            <FormattedMessage id="atts" defaultMessage="Attestation" />
-            {":  "}
-            <b>{fatwa.meta.atts}</b>
-          </p>
+          {fatwa.meta.atts && (
+            <p>
+              <FormattedMessage id="atts" defaultMessage="Attestation" />
+              {":  "}
+              <b>{fatwa.meta.atts}</b>
+            </p>
+          )}
           <p>
             <FormattedMessage id="dOWriting" defaultMessage="Original date" />
             {":  "}
@@ -240,7 +229,7 @@ function Fatwa({ match }) {
           </Route>
         </>
         <h3 className="meta">
-          <FormattedMessage id="moreFatwa" value="More fatwa" />
+          <FormattedMessage id="relatedFatwas" value="Related fatwa" />
         </h3>
         <br />
         <RelatedFatwa fatwas={relatedFatwa} />

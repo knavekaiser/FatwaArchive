@@ -28,7 +28,7 @@ const fatwa = new Schema(
     meta: {
       date: { type: Date, required: true },
       write: { type: String, required: true, trim: true },
-      atts: { type: String, required: true, trim: true },
+      atts: { type: String, trim: true, default: "" },
       comments: [{ type: Schema.Types.ObjectId, ref: "FatwaComment" }],
     },
   },

@@ -17,6 +17,7 @@ import {
 import AdminPanel from "./components/AdminPanel";
 import JamiaProfile from "./components/JamiaProfile";
 import UserQuestion from "./components/UserSubmitions";
+import TableOfContent from "./components/TableOfContent";
 import { SiteContext } from "./Context";
 import Enlish from "./language/en-US.json";
 import Bangali from "./language/bn-BD.json";
@@ -96,6 +97,7 @@ function App() {
           <Route path="/askQuestion" component={UserQuestion} />
           <Route path="/source" component={JamiaProfile} />
           <Route path="/admin" component={AdminPanel} />
+          <Route path="/tableOfContent" component={TableOfContent} />
           <Route path="/" component={FourOFour} />
         </Switch>
         <Route path={/^\/(?!admin)(?!source)/} component={Footer} />

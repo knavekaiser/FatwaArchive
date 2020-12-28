@@ -23,13 +23,34 @@ router.route("/fatwa/:link").get((req, res) => {
     status: "live",
     [`link.${getLan(req.params.link)}`]: req.params.link,
   };
-  Fatwa.findOne(query, "-status")
-    .populate("source", "name primeMufti grad")
-    .then((fatwa) => {
-      if (fatwa) {
-        res.json(fatwa);
+  Promise.all([
+    Fatwa.findOne(query, "-status").populate("source", "name primeMufti grad"),
+    Fatwa.aggregate([
+      {
+        $search: {
+          index: "SearchIndex",
+          text: {
+            path: [`title.${locale}`, `ques.${locale}`, `ans.${locale}`],
+            query: req.params.link.replace(/-/g, " "),
+            fuzzy: { maxEdits: 1 },
+          },
+        },
+      },
+      { $match: { status: "live" } },
+      { $limit: 8 },
+      { $project: { link: 1, title: 1 } },
+    ]),
+  ])
+    .then((data) => {
+      if (data[0]) {
+        data[1].shift();
+        res.json({
+          code: "ok",
+          fatwa: data[0],
+          relatedFatwas: data[1],
+        });
       } else {
-        res.status(404).json("nothing found");
+        res.status(404).json({ code: 404, message: "fatwa did not found" });
       }
     })
     .catch((err) => {
@@ -138,9 +159,7 @@ router.route("/searchSuggestions").get((req, res) => {
       {
         $match: { status: "live" },
       },
-      {
-        $limit: 8,
-      },
+      { $limit: 8 },
       {
         $project: {
           [`link.${locale}`]: 1,
@@ -159,19 +178,41 @@ router.route("/searchSuggestions").get((req, res) => {
     res.status(400).json({ code: 400, message: "something went wrong" });
   }
 });
-router.route("/relatedFatwas").get((req, res) => {
+router.route("/relatedFatwas/:q").get((req, res) => {
   const locale = req.headers["accept-language"];
+  console.log(req.params);
   Fatwa.aggregate([
-    { $sample: { size: 6 } },
+    {
+      $search: {
+        index: "SearchIndex",
+        text: {
+          path: [`title.${locale}`, `ques.${locale}`, `ans.${locale}`],
+          query: req.params.q,
+          fuzzy: { maxEdits: 1 },
+        },
+      },
+    },
+    { $match: { status: "live" } },
+    { $limit: 8 },
     { $project: { link: 1, title: 1 } },
   ])
     .then((fatwas) => {
+      console.log(fatwas);
       res.json({ code: "ok", data: fatwas });
     })
     .catch((err) => {
       console.log(err);
       res.status(500).json({ code: 500, message: "something went worng" });
     });
+});
+router.route("/getLinks").get((req, res) => {
+  Fatwa.find({ status: "live" }, "link.bn-BD")
+    .then((fatwas) => {
+      res.json({ code: "ok", data: fatwas });
+    })
+    .catch((err) =>
+      res.status(500).json({ code: 500, message: "something went wrong" })
+    );
 });
 
 //---------------------------------------------WAY TOOO MUCH WORK HERE!!!

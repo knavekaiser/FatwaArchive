@@ -101,6 +101,34 @@
     box-shadow: 0 0 10px rgba(#000, 0.3);
   }
 }
+.tableOfContent {
+  padding: 1rem 0;
+  h2 {
+    margin-bottom: 1.4rem;
+    padding: 0 0.7rem;
+    span {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 400;
+      color: $light-text;
+      font-style: italic;
+    }
+  }
+  ul {
+    display: grid;
+    grid-gap: 0.1rem;
+    li {
+      a {
+        white-space: normal;
+        display: block;
+        padding: 0.7rem;
+      }
+      &:hover {
+        background: $light-hover;
+      }
+    }
+  }
+}
 
 @media only screen and (max-width: 480px) {
   .about {

@@ -1912,7 +1912,9 @@ const NewQuestions = injectIntl(({ intl }) => {
     return (
       <div className="noQuestion">
         <ion-icon name="file-tray-outline"></ion-icon>
-        <p>that's it for now</p>
+        <p>
+          - <FormattedMessage id="nothingHere" /> -
+        </p>
       </div>
     );
   }
@@ -2383,18 +2385,18 @@ function AdminPanel() {
             path: "/admin/fatwa",
             icon: "reader",
           },
-          {
-            label: (
-              <FormattedMessage id="userArea" defaultMessage="User Area" />
-            ),
-            path: "/admin/user",
-            icon: "people",
-          },
-          {
-            label: <FormattedMessage id="patreons" defaultMessage="Patreons" />,
-            path: "/admin/patreons",
-            icon: "umbrella",
-          },
+          // {
+          //   label: (
+          //     <FormattedMessage id="userArea" defaultMessage="User Area" />
+          //   ),
+          //   path: "/admin/user",
+          //   icon: "people",
+          // },
+          // {
+          //   label: <FormattedMessage id="patreons" defaultMessage="Patreons" />,
+          //   path: "/admin/patreons",
+          //   icon: "umbrella",
+          // },
           {
             label: (
               <FormattedMessage
