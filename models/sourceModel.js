@@ -61,8 +61,8 @@ const Mufti = Source.discriminator(
       year: { type: Number, required: true },
     },
     inst: {
-      "en-US": { type: String, trim: true },
-      "bn-BD": { type: String, trim: true },
+      "bn-BD": { type: String, trim: true, default: "" },
+      "en-US": { type: String, trim: true, default: "" },
     },
   })
 );

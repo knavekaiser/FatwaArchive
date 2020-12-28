@@ -166,10 +166,11 @@
       }
     }
     .checkbox {
-      opacity: 0.5;
+      opacity: 0.6;
       label {
         font-size: 0.7rem;
-        a {
+        span {
+          cursor: pointer;
           text-decoration: underline;
         }
       }
@@ -453,6 +454,50 @@
     }
     &::-webkit-scrollbar {
       width: 0;
+    }
+  }
+}
+.regTnc {
+  max-height: calc(100vh - 2rem);
+  background: $base-white;
+  border-radius: 0.5rem;
+  max-width: 30rem;
+  box-shadow: 0 5px 10px rgba(#000, 0.1);
+  position: relative;
+  ion-icon[name="close-outline"] {
+    color: $light-text;
+    font-size: 1.5rem;
+    padding: 0.5rem;
+    cursor: pointer;
+    position: absolute;
+    top: 0;
+    right: 0;
+    &:hover {
+      color: #000;
+    }
+  }
+  .content {
+    max-height: calc(100vh - 2rem);
+    height: 100%;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    padding: 2rem;
+    overflow: auto;
+    h2 {
+      margin-bottom: 1rem;
+    }
+    p {
+      margin-bottom: 0.8rem;
+    }
+    ul {
+      margin-left: 1rem;
+      display: grid;
+      grid-gap: 0.5rem;
+      li {
+        list-style: unset;
+        text-align: justify;
+      }
     }
   }
 }
@@ -877,5 +922,11 @@ form {
         margin: auto;
       }
     }
+  }
+  .regTnc {
+    .content {
+      padding: 1.5rem;
+    }
+    margin: 1rem;
   }
 }

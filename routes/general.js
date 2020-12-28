@@ -24,7 +24,7 @@ router.route("/fatwa/:link").get((req, res) => {
     [`link.${getLan(req.params.link)}`]: req.params.link,
   };
   Fatwa.findOne(query, "-status")
-    .populate("source", "name primeMufti")
+    .populate("source", "name primeMufti grad")
     .then((fatwa) => {
       if (fatwa) {
         res.json(fatwa);
@@ -49,15 +49,11 @@ router.route("/search").get((req, res) => {
           text: {
             path: [`title.${locale}`, `ques.${locale}`, `ans.${locale}`],
             query: req.query.q,
-            fuzzy: {
-              maxEdits: 1,
-            },
+            fuzzy: { maxEdits: 1 },
           },
         },
       },
-      {
-        $match: { status: "live" },
-      },
+      { $match: { status: "live" } },
       {
         $lookup: {
           from: "sources",
@@ -163,6 +159,20 @@ router.route("/searchSuggestions").get((req, res) => {
     res.status(400).json({ code: 400, message: "something went wrong" });
   }
 });
+router.route("/relatedFatwas").get((req, res) => {
+  const locale = req.headers["accept-language"];
+  Fatwa.aggregate([
+    { $sample: { size: 6 } },
+    { $project: { link: 1, title: 1 } },
+  ])
+    .then((fatwas) => {
+      res.json({ code: "ok", data: fatwas });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({ code: 500, message: "something went worng" });
+    });
+});
 
 //---------------------------------------------WAY TOOO MUCH WORK HERE!!!
 router.route("/askFatwa").post((req, res) => {
@@ -249,13 +259,11 @@ router.route("/mufti/new").post((req, res) => {
         [getLan(versity)]: versity,
         [getLan(versity, true)]: data[0][1],
       };
-      const newMufti = new Mufti({
+      return new Mufti({
         ...req.body,
         pass: data[1],
         role: "mufti",
       });
-      console.log(newMufti);
-      return newMufti;
     })
     .then((submission) => submission.save())
     .then(() => res.status(200).json("application submitted!"))

@@ -1,5 +1,5 @@
 import React, { useState, useContext, useRef, useEffect } from "react";
-import { Link, Route, Switch, useHistory } from "react-router-dom";
+import { Link, Route, Switch, useHistory, Redirect } from "react-router-dom";
 import { SiteContext } from "../Context.js";
 import "./CSS/AdminPanel.min.css";
 import {
@@ -87,16 +87,6 @@ function AllSources() {
               },
               {
                 column: (
-                  <FormattedMessage
-                    id="primeMufti"
-                    defaultMessage="Prime Mufti"
-                  />
-                ),
-                sort: false,
-                colCode: "primeMufti",
-              },
-              {
-                column: (
                   <FormattedMessage id="joined" defaultMessage="Joined" />
                 ),
                 sort: true,
@@ -157,16 +147,6 @@ function AllSources() {
               },
               {
                 column: (
-                  <FormattedMessage
-                    id="primeMufti"
-                    defaultMessage="Prime Mufti"
-                  />
-                ),
-                sort: false,
-                colCode: "primeMufti",
-              },
-              {
-                column: (
                   <FormattedMessage id="joined" defaultMessage="Joined" />
                 ),
                 sort: true,
@@ -215,24 +195,14 @@ function AllSources() {
                 colCode: "joined",
               },
               {
-                column: <FormattedMessage id="name" defaultMessage="Name" />,
-                sort: false,
-                colCode: "name",
-              },
-              {
                 column: <FormattedMessage id="type" defaultMessage="Type" />,
                 sort: true,
                 colCode: "role",
               },
               {
-                column: (
-                  <FormattedMessage
-                    id="primeMufti"
-                    defaultMessage="primeMufti"
-                  />
-                ),
+                column: <FormattedMessage id="name" defaultMessage="Name" />,
                 sort: false,
-                colCode: "primeMufti",
+                colCode: "name",
               },
               {
                 column: (
@@ -249,23 +219,23 @@ function AllSources() {
   );
 }
 function SingleSourceSubmission({ data, setData }) {
-  const jamia = data;
-  const { locale } = useContext(SiteContext);
-  const [showFull, setShowFull] = useState(false);
   const [loading, setLoading] = useState(false);
   function accept() {
     setLoading(true);
     fetch(`/api/admin/source/accept`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ _id: jamia._id }),
+      body: JSON.stringify({ _id: data._id }),
     })
-      .then((res) => {
-        setLoading(false);
-        if (res.status === 200) {
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.code === "ok") {
+          setLoading(false);
           setData((prev) => {
-            return prev.filter((submissions) => submissions._id !== jamia._id);
+            return prev.filter((submissions) => submissions._id !== data._id);
           });
+        } else {
+          alert("someting went wrong");
         }
       })
       .catch((err) => console.log(err));
@@ -275,36 +245,45 @@ function SingleSourceSubmission({ data, setData }) {
     fetch(`/api/admin/source/reject`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ _id: jamia._id }),
+      body: JSON.stringify({ _id: data._id }),
     })
       .then((res) => {
         setLoading(false);
         if (res.status === 200) {
           setData((prev) => {
-            return prev.filter((submissions) => submissions._id !== jamia._id);
+            return prev.filter((submissions) => submissions._id !== data._id);
           });
         }
       })
       .catch((err) => console.log(err));
   }
+  return data.role === "jamia" ? (
+    <JamiaSubmission data={data} accept={accept} reject={reject} />
+  ) : (
+    <MuftiSubmission data={data} accept={accept} reject={reject} />
+  );
+}
+function JamiaSubmission({ data, accept, reject }) {
+  const { locale } = useContext(SiteContext);
+  const [showFull, setShowFull] = useState(false);
+  const [loading, setLoading] = useState(false);
   return !showFull ? (
     <tr onClick={() => (showFull ? setShowFull(false) : setShowFull(true))}>
       <td>
         <FormattedDate
-          value={new Date(jamia.joined)}
+          value={new Date(data.joined)}
           day="numeric"
           month="numeric"
           year="2-digit"
         />
       </td>
+      <td>{data.role}</td>
       <td>
-        {jamia.name[locale]}
-        <span>{jamia.address}</span>
+        {data.name[locale]}
+        <span>{data.primeMufti[locale]}</span>
       </td>
-      <td>{jamia.role}</td>
-      <td>{jamia.primeMufti[locale]}</td>
       <td>
-        <a href={`tel:${jamia.contact}`}>{jamia.contact.replace("+88", "")}</a>
+        <a href={`tel:${data.contact}`}>{data.contact.replace("+88", "")}</a>
       </td>
     </tr>
   ) : (
@@ -312,33 +291,102 @@ function SingleSourceSubmission({ data, setData }) {
       <td className="label">Submitted</td>
       <td className="data">
         <FormattedDate
-          value={new Date(jamia.joined)}
+          value={new Date(data.joined)}
           day="numeric"
           month="numeric"
           year="2-digit"
         />
       </td>
       <td className="label">ID</td>
-      <td className="data">{jamia.id}</td>
+      <td className="data">{data.id}</td>
       <td className="label">Name</td>
-      <td className="data">{jamia.name[locale]}</td>
+      <td className="data">{data.name[locale]}</td>
       <td className="label">Prime Mufti</td>
-      <td className="data">{jamia.primeMufti[locale]}</td>
+      <td className="data">{data.primeMufti[locale]}</td>
       <td className="label">Address</td>
-      <td className="data">{jamia.address}</td>
+      <td className="data">{data.address}</td>
       <td className="label">Contact</td>
       <td className="data">
-        <a href={`tel:${jamia.contact}`}>{jamia.contact.replace("+88", "")}</a>
+        <a href={`tel:${data.contact}`}>{data.contact.replace("+88", "")}</a>
       </td>
       <td className="label">Applicant's Name</td>
-      <td className="data">{jamia.appl.name}</td>
+      <td className="data">{data.appl.name}</td>
       <td className="label">Applicant's designation</td>
-      <td className="data">{jamia.appl.designation}</td>
+      <td className="data">{data.appl.designation}</td>
       <td className="label">Applicant's mobile</td>
       <td className="data">
-        <a href={`tel:${jamia.appl.mob}`}>
-          {jamia.appl.mob.replace("+88", "")}
-        </a>
+        <a href={`tel:${data.appl.mob}`}>{data.appl.mob.replace("+88", "")}</a>
+      </td>
+      <td className="data btns">
+        <Submit
+          loading={loading}
+          onClick={accept}
+          label={
+            <>
+              <ion-icon name="checkmark-outline"></ion-icon> Accept
+            </>
+          }
+        />
+        <Submit
+          loading={loading}
+          onClick={reject}
+          label={
+            <>
+              <ion-icon name="close-outline"></ion-icon> Reject
+            </>
+          }
+        />
+      </td>
+    </tr>
+  );
+}
+function MuftiSubmission({ data, accept, reject }) {
+  const { locale } = useContext(SiteContext);
+  const [showFull, setShowFull] = useState(false);
+  const [loading, setLoading] = useState(false);
+  return !showFull ? (
+    <tr onClick={() => (showFull ? setShowFull(false) : setShowFull(true))}>
+      <td>
+        <FormattedDate
+          value={new Date(data.joined)}
+          day="numeric"
+          month="numeric"
+          year="2-digit"
+        />
+      </td>
+      <td>{data.role}</td>
+      <td>
+        {data.name[locale]}
+        <span>
+          {data.grad.versity[locale]}, {data.grad.year}
+        </span>
+      </td>
+      <td>
+        <a href={`tel:${data.mob}`}>{data.mob.replace("+88", "")}</a>
+      </td>
+    </tr>
+  ) : (
+    <tr className="full">
+      <td className="label">Submitted</td>
+      <td className="data">
+        <FormattedDate
+          value={new Date(data.joined)}
+          day="numeric"
+          month="numeric"
+          year="2-digit"
+        />
+      </td>
+      <td className="label">ID</td>
+      <td className="data">{data.id}</td>
+      <td className="label">Name</td>
+      <td className="data">{data.name[locale]}</td>
+      <td className="label">Address</td>
+      <td className="data">{data.address}</td>
+      <td className="label">Graduation</td>
+      <td className="data">{data.grad.versity[locale]}</td>
+      <td className="label">Contact</td>
+      <td className="data">
+        <a href={`tel:${data.mob}`}>{data.mob.replace("+88", "")}</a>
       </td>
       <td className="data btns">
         <Submit
@@ -364,10 +412,7 @@ function SingleSourceSubmission({ data, setData }) {
   );
 }
 function SingleJamia({ data, setData }) {
-  const jamia = data;
-  const { locale } = useContext(SiteContext);
   const [loading, setLoading] = useState(false);
-  const [showFull, setShowFull] = useState(false);
   function ghost(_id) {
     console.log(_id);
   }
@@ -377,13 +422,13 @@ function SingleJamia({ data, setData }) {
       fetch(`/api/admin/source/`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ _id: jamia._id }),
+        body: JSON.stringify({ _id: data._id }),
       })
         .then((res) => {
           setLoading(false);
           if (res.status === 200) {
             setData((prev) => {
-              return prev.filter((item) => item._id !== jamia._id);
+              return prev.filter((item) => item._id !== data._id);
             });
           } else {
             alert("something went wrong");
@@ -395,16 +440,25 @@ function SingleJamia({ data, setData }) {
         });
     }
   }
-  const patchApi = `/api/admin/jamia/edit/${jamia._id}`;
+  const patchApi = `/api/admin/source/edit/${data._id}`;
+  return data.role === "jamia" ? (
+    <Jamia jamia={data} remove={remove} ghost={ghost} patchApi={patchApi} />
+  ) : (
+    <Mufti mufti={data} remove={remove} ghost={ghost} patchApi={patchApi} />
+  );
+}
+function Jamia({ jamia, ghost, remove, patchApi }) {
+  const { locale } = useContext(SiteContext);
+  const [loading, setLoading] = useState(false);
+  const [showFull, setShowFull] = useState(false);
   return !showFull ? (
     <tr onClick={() => setShowFull(true)}>
       <td className="jamiaId">{jamia.id}</td>
       <td className="jamiaType">{jamia.role}</td>
       <td className="jamiaName">
         {jamia.name[locale]}
-        <span>{jamia.address}</span>
+        <span>{jamia.primeMufti[locale]}</span>
       </td>
-      <td className="jamiaPrimeMufti">{jamia.primeMufti[locale]}</td>
       <td className="jamiaJoined">
         <FormattedDate
           value={new Date(jamia.joined)}
@@ -552,6 +606,163 @@ function SingleJamia({ data, setData }) {
           pattern={/^\+8801\d{0,9}$/}
           tel={true}
           fieldCode="appl.mob"
+          api={patchApi}
+        />
+      </td>
+      <td className="data btns">
+        <Submit
+          loading={loading}
+          onClick={ghost}
+          label={
+            <>
+              <ion-icon name="skull-outline"></ion-icon> Ghost
+            </>
+          }
+        />
+        <button className="hideDetail" onClick={() => setShowFull(false)}>
+          <ion-icon name="chevron-up-outline"></ion-icon>Hide Detail
+        </button>
+        <Submit
+          loading={loading}
+          onClick={remove}
+          label={
+            <>
+              <ion-icon name="trash-outline"></ion-icon> Remove
+            </>
+          }
+        />
+      </td>
+    </tr>
+  );
+}
+function Mufti({ mufti, ghost, remove, patchApi }) {
+  const { locale } = useContext(SiteContext);
+  const [loading, setLoading] = useState(false);
+  const [showFull, setShowFull] = useState(false);
+  return !showFull ? (
+    <tr onClick={() => setShowFull(true)}>
+      <td className="jamiaId">{mufti.id}</td>
+      <td className="jamiaType">{mufti.role}</td>
+      <td className="jamiaName">
+        {mufti.name[locale]}
+        <span>{mufti.add}</span>
+      </td>
+      <td className="jamiaJoined">
+        <FormattedDate
+          value={new Date(mufti.joined)}
+          day="numeric"
+          month="numeric"
+          year="2-digit"
+        />
+      </td>
+      <td className="jamiaFatwaCount">
+        <FormattedNumber value={new Date(mufti.fatwa)} />
+      </td>
+      <td className="jamiaContact">
+        <a title="Call Mufti" href={`tel:${mufti.mob}`}>
+          {mufti.mob.replace("+88", "")}
+        </a>
+      </td>
+    </tr>
+  ) : (
+    <tr className="full">
+      <td className="label">Joined</td>
+      <td className="data">
+        <FormattedDate
+          value={new Date(mufti.joined)}
+          day="numeric"
+          month="numeric"
+          year="2-digit"
+        />
+      </td>
+      <td className="label">Fatwa</td>
+      <td className="data">
+        <FormattedNumber value={mufti.fatwa} />
+      </td>
+      <td className="label">ID</td>
+      <td className="data">{mufti.id}</td>
+      <td className="label">Password</td>
+      <td className="data">
+        <PasswordEditForm api={patchApi} />
+      </td>
+      <td className="label">Name (Bangla)</td>
+      <td className="data">
+        <DataEditForm
+          api={patchApi}
+          defaultValue={mufti.name["bn-BD"]}
+          Element={Input}
+          pattern={/^[ঀ-৾\s(),]+$/}
+          fieldCode="name.bn-BD"
+        />
+      </td>
+      <td className="label">Name (Enlish)</td>
+      <td className="data">
+        <DataEditForm
+          api={patchApi}
+          defaultValue={mufti.name["en-US"]}
+          Element={Input}
+          pattern={/^[a-zA-Z\s(),]+$/}
+          fieldCode="name.en-US"
+        />
+      </td>
+      <td className="label">Graduated from (Bangla)</td>
+      <td className="data">
+        <DataEditForm
+          defaultValue={mufti.grad.versity["bn-BD"]}
+          Element={Input}
+          max={200}
+          fieldCode="grad.versity.bn-BD"
+          api={patchApi}
+        />
+      </td>
+      <td className="label">Graduated from (English)</td>
+      <td className="data">
+        <DataEditForm
+          defaultValue={mufti.grad.versity["en-US"]}
+          Element={Input}
+          max={200}
+          fieldCode="grad.versity.en-US"
+          api={patchApi}
+        />
+      </td>
+      <td className="label">Graduation year</td>
+      <td className="data">
+        <DataEditForm
+          defaultValue={mufti.grad.year}
+          Element={Input}
+          max={200}
+          fieldCode="grad.year"
+          api={patchApi}
+        />
+      </td>
+      <td className="label">Address</td>
+      <td className="data">
+        <DataEditForm
+          defaultValue={mufti.add}
+          Element={Textarea}
+          max={200}
+          fieldCode="address"
+          api={patchApi}
+        />
+      </td>
+      <td className="label">Contact</td>
+      <td className="data">
+        <DataEditForm
+          defaultValue={mufti.mob}
+          Element={Input}
+          pattern={/^\+8801\d{0,9}$/}
+          tel={true}
+          fieldCode="contact"
+          api={patchApi}
+        />
+      </td>
+      <td className="label">About</td>
+      <td className="data">
+        <DataEditForm
+          defaultValue={mufti.about}
+          Element={Textarea}
+          pattern={/^[ঀ-ৣৰ-৾a-zA-Z\s(),-]+$/}
+          fieldCode="about"
           api={patchApi}
         />
       </td>
@@ -1654,7 +1865,12 @@ function QuestionFeed() {
       </h1>
       <Tabs
         page="/admin/questionFeed/"
-        tabs={[{ label: "New Questions", link: "newQuestions" }]}
+        tabs={[
+          {
+            label: <FormattedMessage id="newQuestions" />,
+            link: "newQuestions",
+          },
+        ]}
       />
       <Switch>
         <Route path="/admin/questionFeed" exact>
@@ -1692,6 +1908,14 @@ const NewQuestions = injectIntl(({ intl }) => {
     return () => abortController.abort();
   }
   useEffect(fetchData, [sort]);
+  if (!loading && data.length === 0) {
+    return (
+      <div className="noQuestion">
+        <ion-icon name="file-tray-outline"></ion-icon>
+        <p>that's it for now</p>
+      </div>
+    );
+  }
   return (
     <>
       <div className="filters">
@@ -2136,6 +2360,8 @@ function Report({ report }) {
 }
 
 function AdminPanel() {
+  const { user } = useContext(SiteContext);
+  if (!user || !(user.role === "admin")) return <Redirect to="/" />;
   return (
     <div className="main adminPanel">
       <Sidebar

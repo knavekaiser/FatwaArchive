@@ -1,19 +1,33 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { createPortal } from "react-dom";
 
-export const Modal = ({ open, setOpen, children, className }) => {
+export const Modal = ({
+  containerClass,
+  open,
+  setOpen,
+  children,
+  className,
+  backdropClick,
+}) => {
+  useEffect(() => {
+    if (!containerClass) return;
+    const portal = document.querySelector("#portal");
+    portal.classList.add(containerClass);
+    return () => portal.classList.remove(containerClass);
+  });
   if (!open) return null;
   return createPortal(
     <>
       <div
         className="modalBackdrop"
         onClick={() => {
-          setOpen(false);
+          setOpen && setOpen(false);
+          backdropClick && backdropClick();
         }}
       />
       <div className={`modal ${className ? className : ""}`}>{children}</div>
     </>,
-    document.getElementById("portal")
+    document.querySelector("#portal")
   );
 };
 
@@ -23,6 +37,6 @@ export const Toast = ({ open, children }) => {
     <>
       <div className="toast">{children}</div>
     </>,
-    document.getElementById("portal")
+    document.querySelector("#portal")
   );
 };

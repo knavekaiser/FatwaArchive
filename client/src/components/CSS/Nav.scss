@@ -69,6 +69,9 @@
       place-items: center;
       position: relative;
       grid-template-rows: 1fr;
+      ion-icon {
+        font-size: 1.5rem;
+      }
       &:hover {
         background: rgba($blue, 0.7);
       }

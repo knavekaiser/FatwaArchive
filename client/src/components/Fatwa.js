@@ -22,6 +22,7 @@ function Fatwa({ match }) {
   const history = useHistory();
   const [loading, setLoading] = useState(true);
   const [fatwa, setFatwa] = useState({});
+  const [relatedFatwa, setRelatedFatwa] = useState([]);
   const fixUrlOnLocaleChange = () =>
     fatwa.link && history.push(`/fatwa/${fatwa.link[locale]}`);
   useEffect(fixUrlOnLocaleChange, [locale]);
@@ -38,37 +39,70 @@ function Fatwa({ match }) {
         return res.json();
       })
       .then((data) => {
-        console.log(data);
         setFatwa(data);
       })
       .catch((err) => console.log(err));
     return () => abortController.abort();
   };
+  const fetchRelatedFatwa = () => {
+    if (loading) return;
+    const options = { headers: { "Accept-Language": locale }, signal: signal };
+    fetch("/api/relatedFatwas")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.code === "ok") {
+          setRelatedFatwa(data.data);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+    return () => abortController.abort();
+  };
   useEffect(fetchData, [match]);
-  return (
-    <div className={`main fatwa ${loading ? "loading" : ""}`}>
-      <Helmet>
-        <meta charSet="utf-8" />
-        <title>{fatwa.title && fatwa.title[locale]}</title>
-        <meta
-          name="description"
-          content={fatwa.ans && fatwa.ans[locale].substring(200)}
-        />
-      </Helmet>
-      {loading ? (
+  useEffect(fetchRelatedFatwa, [fatwa]);
+  if (loading) {
+    return (
+      <div className={`main fatwa ${loading ? "loading" : ""}`}>
         <Loading />
-      ) : fatwa.title ? (
+      </div>
+    );
+  }
+  if (fatwa.title) {
+    return (
+      <div className={`main fatwa ${loading ? "loading" : ""}`}>
         <>
+          <Helmet>
+            <meta charSet="utf-8" />
+            <title>{fatwa.title && fatwa.title[locale]}</title>
+            <meta
+              name="description"
+              content={fatwa.ans && fatwa.ans[locale].substring(200)}
+            />
+          </Helmet>
           <h1>{fatwa.title[locale]}</h1>
           <h4 className="jamia">
             {fatwa.source.name[locale]}
             <span className="separator" />
             <FormattedDate value={fatwa.createdAt} />
             <br />
-            <span>
-              <FormattedMessage id="primeMufti" defaultMessage="Prime Mufti" />:{" "}
-              {fatwa.source.primeMufti[locale]}
-            </span>
+            {fatwa.source.type === "Jamia" ? (
+              <span>
+                <FormattedMessage
+                  id="primeMufti"
+                  defaultMessage="Prime Mufti"
+                />
+                : {fatwa.source.primeMufti[locale]}
+              </span>
+            ) : (
+              <span>
+                <FormattedMessage
+                  id="gradFrom"
+                  defaultMessage="Graduated from"
+                />
+                : {fatwa.source.grad.versity[locale]}
+              </span>
+            )}
           </h4>
           <br />
           <br />
@@ -97,6 +131,8 @@ function Fatwa({ match }) {
             <span className="hr" />
           </h3>
           <br />
+          <p className="intro"> - حامدا مصلیا و مسلما - </p>
+          <br />
           {fatwa.ans[locale].split("\n").map((para, i) => {
             return (
               <Fragment key={i}>
@@ -105,6 +141,8 @@ function Fatwa({ match }) {
               </Fragment>
             );
           })}
+          <br />
+          <p className="intro"> - والله اعلم - </p>
           <br />
           {locale === "en-US" && (
             <>
@@ -191,18 +229,51 @@ function Fatwa({ match }) {
           <br />
           <br />
           <br />
+          <Route
+            path={`/fatwa/${fatwa.link ? fatwa.link[locale] : "link"}/report`}
+          >
+            {
+              <Modal open={true} setOpen={closeModal}>
+                <Report fatwa={fatwa} close={closeModal} />
+              </Modal>
+            }
+          </Route>
         </>
-      ) : (
-        <>Fatwa did not found.</>
+        <h3 className="meta">
+          <FormattedMessage id="moreFatwa" value="More fatwa" />
+        </h3>
+        <br />
+        <RelatedFatwa fatwas={relatedFatwa} />
+      </div>
+    );
+  }
+  return (
+    <div className={`main fatwa ${loading ? "loading" : ""}`}>
+      {!loading && !fatwa.title && (
+        <div className="wrongLink">
+          <ion-icon name="cloud-offline-outline"></ion-icon>
+          <FormattedMessage id="fatwaNotFound" />
+        </div>
       )}
-      <Route path={`/fatwa/${fatwa.link ? fatwa.link[locale] : "link"}/report`}>
-        {
-          <Modal open={true} setOpen={closeModal}>
-            <Report fatwa={fatwa} close={closeModal} />
-          </Modal>
-        }
-      </Route>
     </div>
+  );
+}
+
+function RelatedFatwa({ fatwas }) {
+  const { locale } = useContext(SiteContext);
+  return (
+    <ul className="relatedFatwas">
+      {fatwas.map((fatwa) => (
+        <li
+          key={fatwa.link[locale]}
+          onClick={() =>
+            window.scrollTo({ top: 0, left: 0, behavior: "smooth" })
+          }
+        >
+          <Link to={fatwa.link[locale]}>{fatwa.title[locale]}</Link>
+        </li>
+      ))}
+    </ul>
   );
 }
 

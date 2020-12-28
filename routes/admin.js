@@ -310,7 +310,7 @@ router
       res.status(400).json("No language selected or formation is wrong");
       return;
     }
-    Jamia.find(query)
+    Source.find(query)
       .select("-pass -type")
       .sort(`${sort.order === "des" ? "-" : ""}${sort.column}`)
       .then((submissions) => {
@@ -321,24 +321,27 @@ router
       );
   });
 
-//----------------------------------JAMIA
+//----------------------------------SOURCE
 router
   .route("/admin/source/accept")
   .post(passport.authenticate("AdminAuth"), (req, res) => {
-    Jamia.findByIdAndUpdate(req.body._id, {
+    Source.findByIdAndUpdate(req.body._id, {
       status: "active",
       joined: new Date(),
     })
       .then((source) => {
         const message = encodeURI(`আপনার আবেদন গৃহীত হয়েছে । ফতোয়া আর্কাইভ`);
+        const number = source.role === "jamia" ? source.appl.mob : source.mob;
         return fetch(
-          `http://api.greenweb.com.bd/api.php/?token=${process.env.SMS_TOKEN}&to=${source.appl.mob}&message=${message}`,
+          `http://api.greenweb.com.bd/api.php/?token=${process.env.SMS_TOKEN}&to=${number}&message=${message}`,
           { method: "POST" }
         );
       })
-      .then(() => res.status(200).json("Jamia successfully accepted"))
+      .then(() =>
+        res.json({ code: "ok", message: "Jamia successfully accepted" })
+      )
       .catch((err) => {
-        res.status(500).json("somthing went wrong " + err);
+        res.status(500).json({ code: 500, message: "somthing went wrong " });
         console.log(err);
       });
   });
@@ -348,7 +351,7 @@ router
     const query = { status: "active" };
     const sort = { column: req.query.column, order: req.query.order };
     req.query.role && (query.role = RegExp(req.query.role));
-    Jamia.find(query)
+    Source.find(query)
       .sort(`${sort.order === "des" ? "-" : ""}${sort.column}`)
       .select("-pass -type")
       .then((sources) => {

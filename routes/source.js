@@ -147,7 +147,7 @@ router
     const locale = req.headers["accept-language"];
     const query = { status: "live", source: req.user._id };
     const sort = { column: req.query.column, order: req.query.order };
-    const { title, ques, ans, topic, jamia, translation } = req.query;
+    const { title, ques, ans, topic, translation } = req.query;
     title && (query[`title.${locale}`] = RegExp(title));
     ques && (query[`ques.${locale}`] = RegExp(ques));
     ans && (query[`ans.${locale}`] = RegExp(ans));
@@ -385,16 +385,17 @@ router
   .patch(passport.authenticate("SourceAuth"), (req, res) => {
     console.log(req.body);
     if (Object.keys(req.body).length === 1) {
-      Jamia.findOneAndUpdate({ _id: req.user._id }, req.body)
-        .then((jamia) => {
+      Source.findByIdAndUpdate(req.user._id, req.body)
+        .then((source) => {
+          console.log(source);
           res.json("data successfully updated!");
         })
         .catch((err) => res.json(err));
     } else if (Object.keys(req.body).length === 3) {
-      Jamia.findById(req.user._id)
-        .then((jamia) => {
-          if (bcrypt.compareSync(req.body.oldPass, jamia.pass)) {
-            Jamia.findOneAndUpdate(
+      Source.findById(req.user._id)
+        .then((source) => {
+          if (bcrypt.compareSync(req.body.oldPass, source.pass)) {
+            Source.findOneAndUpdate(
               { _id: req.user._id },
               { pass: bcrypt.hashSync(req.body.newPass, 10) }
             )

@@ -9,7 +9,7 @@ import SearchResult from "./components/SearchResult";
 import Fatwa from "./components/Fatwa";
 import About from "./components/About";
 import {
-  JamiaLogin,
+  SourceLogin,
   JamiaRegister,
   AdminLogin,
   PassRecovery,
@@ -89,26 +89,16 @@ function App() {
           </Route>
           <Route path="/fatwa/:id" component={Fatwa} />
           <Route path="/about" component={About} />
-          <Route path="/login" component={JamiaLogin} />
+          <Route path="/login" component={SourceLogin} />
           <Route path="/passwordRecovery" component={PassRecovery} />
           <Route path="/adminLogin" component={AdminLogin} />
           <Route path="/register" component={JamiaRegister} />
           <Route path="/askQuestion" component={UserQuestion} />
-          <ProtectedRoute
-            path="/jamia"
-            redirect="/login"
-            component={JamiaProfile}
-            role="jamia"
-          />
-          <ProtectedRoute
-            path="/admin"
-            redirect="/adminLogin"
-            component={AdminPanel}
-            role="admin"
-          />
+          <Route path="/source" component={JamiaProfile} />
+          <Route path="/admin" component={AdminPanel} />
           <Route path="/" component={FourOFour} />
         </Switch>
-        <Route path={/^\/(?!admin)(?!jamia)/} component={Footer} />
+        <Route path={/^\/(?!admin)(?!source)/} component={Footer} />
       </div>
     </IntlProvider>
   );

@@ -22,8 +22,7 @@ function Avatar() {
   }
   return (
     <li className="avatar" onClick={() => setOpen(true)}>
-      {user.role === "jamia" && user.name[locale].slice(0, 1)}
-      {user.role === "admin" && user.firstName.slice(0, 1)}
+      <ion-icon name="person-circle-outline"></ion-icon>
       {open && (
         <OutsideClick open={open} setOpen={setOpen}>
           <ul
@@ -34,7 +33,7 @@ function Avatar() {
             }}
           >
             <li>
-              <Link to={`/${user.role}/fatwa`}>
+              <Link to={`/${user.role === "admin" ? "admin" : "source"}/fatwa`}>
                 <FormattedMessage id="dashboard" defaultMessage="Dashboard" />
               </Link>
             </li>
@@ -59,8 +58,7 @@ function Nav({ location }) {
   useEffect(() => {
     if (
       location.pathname.startsWith("/moblieSearch") ||
-      location.pathname.startsWith("/about") ||
-      location.pathname.startsWith("/jamia") ||
+      location.pathname.startsWith("/source") ||
       location.pathname.startsWith("/admin") ||
       location.pathname.startsWith("/login") ||
       location.pathname.startsWith("/register") ||
@@ -90,7 +88,7 @@ function Nav({ location }) {
         )}
       />
       <Route
-        path="/jamia"
+        path="/source"
         render={() => (
           <div className="sidebarToggleBtn">
             <ion-icon onClick={toggleSidebar} name="menu-outline"></ion-icon>

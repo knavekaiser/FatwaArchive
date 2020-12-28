@@ -51,20 +51,18 @@ button {
   grid-template-areas: "main";
   place-items: center;
   pointer-events: none;
-  .modalBackdrop {
+  * {
     pointer-events: all;
+  }
+  .modalBackdrop {
     height: 100%;
     width: 100%;
     grid-area: main;
     background: rgba(0, 0, 0, 0.2);
   }
   .modal {
+    z-index: 10;
     grid-area: main;
-  }
-}
-.modal {
-  * {
-    pointer-events: all;
   }
 }
 

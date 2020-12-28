@@ -33,7 +33,7 @@
     font-weight: 400;
     color: $light-text;
     &:hover {
-      text-decoration: underline;
+      // text-decoration: underline;
     }
     span {
       // display: none;
@@ -78,6 +78,18 @@
       }
     }
   }
+  .wrongLink {
+    display: grid;
+    ion-icon {
+      font-size: 3.5rem;
+      color: $light-border;
+    }
+    color: #333;
+  }
+  .intro {
+    text-align: center;
+    font-size: 1.2rem;
+  }
   p {
     text-align: justify;
     span {
@@ -109,6 +121,17 @@
     cursor: pointer;
     &:hover {
       background: $light-hover;
+    }
+  }
+  .relatedFatwas {
+    li {
+      a {
+        display: inline-block;
+        padding: 0.5rem 0;
+        &:hover {
+          text-decoration: underline;
+        }
+      }
     }
   }
 }

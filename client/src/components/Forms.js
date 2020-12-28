@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect, useRef } from "react";
 import { Link, useHistory, Redirect } from "react-router-dom";
 import { SiteContext } from "../Context";
+import { Modal } from "./Modals";
 import "./CSS/SourceForms.min.css";
 import {
   Input,
@@ -473,6 +474,7 @@ export const JamiaRegister = () => {
   const [source, setSource] = useState("jamia");
   const [step, setStep] = useState(1);
   const [success, setSuccess] = useState(false);
+  const [showTnc, setShowTnc] = useState(false);
   const history = useHistory();
   function redirect() {
     user && history.push("/");
@@ -610,13 +612,13 @@ export const JamiaRegister = () => {
                 className={source === "jamia" ? "active" : ""}
                 onClick={() => setSource("jamia")}
               >
-                Jamia
+                <FormattedMessage id="jamia" />
               </li>
               <li
                 className={source === "mufti" ? "active" : ""}
                 onClick={() => setSource("mufti")}
               >
-                Mufti
+                <FormattedMessage id="mufti" />
               </li>
             </ul>
           )}
@@ -661,12 +663,34 @@ export const JamiaRegister = () => {
           <>
             {step === 1 && <MuftiDetail />}
             {step === 2 && (
-              <LoginDetail
-                idIsValid={idIsValid}
-                validatingId={validatingId}
-                setIdIsValid={setIdIsValid}
-                setValidatingId={setValidatingId}
-              />
+              <>
+                <LoginDetail
+                  idIsValid={idIsValid}
+                  validatingId={validatingId}
+                  setIdIsValid={setIdIsValid}
+                  setValidatingId={setValidatingId}
+                />
+                <Checkbox
+                  required={true}
+                  checked={true}
+                  validationMessage="এই বক্সে টিক দিন"
+                >
+                  <FormattedMessage
+                    id="form.jamiaReg.tcAgreement"
+                    defaultMessage="I accept all terms & conditions."
+                    values={{
+                      link: (
+                        <span onClick={() => setShowTnc(true)}>
+                          <FormattedMessage
+                            id="form.jamiaReg.tnc"
+                            defaultMessage="terms & conditions"
+                          />
+                        </span>
+                      ),
+                    }}
+                  />
+                </Checkbox>
+              </>
             )}
             {step === 2 && (
               <button type="button" className="left" onClick={leftButton}>
@@ -692,11 +716,42 @@ export const JamiaRegister = () => {
           </>
         )}
       </form>
+      <Modal open={showTnc} setOpen={setShowTnc} className="regTnc">
+        <ion-icon
+          onClick={() => setShowTnc(false)}
+          name="close-outline"
+        ></ion-icon>
+        <div className="content">
+          <h2>রেজিষ্ট্রেশনের শর্তাবলী</h2>
+          <p>
+            ফতোয়া আর্কাইভ এ রেজিস্টার করার মাধ্যমে আমি এই মর্মে সাক্ষ্য দিচ্ছি
+            যে,
+          </p>
+          <ul>
+            <li>
+              ফতোয়া আর্কাইভ আমার নিবেদন করা সকল ফতোয়া সম্পাদন, সংশোধন,
+              সংরক্ষণ, প্রকাশ, প্রচার করার অধিকার রাখে ।
+            </li>
+            <li>
+              ফতোয়া আর্কাইভ কোনো নোটিশ ব্যতীতই নিবেদিত সকল ফতোয়া সাইট থেকে
+              মুছে ফেলার অধিকার রাখে ।
+            </li>
+            <li>
+              নিবেদিত ফতোয়ায় শাব্দিক বা বিষয়ভিত্তিক কোনো ভুলের কারণে ফতোয়া
+              আর্কাইভ দায়ী থাকবে না ।
+            </li>
+            <li>
+              কোন রকম পূর্ব নোটিশ ছাড়াই ফতোয়া আর্কাইভ এই শর্তাবলী সম্পাদন,
+              সংশোধন, বাতিল করতে পারে ।
+            </li>
+          </ul>
+        </div>
+      </Modal>
     </div>
   );
 };
 
-export const JamiaLogin = () => {
+export const SourceLogin = () => {
   const [invalidCred, setInvalidCred] = useState(false);
   const [loading, setLoading] = useState(false);
   const history = useHistory();
@@ -718,7 +773,7 @@ export const JamiaLogin = () => {
         if (data.code === "ok") {
           setIsAuthenticated(data.isAuthenticated);
           setUser(data.user);
-          history.push("/jamia/fatwa");
+          history.push("/source/fatwa");
         } else {
           setInvalidCred(true);
         }
@@ -1455,6 +1510,7 @@ export const AddFatwaForm = ({ match }) => {
         body: JSON.stringify(data),
       };
     }
+    if (Object.keys(data).length === 0) return;
     setLoading(true);
     fetch(url, options)
       .then((res) => res.json())
@@ -1494,7 +1550,7 @@ export const AddFatwaForm = ({ match }) => {
           <button onClick={() => setSuccess(false)}>
             <FormattedMessage id="addMoreFatwa" />
           </button>
-          <Link to="/jamia/fatwa/pending">
+          <Link to="/source/fatwa/pending">
             <FormattedMessage id="showPending" />
           </Link>
         </div>
