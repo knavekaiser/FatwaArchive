@@ -182,7 +182,9 @@ function Paginaiton({
         {pages.length <= btns &&
           pages.map((item) => (
             <li key={item} className={item === currentPage ? "active" : ""}>
-              <Link to={url.replace("page=n", `page=${item}`)}>{item}</Link>
+              <Link to={url.replace("page=n", `page=${item}`)}>
+                <FormattedNumber value={item} />
+              </Link>
             </li>
           ))}
         {pages.length > btns &&
@@ -200,7 +202,9 @@ function Paginaiton({
             const num = item + pivit;
             return (
               <li key={num} className={num === currentPage ? "active" : ""}>
-                <Link to={url.replace("page=n", `page=${num}`)}>{num}</Link>
+                <Link to={url.replace("page=n", `page=${num}`)}>
+                  <FormattedNumber value={num} />
+                </Link>
               </li>
             );
           })}

@@ -45,8 +45,7 @@ router
         ans: ans,
         ref: ref,
         img: img,
-        write: write,
-        atts: atts,
+        meta: meta,
         source: req.user._id,
         translation: true,
       })

@@ -8,6 +8,7 @@
   .artcl {
     text-indent: 1rem;
     margin-bottom: 0.5rem;
+    text-align: justify;
   }
   h4 {
     font-style: italic;
@@ -48,32 +49,48 @@
         .name {
           // margin-bottom: 0.5rem;
         }
-        .links {
-          display: flex;
-          font-size: 1.3rem;
-          grid-gap: 0.75rem;
+        .des {
+          font-style: italic;
           color: $light-text;
-          a {
-            padding: 0.2rem;
-            border-radius: 2rem;
-            // background: $light-hover;
-          }
+          font-size: 0.75em;
         }
+        // .links {
+        //   display: flex;
+        //   font-size: 1.3rem;
+        //   grid-gap: 0.75rem;
+        //   color: $light-text;
+        //   a {
+        //     display: grid;
+        //     padding: 0.25rem;
+        //     border-radius: 2rem;
+        //     &:hover {
+        //       background: $light-hover;
+        //     }
+        //   }
+        // }
       }
     }
   }
-  .donate {
-    padding: 0.25em;
-    background: #e2136e;
-    color: white;
-    display: block;
-    height: 47px;
-    width: 47px;
-    border-radius: 0.5rem;
-    display: grid;
-    place-items: center;
-    ion-icon {
-      font-size: 1.8rem;
+  .links {
+    display: flex;
+    grid-gap: 1rem;
+    .donate,
+    .email {
+      padding: 0.25em;
+      background: #e2136e;
+      color: white;
+      display: block;
+      height: 47px;
+      width: 47px;
+      border-radius: 0.5rem;
+      display: grid;
+      place-items: center;
+      ion-icon {
+        font-size: 1.8rem;
+      }
+    }
+    .email {
+      background: $accent;
     }
   }
 }

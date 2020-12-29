@@ -41,6 +41,13 @@ function Footer() {
         >
           {locale === "en-US" ? <a>বাং</a> : <a>EN</a>}
         </li>
+        {
+          //   <li>
+          //   <Link className="bugReport" to="/bugReport">
+          //     <ion-icon name="bug-outline"></ion-icon>
+          //   </Link>
+          // </li>
+        }
       </ul>
       <ul>
         <li className="copy">&copy; Fatwa Archive</li>
@@ -50,11 +57,3 @@ function Footer() {
 }
 
 export default Footer;
-
-// <li>
-// <Link to="/desclaimer">Desclaimer</Link>
-// </li>
-// <li>
-// <Link to="/contact">Contact</Link>
-// </li>
-//

@@ -13,6 +13,7 @@ import {
   JamiaRegister,
   AdminLogin,
   PassRecovery,
+  BugReportForm,
 } from "./components/Forms";
 import AdminPanel from "./components/AdminPanel";
 import JamiaProfile from "./components/JamiaProfile";
@@ -98,6 +99,7 @@ function App() {
           <Route path="/source" component={JamiaProfile} />
           <Route path="/admin" component={AdminPanel} />
           <Route path="/tableOfContent" component={TableOfContent} />
+          <Route path="/bugReport" component={BugReportForm} />
           <Route path="/" component={FourOFour} />
         </Switch>
         <Route path={/^\/(?!admin)(?!source)/} component={Footer} />

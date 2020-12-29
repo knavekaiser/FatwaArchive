@@ -185,6 +185,14 @@ const userReview = new Schema({
   submitted: { type: Date, default: Date.now },
 });
 
+const bugReport = new Schema({
+  name: { type: String },
+  message: { type: String },
+  dscr: {
+    componentStack: { type: String },
+  },
+});
+
 const reportFatwa = new Schema(
   {
     fatwa: { type: Schema.Types.ObjectId, ref: "Fatwa" },
@@ -204,7 +212,9 @@ const reportFatwa = new Schema(
 
 const UserReview = mongoose.model("UserReview", userReview);
 const ReportFatwa = mongoose.model("ReportFatwa", reportFatwa);
+const BugReport = mongoose.model("bugReport", bugReport);
 
 global.UserQuestion = UserQuestion;
 global.UserReview = UserReview;
 global.ReportFatwa = ReportFatwa;
+global.BugReport = BugReport;

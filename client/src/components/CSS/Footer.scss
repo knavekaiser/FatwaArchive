@@ -18,6 +18,13 @@
     }
     li {
       white-space: nowrap;
+      .bugReport {
+        display: grid !important;
+        height: min-content;
+        ion-icon {
+          font-size: 1.1em;
+        }
+      }
     }
   }
   .links li {

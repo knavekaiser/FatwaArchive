@@ -724,7 +724,7 @@ export const JamiaRegister = () => {
         <div className="content">
           <h2>রেজিষ্ট্রেশনের শর্তাবলী</h2>
           <p>
-            ফতোয়া আর্কাইভ এ রেজিস্টার করার মাধ্যমে আমি এই মর্মে সাক্ষ্য দিচ্ছি
+            ফতোয়া আর্কাইভ এ রেজিষ্টার করার মাধ্যমে আমি এই মর্মে সাক্ষ্য দিচ্ছি
             যে,
           </p>
           <ul>
@@ -1536,6 +1536,7 @@ export const AddFatwaForm = ({ match }) => {
         }
       })
       .catch((err) => {
+        setLoading(false);
         alert("something went wrong");
         console.log(err);
       });
@@ -2442,6 +2443,17 @@ export const Report = ({ fatwa, close }) => {
           label=<FormattedMessage id="report" defaultMessage="Report" />
         />
         <section className="bottomPadding" />
+      </form>
+    </div>
+  );
+};
+export const BugReportForm = () => {
+  return (
+    <div className="main">
+      <form className="bugReportForm">
+        <Input label=<FormattedMessage id="name" /> />
+        <Textarea label=<FormattedMessage id="message" /> />
+        <Submit />
       </form>
     </div>
   );

@@ -215,6 +215,17 @@ router.route("/getLinks").get((req, res) => {
     );
 });
 
+router.route("/bugReportAuto").post((req, res) => {
+  new BugReport({ ...req.body })
+    .save()
+    .then(() => {
+      res.json({ code: "ok", message: "successfully reported" });
+    })
+    .catch((err) => {
+      res.status(500).json({ code: 500, message: "could not report err" });
+    });
+});
+
 //---------------------------------------------WAY TOOO MUCH WORK HERE!!!
 router.route("/askFatwa").post((req, res) => {
   if (

@@ -3,7 +3,7 @@ import "./CSS/About.min.css";
 import { Route, Link } from "react-router-dom";
 import { FormattedMessage } from "react-intl";
 import { Modal } from "./Modals";
-import bkash from "../naeem_bKash.jpg";
+import bkash from "../_bKash.jpg";
 
 function About({ history }) {
   const closeModal = () => {
@@ -79,7 +79,8 @@ function About({ history }) {
       <hr />
       <br />
       <br />
-      <h3>সদস্যবৃন্দ - </h3>
+      <h2>ফতোয়া আর্কাইভ</h2>
+      <p>কামরাঙ্গীরচর, ঢাকা </p>
       <br />
       <ul className="contacts">
         <li>
@@ -88,30 +89,36 @@ function About({ history }) {
           </div>
           <div className="body">
             <p className="name">মুফতি আব্দুর রহমান আব্দে রাব্বি</p>
-            <div className="links">
-              <a href="mailto:arabderabbi@gmail.com">
-                <ion-icon name="mail-outline"></ion-icon>
-              </a>
-              <a href="tel:+8801305487161">
-                <ion-icon name="call-outline"></ion-icon>
-              </a>
-            </div>
+            <p className="des">হেড অব ইফতা ডিপার্টমেন্ট</p>
+            {
+              // <div className="links">
+              //   <a href="mailto:arabderabbi@gmail.com">
+              //     <ion-icon name="mail-outline"></ion-icon>
+              //   </a>
+              //   <a href="tel:+8801305487161">
+              //     <ion-icon name="call-outline"></ion-icon>
+              //   </a>
+              // </div>
+            }
           </div>
         </li>
         <li>
           <div className="icon">
-            <ion-icon name="hammer-outline"></ion-icon>
+            <ion-icon name="construct-outline"></ion-icon>
           </div>
           <div className="body">
             <p className="name">নাঈম আহমাদ</p>
-            <div className="links">
-              <a href="mailto:naeem.ahmad.9m@gmail.com">
-                <ion-icon name="mail-outline"></ion-icon>
-              </a>
-              <a href="tel:+8801989479749">
-                <ion-icon name="call-outline"></ion-icon>
-              </a>
-            </div>
+            <p className="des">হেড অব টেকনলোজি</p>
+            {
+              //   <div className="links">
+              //   <a href="mailto:naeem.ahmad.9m@gmail.com">
+              //     <ion-icon name="mail-outline"></ion-icon>
+              //   </a>
+              //   <a href="tel:+8801989479749">
+              //     <ion-icon name="call-outline"></ion-icon>
+              //   </a>
+              // </div>
+            }
           </div>
         </li>
       </ul>
@@ -119,13 +126,14 @@ function About({ history }) {
       <br />
       <hr />
       <br />
-      <br />
-      <h2>ফতোয়া আর্কাইভ</h2>
-      <p>কামরাঙ্গীরচর, ঢাকা </p>
-      <br />
-      <Link className="donate" to={"/about/donate"}>
-        <ion-icon name="umbrella-outline"></ion-icon>
-      </Link>
+      <div className="links">
+        <a className="email" href="mailto:contact@fatwaarchive.com">
+          <ion-icon name="mail-outline"></ion-icon>
+        </a>
+        <Link className="donate" to={"/about/donate"}>
+          <ion-icon name="umbrella-outline"></ion-icon>
+        </Link>
+      </div>
       <br />
       <Route path="/about/donate">
         {

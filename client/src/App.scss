@@ -155,3 +155,39 @@ input::-webkit-inner-spin-button {
     }
   }
 }
+.deathPage {
+  background: $base-white;
+  height: 100vh;
+  display: grid;
+  place-items: center;
+  .content {
+    position: relative;
+    display: grid;
+    justify-content: center;
+    align-items: center;
+    grid-gap: 1rem;
+    ion-icon[name="skull-outline"] {
+      font-size: 5rem;
+      color: $light-border;
+    }
+    h2 {
+      text-align: center;
+    }
+    a {
+      align-items: center;
+      color: $blue;
+      display: grid;
+      width: min-content;
+      font-size: 2rem;
+      transform: rotate(0);
+      transition: transform 1s ease-in-out;
+      margin: auto;
+      ion-icon {
+        transform: translateY(-2px);
+      }
+      &:hover {
+        transform: rotate(360deg);
+      }
+    }
+  }
+}
