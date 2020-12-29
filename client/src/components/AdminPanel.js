@@ -228,8 +228,8 @@ function SingleSourceSubmission({ data, setData }) {
       body: JSON.stringify({ _id: data._id }),
     })
       .then((res) => res.json())
-      .then((data) => {
-        if (data.code === "ok") {
+      .then((resData) => {
+        if (resData.code === "ok") {
           setLoading(false);
           setData((prev) => {
             return prev.filter((submissions) => submissions._id !== data._id);
@@ -238,7 +238,10 @@ function SingleSourceSubmission({ data, setData }) {
           alert("someting went wrong");
         }
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        setLoading(false);
+        console.log(err);
+      });
   }
   function reject() {
     setLoading(true);
@@ -258,15 +261,24 @@ function SingleSourceSubmission({ data, setData }) {
       .catch((err) => console.log(err));
   }
   return data.role === "jamia" ? (
-    <JamiaSubmission data={data} accept={accept} reject={reject} />
+    <JamiaSubmission
+      loading={loading}
+      data={data}
+      accept={accept}
+      reject={reject}
+    />
   ) : (
-    <MuftiSubmission data={data} accept={accept} reject={reject} />
+    <MuftiSubmission
+      loading={loading}
+      data={data}
+      accept={accept}
+      reject={reject}
+    />
   );
 }
-function JamiaSubmission({ data, accept, reject }) {
+function JamiaSubmission({ loading, data, accept, reject }) {
   const { locale } = useContext(SiteContext);
   const [showFull, setShowFull] = useState(false);
-  const [loading, setLoading] = useState(false);
   return !showFull ? (
     <tr onClick={() => (showFull ? setShowFull(false) : setShowFull(true))}>
       <td>
@@ -340,10 +352,9 @@ function JamiaSubmission({ data, accept, reject }) {
     </tr>
   );
 }
-function MuftiSubmission({ data, accept, reject }) {
+function MuftiSubmission({ loading, data, accept, reject }) {
   const { locale } = useContext(SiteContext);
   const [showFull, setShowFull] = useState(false);
-  const [loading, setLoading] = useState(false);
   return !showFull ? (
     <tr onClick={() => (showFull ? setShowFull(false) : setShowFull(true))}>
       <td>
@@ -435,6 +446,7 @@ function SingleJamia({ data, setData }) {
           }
         })
         .catch((err) => {
+          setLoading(false);
           console.log(err);
           alert("something went wrong");
         });
@@ -447,9 +459,8 @@ function SingleJamia({ data, setData }) {
     <Mufti mufti={data} remove={remove} ghost={ghost} patchApi={patchApi} />
   );
 }
-function Jamia({ jamia, ghost, remove, patchApi }) {
+function Jamia({ loading, jamia, ghost, remove, patchApi }) {
   const { locale } = useContext(SiteContext);
-  const [loading, setLoading] = useState(false);
   const [showFull, setShowFull] = useState(false);
   return !showFull ? (
     <tr onClick={() => setShowFull(true)}>
@@ -635,9 +646,8 @@ function Jamia({ jamia, ghost, remove, patchApi }) {
     </tr>
   );
 }
-function Mufti({ mufti, ghost, remove, patchApi }) {
+function Mufti({ loading, mufti, ghost, remove, patchApi }) {
   const { locale } = useContext(SiteContext);
-  const [loading, setLoading] = useState(false);
   const [showFull, setShowFull] = useState(false);
   return !showFull ? (
     <tr onClick={() => setShowFull(true)}>
@@ -1331,7 +1341,7 @@ function SingleFatwaSubmission({ data, setData }) {
   const history = useHistory();
   function editFatwaSubmission(id) {
     setFatwaToEdit(fatwa);
-    history.push("/admin/add");
+    history.push("/admin/newFatwa");
   }
   function acceptFatwa() {
     setLoading(true);
@@ -1380,7 +1390,7 @@ function SingleFatwaSubmission({ data, setData }) {
           value={new Date(fatwa.createdAt)}
           day="numeric"
           month="numeric"
-          year="numeric"
+          year="2-digit"
         />
       </td>
       <td className="label">topic</td>
@@ -1465,7 +1475,7 @@ function SingleFatwaSubmission({ data, setData }) {
           value={new Date(fatwa.createdAt)}
           day="numeric"
           month="numeric"
-          year="numeric"
+          year="2-digit"
         />
       </td>
       <td>{fatwa.topic[locale]}</td>
@@ -1507,7 +1517,7 @@ function SingleFatwa({ data, setData }) {
           value={new Date(fatwa.createdAt)}
           day="numeric"
           month="numeric"
-          year="numeric"
+          year="2-digit"
         />
       </td>
       <td className="label">jamia</td>
@@ -1601,7 +1611,7 @@ function SingleFatwa({ data, setData }) {
           value={new Date(fatwa.createdAt)}
           day="numeric"
           month="numeric"
-          year="numeric"
+          year="2-digit"
         />
       </td>
       <td>{fatwa.title[locale]}</td>
@@ -1998,7 +2008,7 @@ function SingleQuestion({ ques, setQues }) {
               value={ques.createdAt}
               day="numeric"
               month="long"
-              year="numeric"
+              year="2-digit"
             />
           ) : (
             <FormattedDate value={ques.submitted} day="numeric" month="long" />
@@ -2095,7 +2105,7 @@ function UserQuestion({ history, match }) {
                   value={userQues.createdAt}
                   day="numeric"
                   month="long"
-                  year="numeric"
+                  year="2-digit"
                 />
                 <span className="separator" />
                 <FormattedTimeParts value={userQues.createdAt}>
@@ -2237,7 +2247,7 @@ function Answer({ ques, ans, setQues }) {
               value={ans.createdAt}
               day="numeric"
               month="long"
-              year="numeric"
+              year="2-digit"
             />
             <span className="separator" />
             <FormattedTimeParts value={ans.createdAt}>
@@ -2338,7 +2348,7 @@ function Report({ report }) {
             value={report.createdAt}
             day="numeric"
             month="long"
-            year="numeric"
+            year="2-digit"
           />
           <span className="separator" />
           <FormattedTimeParts value={report.createdAt}>

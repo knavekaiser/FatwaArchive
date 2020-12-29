@@ -326,12 +326,13 @@
       box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
       display: grid;
       grid-template-columns: 1fr 1fr;
-      grid-gap: 0.5rem;
+      grid-gap: 0.7rem;
       position: relative;
       .user {
         pointer-events: none;
         .name {
           font-weight: 600;
+          margin-bottom: 0.3rem;
         }
         .contact {
           font-size: 0.9rem;

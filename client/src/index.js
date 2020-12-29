@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useContext } from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter } from "react-router-dom";
 import { Helmet } from "react-helmet";
-import { Provider } from "./Context";
+import { Provider, SiteContext } from "./Context";
 import App from "./App";
 
 class ErrorBoundary extends React.Component {
@@ -54,10 +54,11 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-ReactDOM.render(
-  <Provider>
+function AppContainer() {
+  const { locale } = useContext(SiteContext);
+  return (
     <BrowserRouter>
-      <Helmet>
+      <Helmet htmlAttributes={{ lang: locale.slice(0, 2) }}>
         <meta charSet="utf-8" />
         <title>Fatwa Archive</title>
         <meta
@@ -69,6 +70,12 @@ ReactDOM.render(
         <App />
       </ErrorBoundary>
     </BrowserRouter>
+  );
+}
+
+ReactDOM.render(
+  <Provider>
+    <AppContainer />
   </Provider>,
   document.getElementById("root")
 );

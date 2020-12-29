@@ -1,7 +1,7 @@
 router
   .route("/admin/sources")
   .get(passport.authenticate("AdminAuth"), (req, res) => {
-    Source.find({ status: "active" }, "name varified")
+    Source.find({ status: "active" }, "name varified id")
       .then((sources) => {
         res.json({ code: "ok", data: sources });
       })
@@ -210,7 +210,7 @@ router
 router
   .route("/admin/fatwaSubmissions/remove/:_id")
   .delete(passport.authenticate("AdminAuth"), (req, res) => {
-    FatwaSubmission.findByIdAndDelete(req.params._id)
+    Fatwa.findByIdAndDelete(req.params._id)
       .then(() => {
         res.json("submission successfully deleted.");
       })

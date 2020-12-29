@@ -71,7 +71,14 @@ function Fatwa({ match }) {
           <h4 className="jamia">
             {fatwa.source.name[locale]}
             <span className="separator" />
-            <FormattedDate value={fatwa.createdAt} />
+            <small>
+              <FormattedDate
+                value={fatwa.createdAt}
+                day="numeric"
+                month="short"
+                year="2-digit"
+              />
+            </small>
             <br />
             {fatwa.source.type === "Jamia" ? (
               <span>
@@ -187,11 +194,13 @@ function Fatwa({ match }) {
             />
           </h3>
           <br />
-          <p>
-            <FormattedMessage id="write" defaultMessage="Writer" />
-            {":  "}
-            <b>{fatwa.meta.write}</b>
-          </p>
+          {fatwa.meta.write && (
+            <p>
+              <FormattedMessage id="write" defaultMessage="Writer" />
+              {":  "}
+              <b>{fatwa.meta.write}</b>
+            </p>
+          )}
           {fatwa.meta.atts && (
             <p>
               <FormattedMessage id="atts" defaultMessage="Attestation" />
@@ -202,11 +211,13 @@ function Fatwa({ match }) {
           <p>
             <FormattedMessage id="dOWriting" defaultMessage="Original date" />
             {":  "}
-            <b>
-              <FormattedDate value={fatwa.meta.date} />
-            </b>
+            <FormattedDate
+              value={fatwa.createdAt}
+              day="numeric"
+              month="short"
+              year="2-digit"
+            />
           </p>
-          <br />
           <br />
           <br />
           <button
@@ -215,6 +226,7 @@ function Fatwa({ match }) {
           >
             <FormattedMessage id="report" defaultMessage="Report" />
           </button>
+          <br />
           <br />
           <br />
           <br />

@@ -1579,7 +1579,7 @@ export const AddFatwaForm = ({ match }) => {
           disabled={sources.length === 0}
           options={sources.map((source) => {
             return {
-              label: source.name[locale],
+              label: source.id,
               value: source,
             };
           })}
