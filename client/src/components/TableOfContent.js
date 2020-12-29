@@ -22,7 +22,7 @@ function TableOfContent() {
     <div className="main tableOfContent">
       <h2>
         <FormattedMessage id="tableOfContent" />
-        {data.length && (
+        {data.length > 0 && (
           <span>
             <FormattedMessage
               values={{ number: <FormattedNumber value={data.length} /> }}

@@ -1278,8 +1278,6 @@ function UserQuestion({ history, match }) {
           ) {
             setAnswered(true);
           }
-        } else {
-          throw data;
         }
       })
       .catch((err) => {
@@ -1347,6 +1345,10 @@ function UserQuestion({ history, match }) {
               setOpen={() => history.push(match.url)}
               className="answerForm"
             >
+              <ion-icon
+                name="close-outline"
+                onClick={() => history.push(match.url)}
+              ></ion-icon>
               <UserQuestionAnswerForm
                 setQues={setUserQues}
                 ques={userQues.ques}
@@ -1369,7 +1371,7 @@ function UserQuestion({ history, match }) {
   }
   return (
     <div className="view">
-      {loading ? <h1>loading</h1> : <p>Question did not found!</p>}
+      {loading ? <h1>loading</h1> : <p>Question not found!</p>}
     </div>
   );
 }
@@ -1573,7 +1575,7 @@ function Answer({ ques, ans, setQues }) {
 }
 
 function JamiaProfile() {
-  const { user, locale } = useContext(SiteContext);
+  const { user, locale, setSidebarSize } = useContext(SiteContext);
   if (!user || user.role === "admin") return <Redirect to="/login" />;
   return (
     <div className="main jamiaProfile">
@@ -1609,7 +1611,14 @@ function JamiaProfile() {
         ]}
       >
         <div className="profile">
-          <Link to="/source/profile">
+          <Link
+            to="/source/profile"
+            onClick={() => {
+              if (window.innerWidth < 1080) {
+                setSidebarSize("mini");
+              }
+            }}
+          >
             <h2>{user.name[locale][0]}</h2>
           </Link>
           <p>{user.name[locale]}</p>

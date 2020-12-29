@@ -265,7 +265,13 @@ router
     if (ObjectID.isValid(req.params._id)) {
       UserQuestion.findById(req.params._id)
         .populate("ans.source reports.source", "name add")
-        .then((ques) => res.json({ code: "ok", content: ques }))
+        .then((ques) => {
+          if (ques) {
+            res.json({ code: "ok", content: ques });
+          } else {
+            res.status(404).json({ code: 404, message: "question not found" });
+          }
+        })
         .catch((err) => {
           console.log(err);
           res.status(500).json("something went wrong");
@@ -404,7 +410,7 @@ router
                 res.status(500).json(err);
               });
           } else {
-            res.status(401).json("Old password does not match");
+            res.status(403).json("Old password does not match");
           }
         })
         .catch((err) => res.status(500).json(err));

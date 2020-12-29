@@ -8,7 +8,10 @@ function Footer() {
   const { user, locale, setLocale } = useContext(SiteContext);
   return (
     <div className="footer">
-      <ul className="links">
+      <ul
+        className="links"
+        onClick={() => window.scrollTo({ top: 0, left: 0, behavior: "smooth" })}
+      >
         <li>
           <Link to="/about">
             <FormattedMessage id="about" defaultMessage="About" />
@@ -21,7 +24,7 @@ function Footer() {
         </li>
         {user === null && (
           <li>
-            <Link to="/admin">
+            <Link to="/adminLogin">
               <FormattedMessage id="admin" defaultMessage="Admin" />
             </Link>
           </li>

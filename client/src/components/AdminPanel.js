@@ -2153,7 +2153,7 @@ function UserQuestion({ history, match }) {
   }
   return (
     <div className="view">
-      {loading ? <h1>loading</h1> : <p>Question did not found!</p>}
+      {loading ? <h1>loading</h1> : <p>Question not found!</p>}
     </div>
   );
 }
@@ -2362,7 +2362,7 @@ function Report({ report }) {
 }
 
 function AdminPanel() {
-  const { user } = useContext(SiteContext);
+  const { user, setSidebarSize } = useContext(SiteContext);
   if (!user || !(user.role === "admin")) return <Redirect to="/" />;
   return (
     <div className="main adminPanel">
@@ -2410,7 +2410,15 @@ function AdminPanel() {
         ]}
       >
         <div className="profile">
-          <h2>A</h2>
+          <h2
+            onClick={() => {
+              if (window.innerWidth < 1080) {
+                setSidebarSize("mini");
+              }
+            }}
+          >
+            A
+          </h2>
         </div>
       </Sidebar>
       <Switch>

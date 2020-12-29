@@ -721,7 +721,8 @@
         border: none;
         grid-template-columns: 1fr !important;
         td {
-          padding: 2rem;
+          display: grid !important;
+          padding: 2rem !important;
           display: grid;
           grid-gap: 0.5rem;
           place-items: center;
@@ -743,7 +744,6 @@
       grid-column-gap: 1rem;
       align-items: center;
       justify-content: center;
-      // grid-template-columns: 0.25fr 0.3fr 0.37fr 3rem 3rem;
       &.loadingColumn {
         min-height: 5rem;
         border: none;

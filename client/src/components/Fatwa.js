@@ -253,13 +253,15 @@ function RelatedFatwa({ fatwas }) {
   return (
     <ul className="relatedFatwas">
       {fatwas.map((fatwa) => (
-        <li
-          key={fatwa.link[locale]}
-          onClick={() =>
-            window.scrollTo({ top: 0, left: 0, behavior: "smooth" })
-          }
-        >
-          <Link to={fatwa.link[locale]}>{fatwa.title[locale]}</Link>
+        <li key={fatwa.link[locale]}>
+          <Link
+            onClick={() =>
+              window.scrollTo({ top: 0, left: 0, behavior: "smooth" })
+            }
+            to={fatwa.link[locale]}
+          >
+            {fatwa.title[locale]}
+          </Link>
         </li>
       ))}
     </ul>

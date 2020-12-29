@@ -19,7 +19,7 @@ import {
   SS,
   emptyFieldWarning,
 } from "./FormElements";
-import { FormattedMessage, FormattedNumber } from "react-intl";
+import { FormattedMessage, FormattedNumber, injectIntl } from "react-intl";
 
 const refInputBook = [
   [
@@ -1120,7 +1120,7 @@ export const PassRecovery = () => {
                   passwordStrength={true}
                   dataId="pass"
                   label=<FormattedMessage
-                    id="form.passRecovery.pass.input1"
+                    id="newPass"
                     defaultValue="New password"
                   />
                 />
@@ -1128,7 +1128,7 @@ export const PassRecovery = () => {
                   match=".passRecovery #pass input"
                   dataId="confirmPass"
                   label=<FormattedMessage
-                    id="form.passRecovery.pass.input2"
+                    id="confirmPass"
                     defaultValue="Confirm password"
                   />
                 />
@@ -2216,7 +2216,7 @@ export const DataEditForm = ({
     </form>
   );
 };
-export const PasswordEditForm = ({ api }) => {
+export const PasswordEditForm = injectIntl(({ api, intl }) => {
   const form = useRef();
   const [edit, setEdit] = useState(false);
   const [pass, setPass] = useState({ oldPass: "", newPass: "", confirm: "" });
@@ -2241,6 +2241,8 @@ export const PasswordEditForm = ({ api }) => {
           if (res.status === 200) {
             setEdit(false);
             form.current.querySelector("input").blur();
+          } else if (res.status === 403) {
+            alert("Old password is wrong!");
           } else {
             alert("Something went wrong!");
           }
@@ -2262,20 +2264,22 @@ export const PasswordEditForm = ({ api }) => {
       ) : (
         <section>
           <PasswordInput
-            placeholder="Old password"
-            match=".reg #confirmPass input"
+            autoComplete=""
+            placeholder={intl.formatMessage({ id: "oldPass" })}
             dataId="oldPass"
             onChange={(target) => setPassword("oldPass", target.value)}
           />
           <PasswordInput
-            placeholder="New password"
+            autoComplete="new-password"
+            placeholder={intl.formatMessage({ id: "newPass" })}
             match=".data #confirmPass input"
             passwordStrength={true}
             dataId="pass"
             onChange={(target) => setPassword("newPass", target.value)}
           />
           <PasswordInput
-            placeholder="Confirm password"
+            autoComplete="new-password"
+            placeholder={intl.formatMessage({ id: "confirmPass" })}
             match=".data #pass input"
             dataId="confirmPass"
             onChange={(target) => setPassword("confirm", target.value)}
@@ -2300,7 +2304,7 @@ export const PasswordEditForm = ({ api }) => {
       )}
     </form>
   );
-};
+});
 
 export const Report = ({ fatwa, close }) => {
   const [loading, setLoading] = useState(false);
