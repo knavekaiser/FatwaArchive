@@ -781,6 +781,35 @@
   border-radius: 8px;
   transition: color, 0.2s ease-in-out;
 }
+.scrappedFawtaForm {
+  .modal {
+    background: $base-white;
+    border-radius: 1rem;
+    position: relative;
+    ion-icon[name="close-outline"] {
+      cursor: pointer;
+      z-index: 10;
+      position: absolute;
+      font-size: 2rem;
+      padding: 0.5rem;
+      top: 0;
+      right: 0;
+    }
+    form {
+      max-height: calc(100vh - 2rem);
+      padding: 2rem;
+      overflow-y: auto;
+      &::-webkit-scrollbar {
+        display: none;
+      }
+      .metaInfo {
+        grid-template-columns: 1fr;
+        grid-column: 1/3;
+        word-wrap: break-word;
+      }
+    }
+  }
+}
 
 @media only screen and (max-width: 1080px) {
   .adminPanel {
@@ -986,6 +1015,16 @@
     &.full {
       box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
       background: $base-white;
+    }
+  }
+  .scrappedFawtaForm {
+    .modal {
+      width: 100%;
+      border-radius: 0;
+      form {
+        max-height: 100vh;
+        padding: 1rem;
+      }
     }
   }
 }

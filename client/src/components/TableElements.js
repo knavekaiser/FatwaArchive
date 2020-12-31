@@ -469,6 +469,75 @@ export const View = ({
   );
 };
 
+export const ViewPaginated = ({
+  id,
+  api,
+  categories,
+  columns,
+  defaultSort,
+  Element,
+}) => {
+  const abortController = new AbortController();
+  const signal = abortController.signal;
+  const { locale } = useContext(SiteContext);
+  const [filters, setFilters] = useState([]);
+  const [sort, setSort] = useState(defaultSort);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  function fetchData() {
+    !loading && setLoading(true);
+    const query = encodeURI(filters);
+    const options = { headers: { "Accept-Language": locale }, signal: signal };
+    const url = `/${api}${query}&column=${sort.column}&order=${sort.order}`;
+    fetch(url, options)
+      .then((res) => res.json())
+      .then((data) => {
+        setLoading(false);
+        if (data.code === "ok") {
+          setData(data.data);
+        } else {
+          alert("something went wrong");
+        }
+      })
+      .catch((err) => {
+        setLoading(false);
+        if (err.name === "AbortError") {
+          return;
+        }
+        console.log(err);
+        alert("something went wrong");
+      });
+    return () => abortController.abort();
+  }
+  useEffect(fetchData, [filters, sort, api]);
+  return (
+    <>
+      {categories && (
+        <Filter
+          filters={filters}
+          setFilters={setFilters}
+          categories={categories}
+        />
+      )}
+      <Table
+        id={id}
+        className="thead"
+        sort={sort}
+        setSort={setSort}
+        columns={columns}
+      />
+      <Table id={id} sort={sort} setSort={setSort}>
+        {loading && <LoadingColumn />}
+        {!loading &&
+          data.map((item) => (
+            <Element setData={setData} key={item._id} data={item} />
+          ))}
+        {!loading && data.length === 0 && <NothingHere />}
+      </Table>
+    </>
+  );
+};
+
 export const LoadingPost = () => {
   return (
     <div className="question loading">

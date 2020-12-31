@@ -127,7 +127,9 @@ function Fatwa({ match }) {
             <span className="hr" />
           </h3>
           <br />
-          <p className="intro"> - حامدا مصلیا و مسلما - </p>
+          <p className="intro">
+            - حامداومصلياومسلما ، بسم الله الرحمن الرحيم -
+          </p>
           <br />
           {fatwa.ans[locale].split("\n").map((para, i) => {
             return (
@@ -138,7 +140,7 @@ function Fatwa({ match }) {
             );
           })}
           <br />
-          <p className="intro"> - والله اعلم - </p>
+          <p className="intro"> - والله اعلم باالصواب - </p>
           <br />
           {locale === "en-US" && (
             <>

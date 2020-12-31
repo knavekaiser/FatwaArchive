@@ -10,7 +10,6 @@ router
         res.status(500).json({ code: 500, message: "something went wrong" });
       });
   });
-
 router
   .route("/admin/newFatwa")
   .post(passport.authenticate("AdminAuth"), (req, res) => {
@@ -81,7 +80,6 @@ router
         });
     }
   });
-
 router
   .route("/admin/editFatwa/:_id")
   .patch(passport.authenticate("AdminAuth"), (req, res) => {
@@ -128,6 +126,7 @@ router
       res.status(400).json({ code: 400, message: "invalid id" });
     }
   });
+
 //----------------------------------FATWA
 router
   .route("/admin/allfatwa/filter")
@@ -216,6 +215,134 @@ router
       })
       .catch((err) => res.status(500).json(err));
   });
+
+//----------------------------------SCRAPPED FATWA
+router
+  .route("/admin/scrappedFatwas/filter")
+  .get(passport.authenticate("AdminAuth"), (req, res) => {
+    const locale = req.headers["accept-language"];
+    const query = { status: "pending" };
+    const { ans, page } = req.query;
+    ScrappedFatwa.find(query)
+      .populate("source", "name")
+      .skip(0)
+      .limit(10)
+      .then((fatwas) => {
+        res.json({ code: "ok", data: fatwas });
+      })
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json({ code: 500, message: "something went wrong" });
+      });
+  });
+router
+  .route("/admin/scrappedFatwa/accept")
+  .post(passport.authenticate("AdminAuth"), (req, res) => {
+    const { topic, title, ques, ans, ref, img, meta, _id, source } = req.body;
+    if (!title["en-US"] && !ques["en-US"] && !ans["en-US"]) {
+      TranslateAll([title["bn-BD"], ques["bn-BD"], ans["bn-BD"]], true)
+        .then((translations) => {
+          return new Fatwa({
+            topic: topic,
+            link: {
+              "bn-BD": title["bn-BD"].replace(/\s/g, "-"),
+              "en-US": translations[0].replace(/\s/g, "-"),
+            },
+            title: { "bn-BD": title["bn-BD"], "en-US": translations[0] },
+            ques: { "bn-BD": ques["bn-BD"], "en-US": translations[1] },
+            ans: { "bn-BD": ans["bn-BD"], "en-US": translations[2] },
+            ref: ref,
+            img: img,
+            meta: meta,
+            status: "live",
+            source: source,
+            translation: false,
+          });
+        })
+        .then((newFatwa) => newFatwa.save())
+        .then(() => Source.updateFatwaCount(source))
+        .then(() =>
+          ScrappedFatwa.findOneAndUpdate({ _id: _id }, { status: "live" })
+        )
+        .then(() => res.send({ code: "ok", message: "fatwa added" }))
+        .catch((err) => {
+          console.log(err);
+          if (err.code === 11000) {
+            res.status(400).json({
+              code: err.code,
+              field: Object.keys(err.keyValue)[0],
+            });
+          } else {
+            res
+              .status(400)
+              .json({ code: 500, message: "something went wrong" });
+          }
+        });
+    } else {
+      newFatwa = new Fatwa({
+        topic: req.body.topic,
+        title: title,
+        ques: ques,
+        ans: ans,
+        ref: ref,
+        img: img,
+        write: write,
+        atts: atts,
+        source: req.user._id,
+        translation: true,
+      })
+        .save()
+        .then(() => res.send({ code: "ok", message: "fatwa added" }))
+        .catch((err) => {
+          console.log(err);
+          if (err.code === 11000) {
+            res.status(400).json({
+              code: err.code,
+              field: Object.keys(err.keyValue)[0],
+            });
+          } else {
+            res
+              .status(400)
+              .json({ code: 500, message: "something went wrong" });
+          }
+        });
+    }
+  });
+router
+  .route("/admin/scrappedFatwas/live/filter")
+  .get(passport.authenticate("AdminAuth"), (req, res) => {
+    const locale = req.headers["accept-language"];
+    const query = { status: "live" };
+    const { ans, page } = req.query;
+    ScrappedFatwa.find(query)
+      .populate("source", "name")
+      .skip(0)
+      .limit(10)
+      .then((fatwas) => {
+        res.json({ code: "ok", data: fatwas });
+      })
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json({ code: 500, message: "something went wrong" });
+      });
+  });
+
+// ScrappedFatwa.updateMany(
+//   { source: "5fec7694af1176494250b230" },
+//   { createdAt: Date.now }
+// ).then((res) => {
+//   console.log(res);
+// });
+
+// ScrappedFatwa.aggregate()
+//   .sample(10)
+//   .then((res) => {
+//     console.log(res);
+//   });
+
+// ScrappedFatwa.find({ status: "live" }).then((res) => {
+//   console.log(res);
+// });
 
 //----------------------------------UESR QUESTION
 router

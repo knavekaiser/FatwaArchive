@@ -56,6 +56,15 @@ const refInputSura = [
     },
   ],
 ];
+const getLan = (sentence, i) => {
+  if (!sentence) return;
+  const str = sentence.replace(/[\s\-\.?।]/gi, "");
+  if ((str.match(/[a-z0-9]/gi) || []).length / str.length > 0.9) {
+    return !i ? "en-US" : "bn-BD";
+  } else {
+    return !i ? "bn-BD" : "en-US";
+  }
+};
 
 function JamiaDetail() {
   return (
@@ -1563,7 +1572,7 @@ export const AddFatwaForm = ({ match }) => {
       className={`addFatwa ${preFill.translate ? "translate" : ""}`}
       onSubmit={submit}
     >
-      {match.params.id && !fatwaToEdit && (
+      {match?.params.id && !fatwaToEdit && (
         <Redirect to="/jamia/fatwa/submissions" />
       )}
       {user.role === "admin" && (
@@ -2127,6 +2136,453 @@ export const UserQuestionReportForm = ({ _id }) => {
         validationMessage=<FormattedMessage id="userQuesReportMsgValidation" />
         required={true}
       />
+      <Submit
+        label=<FormattedMessage id="submit" defaultMessage="Submit" />
+        loading={loading}
+        setLoading={setLoading}
+      />
+    </form>
+  );
+};
+
+export const ScrappedFawtaForm = ({ data }) => {
+  const [loading, setLoading] = useState(false);
+  const [sources, setSources] = useState([]);
+  const history = useHistory();
+  const { locale, user } = useContext(SiteContext);
+  const [preFill, setPreFill] = useState(() => {
+    let inputBooks = [];
+    let inputSura = [];
+    getLan(data.title) === "bn-BD" && SS.set("scrappedFatwa-title", data.title);
+    getLan(data.title) === "en-US" &&
+      SS.set("scrappedFatwa-titleEn", data.title);
+    getLan(data.ques) === "bn-BD" && SS.set("scrappedFatwa-ques", data.ques);
+    getLan(data.ques) === "en-US" && SS.set("scrappedFatwa-quesEn", data.ques);
+    getLan(data.ans) === "bn-BD" && SS.set("scrappedFatwa-ans", data.ans);
+    getLan(data.ans) === "en-US" && SS.set("scrappedFatwa-ansEn", data.ans);
+    data.meta.date && SS.set("scrappedFatwa-date", data.meta.date);
+    if (data.ref.length > 0) {
+      data.ref.forEach((item) => {
+        if (item.book) {
+          inputBooks.push([
+            {
+              ...refInputBook[0][0],
+              value: item.book,
+            },
+            {
+              ...refInputBook[0][1],
+              value: item.part,
+            },
+            {
+              ...refInputBook[0][2],
+              value: item.page,
+            },
+          ]);
+        } else {
+          inputSura.push([
+            {
+              ...refInputSura[0][0],
+              value: item.sura,
+            },
+            {
+              ...refInputSura[0][1],
+              value: item.aayat,
+            },
+          ]);
+        }
+      });
+      inputBooks.push(...refInputBook);
+      inputSura.push(...refInputSura);
+    }
+    return {
+      ...(data.ref.length > 0 && {
+        inputBooks: [...inputBooks],
+        inputSura: [...inputSura],
+      }),
+      ...data,
+      img: [],
+    };
+  });
+  const [sameExists, setSameExists] = useState("");
+  const [success, setSuccess] = useState(false);
+  function setCleanup() {
+    return () => {
+      SS.remove("scrappedFatwa-topic");
+      SS.remove("scrappedFatwa-title");
+      SS.remove("scrappedFatwa-titleEn");
+      SS.remove("scrappedFatwa-ques");
+      SS.remove("scrappedFatwa-quesEn");
+      SS.remove("scrappedFatwa-ans");
+      SS.remove("scrappedFatwa-ansEn");
+      SS.remove("scrappedFatwa-atts");
+      SS.remove("scrappedFatwa-write");
+      SS.remove("scrappedFatwa-date");
+    };
+  }
+  useEffect(() => {
+    if (user.role !== "admin") return;
+    fetch("/api/admin/sources")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.code === "ok") {
+          setSources(data.data);
+        } else {
+          alert("someting went wrong");
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        alert("something went wrong");
+      });
+  }, []);
+  useEffect(setCleanup, []);
+  function submit(e) {
+    e.preventDefault();
+    let newFatwa, url, options;
+    newFatwa = {
+      topic: JSON.parse(SS.get("scrappedFatwa-topic")),
+      title: {
+        "bn-BD": SS.get("scrappedFatwa-title"),
+        "en-US": SS.get("scrappedFatwa-titleEn"),
+      },
+      ques: {
+        "bn-BD": SS.get("scrappedFatwa-ques"),
+        "en-US": SS.get("scrappedFatwa-quesEn"),
+      },
+      ans: {
+        "bn-BD": SS.get("scrappedFatwa-ans"),
+        "en-US": SS.get("scrappedFatwa-ansEn"),
+      },
+      meta: {
+        write: SS.get("scrappedFatwa-write"),
+        atts: SS.get("scrappedFatwa-atts"),
+        date: SS.get("scrappedFatwa-date"),
+      },
+      ref: [
+        ...GetGroupData($(".addFatwa #books.multipleInput")),
+        ...GetGroupData($(".addFatwa #sura.multipleInput")),
+      ],
+      img: preFill.img,
+      _id: data._id,
+      source: data.source,
+    };
+    url = `/api/admin/scrappedFatwa/accept`;
+    options = {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newFatwa),
+    };
+    if (Object.keys(data).length === 0) return;
+    setLoading(true);
+    fetch(url, options)
+      .then((res) => res.json())
+      .then((data) => {
+        setLoading(false);
+        if (data.code === "ok") {
+          SS.remove("scrappedFatwa-ansEn");
+          SS.remove("scrappedFatwa-topic");
+          SS.remove("scrappedFatwa-ques");
+          SS.remove("scrappedFatwa-quesEn");
+          SS.remove("scrappedFatwa-title");
+          SS.remove("scrappedFatwa-titleEn");
+          SS.remove("scrappedFatwa-ans");
+          SS.remove("scrappedFatwa-date");
+          SS.remove("scrappedFatwa-write");
+          SS.remove("scrappedFatwa-atts");
+          SS.remove("scrappedFatwa-source");
+          setSuccess(true);
+        } else if (data.code === 11000) {
+          setSameExists(data.field);
+        } else {
+          throw data.code;
+        }
+      })
+      .catch((err) => {
+        setLoading(false);
+        alert("something went wrong");
+        console.log(err);
+      });
+  }
+  if (success) {
+    return (
+      <SuccessPage
+        className="addFatwa"
+        message="ফতোয়া সাবমিট হয়ে গেছে"
+      ></SuccessPage>
+    );
+  }
+  return (
+    <form
+      className={`addFatwa ${preFill.translate ? "translate" : ""}`}
+      onSubmit={submit}
+    >
+      {
+        // user.role === "admin" && (<Combobox
+        //   defaultValue={
+        //     (preFill.source && preFill.source.name) ||
+        //     (SS.get("newFatwa-source") &&
+        //       JSON.parse(SS.get("newFatwa-source")).name) ||
+        //     ""
+        //   }
+        //   label=<FormattedMessage id="source" defaultMessage="Source" />
+        //   maxHeight="13rem"
+        //   disabled={sources.length === 0}
+        //   options={sources.map((source) => {
+        //     return {
+        //       label: source.id,
+        //       value: source,
+        //     };
+        //   })}
+        //   validationMessage=<FormattedMessage
+        //     id="sourceValidation"
+        //     defaultMessage="Select a jamia"
+        //   />
+        //   required={true}
+        //   dataId="source"
+        //   onChange={(target) => {
+        //     const value = {
+        //       name: target.value.name,
+        //       _id: target.value._id,
+        //     };
+        //     SS.set("newFatwa-source", JSON.stringify(value));
+        //     fatwaToEdit && SS.set("editFatwa-source", JSON.stringify(value));
+        //   }}
+        // />)
+      }
+      <Combobox
+        required={true}
+        dataId="topic"
+        onChange={(target) => {
+          SS.set("scrappedFatwa-topic", JSON.stringify(target.value));
+        }}
+        maxHeight="15rem"
+        label=<FormattedMessage id="topic" defaultMessage="Topic" />
+        validationMessage=<FormattedMessage
+          id="topicValidation"
+          defaultMessage="Select a topic"
+        />
+        options={topics.map((topic) => {
+          return {
+            label: topic[locale],
+            value: topic,
+          };
+        })}
+      />
+      <Checkbox
+        label=<ion-icon name="language-outline"></ion-icon>
+        defaultValue={preFill.translate}
+        onChange={(target) =>
+          setPreFill((prev) => {
+            const newPrefill = { ...prev };
+            newPrefill.translate = target.checked;
+            return newPrefill;
+          })
+        }
+      />
+      <Input
+        required={true}
+        defaultValue={preFill.title}
+        dataId="title"
+        min={10}
+        validationMessage=<FormattedMessage
+          id="titleValidation"
+          defaultMessage="Enter a title"
+        />
+        label=<FormattedMessage id="title" defaultMessage="Title" />
+        max={200}
+        className={sameExists === "title.bn-BD" ? "err" : ""}
+        onChange={(target) => {
+          SS.set("scrappedFatwa-title", target.value);
+          setSameExists("");
+        }}
+      >
+        {sameExists === "title.bn-BD" && (
+          <span className="errMessage">
+            <FormattedMessage id="sameTitleErr" />
+          </span>
+        )}
+      </Input>
+      {preFill.translate && (
+        <Input
+          min={10}
+          required={true}
+          validationMessage=<FormattedMessage
+            id="titleValidation"
+            defaultMessage="Enter a title"
+          />
+          defaultValue={preFill.title}
+          dataId="titleEn"
+          label="Title in English"
+          className={sameExists === "title.en-US" ? "err" : ""}
+          max={200}
+          onChange={(target) => {
+            SS.set("scrappedFatwa-titleEn", target.value);
+          }}
+        >
+          {sameExists === "title.en-US" && (
+            <span className="errMessage">
+              <FormattedMessage id="sameTitleErr" />
+            </span>
+          )}
+        </Input>
+      )}
+      <Textarea
+        min="20"
+        required={true}
+        validationMessage=<FormattedMessage
+          id="addFatwa.quesValidation"
+          defaultMessage="Enter a question"
+        />
+        defaultValue={preFill.ques}
+        onChange={(target) => {
+          SS.set("scrappedFatwa-ques", target.value);
+        }}
+        dataId="ques"
+        label=<FormattedMessage id="question" defaultMessage="Question" />
+      />
+      {preFill.translate && (
+        <Textarea
+          min="20"
+          required={true}
+          validationMessage=<FormattedMessage
+            id="addFatwa.quesValidation"
+            defaultMessage="Enter a question"
+          />
+          defaultValue={preFill.ques}
+          onChange={(target) => {
+            SS.set("scrappedFatwa-quesEn", target.value);
+          }}
+          dataId="quesEn"
+          label="Question in English"
+        />
+      )}
+      <Textarea
+        min="20"
+        required={true}
+        validationMessage=<FormattedMessage
+          id="addFatwa.ansValidation"
+          defaultMessage="Enter an answer"
+        />
+        defaultValue={preFill.ans}
+        onChange={(target) => {
+          SS.set("scrappedFatwa-ans", target.value);
+          setSameExists(false);
+        }}
+        dataId="ans"
+        className={sameExists === "ans.bn-BD" ? "err" : ""}
+        label=<FormattedMessage id="answer" defaultMessage="Answer" />
+      >
+        {sameExists === "ans.bn-BD" && (
+          <span className="errMessage">
+            <FormattedMessage id="sameAnsErr" />
+          </span>
+        )}
+      </Textarea>
+      {preFill.translate && (
+        <Textarea
+          min="20"
+          required={true}
+          validationMessage=<FormattedMessage
+            id="addFatwa.ansValidation"
+            defaultMessage="Enter an answer"
+          />
+          defaultValue={preFill.ans}
+          className={sameExists === "ans.en-US" ? "err" : ""}
+          onChange={(target) => {
+            SS.set("scrappedFatwa-ansEn", target.value);
+          }}
+          dataId="ansEn"
+          label="Answer in Enlish"
+        >
+          {sameExists === "ans.en-US" && (
+            <span className="errMessage">
+              <FormattedMessage id="sameAnsErr" />
+            </span>
+          )}
+        </Textarea>
+      )}
+      <div className="ref">
+        <MultipleInput
+          id="books"
+          inputs={preFill.inputBooks || refInputBook}
+          refInput={refInputBook}
+        />
+        <MultipleInput
+          id="sura"
+          inputs={preFill.inputSura || refInputSura}
+          refInput={refInputSura}
+        />
+      </div>
+      <div className="meta">
+        <DateInput
+          dataId="date"
+          label=<FormattedMessage
+            id="dOWriting"
+            defaultMessage="Fatwa was written in"
+          />
+          max={new Date()}
+          onChange={(target) => {
+            SS.set("scrappedFatwa-date", target.value);
+          }}
+          defaultValue={preFill.meta.date || ""}
+          validationMessage=<FormattedMessage
+            id="dOWritingValidation"
+            defaultMessage="When was the fatwa written originally?"
+          />
+        />
+        <Input
+          min={5}
+          defaultValue={preFill.meta.write}
+          dataId="write"
+          onChange={(target) => {
+            SS.set("scrappedFatwa-write", target.value);
+            setSameExists(false);
+          }}
+          label={
+            <>
+              <FormattedMessage id="write" defaultMessage="Write" />
+              <small>
+                (<FormattedMessage id="optional" />)
+              </small>
+            </>
+          }
+          validationMessage=<FormattedMessage
+            id="writeValidation"
+            defaultMessage="who wrote the fatwa"
+          />
+        />
+        <Input
+          min={5}
+          validationMessage="test"
+          defaultValue={preFill.meta.atts}
+          dataId="write"
+          onChange={(target) => {
+            SS.set("scrappedFatwa-atts", target.value);
+            setSameExists(false);
+          }}
+          label={
+            <>
+              <FormattedMessage id="atts" defaultMessage="Attestation" />{" "}
+              <small>
+                (<FormattedMessage id="optional" />)
+              </small>
+            </>
+          }
+          validationMessage=<FormattedMessage
+            id="attsValidation"
+            defaultMessage="who attestated the fatwa"
+          />
+        />
+      </div>
+      <ul className="metaInfo">
+        {Object.keys(preFill.meta).map((key) => {
+          return (
+            <li key={key}>
+              {key}: {preFill.meta[key]}
+            </li>
+          );
+        })}
+      </ul>
       <Submit
         label=<FormattedMessage id="submit" defaultMessage="Submit" />
         loading={loading}

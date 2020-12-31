@@ -11,7 +11,12 @@ import {
   ID,
   SS,
 } from "./FormElements";
-import { DataEditForm, PasswordEditForm, AddFatwaForm } from "./Forms";
+import {
+  DataEditForm,
+  PasswordEditForm,
+  AddFatwaForm,
+  ScrappedFawtaForm,
+} from "./Forms";
 import { Tabs, Sidebar, View, Actions, LoadingPost } from "./TableElements";
 import {
   FormattedDate,
@@ -21,6 +26,7 @@ import {
   injectIntl,
 } from "react-intl";
 import FourOFour from "./FourOFour";
+import { Modal } from "./Modals";
 
 const encodeURL = (obj) =>
   Object.keys(obj)
@@ -2374,6 +2380,552 @@ function Report({ report }) {
   );
 }
 
+const ScrappedFatwas = injectIntl(({ history, location, match, intl }) => {
+  const { locale } = useContext(SiteContext);
+  return (
+    <div className="view">
+      <h1 className="viewTitle">
+        <FormattedMessage id="scrapped" defaultMessage="Scrapped" />
+      </h1>
+      <Tabs
+        page="/admin/scrappedFatwas/"
+        tabs={[
+          {
+            label: <FormattedMessage id="pending" defaultMessage="pending" />,
+            link: "pending",
+          },
+          {
+            label: <FormattedMessage id="live" defaultMessage="Live" />,
+            link: "live",
+          },
+        ]}
+      />
+      <Switch>
+        <Route path="/admin/scrappedFatwas" exact>
+          <View
+            key="allFatwaSubmission"
+            Element={SingleScrappedFatwa}
+            id="fatwaSubmissions"
+            api="api/admin/scrappedFatwas/filter?"
+            categories={[
+              {
+                default: true,
+                fieldName: "title",
+                name: intl.formatMessage({
+                  id: "title",
+                  defaultMessage: "Title",
+                }),
+                chip: intl.formatMessage({
+                  id: "titleChip",
+                  defaultMessage: "Title contains:",
+                }),
+                input: (
+                  <Input
+                    autoFocus={true}
+                    label=<FormattedMessage
+                      id="titleChip"
+                      defaultMessage="Title contains:"
+                    />
+                    required={true}
+                  />
+                ),
+              },
+              {
+                fieldName: "topic",
+                name: intl.formatMessage({
+                  id: "topic",
+                  defaultMessage: "Topic",
+                }),
+                chip: intl.formatMessage({
+                  id: "topicChip",
+                  defaultMessage: "Topic is",
+                }),
+                input: (
+                  <Combobox
+                    id={ID(8)}
+                    maxHeight={300}
+                    label=<FormattedMessage
+                      id="topicChip"
+                      defaultMessage="topic is"
+                    />
+                    options={topics.map((option) => {
+                      return {
+                        label: option[locale],
+                        value: option,
+                      };
+                    })}
+                  />
+                ),
+              },
+              {
+                fieldName: "ques",
+                name: intl.formatMessage({
+                  id: "question",
+                  defaultMessage: "Question",
+                }),
+                chip: intl.formatMessage({
+                  id: "quesChip",
+                  defaultMessage: "Question contains",
+                }),
+                input: (
+                  <Input
+                    autoFocus={true}
+                    label=<FormattedMessage
+                      id="quesChip"
+                      defaultMessage="Question contains"
+                    />
+                    required={true}
+                  />
+                ),
+              },
+              {
+                fieldName: "ans",
+                name: intl.formatMessage({
+                  id: "answer",
+                  defaultMessage: "Answer",
+                }),
+                display: intl.formatMessage({
+                  id: "ansChip",
+                  defaultMessage: "Answer contains",
+                }),
+                input: (
+                  <Input
+                    autoFocus={true}
+                    label=<FormattedMessage
+                      id="ansChip"
+                      defaultMessage="Answer contains"
+                    />
+                    required={true}
+                  />
+                ),
+              },
+              {
+                fieldName: "translation",
+                name: intl.formatMessage({
+                  id: "translation",
+                  defaultMessage: "Translation",
+                }),
+                chip: intl.formatMessage({
+                  id: "translationChip",
+                  defaultMessage: "Translation:",
+                }),
+                input: (
+                  <Combobox
+                    maxHeight={500}
+                    label=<FormattedMessage
+                      id="translation"
+                      defaultMessage="Translation:"
+                    />
+                    options={[
+                      {
+                        label: intl.formatMessage({
+                          id: "translationAuto",
+                          defaultMessage: "Auto",
+                        }),
+                        value: "generated",
+                      },
+                      {
+                        label: intl.formatMessage({
+                          id: "translationManual",
+                          defaultMessage: "Manual",
+                        }),
+                        value: "manual",
+                      },
+                    ]}
+                  />
+                ),
+              },
+            ]}
+            columns={[
+              {
+                column: <FormattedMessage id="date" defaultMessage="Date" />,
+                sort: true,
+                colCode: "createdAt",
+              },
+              {
+                column: <FormattedMessage id="topic" defaultMessage="Topic" />,
+                sort: true,
+                colCode: "topic",
+              },
+              {
+                column: (
+                  <FormattedMessage id="source" defaultMessage="Source" />
+                ),
+                sort: true,
+                colCode: "jamia",
+              },
+              {
+                column: <FormattedMessage id="title" defaultMessage="Title" />,
+                sort: false,
+              },
+            ]}
+            defaultSort={{ column: "createdAt", order: "des" }}
+          />
+        </Route>
+        <Route path="/admin/scrappedFatwas/pending">
+          <View
+            key="allFatwaSubmission"
+            Element={SingleScrappedFatwa}
+            id="fatwaSubmissions"
+            api="api/admin/scrappedFatwas/filter?"
+            categories={[
+              {
+                default: true,
+                fieldName: "title",
+                name: intl.formatMessage({
+                  id: "title",
+                  defaultMessage: "Title",
+                }),
+                chip: intl.formatMessage({
+                  id: "titleChip",
+                  defaultMessage: "Title contains:",
+                }),
+                input: (
+                  <Input
+                    autoFocus={true}
+                    label=<FormattedMessage
+                      id="titleChip"
+                      defaultMessage="Title contains:"
+                    />
+                    required={true}
+                  />
+                ),
+              },
+              {
+                fieldName: "topic",
+                name: intl.formatMessage({
+                  id: "topic",
+                  defaultMessage: "Topic",
+                }),
+                chip: intl.formatMessage({
+                  id: "topicChip",
+                  defaultMessage: "Topic is",
+                }),
+                input: (
+                  <Combobox
+                    id={ID(8)}
+                    maxHeight={300}
+                    label=<FormattedMessage
+                      id="topicChip"
+                      defaultMessage="topic is"
+                    />
+                    options={topics.map((option) => {
+                      return {
+                        label: option[locale],
+                        value: option,
+                      };
+                    })}
+                  />
+                ),
+              },
+              {
+                fieldName: "ques",
+                name: intl.formatMessage({
+                  id: "question",
+                  defaultMessage: "Question",
+                }),
+                chip: intl.formatMessage({
+                  id: "quesChip",
+                  defaultMessage: "Question contains",
+                }),
+                input: (
+                  <Input
+                    autoFocus={true}
+                    label=<FormattedMessage
+                      id="quesChip"
+                      defaultMessage="Question contains"
+                    />
+                    required={true}
+                  />
+                ),
+              },
+              {
+                fieldName: "ans",
+                name: intl.formatMessage({
+                  id: "answer",
+                  defaultMessage: "Answer",
+                }),
+                display: intl.formatMessage({
+                  id: "ansChip",
+                  defaultMessage: "Answer contains",
+                }),
+                input: (
+                  <Input
+                    autoFocus={true}
+                    label=<FormattedMessage
+                      id="ansChip"
+                      defaultMessage="Answer contains"
+                    />
+                    required={true}
+                  />
+                ),
+              },
+              {
+                fieldName: "translation",
+                name: intl.formatMessage({
+                  id: "translation",
+                  defaultMessage: "Translation",
+                }),
+                chip: intl.formatMessage({
+                  id: "translationChip",
+                  defaultMessage: "Translation:",
+                }),
+                input: (
+                  <Combobox
+                    maxHeight={500}
+                    label=<FormattedMessage
+                      id="translation"
+                      defaultMessage="Translation:"
+                    />
+                    options={[
+                      {
+                        label: intl.formatMessage({
+                          id: "translationAuto",
+                          defaultMessage: "Auto",
+                        }),
+                        value: "generated",
+                      },
+                      {
+                        label: intl.formatMessage({
+                          id: "translationManual",
+                          defaultMessage: "Manual",
+                        }),
+                        value: "manual",
+                      },
+                    ]}
+                  />
+                ),
+              },
+            ]}
+            columns={[
+              {
+                column: <FormattedMessage id="date" defaultMessage="Date" />,
+                sort: true,
+                colCode: "createdAt",
+              },
+              {
+                column: <FormattedMessage id="topic" defaultMessage="Topic" />,
+                sort: true,
+                colCode: "topic",
+              },
+              {
+                column: (
+                  <FormattedMessage id="source" defaultMessage="Source" />
+                ),
+                sort: true,
+                colCode: "jamia",
+              },
+              {
+                column: <FormattedMessage id="title" defaultMessage="Title" />,
+                sort: false,
+              },
+            ]}
+            defaultSort={{ column: "createdAt", order: "des" }}
+          />
+        </Route>
+        <Route path="/admin/scrappedFatwas/live">
+          <View
+            key="allFatwa"
+            Element={SingleScrappedFatwa}
+            id="allFatwa"
+            api="api/admin/scrappedFatwas/live/filter?"
+            categories={[
+              {
+                default: true,
+                fieldName: "title",
+                name: intl.formatMessage({
+                  id: "title",
+                  defaultMessage: "Title",
+                }),
+                chip: intl.formatMessage({
+                  id: "titleChip",
+                  defaultMessage: "Title contains:",
+                }),
+                input: (
+                  <Input
+                    autoFocus={true}
+                    label=<FormattedMessage
+                      id="titleChip"
+                      defaultMessage="Title contains:"
+                    />
+                    required={true}
+                  />
+                ),
+              },
+              {
+                fieldName: "topic",
+                name: intl.formatMessage({
+                  id: "topic",
+                  defaultMessage: "Topic",
+                }),
+                chip: intl.formatMessage({
+                  id: "topicChip",
+                  defaultMessage: "Topic is",
+                }),
+                input: (
+                  <Combobox
+                    id={ID(8)}
+                    maxHeight={300}
+                    label=<FormattedMessage
+                      id="topicChip"
+                      defaultMessage="topic is"
+                    />
+                    options={topics.map((option) => {
+                      return {
+                        label: option[locale],
+                        value: option,
+                      };
+                    })}
+                  />
+                ),
+              },
+              {
+                fieldName: "ques",
+                name: intl.formatMessage({
+                  id: "question",
+                  defaultMessage: "Question",
+                }),
+                chip: intl.formatMessage({
+                  id: "quesChip",
+                  defaultMessage: "Question contains",
+                }),
+                input: (
+                  <Input
+                    autoFocus={true}
+                    label=<FormattedMessage
+                      id="quesChip"
+                      defaultMessage="Question contains"
+                    />
+                    required={true}
+                  />
+                ),
+              },
+              {
+                fieldName: "ans",
+                name: intl.formatMessage({
+                  id: "answer",
+                  defaultMessage: "Answer",
+                }),
+                display: intl.formatMessage({
+                  id: "ansChip",
+                  defaultMessage: "Answer contains",
+                }),
+                input: (
+                  <Input
+                    autoFocus={true}
+                    label=<FormattedMessage
+                      id="ansChip"
+                      defaultMessage="Answer contains"
+                    />
+                    required={true}
+                  />
+                ),
+              },
+              {
+                fieldName: "translation",
+                name: intl.formatMessage({
+                  id: "translation",
+                  defaultMessage: "Translation",
+                }),
+                chip: intl.formatMessage({
+                  id: "translationChip",
+                  defaultMessage: "Translation:",
+                }),
+                input: (
+                  <Combobox
+                    maxHeight={500}
+                    label=<FormattedMessage
+                      id="translation"
+                      defaultMessage="Translation:"
+                    />
+                    options={[
+                      {
+                        label: intl.formatMessage({
+                          id: "translationAuto",
+                          defaultMessage: "Auto",
+                        }),
+                        value: "generated",
+                      },
+                      {
+                        label: intl.formatMessage({
+                          id: "translationManual",
+                          defaultMessage: "Manual",
+                        }),
+                        value: "manual",
+                      },
+                    ]}
+                  />
+                ),
+              },
+            ]}
+            columns={[
+              {
+                column: <FormattedMessage id="date" defaultMessage="Date" />,
+                sort: true,
+                colCode: "createdAt",
+              },
+              {
+                column: <FormattedMessage id="topic" defaultMessage="Topic" />,
+                sort: true,
+                colCode: "topic",
+              },
+              {
+                column: (
+                  <FormattedMessage id="source" defaultMessage="Source" />
+                ),
+                sort: true,
+                colCode: "jamia",
+              },
+              {
+                column: <FormattedMessage id="title" defaultMessage="Title" />,
+                sort: false,
+              },
+            ]}
+            defaultSort={{ column: "createdAt", order: "des" }}
+          />
+        </Route>
+      </Switch>
+    </div>
+  );
+});
+function SingleScrappedFatwa({ data, setData }) {
+  const [showForm, setShowForm] = useState(false);
+  const { locale, setFatwaToEdit } = useContext(SiteContext);
+  return (
+    <>
+      <tr
+        onClick={() => {
+          setShowForm(true);
+          setFatwaToEdit(data);
+        }}
+      >
+        <td>
+          <FormattedDate
+            value={data.createdAt}
+            day="numeric"
+            month="numeric"
+            year="2-digit"
+          />
+        </td>
+        <td>{data.topic || "NA"}</td>
+        <td>{data.source?.name[locale] || "NA"}</td>
+        <td>{data.title?.[locale] || "NA"}</td>
+      </tr>
+      <Modal
+        containerClass="scrappedFawtaForm"
+        open={showForm}
+        setOpen={setShowForm}
+      >
+        <ion-icon
+          onClick={() => setShowForm(false)}
+          name="close-outline"
+        ></ion-icon>
+        <ScrappedFawtaForm data={data} />
+      </Modal>
+    </>
+  );
+}
+
 function AdminPanel() {
   const { user, setSidebarSize } = useContext(SiteContext);
   if (!user || !(user.role === "admin")) return <Redirect to="/" />;
@@ -2397,6 +2949,11 @@ function AdminPanel() {
             label: <FormattedMessage id="fatwa" defaultMessage="Fatwa" />,
             path: "/admin/fatwa",
             icon: "reader",
+          },
+          {
+            label: <FormattedMessage id="scrapped" defaultMessage="Scrapped" />,
+            path: "/admin/scrappedFatwas",
+            icon: "download",
           },
           // {
           //   label: (
@@ -2440,6 +2997,7 @@ function AdminPanel() {
         <Route path="/admin/fatwa/:filter?" component={AllFatwa} />
         <Route path="/admin/patreons" component={Patreons} />
         <Route path="/admin/user" component={UserReview} />
+        <Route path="/admin/scrappedFatwas" component={ScrappedFatwas} />
         <Route
           path="/admin/newFatwa"
           component={(props) => (

@@ -40,6 +40,14 @@ button {
   background-color: $base-white;
 }
 
+.input {
+  label {
+    pointer-events: none !important;
+    * {
+      pointer-events: none !important;
+    }
+  }
+}
 #portal {
   z-index: 100;
   top: 0;
