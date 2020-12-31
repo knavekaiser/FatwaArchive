@@ -68,36 +68,38 @@ function Fatwa({ match }) {
             />
           </Helmet>
           <h1>{fatwa.title[locale]}</h1>
-          <h4 className="jamia">
-            {fatwa.source.name[locale]}
-            <span className="separator" />
-            <small>
-              <FormattedDate
-                value={fatwa.createdAt}
-                day="numeric"
-                month="short"
-                year="2-digit"
-              />
-            </small>
-            <br />
-            {fatwa.source.type === "Jamia" ? (
-              <span>
-                <FormattedMessage
-                  id="primeMufti"
-                  defaultMessage="Prime Mufti"
+          {fatwa.source && (
+            <h4 className="jamia">
+              {fatwa.source?.name[locale] || "NA"}
+              <span className="separator" />
+              <small>
+                <FormattedDate
+                  value={fatwa.createdAt}
+                  day="numeric"
+                  month="short"
+                  year="2-digit"
                 />
-                : {fatwa.source.primeMufti[locale]}
-              </span>
-            ) : (
-              <span>
-                <FormattedMessage
-                  id="gradFrom"
-                  defaultMessage="Graduated from"
-                />
-                : {fatwa.source.grad.versity[locale]}
-              </span>
-            )}
-          </h4>
+              </small>
+              <br />
+              {fatwa.source.type === "Jamia" ? (
+                <span>
+                  <FormattedMessage
+                    id="primeMufti"
+                    defaultMessage="Prime Mufti"
+                  />
+                  : {fatwa.source.primeMufti[locale]}
+                </span>
+              ) : (
+                <span>
+                  <FormattedMessage
+                    id="gradFrom"
+                    defaultMessage="Graduated from"
+                  />
+                  : {fatwa.source.grad.versity[locale]}
+                </span>
+              )}
+            </h4>
+          )}
           <br />
           <br />
           <h3>
@@ -154,37 +156,41 @@ function Fatwa({ match }) {
             </>
           )}
           <br />
-          <br />
-          <h3 className="sub">
-            <FormattedMessage id="ref" value="Ref." />
-          </h3>
-          <br />
-          <ul className="ref">
-            {fatwa.ref.map((ref, i) =>
-              ref.book ? (
-                <li key={i}>
-                  <span>{ref.book}</span>,{" "}
-                  <FormattedMessage id="page" defaultMessage="Page" />{" "}
-                  <span>
-                    <FormattedNumber value={ref.part} />
-                  </span>
-                  , <FormattedMessage id="part" defaultMessage="Part" />{" "}
-                  <span>
-                    <FormattedNumber value={ref.page} />
-                  </span>
-                </li>
-              ) : (
-                <li key={i}>
-                  <span>{ref.sura}</span>,{" "}
-                  <FormattedMessage id="aayat" defaultMessage="Aayat" />{" "}
-                  <span>
-                    <FormattedNumber value={ref.aayat} />
-                  </span>
-                </li>
-              )
-            )}
-          </ul>
-          <br />
+          {fatwa.ref.length > 0 && (
+            <>
+              <br />
+              <h3 className="sub">
+                <FormattedMessage id="ref" value="Ref." />
+              </h3>
+              <br />
+              <ul className="ref">
+                {fatwa.ref.map((ref, i) =>
+                  ref.book ? (
+                    <li key={i}>
+                      <span>{ref.book}</span>,{" "}
+                      <FormattedMessage id="page" defaultMessage="Page" />{" "}
+                      <span>
+                        <FormattedNumber value={ref.part} />
+                      </span>
+                      , <FormattedMessage id="part" defaultMessage="Part" />{" "}
+                      <span>
+                        <FormattedNumber value={ref.page} />
+                      </span>
+                    </li>
+                  ) : (
+                    <li key={i}>
+                      <span>{ref.sura}</span>,{" "}
+                      <FormattedMessage id="aayat" defaultMessage="Aayat" />{" "}
+                      <span>
+                        <FormattedNumber value={ref.aayat} />
+                      </span>
+                    </li>
+                  )
+                )}
+              </ul>
+              <br />
+            </>
+          )}
           <br />
           <br />
           <h3 className="meta">

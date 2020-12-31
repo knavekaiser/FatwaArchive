@@ -26,9 +26,10 @@ const fatwa = new Schema(
     status: { type: String, default: "pending" },
     translation: { type: Boolean, enum: [true, false], default: false },
     meta: {
-      date: { type: Date, required: true },
-      write: { type: String, required: true, trim: true },
+      date: { type: Date, default: Date.now },
+      write: { type: String, default: "" },
       atts: { type: String, trim: true, default: "" },
+      link: { type: String, default: "" },
       comments: [{ type: Schema.Types.ObjectId, ref: "FatwaComment" }],
     },
   },
@@ -72,8 +73,20 @@ const deletedFatwa = new Schema(
   { timestamps: true }
 );
 
-const Fatwa = mongoose.model("Fatwa", fatwa);
-const DeletedFatwa = mongoose.model("DeletedFatwa", deletedFatwa);
+const scrappedFatwa = new Schema({
+  source: { type: Schema.Types.ObjectId, ref: "Source" },
+  title: { type: String },
+  ques: { type: String },
+  ans: { type: String, unique: true },
+  ref: [],
+  refStr: { type: String },
+  status: { type: String, default: "pending" },
+  meta: {
+    link: { type: String },
+    fatwaNo: { type: String },
+  },
+});
+global.ScrappedFatwa = mongoose.model("ScrappedFatwa", scrappedFatwa);
 
-global.Fatwa = Fatwa;
-global.DeletedFatwa = DeletedFatwa;
+global.Fatwa = mongoose.model("Fatwa", fatwa);
+global.DeletedFatwa = mongoose.model("DeletedFatwa", deletedFatwa);

@@ -1479,7 +1479,7 @@ function SingleFatwaSubmission({ data, setData }) {
         />
       </td>
       <td>{fatwa.topic[locale]}</td>
-      <td>{fatwa.source.name[locale]}</td>
+      <td>{fatwa.source?.name[locale] || "NA"}</td>
       <td>{fatwa.title[locale]}</td>
     </tr>
   );
@@ -1495,7 +1495,10 @@ function SingleFatwa({ data, setData }) {
     fetch(`/api/admin/fatwa/`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ fatwa: fatwa._id, source: fatwa.source._id }),
+      body: JSON.stringify({
+        fatwa: fatwa._id,
+        source: fatwa.source?._id || null,
+      }),
     })
       .then((res) => {
         setLoading(false);
@@ -1603,7 +1606,7 @@ function SingleFatwa({ data, setData }) {
     </tr>
   ) : (
     <tr data-id={fatwa._id} onClick={() => setOpen(true)}>
-      <td>{fatwa.source ? fatwa.source.name[locale] : "null"}</td>
+      <td>{fatwa.source?.name[locale] || "NA"}</td>
       <td>{fatwa.topic[locale]}</td>
       <td>{fatwa.translation ? "Yes" : "No"}</td>
       <td>

@@ -320,8 +320,6 @@ router
         res.status(500).json({ code: 500, message: "something went wrong" })
       );
   });
-
-//----------------------------------SOURCE
 router
   .route("/admin/source/accept")
   .post(passport.authenticate("AdminAuth"), (req, res) => {
@@ -346,6 +344,17 @@ router
       });
   });
 router
+  .route("/admin/source/reject")
+  .delete(passport.authenticate("AdminAuth"), (req, res) => {
+    Source.findByIdAndDelete(req.body._id)
+      .then(() => res.status(200).json("Jamia Submission deleted!"))
+      .catch((err) => {
+        res.json(err);
+      });
+  });
+
+//----------------------------------SOURCE
+router
   .route("/admin/sources/active/filter")
   .get(passport.authenticate("AdminAuth"), (req, res) => {
     const query = { status: "active" };
@@ -362,29 +371,20 @@ router
       );
   });
 router
-  .route("/admin/source/reject")
-  .delete(passport.authenticate("AdminAuth"), (req, res) => {
-    Jamia.findByIdAndDelete(req.body._id)
-      .then(() => res.status(200).json("Jamia Submission deleted!"))
-      .catch((err) => {
-        res.json(err);
-      });
-  });
-router
   .route("/admin/source/edit/:_id")
   .patch(passport.authenticate("AdminAuth"), (req, res) => {
     if (Object.keys(req.body).length === 1) {
-      Jamia.findOneAndUpdate({ _id: req.params._id }, req.body)
+      Source.findOneAndUpdate({ _id: req.params._id }, req.body)
         .then((jamia) => {
           res.json("data successfully updated!");
         })
         .catch((err) => res.json(err));
     } else if (Object.keys(req.body).length === 3) {
-      Jamia.findById(req.params._id)
+      Source.findById(req.params._id)
         .then((jamia) => bcrypt.compare(req.body.oldPass, jamia.pass))
         .then((match) => {
           if (match) {
-            Jamia.findOneAndUpdate(
+            Source.findOneAndUpdate(
               { _id: req.params._id },
               { pass: bcrypt.hashSync(req.body.newPass, 10) }
             )
@@ -402,7 +402,7 @@ router
 router
   .route("/admin/source")
   .delete(passport.authenticate("AdminAuth"), (req, res) => {
-    Jamia.findByIdAndDelete(req.body._id)
+    Source.findByIdAndDelete(req.body._id)
       .then(() => res.json("jamia successfully deleted"))
       .catch((err) => res.status(500).json(err));
   });
