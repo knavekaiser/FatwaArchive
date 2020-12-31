@@ -64,7 +64,21 @@
         // animation: loadingColumn2 1.25s linear alternate infinite;
       }
     }
-    &.thead {
+  }
+  #allScrapped,
+  #allScrappedLive {
+    tr {
+      grid-template-columns: 6rem 8rem 8rem 1fr;
+      &.loading {
+        // animation: loadingColumn2 1.25s linear alternate infinite;
+      }
+      td {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+      }
     }
   }
   #userSubmissions {
@@ -323,6 +337,7 @@
     grid-column: 2/3;
     margin: auto;
     margin-right: 0;
+    margin-bottom: 2rem;
   }
 }
 .sidebar {
@@ -843,7 +858,9 @@
     grid-template-columns: 0 1fr;
     .view {
       #allFatwa,
-      #fatwaSubmissions {
+      #fatwaSubmissions,
+      #allScrappedLive,
+      #allScrapped {
         tr {
           &.full {
             .data {

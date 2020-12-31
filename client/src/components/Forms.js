@@ -2145,7 +2145,7 @@ export const UserQuestionReportForm = ({ _id }) => {
   );
 };
 
-export const ScrappedFawtaForm = ({ data }) => {
+export const ScrappedFawtaForm = ({ data, fetchData }) => {
   const [loading, setLoading] = useState(false);
   const [sources, setSources] = useState([]);
   const history = useHistory();
@@ -2291,6 +2291,7 @@ export const ScrappedFawtaForm = ({ data }) => {
           SS.remove("scrappedFatwa-atts");
           SS.remove("scrappedFatwa-source");
           setSuccess(true);
+          fetchData && fetchData();
         } else if (data.code === 11000) {
           setSameExists(data.field);
         } else {
@@ -2583,6 +2584,7 @@ export const ScrappedFawtaForm = ({ data }) => {
           );
         })}
       </ul>
+      <section className="bottomPadding" />
       <Submit
         label=<FormattedMessage id="submit" defaultMessage="Submit" />
         loading={loading}

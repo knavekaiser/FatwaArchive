@@ -2405,7 +2405,7 @@ const ScrappedFatwas = injectIntl(({ history, location, match, intl }) => {
           <View
             key="allFatwaSubmission"
             Element={SingleScrappedFatwa}
-            id="fatwaSubmissions"
+            id="allScrapped"
             api="api/admin/scrappedFatwas/filter?"
             categories={[
               {
@@ -2566,7 +2566,7 @@ const ScrappedFatwas = injectIntl(({ history, location, match, intl }) => {
           <View
             key="allFatwaSubmission"
             Element={SingleScrappedFatwa}
-            id="fatwaSubmissions"
+            id="allScrapped"
             api="api/admin/scrappedFatwas/filter?"
             categories={[
               {
@@ -2727,7 +2727,7 @@ const ScrappedFatwas = injectIntl(({ history, location, match, intl }) => {
           <View
             key="allFatwa"
             Element={SingleScrappedFatwa}
-            id="allFatwa"
+            id="allScrappedLive"
             api="api/admin/scrappedFatwas/live/filter?"
             categories={[
               {
@@ -2891,6 +2891,21 @@ const ScrappedFatwas = injectIntl(({ history, location, match, intl }) => {
 function SingleScrappedFatwa({ data, setData }) {
   const [showForm, setShowForm] = useState(false);
   const { locale, setFatwaToEdit } = useContext(SiteContext);
+  function fetchData() {
+    fetch("/api/admin/scrappedFatwas/filter?")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.code === "ok") {
+          setData(data.data);
+        } else {
+          alert("someting went wrong");
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        alert("someting went wrong");
+      });
+  }
   return (
     <>
       <tr
@@ -2909,7 +2924,7 @@ function SingleScrappedFatwa({ data, setData }) {
         </td>
         <td>{data.topic || "NA"}</td>
         <td>{data.source?.name[locale] || "NA"}</td>
-        <td>{data.title?.[locale] || "NA"}</td>
+        <td>{data.title || data.ques}</td>
       </tr>
       <Modal
         containerClass="scrappedFawtaForm"
@@ -2920,7 +2935,7 @@ function SingleScrappedFatwa({ data, setData }) {
           onClick={() => setShowForm(false)}
           name="close-outline"
         ></ion-icon>
-        <ScrappedFawtaForm data={data} />
+        <ScrappedFawtaForm data={data} fetchData={fetchData} />
       </Modal>
     </>
   );
