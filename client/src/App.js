@@ -66,7 +66,7 @@ function App() {
       .catch((err) => 69);
   };
   useEffect(setLan, []);
-  // useEffect(seeIfLoggedIn, []);
+  useEffect(seeIfLoggedIn, []);
   const [messages, setMessages] = useState(null);
   useEffect(() => setMessages(locale === "bn-BD" ? Bangali : Enlish), [locale]);
   return (
