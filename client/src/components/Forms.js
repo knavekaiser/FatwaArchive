@@ -1397,6 +1397,7 @@ export const AddFatwaForm = ({ match }) => {
         });
         inputBooks.push(...refInputBook);
         inputSura.push(...refInputSura);
+        inputHadith.push(...refInputHadith);
       }
       return {
         ...(fatwaToEdit.ref.length > 0 && {
@@ -2208,6 +2209,7 @@ export const ScrappedFawtaForm = ({ data, fetchData }) => {
   const [preFill, setPreFill] = useState(() => {
     let inputBooks = [];
     let inputSura = [];
+    let inputHadith = [];
     getLan(data.title) === "bn-BD" && SS.set("scrappedFatwa-title", data.title);
     getLan(data.title) === "en-US" &&
       SS.set("scrappedFatwa-titleEn", data.title);
@@ -2233,7 +2235,7 @@ export const ScrappedFawtaForm = ({ data, fetchData }) => {
               value: item.page,
             },
           ]);
-        } else {
+        } else if (item.sura) {
           inputSura.push([
             {
               ...refInputSura[0][0],
@@ -2244,15 +2246,28 @@ export const ScrappedFawtaForm = ({ data, fetchData }) => {
               value: item.aayat,
             },
           ]);
+        } else {
+          inputHadith.push([
+            {
+              ...refInputHadith[0][0],
+              value: item.hadith,
+            },
+            {
+              ...refInputHadith[0][1],
+              value: item.hadithNo,
+            },
+          ]);
         }
       });
       inputBooks.push(...refInputBook);
       inputSura.push(...refInputSura);
+      inputHadith.push(...refInputHadith);
     }
     return {
       ...(data.ref.length > 0 && {
         inputBooks: [...inputBooks],
         inputSura: [...inputSura],
+        inputHadith: [...inputHadith],
       }),
       ...data,
       img: [],

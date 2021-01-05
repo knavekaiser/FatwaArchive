@@ -557,6 +557,7 @@ export const DateInput = ({
           e.target.setCustomValidity(" ");
           setInvalidInput(true);
         }}
+        className={value ? "dirty" : ""}
         min={formatDate(min)}
         max={formatDate(max)}
         value={value}

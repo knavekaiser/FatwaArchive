@@ -508,11 +508,9 @@ input:-webkit-autofill:focus {
   font-size: 1.05rem;
   // -webkit-box-shadow: 0 0 0px 1000px $base-white inset;
 }
-input[type="date"]:required:invalid::-webkit-datetime-edit {
-  color: transparent;
-}
-input[type="date"]:focus::-webkit-datetime-edit {
-  color: black !important;
+
+input:not(.dirty)::-webkit-datetime-edit {
+  color: rgba(#fff, 0);
 }
 input[type="date"] {
   height: 34px;

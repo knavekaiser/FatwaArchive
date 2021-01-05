@@ -2948,7 +2948,7 @@ const ScrappedFatwas = injectIntl(({ history, location, match, intl }) => {
 });
 function SingleScrappedFatwa({ data, setData }) {
   const [showForm, setShowForm] = useState(false);
-  const { locale, setFatwaToEdit } = useContext(SiteContext);
+  const { locale } = useContext(SiteContext);
   function fetchData() {
     fetch("/api/admin/scrappedFatwas/filter?")
       .then((res) => res.json())
@@ -2969,7 +2969,6 @@ function SingleScrappedFatwa({ data, setData }) {
       <tr
         onClick={() => {
           setShowForm(true);
-          setFatwaToEdit(data);
         }}
       >
         <td>
