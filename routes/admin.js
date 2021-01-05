@@ -261,7 +261,7 @@ router
           });
         })
         .then((newFatwa) => newFatwa.save())
-        .then(() => Source.updateFatwaCount(source))
+        .then(() => Source.updateFatwaCount(source._id))
         .then(() =>
           ScrappedFatwa.findOneAndUpdate({ _id: _id }, { status: "live" })
         )
@@ -293,6 +293,7 @@ router
         translation: true,
       })
         .save()
+        .then(() => Source.updateFatwaCount(source._id))
         .then(() => res.send({ code: "ok", message: "fatwa added" }))
         .catch((err) => {
           console.log(err);
