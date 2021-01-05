@@ -5,7 +5,6 @@ export const Provider = ({ children }) => {
   const [locale, setLocale] = useState("bn-BD");
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [lan, setLan] = useState("bn");
   const [fatwaToEdit, setFatwaToEdit] = useState(null);
   const [sidebarSize, setSidebarSize] = useState(() =>
     window.innerWidth <= 1080 ? "mini" : "full"
@@ -15,8 +14,6 @@ export const Provider = ({ children }) => {
       value={{
         locale,
         setLocale,
-        lan,
-        setLan,
         user,
         setUser,
         isAuthenticated,

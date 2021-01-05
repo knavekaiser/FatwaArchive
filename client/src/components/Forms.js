@@ -56,6 +56,21 @@ const refInputSura = [
     },
   ],
 ];
+const refInputHadith = [
+  [
+    {
+      id: "hadith",
+      type: "text",
+      label: <FormattedMessage id="hadith" defaultMessage="Hadith book" />,
+      clone: true,
+    },
+    {
+      id: "hadithNo",
+      type: "number",
+      label: <FormattedMessage id="hadithNo" defaultMessage="Hadith No." />,
+    },
+  ],
+];
 const getLan = (sentence, i) => {
   if (!sentence) return;
   const str = sentence.replace(/[\s\-\.?।]/gi, "");
@@ -1321,6 +1336,7 @@ export const AddFatwaForm = ({ match }) => {
     } else {
       let inputBooks = [];
       let inputSura = [];
+      let inputHadith = [];
       SS.set("editFatwa-topic", JSON.stringify(fatwaToEdit.topic));
       SS.set("editFatwa-title", fatwaToEdit.title["bn-BD"]);
       SS.set("editFatwa-titleEn", fatwaToEdit.title["en-US"]);
@@ -1328,7 +1344,7 @@ export const AddFatwaForm = ({ match }) => {
       SS.set("editFatwa-quesEn", fatwaToEdit.ques["en-US"]);
       SS.set("editFatwa-ans", fatwaToEdit.ans["bn-BD"]);
       SS.set("editFatwa-ansEn", fatwaToEdit.ans["en-US"]);
-      SS.set("editFatwa-date", fatwaToEdit.meta.date);
+      fatwaToEdit.meta.date && SS.set("editFatwa-date", fatwaToEdit.meta.date);
       SS.set("editFatwa-write", fatwaToEdit.meta.write);
       SS.set("editFatwa-atts", fatwaToEdit.meta.atts);
       SS.set(
@@ -1355,7 +1371,7 @@ export const AddFatwaForm = ({ match }) => {
                 value: item.page,
               },
             ]);
-          } else {
+          } else if (item.sura) {
             inputSura.push([
               {
                 ...refInputSura[0][0],
@@ -1364,6 +1380,17 @@ export const AddFatwaForm = ({ match }) => {
               {
                 ...refInputSura[0][1],
                 value: item.aayat,
+              },
+            ]);
+          } else {
+            inputHadith.push([
+              {
+                ...refInputHadith[0][0],
+                value: item.hadith,
+              },
+              {
+                ...refInputHadith[0][1],
+                value: item.hadithNo,
               },
             ]);
           }
@@ -1375,6 +1402,7 @@ export const AddFatwaForm = ({ match }) => {
         ...(fatwaToEdit.ref.length > 0 && {
           inputBooks: [...inputBooks],
           inputSura: [...inputSura],
+          inputHadith: [...inputHadith],
         }),
         ...fatwaToEdit,
       };
@@ -1462,14 +1490,15 @@ export const AddFatwaForm = ({ match }) => {
         ...(JSON.stringify([
           ...GetGroupData($(".addFatwa #books.multipleInput")),
           ...GetGroupData($(".addFatwa #sura.multipleInput")),
+          ...GetGroupData($(".addFatwa #hadith.multipleInput")),
         ]) !== JSON.stringify(fatwaToEdit.ref) && {
           ref: [
             ...GetGroupData($(".addFatwa #books.multipleInput")),
             ...GetGroupData($(".addFatwa #sura.multipleInput")),
+            ...GetGroupData($(".addFatwa #hadith.multipleInput")),
           ],
         }),
       };
-
       if (user.role === "admin") {
         url = `/api/admin/editFatwa/${match.params.id}`;
       } else {
@@ -1509,6 +1538,7 @@ export const AddFatwaForm = ({ match }) => {
         ref: [
           ...GetGroupData($(".addFatwa #books.multipleInput")),
           ...GetGroupData($(".addFatwa #sura.multipleInput")),
+          ...GetGroupData($(".addFatwa #hadith.multipleInput")),
         ],
         img: preFill.img,
       };
@@ -1783,10 +1813,14 @@ export const AddFatwaForm = ({ match }) => {
           inputs={preFill.inputSura || refInputSura}
           refInput={refInputSura}
         />
+        <MultipleInput
+          id="hadith"
+          inputs={preFill.inputHadith || refInputHadith}
+          refInput={refInputHadith}
+        />
       </div>
       <div className="meta">
         <DateInput
-          required={true}
           dataId="date"
           label=<FormattedMessage
             id="dOWriting"
@@ -1805,7 +1839,6 @@ export const AddFatwaForm = ({ match }) => {
         />
         <Input
           min={5}
-          required={true}
           defaultValue={preFill.meta.write || SS.get("newFatwa-write")}
           dataId="write"
           onChange={(target) => {
@@ -1860,6 +1893,7 @@ export const UserQuestionAnswerForm = ({ ques, setQues, _id }) => {
     if (SS.get("ansFatwa-ref")) {
       let inputBooks = [];
       let inputSura = [];
+      let inputHadith = [];
       JSON.parse(SS.get("ansFatwa-ref")).forEach((item) => {
         if (item.book) {
           inputBooks.push([
@@ -1876,7 +1910,7 @@ export const UserQuestionAnswerForm = ({ ques, setQues, _id }) => {
               value: item.page,
             },
           ]);
-        } else {
+        } else if (item.sura) {
           inputSura.push([
             {
               ...refInputSura[0][0],
@@ -1887,11 +1921,27 @@ export const UserQuestionAnswerForm = ({ ques, setQues, _id }) => {
               value: item.aayat,
             },
           ]);
+        } else {
+          inputHadith.push([
+            {
+              ...refInputHadith[0][0],
+              value: item.hadith,
+            },
+            {
+              ...refInputHadith[0][1],
+              value: item.hadithNo,
+            },
+          ]);
         }
       });
       inputBooks.push(...refInputBook);
       inputSura.push(...refInputSura);
-      return { inputBooks: [...inputBooks], inputSura: [...inputSura] };
+      inputHadith.push(...refInputHadith);
+      return {
+        inputBooks: [...inputBooks],
+        inputSura: [...inputSura],
+        inputHadith: [...inputHadith],
+      };
     } else {
       return {};
     }
@@ -1912,6 +1962,7 @@ export const UserQuestionAnswerForm = ({ ques, setQues, _id }) => {
       ref: [
         ...GetGroupData($(".addFatwa #books.multipleInput")),
         ...GetGroupData($(".addFatwa #sura.multipleInput")),
+        ...GetGroupData($(".addFatwa #hadith.multipleInput")),
       ],
     };
     const url = `/api/source/userQues/answer/${_id}`;
@@ -1920,26 +1971,27 @@ export const UserQuestionAnswerForm = ({ ques, setQues, _id }) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     };
-    setLoading(true);
-    fetch(url, options)
-      .then((res) => res.json())
-      .then((data) => {
-        setLoading(false);
-        if (data.code === "ok") {
-          SS.remove("ansFatwa-title");
-          SS.remove("ansFatwa-ans");
-          SS.remove("ansFatwa-ref");
-          setQues(data.content);
-          history.goBack();
-        } else if (data.code === 11000) {
-          setSameExists(data.field);
-        } else {
-          alert("something went wrong");
-        }
-      })
-      .catch((err) => {
-        alert("something went wrong");
-      });
+    console.log(data);
+    // setLoading(true);
+    // fetch(url, options)
+    //   .then((res) => res.json())
+    //   .then((data) => {
+    //     setLoading(false);
+    //     if (data.code === "ok") {
+    //       SS.remove("ansFatwa-title");
+    //       SS.remove("ansFatwa-ans");
+    //       SS.remove("ansFatwa-ref");
+    //       setQues(data.content);
+    //       history.goBack();
+    //     } else if (data.code === 11000) {
+    //       setSameExists(data.field);
+    //     } else {
+    //       alert("something went wrong");
+    //     }
+    //   })
+    //   .catch((err) => {
+    //     alert("something went wrong");
+    //   });
   }
   return (
     <form className={`addFatwa`} onSubmit={submit}>
@@ -2018,10 +2070,14 @@ export const UserQuestionAnswerForm = ({ ques, setQues, _id }) => {
           inputs={preFill.inputSura || refInputSura}
           refInput={refInputSura}
         />
+        <MultipleInput
+          id="hadith"
+          inputs={preFill.inputHadith || refInputHadith}
+          refInput={refInputHadith}
+        />
       </div>
       <div className="meta">
         <DateInput
-          required={true}
           dataId="date"
           label=<FormattedMessage
             id="dOWriting"
@@ -2039,7 +2095,6 @@ export const UserQuestionAnswerForm = ({ ques, setQues, _id }) => {
         />
         <Input
           min={5}
-          required={true}
           defaultValue={SS.get("ansFatwa-write")}
           dataId="write"
           onChange={(target) => {
@@ -2261,6 +2316,7 @@ export const ScrappedFawtaForm = ({ data, fetchData }) => {
       ref: [
         ...GetGroupData($(".addFatwa #books.multipleInput")),
         ...GetGroupData($(".addFatwa #sura.multipleInput")),
+        ...GetGroupData($(".addFatwa #hadith.multipleInput")),
       ],
       img: preFill.img,
       _id: data._id,
@@ -2512,6 +2568,11 @@ export const ScrappedFawtaForm = ({ data, fetchData }) => {
           id="sura"
           inputs={preFill.inputSura || refInputSura}
           refInput={refInputSura}
+        />
+        <MultipleInput
+          id="hadith"
+          inputs={preFill.inputHadith || refInputHadith}
+          refInput={refInputHadith}
         />
       </div>
       <div className="meta">

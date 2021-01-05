@@ -768,46 +768,7 @@ export const Textarea = ({
     </section>
   );
 };
-const Group = ({ id, inputs, clone, setGroupCount }) => {
-  const { lan } = useContext(SiteContext);
-  const [value, setValue] = useState("");
-  function handleMount() {
-    setGroupCount((prev) => {
-      const newGroup = [...prev];
-      newGroup.push(`${id}:${inputs[0].value || ""}`);
-      return newGroup;
-    });
-    return () => {
-      setGroupCount((prev) => {
-        return prev.filter((item) => item.split(":")[0] !== id);
-      });
-    };
-  }
-  useEffect(handleMount, []);
-  return (
-    <div className="group">
-      {inputs.map((input) => {
-        return (
-          <Input
-            dataId={input.id}
-            key={input.id}
-            warning={input.type === "number" && "0-9, ০-৯"}
-            defaultValue={input.value}
-            required={input.clone ? false : true}
-            strict={input.type === "number" && /^[০-৯0-9]+$/g}
-            label={input.label}
-            id={input.clone ? id : ""}
-            onChange={(e) => {
-              clone(e);
-              setValue(e.value);
-            }}
-            disabled={input.clone ? false : input.value ? false : value === ""}
-          />
-        );
-      })}
-    </div>
-  );
-};
+
 export const MultipleInput = ({ inputs, refInput, id }) => {
   const [groupCount, setGroupCount] = useState([]);
   useEffect(() => {
@@ -820,17 +781,17 @@ export const MultipleInput = ({ inputs, refInput, id }) => {
     setGroupCount((prev) => {
       const newGroup = [...prev];
       let current = 0;
-      for (var i = 0; i < newGroup.length; i++) {
-        if (newGroup[i].split(":")[0] === e.id) {
+      newGroup.some((item, i) => {
+        if (item.split(":")[0] === e.id) {
           newGroup.splice(i, 1);
           current = i;
-          break;
         }
-      }
+      });
       newGroup.splice(current, 0, `${e.id}:${e.value}`);
       const currentValue = newGroup[current].split(":")[1];
       const nextGroup = newGroup[current + 1];
-      if (currentValue.length >= 1 && nextGroup === undefined) {
+      const emptyGroup = newGroup.filter((item) => !item.split(":")[1]);
+      if (currentValue.length && !emptyGroup.length) {
         setFinal((prev) => {
           const newFinal = [...prev];
           newFinal.push(
@@ -846,18 +807,27 @@ export const MultipleInput = ({ inputs, refInput, id }) => {
           return newFinal;
         });
       } else if (currentValue.length === 0) {
-        setFinal((prev) => {
-          const newFinal = [...prev];
-          for (var i = 0; i < newGroup.length; i++) {
-            const value = newGroup[i].split(":")[1];
-            if (value === "" && i < current) {
-              newFinal.splice(i, 1);
-            } else if (value === "" && i > current) {
-              newFinal.splice(i, 1);
+        if (e.maxLength === 100) {
+          setFinal((prev) => {
+            const newFinal = [...prev];
+            const indecies = [];
+            for (var i = 0; i < newGroup.length; i++) {
+              const value = newGroup[i].split(":")[1];
+              if (value === "") {
+                indecies.push(i);
+              }
+              // if (value === "" && i < current) {
+              //   newFinal.splice(i, 1);
+              // } else if (value === "" && i > current) {
+              //   newFinal.splice(i, 1);
+              // }
             }
-          }
-          return newFinal;
-        });
+            const filtered = newFinal.filter(
+              (item, i) => !indecies.includes(i)
+            );
+            return filtered.length === 0 ? newFinal : filtered;
+          });
+        }
       }
       return newGroup;
     });
@@ -886,6 +856,47 @@ export const MultipleInput = ({ inputs, refInput, id }) => {
     </div>
   );
 };
+const Group = ({ id, inputs, clone, setGroupCount }) => {
+  const [value, setValue] = useState("");
+  function handleMount() {
+    setGroupCount((prev) => {
+      const newGroup = [...prev];
+      newGroup.push(`${id}:${inputs[0].value || ""}`);
+      return newGroup;
+    });
+    return () => {
+      setGroupCount((prev) => {
+        return prev.filter((item) => item.split(":")[0] !== id);
+      });
+    };
+  }
+  useEffect(handleMount, []);
+  return (
+    <div className="group">
+      {inputs.map((input, i) => {
+        return (
+          <Input
+            dataId={input.id}
+            key={input.id}
+            warning={input.type === "number" && "0-9, ০-৯"}
+            defaultValue={input.value}
+            required={input.clone ? false : !(input.id === "part")}
+            strict={input.type === "number" && /^[০-৯0-9]+$/g}
+            max={input.clone ? 100 : 12}
+            label={input.label}
+            id={input.clone ? id : id + i}
+            onChange={(e) => {
+              clone(e);
+              setValue(e.value);
+            }}
+            disabled={input.clone ? false : input.value ? false : value === ""}
+          />
+        );
+      })}
+    </div>
+  );
+};
+
 export const Combobox = ({
   label,
   icon,

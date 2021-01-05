@@ -46,6 +46,8 @@
   "page": "Page",
   "sura": "Sura",
   "aayat": "Aayat",
+  "hadith": "Hadith book",
+  "hadithNo": "Hadith No.",
   "write": "Write",
   "atts": "Attestation",
   "scrapped": "Scrapped",

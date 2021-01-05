@@ -117,6 +117,7 @@ router
               field: Object.keys(err.keyValue)[0],
             });
           } else {
+            console.log(err);
             res
               .status(500)
               .json({ code: 500, message: "something went wrong" });

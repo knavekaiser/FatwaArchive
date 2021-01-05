@@ -81,23 +81,25 @@ function Fatwa({ match }) {
                 />
               </small>
               <br />
-              {fatwa.source.type === "Jamia" ? (
-                <span>
-                  <FormattedMessage
-                    id="primeMufti"
-                    defaultMessage="Prime Mufti"
-                  />
-                  : {fatwa.source.primeMufti[locale]}
-                </span>
-              ) : (
-                <span>
-                  <FormattedMessage
-                    id="gradFrom"
-                    defaultMessage="Graduated from"
-                  />
-                  : {fatwa.source.grad.versity[locale]}
-                </span>
-              )}
+              {
+                //   fatwa.source.type === "Jamia" ? (
+                //   <span>
+                //     <FormattedMessage
+                //       id="primeMufti"
+                //       defaultMessage="Prime Mufti"
+                //     />
+                //     : {fatwa.source.primeMufti[locale]}
+                //   </span>
+                // ) : (
+                //   <span>
+                //     <FormattedMessage
+                //       id="gradFrom"
+                //       defaultMessage="Graduated from"
+                //     />
+                //     : {fatwa.source.grad.versity[locale]}
+                //   </span>
+                // )
+              }
             </h4>
           )}
           <br />
@@ -166,29 +168,44 @@ function Fatwa({ match }) {
               </h3>
               <br />
               <ul className="ref">
-                {fatwa.ref.map((ref, i) =>
-                  ref.book ? (
-                    <li key={i}>
-                      <span>{ref.book}</span>,{" "}
-                      <FormattedMessage id="page" defaultMessage="Page" />{" "}
-                      <span>
-                        <FormattedNumber value={ref.part} />
-                      </span>
-                      , <FormattedMessage id="part" defaultMessage="Part" />{" "}
-                      <span>
-                        <FormattedNumber value={ref.page} />
-                      </span>
-                    </li>
-                  ) : (
-                    <li key={i}>
-                      <span>{ref.sura}</span>,{" "}
-                      <FormattedMessage id="aayat" defaultMessage="Aayat" />{" "}
-                      <span>
-                        <FormattedNumber value={ref.aayat} />
-                      </span>
-                    </li>
-                  )
-                )}
+                {fatwa.ref.map((item, i) => {
+                  if (item.book) {
+                    return (
+                      <li key={item.book + item.part + item.page}>
+                        <FormattedMessage id="book" defaultMessage="Book" />:{" "}
+                        {item.book},{" "}
+                        <FormattedMessage id="part" defaultMessage="Part" />:{" "}
+                        <FormattedNumber value={item.part} />,{" "}
+                        <FormattedMessage id="page" defaultMessage="Page" />:{" "}
+                        <FormattedNumber value={item.page} />
+                      </li>
+                    );
+                  } else if (item.sura) {
+                    return (
+                      <li key={item.sura + item.aayat}>
+                        <FormattedMessage id="sura" defaultMessage="Sura" />:{" "}
+                        {item.sura},{" "}
+                        <FormattedMessage id="aayat" defaultMessage="Aayat" />:{" "}
+                        <FormattedNumber value={item.aayat} />
+                      </li>
+                    );
+                  } else {
+                    return (
+                      <li key={item.hadith + item.hadithNo}>
+                        <FormattedMessage
+                          id="hadith"
+                          defaultMessage="hadith book"
+                        />
+                        : {item.hadith},{" "}
+                        <FormattedMessage
+                          id="hadithNo"
+                          defaultMessage="Hadith No"
+                        />
+                        : <FormattedNumber value={item.hadithNo} />
+                      </li>
+                    );
+                  }
+                })}
               </ul>
               <br />
             </>
