@@ -98,6 +98,7 @@ async function ssr(url) {
   const newUrl = url;
   await page.setExtraHTTPHeaders({ robot: "on" });
   await page.goto(newUrl, { waitUntil: "networkidle0" });
+  console.log("ssr started");
   await newPage.evaluate(() => {
     for (el of document.querySelectorAll("link")) {
       el.remove();
@@ -110,6 +111,7 @@ async function ssr(url) {
     }
   });
   const html = await page.content(); // serialized HTML of page DOM.
+  console.log("got the page content", html);
   await browser.close();
   return html;
 }
