@@ -1,4 +1,11 @@
-import React, { useContext, useState, useEffect, useRef } from "react";
+import React, {
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+  Suspense,
+  lazy,
+} from "react";
 import { Route, Switch, useHistory, Redirect } from "react-router-dom";
 import { IntlProvider } from "react-intl";
 import LandingPage from "./components/LandingPage";
@@ -15,14 +22,14 @@ import {
   PassRecovery,
   BugReportForm,
 } from "./components/Forms";
-import AdminPanel from "./components/AdminPanel";
-import JamiaProfile from "./components/JamiaProfile";
 import UserQuestion from "./components/UserSubmitions";
 import TableOfContent from "./components/TableOfContent";
 import { SiteContext } from "./Context";
 import Enlish from "./language/en-US.json";
 import Bangali from "./language/bn-BD.json";
 import "./App.min.css";
+const AdminPanel = lazy(() => import("./components/AdminPanel"));
+const JamiaProfile = lazy(() => import("./components/JamiaProfile"));
 
 function ProtectedRoute({
   component: Component,
@@ -96,8 +103,22 @@ function App() {
           <Route path="/adminLogin" component={AdminLogin} />
           <Route path="/register" component={JamiaRegister} />
           <Route path="/askQuestion" component={UserQuestion} />
-          <Route path="/source" component={JamiaProfile} />
-          <Route path="/admin" component={AdminPanel} />
+          <Route
+            path="/source"
+            render={() => (
+              <Suspense fallback={<div>Loading...</div>}>
+                <JamiaProfile />
+              </Suspense>
+            )}
+          />
+          <Route
+            path="/admin"
+            render={() => (
+              <Suspense fallback={<div>Loading...</div>}>
+                <AdminPanel />
+              </Suspense>
+            )}
+          />
           <Route path="/tableOfContent" component={TableOfContent} />
           <Route path="/bugReport" component={BugReportForm} />
           <Route path="/" component={FourOFour} />

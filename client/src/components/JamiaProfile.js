@@ -13,6 +13,7 @@ import {
   Submit,
 } from "./FormElements";
 import "./CSS/JamiaProfile.min.css";
+import "./CSS/AdminPanel.min.css";
 import {
   FormattedDate,
   FormattedNumber,

@@ -329,23 +329,6 @@ router
       });
   });
 
-// ScrappedFatwa.updateMany(
-//   { source: "5fec7694af1176494250b230" },
-//   { createdAt: Date.now }
-// ).then((res) => {
-//   console.log(res);
-// });
-
-// ScrappedFatwa.aggregate()
-//   .sample(10)
-//   .then((res) => {
-//     console.log(res);
-//   });
-
-// ScrappedFatwa.find({ status: "live" }).then((res) => {
-//   console.log(res);
-// });
-
 //----------------------------------UESR QUESTION
 router
   .route("/admin/questionFeed/filter")

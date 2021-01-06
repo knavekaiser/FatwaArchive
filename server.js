@@ -9,6 +9,9 @@ global.JwtStrategy = require("passport-jwt").Strategy;
 global.ExtractJwt = require("passport-jwt").ExtractJwt;
 global.jwt = require("jsonwebtoken");
 global.jwt_decode = require("jwt-decode");
+const importGlobal = require("import-global");
+const isBot = require("isbot-fast");
+const puppeteer = importGlobal("puppeteer");
 
 global.genCode = (n) => {
   code = "";
@@ -55,8 +58,8 @@ const app = express();
 //---------------------------------------------- dev stuff -
 
 require("dotenv").config();
-const morgan = require("morgan");
-app.use(morgan("dev"));
+// const morgan = require("morgan");
+// app.use(morgan("dev"));
 
 //----------------------------------------------------------
 
@@ -89,9 +92,53 @@ app.use("/api", require("./routes/general"));
 app.use("/api/source", require("./routes/source"));
 app.use("/api/admin", require("./routes/admin"));
 
-app.use(express.static(path.join(__dirname, "client/build")));
-app.get("*", (req, res) => {
-  return res.sendFile(path.join(__dirname, "/client/build/index.html"));
-});
+async function ssr(url) {
+  const browser = await puppeteer.launch({ headless: true });
+  const page = await browser.newPage();
+  const newUrl = url;
+  await page.setExtraHTTPHeaders({ robot: "on" });
+  await page.goto(newUrl, { waitUntil: "networkidle0" });
+  await newPage.evaluate(() => {
+    for (el of document.querySelectorAll("link")) {
+      el.remove();
+    }
+    for (el of document.querySelectorAll("script")) {
+      el.remove();
+    }
+    for (el of document.querySelectorAll("noscript")) {
+      el.remove();
+    }
+  });
+  const html = await page.content(); // serialized HTML of page DOM.
+  await browser.close();
+  return html;
+}
+// isBot.extend(["bingbot", "validator", "image"]);
+async function bot(req, res, next) {
+  const ua = req.headers["user-agent"] || "";
+  if (
+    req.headers.robot === "on" ||
+    req.originalUrl.startsWith("/static") ||
+    req.originalUrl.startsWith("/api") ||
+    req.originalUrl.startsWith("/fatwaArchive_favicon")
+  ) {
+    next();
+  } else {
+    if (isBot(ua)) {
+      console.log("this was a bot ", ua);
+      const url = req.get("host") + req.originalUrl;
+      const html = await ssr(url);
+      res.send(html);
+    } else {
+      next();
+    }
+  }
+}
+
+app.use(bot, express.static(path.join(__dirname, "client/build")));
+
+app.get("*", (req, res) =>
+  res.sendFile(path.join(__dirname, "/client/build/index.html"))
+);
 
 app.listen(PORT, () => console.log("server just ran at " + PORT));

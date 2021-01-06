@@ -35,7 +35,9 @@ function TableOfContent() {
       <ul>
         {data.map((item) => (
           <li key={item.link[locale]}>
-            <Link to={`fatwa/${item.link[locale]}`}>{item.link[locale]}</Link>
+            <Link to={`fatwa/${item.link[locale]}`}>
+              {item.link[locale].replaceAll("-", " ")}
+            </Link>
           </li>
         ))}
       </ul>

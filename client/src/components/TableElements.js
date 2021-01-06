@@ -433,6 +433,7 @@ export const View = ({
       .catch((err) => {
         setLoading(false);
         if (err.name === "AbortError") {
+          console.log("aborted by user");
           return;
         }
         console.log(err);

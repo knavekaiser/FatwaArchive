@@ -64,7 +64,7 @@ function Fatwa({ match }) {
             <title>{fatwa.title && fatwa.title[locale]}</title>
             <meta
               name="description"
-              content={fatwa.ans && fatwa.ans[locale].substring(200)}
+              content={fatwa.ans && fatwa.ans[locale].substring(0, 500)}
             />
           </Helmet>
           <h1>{fatwa.title[locale]}</h1>

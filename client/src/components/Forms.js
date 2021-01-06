@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect, useRef } from "react";
-import { Link, useHistory, Redirect } from "react-router-dom";
+import { Prompt, Link, useHistory, Redirect } from "react-router-dom";
 import { SiteContext } from "../Context";
 import { Modal } from "./Modals";
 import "./CSS/SourceForms.min.css";
@@ -2306,6 +2306,14 @@ export const ScrappedFawtaForm = ({ data, fetchData }) => {
       });
   }, []);
   useEffect(setCleanup, []);
+  const [prompt, setPrompt] = useState(false);
+  useEffect(() => {
+    if (prompt) {
+      window.onbeforeunload = () => true;
+    } else {
+      window.onbeforeunload = undefined;
+    }
+  }, []);
   function submit(e) {
     e.preventDefault();
     let newFatwa, url, options;
@@ -2388,6 +2396,7 @@ export const ScrappedFawtaForm = ({ data, fetchData }) => {
       className={`addFatwa ${preFill.translate ? "translate" : ""}`}
       onSubmit={submit}
     >
+      <Prompt message="you sure?" />
       {
         // user.role === "admin" && (<Combobox
         //   defaultValue={

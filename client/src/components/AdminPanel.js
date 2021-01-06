@@ -1,6 +1,7 @@
 import React, { useState, useContext, useRef, useEffect } from "react";
 import { Link, Route, Switch, useHistory, Redirect } from "react-router-dom";
 import { SiteContext } from "../Context.js";
+import "./CSS/JamiaProfile.min.css";
 import "./CSS/AdminPanel.min.css";
 import {
   Input,
