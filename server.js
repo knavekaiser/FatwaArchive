@@ -9,8 +9,6 @@ global.JwtStrategy = require("passport-jwt").Strategy;
 global.ExtractJwt = require("passport-jwt").ExtractJwt;
 global.jwt = require("jsonwebtoken");
 global.jwt_decode = require("jwt-decode");
-const importGlobal = require("import-global");
-const puppeteer = importGlobal("puppeteer");
 const isBot = require("isbot-fast");
 
 global.genCode = (n) => {
