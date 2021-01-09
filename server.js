@@ -9,9 +9,7 @@ global.JwtStrategy = require("passport-jwt").Strategy;
 global.ExtractJwt = require("passport-jwt").ExtractJwt;
 global.jwt = require("jsonwebtoken");
 global.jwt_decode = require("jwt-decode");
-const importGlobal = require("import-global");
 const isBot = require("isbot-fast");
-const puppeteer = importGlobal("puppeteer");
 
 global.genCode = (n) => {
   code = "";
@@ -63,7 +61,7 @@ require("dotenv").config();
 
 //----------------------------------------------------------
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 8877;
 const URI = process.env.ATLAS_URI;
 
 const CREDENTIALS = JSON.parse(process.env.GOOGLE_API_CREDENTIAL);
@@ -93,29 +91,33 @@ app.use("/api/source", require("./routes/source"));
 app.use("/api/admin", require("./routes/admin"));
 
 async function ssr(url) {
-  const browser = await puppeteer.launch({ headless: true });
-  const page = await browser.newPage();
-  const newUrl = url;
-  await page.setExtraHTTPHeaders({ robot: "on" });
-  await page.goto(newUrl, { waitUntil: "networkidle0" });
-  console.log("ssr started");
-  await newPage.evaluate(() => {
-    for (el of document.querySelectorAll("link")) {
-      el.remove();
-    }
-    for (el of document.querySelectorAll("script")) {
-      el.remove();
-    }
-    for (el of document.querySelectorAll("noscript")) {
-      el.remove();
-    }
-  });
-  const html = await page.content(); // serialized HTML of page DOM.
-  console.log("got the page content", html);
-  await browser.close();
-  return html;
+  try {
+    const browser = await puppeteer.launch({ headless: true });
+    const page = await browser.newPage();
+    const newUrl = url;
+    await page.setExtraHTTPHeaders({ robot: "on" });
+    await page.goto(newUrl, { waitUntil: "networkidle0" });
+    await newPage.evaluate(() => {
+      for (el of document.querySelectorAll("link")) {
+        el.remove();
+      }
+      for (el of document.querySelectorAll("script")) {
+        el.remove();
+      }
+      for (el of document.querySelectorAll("noscript")) {
+        el.remove();
+      }
+    });
+    const html = await page.content(); // serialized HTML of page DOM.
+    console.log("rendered the html");
+    await browser.close();
+    return html;
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
 }
-// isBot.extend(["bingbot", "validator", "image"]);
+
 async function bot(req, res, next) {
   const ua = req.headers["user-agent"] || "";
   if (
@@ -130,7 +132,11 @@ async function bot(req, res, next) {
       console.log("this was a bot ", ua);
       const url = req.get("host") + req.originalUrl;
       const html = await ssr(url);
-      res.send(html);
+      if (html) {
+        res.send(html);
+      } else {
+        next();
+      }
     } else {
       next();
     }
