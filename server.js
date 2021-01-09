@@ -9,6 +9,8 @@ global.JwtStrategy = require("passport-jwt").Strategy;
 global.ExtractJwt = require("passport-jwt").ExtractJwt;
 global.jwt = require("jsonwebtoken");
 global.jwt_decode = require("jwt-decode");
+const importGlobal = require("import-global");
+const puppeteer = importGlobal("puppeteer");
 const isBot = require("isbot-fast");
 
 global.genCode = (n) => {
@@ -61,7 +63,7 @@ require("dotenv").config();
 
 //----------------------------------------------------------
 
-const PORT = process.env.PORT || 8877;
+const PORT = process.env.PORT || 3001;
 const URI = process.env.ATLAS_URI;
 
 const CREDENTIALS = JSON.parse(process.env.GOOGLE_API_CREDENTIAL);
