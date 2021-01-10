@@ -90,38 +90,14 @@ app.use("/api", require("./routes/general"));
 app.use("/api/source", require("./routes/source"));
 app.use("/api/admin", require("./routes/admin"));
 
-async function ssr(url) {
-  try {
-    const browser = await puppeteer.launch({ headless: true });
-    const page = await browser.newPage();
-    const newUrl = url;
-    await page.setExtraHTTPHeaders({ robot: "on" });
-    await page.goto(newUrl, { waitUntil: "networkidle0" });
-    await newPage.evaluate(() => {
-      for (el of document.querySelectorAll("link")) {
-        el.remove();
-      }
-      for (el of document.querySelectorAll("script")) {
-        el.remove();
-      }
-      for (el of document.querySelectorAll("noscript")) {
-        el.remove();
-      }
-    });
-    const html = await page.content(); // serialized HTML of page DOM.
-    console.log("rendered the html");
-    await browser.close();
-    return html;
-  } catch (err) {
-    console.log(err);
-    return null;
-  }
-}
+const got = require("got");
+const jsdom = require("jsdom");
+const { JSDOM } = jsdom;
 
 async function bot(req, res, next) {
   const ua = req.headers["user-agent"] || "";
   if (
-    req.headers.robot === "on" ||
+    req.headers.ssr === "on" ||
     req.originalUrl.startsWith("/static") ||
     req.originalUrl.startsWith("/api") ||
     req.originalUrl.startsWith("/fatwaArchive_favicon")
@@ -129,14 +105,27 @@ async function bot(req, res, next) {
     next();
   } else {
     if (isBot(ua)) {
-      console.log("this was a bot ", ua);
+      console.log("this was a bot ");
       const url = req.get("host") + req.originalUrl;
-      const html = await ssr(url);
-      if (html) {
-        res.send(html);
-      } else {
-        next();
-      }
+      got(url, { headers: { ssr: "on" } })
+        .then((response) => {
+          const window = new JSDOM(response.body, {
+            url: url,
+            resources: "usable",
+            runScripts: "dangerously",
+          }).window;
+          window.fetch = fetch;
+          const document = window.document;
+          setTimeout(() => {
+            const html = document.documentElement.outerHTML;
+            res.send(html);
+          }, 2000);
+        })
+        .catch((err) => {
+          console.log(err);
+          next();
+        });
+      console.log("-----------------------------------------res ended");
     } else {
       next();
     }
