@@ -106,13 +106,13 @@ async function bot(req, res, next) {
   ) {
     next();
   } else {
-    if (isBot(ua)) {
+    if (isBot(ua) || true) {
       console.log("this was a bot", req.originalUrl);
       const url = `http://${req.get("host")}${req.originalUrl}`;
       // const fullUrl = `http://${req.get("host")}${req.originalUrl}`;
       try {
         let launchOptions = {
-          headless: false,
+          headless: true,
           executablePath: "../GoogleChromePortable/App/Chrome-bin/chrome.exe",
         };
         const browser = await puppeteer.launch(launchOptions);
