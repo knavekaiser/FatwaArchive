@@ -101,19 +101,19 @@ async function bot(req, res, next) {
     req.headers.ssr === "on" ||
     req.originalUrl.startsWith("/static") ||
     req.originalUrl.startsWith("/api") ||
-    req.originalUrl.startsWith("/fatwaArchive_favicon")
+    req.originalUrl.startsWith("/fatwaArchive_favicon") ||
+    req.originalUrl.startsWith("/favicon.ico")
   ) {
     next();
   } else {
-    if (isBot(ua) || true) {
-      console.log("this was a bot ");
-      const url = `http://${req.get("host")}`;
+    if (isBot(ua)) {
+      console.log("this was a bot", req.originalUrl);
+      const url = `http://${req.get("host")}${req.originalUrl}`;
       // const fullUrl = `http://${req.get("host")}${req.originalUrl}`;
       try {
         let launchOptions = {
-          headless: true,
-          executablePath:
-            "../Python SSR/GoogleChromePortable/App/Chrome-bin/chrome.exe",
+          headless: false,
+          executablePath: "../GoogleChromePortable/App/Chrome-bin/chrome.exe",
         };
         const browser = await puppeteer.launch(launchOptions);
         const [page] = await browser.pages();
