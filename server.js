@@ -90,6 +90,7 @@ app.use("/api", require("./routes/general"));
 app.use("/api/source", require("./routes/source"));
 app.use("/api/admin", require("./routes/admin"));
 
+const puppeteer = require("puppeteer-core");
 const got = require("got");
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
@@ -104,28 +105,70 @@ async function bot(req, res, next) {
   ) {
     next();
   } else {
-    if (isBot(ua)) {
+    if (isBot(ua) || true) {
       console.log("this was a bot ");
-      const url = req.get("host") + req.originalUrl;
-      got(url, { headers: { ssr: "on" } })
-        .then((response) => {
-          const window = new JSDOM(response.body, {
-            url: url,
-            resources: "usable",
-            runScripts: "dangerously",
-          }).window;
-          window.fetch = fetch;
-          const document = window.document;
-          setTimeout(() => {
-            const html = document.documentElement.outerHTML;
-            res.send(html);
-          }, 2000);
-        })
-        .catch((err) => {
-          console.log(err);
-          next();
+      const url = `http://${req.get("host")}`;
+      // const fullUrl = `http://${req.get("host")}${req.originalUrl}`;
+      try {
+        let launchOptions = {
+          headless: true,
+          executablePath:
+            "../Python SSR/GoogleChromePortable/App/Chrome-bin/chrome.exe",
+        };
+        const browser = await puppeteer.launch(launchOptions);
+        const [page] = await browser.pages();
+
+        // await page.setUserAgent(
+        //   "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"
+        // );
+        await page.setExtraHTTPHeaders({ ssr: "on" });
+
+        await page.goto(url, {
+          waitUntil: "networkidle0",
         });
-      console.log("-----------------------------------------res ended");
+
+        const data = await page.evaluate(() => {
+          document.querySelectorAll("script").forEach((scr) => scr.remove());
+          document.querySelectorAll("link").forEach((link) => link.remove());
+          document.querySelector("noscript").remove();
+          return document.querySelector("*").outerHTML;
+        });
+        res.writeHeader(200, { "Content-Type": "text/html" });
+        res.write(data);
+        res.end();
+        await browser.close();
+        console.log("successfully served");
+      } catch (err) {
+        console.log(err);
+        next();
+      }
+      // got(url, { headers: { ssr: "on" } })
+      //   .then((response) => {
+      //     const window = new JSDOM(response.body, {
+      //       url: url,
+      //       reference: url,
+      //       includeNodeLocations: true,
+      //       resources: "usable",
+      //       runScripts: "dangerously",
+      //     }).window;
+      //     window.fetch = fetch;
+      //     window.location.href = fullUrl;
+      //     const document = window.document;
+      //
+      //     setTimeout(() => {
+      //       document
+      //         .querySelectorAll("link[rel='stylesheet']")
+      //         .forEach((el) => el.remove());
+      //       document.querySelectorAll("script").forEach((el) => el.remove());
+      //       document.querySelector("noscript").remove();
+      //       const html = document.documentElement.outerHTML;
+      //       res.send(html);
+      //     }, 3000);
+      //   })
+      //   .catch((err) => {
+      //     console.log(135, err);
+      //     next();
+      //   });
     } else {
       next();
     }
