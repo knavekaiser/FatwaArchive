@@ -1531,8 +1531,12 @@ function Answer({ ques, ans, setQues }) {
                     <li key={item.book + item.part + item.page}>
                       <FormattedMessage id="book" defaultMessage="Book" />:{" "}
                       {item.book},{" "}
-                      <FormattedMessage id="part" defaultMessage="Part" />:{" "}
-                      <FormattedNumber value={item.part} />,{" "}
+                      {item.part && (
+                        <>
+                          <FormattedMessage id="part" defaultMessage="Part" />:{" "}
+                          <FormattedNumber value={item.part} />,
+                        </>
+                      )}{" "}
                       <FormattedMessage id="page" defaultMessage="Page" />:{" "}
                       <FormattedNumber value={item.page} />
                     </li>

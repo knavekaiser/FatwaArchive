@@ -1972,27 +1972,27 @@ export const UserQuestionAnswerForm = ({ ques, setQues, _id }) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     };
-    console.log(data);
-    // setLoading(true);
-    // fetch(url, options)
-    //   .then((res) => res.json())
-    //   .then((data) => {
-    //     setLoading(false);
-    //     if (data.code === "ok") {
-    //       SS.remove("ansFatwa-title");
-    //       SS.remove("ansFatwa-ans");
-    //       SS.remove("ansFatwa-ref");
-    //       setQues(data.content);
-    //       history.goBack();
-    //     } else if (data.code === 11000) {
-    //       setSameExists(data.field);
-    //     } else {
-    //       alert("something went wrong");
-    //     }
-    //   })
-    //   .catch((err) => {
-    //     alert("something went wrong");
-    //   });
+    // console.log(data);
+    setLoading(true);
+    fetch(url, options)
+      .then((res) => res.json())
+      .then((data) => {
+        setLoading(false);
+        if (data.code === "ok") {
+          SS.remove("ansFatwa-title");
+          SS.remove("ansFatwa-ans");
+          SS.remove("ansFatwa-ref");
+          setQues(data.content);
+          history.goBack();
+        } else if (data.code === 11000) {
+          setSameExists(data.field);
+        } else {
+          alert("something went wrong");
+        }
+      })
+      .catch((err) => {
+        alert("something went wrong");
+      });
   }
   return (
     <form className={`addFatwa`} onSubmit={submit}>
@@ -2085,6 +2085,7 @@ export const UserQuestionAnswerForm = ({ ques, setQues, _id }) => {
             defaultMessage="Fatwa was written in"
           />
           max={new Date()}
+          required={true}
           onChange={(target) => {
             SS.set("ansFatwa-date", target.value);
           }}
@@ -2103,6 +2104,7 @@ export const UserQuestionAnswerForm = ({ ques, setQues, _id }) => {
             setSameExists(false);
           }}
           label=<FormattedMessage id="write" defaultMessage="Write" />
+          required={true}
           validationMessage=<FormattedMessage
             id="writeValidation"
             defaultMessage="who wrote the fatwa"
