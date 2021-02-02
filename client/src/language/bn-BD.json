@@ -176,5 +176,7 @@
   "ansChip": "উত্তরে রয়েছে",
   "translationChip": "অনুবাদ:",
   "translationManual": "ব্যক্তি",
-  "translationAuto": "গুগল"
+  "translationAuto": "গুগল",
+  "perPage": "প্রতি পৃষ্ঠায়ঃ",
+  "itemCount": "{start}-{end}, মোট {total}"
 }

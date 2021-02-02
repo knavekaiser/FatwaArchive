@@ -5,7 +5,12 @@
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
 }
-
+@font-face {
+  font-family: "SolaimanLipi";
+  src: local("solaimanLipi"), url("solaimanlipi.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
 #root,
 #portal {
   -webkit-font-smoothing: antialiased;

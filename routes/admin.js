@@ -133,7 +133,7 @@ router
   .route("/admin/allfatwa/filter")
   .get(passport.authenticate("AdminAuth"), (req, res) => {
     const locale = req.headers["accept-language"];
-    const { title, ques, ans, topic, translation } = req.query;
+    const { title, ques, ans, topic, translation, perPage, page } = req.query;
     const query = { status: "live" };
     const sort = { column: req.query.column, order: req.query.order };
     title && (query[`title.${locale}`] = RegExp(title));
@@ -151,11 +151,45 @@ router
       });
       return;
     }
-    Fatwa.find(query)
-      .populate("source", "name primeMufti role")
-      .sort(`${sort.order === "des" ? "-" : ""}${sort.column}`)
-      .then((fatwas) => {
-        res.json({ code: "ok", data: fatwas });
+    Fatwa.aggregate([
+      { $match: query },
+      {
+        $lookup: {
+          from: "sources",
+          localField: "source",
+          foreignField: "_id",
+          as: "source",
+        },
+      },
+      { $unwind: "$source" },
+      { $sort: { [sort.column]: sort.order === "des" ? -1 : 1 } },
+      {
+        $project: {
+          _id: 1,
+          [`link.${locale}`]: 1,
+          [`title.${locale}`]: 1,
+          [`ques.${locale}`]: 1,
+          [`ans.${locale}`]: 1,
+          [`topic.${locale}`]: 1,
+          createdAt: 1,
+          translation: 1,
+          [`source.id`]: 1,
+          [`source.name.${locale}`]: 1,
+        },
+      },
+      {
+        $facet: {
+          fatwas: [{ $skip: +perPage * (+page - 1) }, { $limit: +perPage }],
+          pageInfo: [{ $group: { _id: null, count: { $sum: 1 } } }],
+        },
+      },
+    ])
+      .then((data) => {
+        res.json({
+          code: "ok",
+          total: data[0].pageInfo[0] ? data[0].pageInfo[0].count : 0,
+          content: data[0].fatwas,
+        });
       })
       .catch((err) => {
         res.status(500).json({ code: 500, message: "something went wrong" });
@@ -173,7 +207,7 @@ router
 router
   .route("/admin/fatwaSubmissions/filter")
   .get(passport.authenticate("AdminAuth"), (req, res) => {
-    const { title, ques, ans, topic, translation } = req.query;
+    const { title, ques, ans, topic, translation, perPage, page } = req.query;
     const locale = req.headers["accept-language"];
     const query = { $or: [{ status: "pending" }, { status: "pendingEdit" }] };
     const sort = { column: req.query.column, order: req.query.order };
@@ -181,11 +215,31 @@ router
     ques && (query[`ques.${locale}`] = RegExp(ques));
     ans && (query[`ans.${locale}`] = RegExp(ans));
     topic && (query[`topic.${locale}`] = topic);
-    Fatwa.find(query)
-      .populate("source", "name primeMufti role")
-      .sort(`${sort.order === "des" ? "-" : ""}${sort.column}`)
-      .then((submissions) => {
-        res.json({ code: "ok", data: submissions });
+    Fatwa.aggregate([
+      { $match: query },
+      {
+        $lookup: {
+          from: "sources",
+          localField: "source",
+          foreignField: "_id",
+          as: "source",
+        },
+      },
+      { $unwind: "$source" },
+      { $sort: { [sort.column]: sort.order === "des" ? -1 : 1 } },
+      {
+        $facet: {
+          fatwas: [{ $skip: +perPage * (+page - 1) }, { $limit: +perPage }],
+          pageInfo: [{ $group: { _id: null, count: { $sum: 1 } } }],
+        },
+      },
+    ])
+      .then((data) => {
+        res.json({
+          code: "ok",
+          total: data[0].pageInfo[0] ? data[0].pageInfo[0].count : 0,
+          content: data[0].fatwas,
+        });
       })
       .catch((err) =>
         res.status(500).json({ code: 500, message: "something went wrong" })
@@ -223,13 +277,33 @@ router
   .get(passport.authenticate("AdminAuth"), (req, res) => {
     const locale = req.headers["accept-language"];
     const query = { status: "pending" };
-    const { ans, page } = req.query;
-    ScrappedFatwa.find(query)
-      .populate("source", "name")
-      .skip(0)
-      .limit(10)
-      .then((fatwas) => {
-        res.json({ code: "ok", data: fatwas });
+    const { ans, perPage, page } = req.query;
+    const sort = { column: req.query.column, order: req.query.order };
+    ScrappedFatwa.aggregate([
+      { $match: query },
+      {
+        $lookup: {
+          from: "sources",
+          localField: "source",
+          foreignField: "_id",
+          as: "source",
+        },
+      },
+      { $unwind: "$source" },
+      { $sort: { [sort.column]: sort.order === "des" ? -1 : 1 } },
+      {
+        $facet: {
+          fatwas: [{ $skip: +perPage * (+page - 1) }, { $limit: +perPage }],
+          pageInfo: [{ $group: { _id: null, count: { $sum: 1 } } }],
+        },
+      },
+    ])
+      .then((data) => {
+        res.json({
+          code: "ok",
+          total: data[0].pageInfo[0] ? data[0].pageInfo[0].count : 0,
+          content: data[0].fatwas,
+        });
       })
       .catch((err) => {
         console.log(err);
@@ -315,13 +389,33 @@ router
   .get(passport.authenticate("AdminAuth"), (req, res) => {
     const locale = req.headers["accept-language"];
     const query = { status: "live" };
-    const { ans, page } = req.query;
-    ScrappedFatwa.find(query)
-      .populate("source", "name")
-      .skip(0)
-      .limit(10)
-      .then((fatwas) => {
-        res.json({ code: "ok", data: fatwas });
+    const { ans, perPage, page } = req.query;
+    const sort = { column: req.query.column, order: req.query.order };
+    ScrappedFatwa.aggregate([
+      { $match: query },
+      {
+        $lookup: {
+          from: "sources",
+          localField: "source",
+          foreignField: "_id",
+          as: "source",
+        },
+      },
+      { $unwind: "$source" },
+      { $sort: { [sort.column]: sort.order === "des" ? -1 : 1 } },
+      {
+        $facet: {
+          fatwas: [{ $skip: +perPage * (+page - 1) }, { $limit: +perPage }],
+          pageInfo: [{ $group: { _id: null, count: { $sum: 1 } } }],
+        },
+      },
+    ])
+      .then((data) => {
+        res.json({
+          code: "ok",
+          total: data[0].pageInfo[0] ? data[0].pageInfo[0].count : 0,
+          content: data[0].fatwas,
+        });
       })
       .catch((err) => {
         console.log(err);

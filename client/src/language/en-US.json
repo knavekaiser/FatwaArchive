@@ -174,5 +174,7 @@
   "ansChip": "Answer contains",
   "translationChip": "Translation:",
   "translationManual": "Manual",
-  "translationAuto": "Auto"
+  "translationAuto": "Auto",
+  "perPage": "Per Page:",
+  "itemCount": "{start}-{end} of {total}"
 }

@@ -18,7 +18,14 @@ import {
   AddFatwaForm,
   ScrappedFawtaForm,
 } from "./Forms";
-import { Tabs, Sidebar, View, Actions, LoadingPost } from "./TableElements";
+import {
+  Tabs,
+  Sidebar,
+  View,
+  ViewPaginated,
+  Actions,
+  LoadingPost,
+} from "./TableElements";
 import {
   FormattedDate,
   FormattedNumber,
@@ -832,7 +839,7 @@ const AllFatwa = injectIntl(({ history, location, match, intl }) => {
       />
       <Switch>
         <Route path="/admin/fatwa" exact>
-          <View
+          <ViewPaginated
             key="allFatwa"
             Element={SingleFatwa}
             id="allFatwa"
@@ -1004,7 +1011,7 @@ const AllFatwa = injectIntl(({ history, location, match, intl }) => {
           />
         </Route>
         <Route path="/admin/fatwa/live">
-          <View
+          <ViewPaginated
             key="allFatwa"
             Element={SingleFatwa}
             id="allFatwa"
@@ -1176,7 +1183,7 @@ const AllFatwa = injectIntl(({ history, location, match, intl }) => {
           />
         </Route>
         <Route path="/admin/fatwa/pending">
-          <View
+          <ViewPaginated
             key="allFatwaSubmission"
             Element={SingleFatwaSubmission}
             id="fatwaSubmissions"
@@ -1326,7 +1333,7 @@ const AllFatwa = injectIntl(({ history, location, match, intl }) => {
                   <FormattedMessage id="source" defaultMessage="Source" />
                 ),
                 sort: true,
-                colCode: "jamia",
+                colCode: "source",
               },
               {
                 column: <FormattedMessage id="title" defaultMessage="Title" />,
@@ -2465,7 +2472,7 @@ const ScrappedFatwas = injectIntl(({ history, location, match, intl }) => {
       />
       <Switch>
         <Route path="/admin/scrappedFatwas" exact>
-          <View
+          <ViewPaginated
             key="allFatwaSubmission"
             Element={SingleScrappedFatwa}
             id="allScrapped"
@@ -2607,7 +2614,6 @@ const ScrappedFatwas = injectIntl(({ history, location, match, intl }) => {
               },
               {
                 column: <FormattedMessage id="topic" defaultMessage="Topic" />,
-                sort: true,
                 colCode: "topic",
               },
               {
@@ -2615,7 +2621,7 @@ const ScrappedFatwas = injectIntl(({ history, location, match, intl }) => {
                   <FormattedMessage id="source" defaultMessage="Source" />
                 ),
                 sort: true,
-                colCode: "jamia",
+                colCode: "source",
               },
               {
                 column: <FormattedMessage id="title" defaultMessage="Title" />,
@@ -2626,7 +2632,7 @@ const ScrappedFatwas = injectIntl(({ history, location, match, intl }) => {
           />
         </Route>
         <Route path="/admin/scrappedFatwas/pending">
-          <View
+          <ViewPaginated
             key="allFatwaSubmission"
             Element={SingleScrappedFatwa}
             id="allScrapped"
@@ -2768,7 +2774,6 @@ const ScrappedFatwas = injectIntl(({ history, location, match, intl }) => {
               },
               {
                 column: <FormattedMessage id="topic" defaultMessage="Topic" />,
-                sort: true,
                 colCode: "topic",
               },
               {
@@ -2776,7 +2781,7 @@ const ScrappedFatwas = injectIntl(({ history, location, match, intl }) => {
                   <FormattedMessage id="source" defaultMessage="Source" />
                 ),
                 sort: true,
-                colCode: "jamia",
+                colCode: "source",
               },
               {
                 column: <FormattedMessage id="title" defaultMessage="Title" />,
@@ -2787,7 +2792,7 @@ const ScrappedFatwas = injectIntl(({ history, location, match, intl }) => {
           />
         </Route>
         <Route path="/admin/scrappedFatwas/live">
-          <View
+          <ViewPaginated
             key="allFatwa"
             Element={SingleScrappedFatwa}
             id="allScrappedLive"
@@ -2937,7 +2942,7 @@ const ScrappedFatwas = injectIntl(({ history, location, match, intl }) => {
                   <FormattedMessage id="source" defaultMessage="Source" />
                 ),
                 sort: true,
-                colCode: "jamia",
+                colCode: "source",
               },
               {
                 column: <FormattedMessage id="title" defaultMessage="Title" />,

@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
 import { SiteContext } from "../Context";
 import { Link, useHistory } from "react-router-dom";
-import { FormattedMessage } from "react-intl";
+import { Combobox } from "./FormElements";
+import { FormattedMessage, FormattedNumber, injectIntl } from "react-intl";
 import Footer from "./Footer";
 
 export const Sidebar = ({ views, children }) => {
@@ -470,74 +471,140 @@ export const View = ({
   );
 };
 
-export const ViewPaginated = ({
-  id,
-  api,
-  categories,
-  columns,
-  defaultSort,
-  Element,
-}) => {
-  const abortController = new AbortController();
-  const signal = abortController.signal;
-  const { locale } = useContext(SiteContext);
-  const [filters, setFilters] = useState([]);
-  const [sort, setSort] = useState(defaultSort);
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  function fetchData() {
-    !loading && setLoading(true);
-    const query = encodeURI(filters);
-    const options = { headers: { "Accept-Language": locale }, signal: signal };
-    const url = `/${api}${query}&column=${sort.column}&order=${sort.order}`;
-    fetch(url, options)
-      .then((res) => res.json())
-      .then((data) => {
-        setLoading(false);
-        if (data.code === "ok") {
-          setData(data.data);
-        } else {
+export const ViewPaginated = injectIntl(
+  ({ id, api, categories, columns, defaultSort, Element, intl }) => {
+    const abortController = new AbortController();
+    const signal = abortController.signal;
+    const { locale } = useContext(SiteContext);
+    const [filters, setFilters] = useState([]);
+    const [sort, setSort] = useState(defaultSort);
+    const [data, setData] = useState([]);
+    const [perPage, setPerPage] = useState(20);
+    const [total, setTotal] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [loading, setLoading] = useState(true);
+    function fetchData() {
+      !loading && setLoading(true);
+      const query = encodeURI(filters);
+      const options = {
+        headers: { "Accept-Language": locale },
+        signal: signal,
+      };
+      const url = `/${api}${query}&column=${sort.column}&order=${sort.order}&perPage=${perPage}&page=${currentPage}`;
+      fetch(url, options)
+        .then((res) => res.json())
+        .then((data) => {
+          setLoading(false);
+          if (data.code === "ok") {
+            setData(data.content);
+            setTotal(data.total);
+          } else {
+            alert("something went wrong");
+          }
+        })
+        .catch((err) => {
+          setLoading(false);
+          if (err.name === "AbortError") {
+            return;
+          }
+          console.log(err);
           alert("something went wrong");
-        }
-      })
-      .catch((err) => {
-        setLoading(false);
-        if (err.name === "AbortError") {
-          return;
-        }
-        console.log(err);
-        alert("something went wrong");
-      });
-    return () => abortController.abort();
-  }
-  useEffect(fetchData, [filters, sort, api]);
-  return (
-    <>
-      {categories && (
-        <Filter
-          filters={filters}
-          setFilters={setFilters}
-          categories={categories}
+        });
+      return () => abortController.abort();
+    }
+    useEffect(fetchData, [filters, sort, api, perPage, currentPage, locale]);
+    return (
+      <>
+        {categories && (
+          <Filter
+            filters={filters}
+            setFilters={setFilters}
+            categories={categories}
+          />
+        )}
+        <Table
+          id={id}
+          className="thead"
+          sort={sort}
+          setSort={setSort}
+          columns={columns}
         />
-      )}
-      <Table
-        id={id}
-        className="thead"
-        sort={sort}
-        setSort={setSort}
-        columns={columns}
-      />
-      <Table id={id} sort={sort} setSort={setSort}>
-        {loading && <LoadingColumn />}
-        {!loading &&
-          data.map((item) => (
-            <Element setData={setData} key={item._id} data={item} />
-          ))}
-        {!loading && data.length === 0 && <NothingHere />}
-      </Table>
-    </>
-  );
-};
+        <Table id={id} sort={sort} setSort={setSort}>
+          {loading && <LoadingColumn />}
+          {!loading &&
+            data.map((item) => (
+              <Element setData={setData} key={item._id} data={item} />
+            ))}
+          {!loading && data.length === 0 && <NothingHere />}
+        </Table>
+        <div className="tableFooter">
+          {loading ? (
+            <div className="loading">
+              <span />
+              <span />
+              <span />
+            </div>
+          ) : (
+            data.length > 0 && (
+              <>
+                <div className="perPage">
+                  <p className="count">
+                    <FormattedMessage id="perPage" />
+                  </p>
+                  <Combobox
+                    icon="caret-down"
+                    options={[
+                      { label: intl.formatNumber(20), value: 20 },
+                      { label: intl.formatNumber(30), value: 30 },
+                      { label: intl.formatNumber(50), value: 50 },
+                    ]}
+                    defaultValue={perPage === 20 ? 0 : perPage === 30 ? 1 : 2}
+                    maxHeight={96}
+                    onChange={(option) => {
+                      setPerPage(option.value);
+                    }}
+                  />
+                </div>
+                <p className="count">
+                  <FormattedMessage
+                    id="itemCount"
+                    values={{
+                      start: (
+                        <FormattedNumber
+                          value={(currentPage - 1) * perPage + 1}
+                        />
+                      ),
+                      end: (
+                        <FormattedNumber
+                          value={Math.min(currentPage * perPage, total)}
+                        />
+                      ),
+                      total: <FormattedNumber value={total} />,
+                    }}
+                  />
+                </p>
+                <div className="btns">
+                  <button disabled={loading || currentPage === 1}>
+                    <ion-icon
+                      onClick={() => setCurrentPage((prev) => prev - 1)}
+                      name="chevron-back-outline"
+                    ></ion-icon>
+                  </button>
+                  <button disabled={loading || total / perPage < currentPage}>
+                    <ion-icon
+                      onClick={() => setCurrentPage((prev) => prev + 1)}
+                      name="chevron-forward-outline"
+                    ></ion-icon>
+                  </button>
+                </div>
+              </>
+            )
+          )}
+        </div>
+      </>
+    );
+  }
+);
 
 export const LoadingPost = () => {
   return (

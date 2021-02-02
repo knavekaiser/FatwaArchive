@@ -10,6 +10,11 @@
   #allFatwa {
     tr {
       grid-template-columns: 8rem 8rem 5rem 6rem 1fr;
+      td {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
     }
   }
   #allJamia {
@@ -792,6 +797,82 @@
       }
       td.jamiaFatwaCount {
         text-align: center;
+      }
+    }
+  }
+  .tableFooter {
+    margin-bottom: 2rem;
+    padding: 0.5rem;
+    border-bottom: 1px solid $light-border;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    grid-gap: 2rem;
+    .perPage {
+      align-items: center;
+      grid-gap: 0.5rem;
+      p {
+        white-space: nowrap;
+      }
+      .combobox {
+        width: 3rem;
+        input {
+          font-size: 0.9rem;
+          border-bottom: none;
+          padding-top: 4px;
+        }
+        ion-icon {
+          margin: auto;
+          font-size: 1.1rem;
+        }
+        .options {
+          &::-webkit-scrollbar {
+            width: 0 !important;
+          }
+          li {
+            font-size: 0.9rem;
+            text-align: center;
+          }
+        }
+      }
+      display: flex;
+    }
+    p {
+      color: $light-text;
+      font-size: 0.82rem;
+    }
+    .btns {
+      grid-gap: 0;
+      button {
+        outline: none;
+        border: none;
+        background: none;
+        font-size: 1rem;
+        cursor: pointer;
+        padding: 0;
+        &:disabled {
+          pointer-events: none;
+          color: $light-border;
+        }
+        color: $light-text;
+        ion-icon {
+          padding: 0.25em;
+          &:hover {
+            color: #333;
+            background: $light-hover;
+          }
+        }
+      }
+    }
+    .loading {
+      display: flex;
+      grid-gap: 1.5rem;
+      span {
+        margin: 0.75rem 0;
+        background: $light-hover;
+        height: 1rem;
+        width: 4rem;
+        border-radius: 1rem;
       }
     }
   }

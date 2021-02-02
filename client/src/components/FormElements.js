@@ -1,4 +1,10 @@
-import React, { useState, useContext, useEffect, useRef } from "react";
+import React, {
+  useState,
+  useContext,
+  useEffect,
+  useRef,
+  useLayoutEffect,
+} from "react";
 import { SiteContext } from "../Context";
 import TextareaAutosize from "react-textarea-autosize";
 import { FormattedMessage, FormattedNumber } from "react-intl";
@@ -924,6 +930,15 @@ export const Combobox = ({
   const [open, setOpen] = useState(false);
   const [data, setData] = useState("");
   const input = useRef();
+  const ul = useRef();
+  useLayoutEffect(() => {
+    const { bottom } = input.current.getBoundingClientRect();
+    if (bottom + maxHeight > window.innerHeight) {
+      ul.current.style.top = `${window.innerHeight - (bottom + maxHeight)}px`;
+    } else {
+      ul.current.style.removeProperty("top");
+    }
+  });
   return (
     <OutsideClick
       className={`combobox ${disabled ? "disabled" : ""}`}
@@ -951,6 +966,7 @@ export const Combobox = ({
         name={`${icon ? icon : "chevron-down"}-outline`}
       ></ion-icon>
       <ul
+        ref={ul}
         style={{
           width: "100%",
           position: "absolute",
