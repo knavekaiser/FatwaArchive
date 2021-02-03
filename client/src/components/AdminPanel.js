@@ -62,7 +62,7 @@ function AllSources() {
       />
       <Switch>
         <Route path="/admin/sources" exact>
-          <View
+          <ViewPaginated
             key="allJamia"
             Element={SingleJamia}
             defaultSort={{ column: "joined", order: "des" }}
@@ -122,7 +122,7 @@ function AllSources() {
           />
         </Route>
         <Route path="/admin/sources/active">
-          <View
+          <ViewPaginated
             key="allJamia"
             Element={SingleJamia}
             defaultSort={{ column: "joined", order: "des" }}
@@ -182,7 +182,7 @@ function AllSources() {
           />
         </Route>
         <Route path="/admin/sources/submissions">
-          <View
+          <ViewPaginated
             key="allSourceSubmissions"
             Element={SingleSourceSubmission}
             defaultSort={{ column: "joined", order: "des" }}

@@ -110,6 +110,7 @@ router
   .route("/source/fatwaSubmissions/filter")
   .get(passport.authenticate("SourceAuth"), (req, res) => {
     const locale = req.headers["accept-language"];
+    const { perPage, page } = req.query;
     const query = {
       $or: [{ status: "pending" }, { status: "pendingEdit" }],
       source: req.user._id,
@@ -120,10 +121,22 @@ router
       (query[`ques.${locale}`] = RegExp(req.query.question));
     req.query.answer && (query[`ans.${locale}`] = RegExp(req.query.answer));
     req.query.topic && (query[`topic.${locale}`] = req.query.topic);
-    Fatwa.find(query)
-      .sort(`${sort.order === "des" ? "-" : ""}${sort.column}`)
-      .then((submissions) => {
-        res.json({ code: "ok", data: submissions });
+    Fatwa.aggregate([
+      { $match: query },
+      { $sort: { [sort.column]: sort.order === "des" ? -1 : 1 } },
+      {
+        $facet: {
+          fatwas: [{ $skip: +perPage * (+page - 1) }, { $limit: +perPage }],
+          pageInfo: [{ $group: { _id: null, count: { $sum: 1 } } }],
+        },
+      },
+    ])
+      .then((data) => {
+        res.json({
+          code: "ok",
+          total: data[0].pageInfo[0] ? data[0].pageInfo[0].count : 0,
+          content: data[0].fatwas,
+        });
       })
       .catch((err) =>
         res.status(500).json({ code: 500, message: "something went wrong" })
@@ -145,6 +158,7 @@ router
   .get(passport.authenticate("SourceAuth"), (req, res) => {
     const locale = req.headers["accept-language"];
     const query = { status: "live", source: req.user._id };
+    const { perPage, page } = req.query;
     const sort = { column: req.query.column, order: req.query.order };
     const { title, ques, ans, topic, translation } = req.query;
     title && (query[`title.${locale}`] = RegExp(title));
@@ -156,10 +170,36 @@ router
     (translation === "Manual" || translation === "ব্যক্তি") &&
       (query.translation = true);
     if (locale === "bn-BD" || locale === "en-US") {
-      Fatwa.find(query, "-status -img")
-        .sort(`${sort.order === "des" ? "-" : ""}${sort.column}`)
-        .then((fatwas) => {
-          res.json({ code: "ok", data: fatwas });
+      Fatwa.aggregate([
+        { $match: query },
+        { $sort: { [sort.column]: sort.order === "des" ? -1 : 1 } },
+        {
+          $project: {
+            _id: 1,
+            [`link.${locale}`]: 1,
+            [`title.${locale}`]: 1,
+            [`ques.${locale}`]: 1,
+            [`ans.${locale}`]: 1,
+            [`topic.${locale}`]: 1,
+            createdAt: 1,
+            translation: 1,
+            [`source.id`]: 1,
+            [`source.name.${locale}`]: 1,
+          },
+        },
+        {
+          $facet: {
+            fatwas: [{ $skip: +perPage * (+page - 1) }, { $limit: +perPage }],
+            pageInfo: [{ $group: { _id: null, count: { $sum: 1 } } }],
+          },
+        },
+      ])
+        .then((data) => {
+          res.json({
+            code: "ok",
+            total: data[0].pageInfo[0] ? data[0].pageInfo[0].count : 0,
+            content: data[0].fatwas,
+          });
         })
         .catch((err) => {
           res.status(500).json({ code: 500, message: "something went wrong" });

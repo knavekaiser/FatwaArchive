@@ -11,6 +11,7 @@ function TableOfContent() {
     fetch("/api/getLinks")
       .then((res) => res.json())
       .then((data) => {
+        setLoading(false);
         if (data.code === "ok") {
           setData(data.data);
         }
@@ -18,6 +19,9 @@ function TableOfContent() {
       .catch((err) => console.log(err));
   };
   useEffect(fetchData, []);
+  if (loading) {
+    return <div className="main tableOfContent">loading</div>;
+  }
   return (
     <div className="main tableOfContent">
       <h2>

@@ -509,6 +509,7 @@ router
   .route("/admin/sources/submissions/filter")
   .get(passport.authenticate("AdminAuth"), (req, res) => {
     const locale = req.headers["accept-language"];
+    const { perPage, page } = req.query;
     const query = { status: "pending" };
     req.query.role && (query.role = RegExp(req.query.role));
     const sort = { column: req.query.column, order: req.query.order };
@@ -516,15 +517,33 @@ router
       res.status(400).json("No language selected or formation is wrong");
       return;
     }
-    Source.find(query)
-      .select("-pass -type")
-      .sort(`${sort.order === "des" ? "-" : ""}${sort.column}`)
-      .then((submissions) => {
-        res.json({ code: "ok", data: submissions });
+    Source.aggregate([
+      { $match: query },
+      { $sort: { [sort.column]: sort.order === "des" ? -1 : 1 } },
+      {
+        $project: {
+          pass: 0,
+          type: 0,
+        },
+      },
+      {
+        $facet: {
+          sources: [{ $skip: +perPage * (+page - 1) }, { $limit: +perPage }],
+          pageInfo: [{ $group: { _id: null, count: { $sum: 1 } } }],
+        },
+      },
+    ])
+      .then((data) => {
+        res.json({
+          code: "ok",
+          total: data[0].pageInfo[0] ? data[0].pageInfo[0].count : 0,
+          content: data[0].sources,
+        });
       })
-      .catch((err) =>
-        res.status(500).json({ code: 500, message: "something went wrong" })
-      );
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json({ code: 500, message: "something went wrong" });
+      });
   });
 router
   .route("/admin/source/accept")
@@ -563,18 +582,37 @@ router
 router
   .route("/admin/sources/active/filter")
   .get(passport.authenticate("AdminAuth"), (req, res) => {
+    const { perPage, page } = req.query;
     const query = { status: "active" };
     const sort = { column: req.query.column, order: req.query.order };
     req.query.role && (query.role = RegExp(req.query.role));
-    Source.find(query)
-      .sort(`${sort.order === "des" ? "-" : ""}${sort.column}`)
-      .select("-pass -type")
-      .then((sources) => {
-        res.json({ code: "ok", data: sources });
+    Source.aggregate([
+      { $match: query },
+      { $sort: { [sort.column]: sort.order === "des" ? -1 : 1 } },
+      {
+        $project: {
+          pass: 0,
+          type: 0,
+        },
+      },
+      {
+        $facet: {
+          sources: [{ $skip: +perPage * (+page - 1) }, { $limit: +perPage }],
+          pageInfo: [{ $group: { _id: null, count: { $sum: 1 } } }],
+        },
+      },
+    ])
+      .then((data) => {
+        res.json({
+          code: "ok",
+          total: data[0].pageInfo[0] ? data[0].pageInfo[0].count : 0,
+          content: data[0].sources,
+        });
       })
-      .catch((err) =>
-        res.status(500).json({ code: 500, data: "something went wrong" })
-      );
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json({ code: 500, data: "something went wrong" });
+      });
   });
 router
   .route("/admin/source/edit/:_id")

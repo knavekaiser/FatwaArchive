@@ -1,7 +1,14 @@
 import React, { useState, useContext, useEffect, useRef } from "react";
 import { Route, Switch, Link, Redirect, useHistory } from "react-router-dom";
 import { SiteContext } from "../Context";
-import { Tabs, View, Sidebar, Actions, LoadingPost } from "./TableElements";
+import {
+  Tabs,
+  View,
+  ViewPaginated,
+  Sidebar,
+  Actions,
+  LoadingPost,
+} from "./TableElements";
 import {
   ID,
   Input,
@@ -409,7 +416,7 @@ const JamiaAllFatwa = injectIntl(({ intl }) => {
       />
       <Switch>
         <Route path="/source/fatwa" exact>
-          <View
+          <ViewPaginated
             key="jamiaAllFatwa"
             Element={SingleFatwa}
             id="allFatwa"
@@ -574,7 +581,7 @@ const JamiaAllFatwa = injectIntl(({ intl }) => {
           />
         </Route>
         <Route path="/source/fatwa/live">
-          <View
+          <ViewPaginated
             key="jamiaAllFatwa"
             Element={SingleFatwa}
             id="allFatwa"
@@ -739,7 +746,7 @@ const JamiaAllFatwa = injectIntl(({ intl }) => {
           />
         </Route>
         <Route path="/source/fatwa/pending">
-          <View
+          <ViewPaginated
             key="jamiaAllFatwaSubmission"
             Element={JamiaSingleFatwaSubmission}
             id="fatwaSubmissions"

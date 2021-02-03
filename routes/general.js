@@ -376,7 +376,7 @@ router.route("/auth").get((req, res) => {
       res.redirect("/api/authAdmin");
     }
   } else {
-    res.status(400).json({ code: 400, message: "bad request" });
+    res.json({ code: 400, message: "bad request" });
   }
 });
 router
