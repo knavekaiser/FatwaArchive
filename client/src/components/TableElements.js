@@ -533,7 +533,12 @@ export const ViewPaginated = injectIntl(
           {loading && <LoadingColumn />}
           {!loading &&
             data.map((item) => (
-              <Element setData={setData} key={item._id} data={item} />
+              <Element
+                setData={setData}
+                key={item._id}
+                data={item}
+                fetchData={fetchData}
+              />
             ))}
           {!loading && data.length === 0 && <NothingHere />}
         </Table>

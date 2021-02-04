@@ -22,7 +22,12 @@ function Avatar() {
   }
   return (
     <li className="avatar" onClick={() => setOpen(true)}>
-      <ion-icon name="person-circle-outline"></ion-icon>
+      {user.role === "admin" ? (
+        <ion-icon name="shield-outline"></ion-icon>
+      ) : (
+        <ion-icon name="people-circle-outline"></ion-icon>
+      )}
+
       {open && (
         <OutsideClick open={open} setOpen={setOpen}>
           <ul

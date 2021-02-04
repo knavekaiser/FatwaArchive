@@ -31,23 +31,8 @@ import "./App.min.css";
 const AdminPanel = lazy(() => import("./components/AdminPanel"));
 const JamiaProfile = lazy(() => import("./components/JamiaProfile"));
 
-function ProtectedRoute({
-  component: Component,
-  redirect,
-  role,
-  children,
-  ...rest
-}) {
-  const { user } = useContext(SiteContext);
-  return user && user.role === role ? (
-    <Route {...rest}>{children ? children : <Component />}</Route>
-  ) : (
-    <Redirect to={redirect} />
-  );
-}
-
 function App() {
-  const { setUser, setIsAuthenticated, setSources } = useContext(SiteContext);
+  const { setUser, setIsAuthenticated } = useContext(SiteContext);
   const { locale, setLocale } = useContext(SiteContext);
   const history = useHistory();
   const link = useRef(window.location.href.replace(window.location.origin, ""));

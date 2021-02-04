@@ -163,20 +163,20 @@ router
       },
       { $unwind: "$source" },
       { $sort: { [sort.column]: sort.order === "des" ? -1 : 1 } },
-      {
-        $project: {
-          _id: 1,
-          [`link.${locale}`]: 1,
-          [`title.${locale}`]: 1,
-          [`ques.${locale}`]: 1,
-          [`ans.${locale}`]: 1,
-          [`topic.${locale}`]: 1,
-          createdAt: 1,
-          translation: 1,
-          [`source.id`]: 1,
-          [`source.name.${locale}`]: 1,
-        },
-      },
+      // {
+      //   $project: {
+      //     _id: 1,
+      //     [`link.${locale}`]: 1,
+      //     [`title.${locale}`]: 1,
+      //     [`ques.${locale}`]: 1,
+      //     [`ans.${locale}`]: 1,
+      //     [`topic.${locale}`]: 1,
+      //     createdAt: 1,
+      //     translation: 1,
+      //     [`source.id`]: 1,
+      //     [`source.name.${locale}`]: 1,
+      //   },
+      // },
       {
         $facet: {
           fatwas: [{ $skip: +perPage * (+page - 1) }, { $limit: +perPage }],

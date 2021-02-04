@@ -1547,6 +1547,25 @@ function SingleFatwa({ data, setData }) {
         console.log(err);
       });
   }
+  // return (
+  //   <tr onClick={() => setOpen(true)}>
+  //     <td>{fatwa.source?.name[locale] || "NA"}</td>
+  //     <td>{fatwa.topic[locale]}</td>
+  //     <td>{fatwa.translation ? "Yes" : "No"}</td>
+  //     <td>
+  //       <FormattedDate
+  //         value={new Date(fatwa.createdAt)}
+  //         day="numeric"
+  //         month="numeric"
+  //         year="2-digit"
+  //       />
+  //     </td>
+  //     <td>{fatwa.title[locale]}</td>
+  //     {open && (
+  //       <Modal open={true}>this is the full fatwa with all the detail</Modal>
+  //     )}
+  //   </tr>
+  // );
   return open ? (
     <tr data-id={fatwa._id} className={`${open ? "full" : ""}`}>
       <td className="label">Added</td>
@@ -2956,24 +2975,9 @@ const ScrappedFatwas = injectIntl(({ history, location, match, intl }) => {
     </div>
   );
 });
-function SingleScrappedFatwa({ data, setData }) {
+function SingleScrappedFatwa({ data, setData, fetchData }) {
   const [showForm, setShowForm] = useState(false);
   const { locale } = useContext(SiteContext);
-  function fetchData() {
-    fetch("/api/admin/scrappedFatwas/filter?")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.code === "ok") {
-          setData(data.data);
-        } else {
-          alert("someting went wrong");
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-        alert("someting went wrong");
-      });
-  }
   return (
     <>
       <tr
