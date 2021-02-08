@@ -9,8 +9,8 @@ router
           return new Fatwa({
             topic: topic,
             link: {
-              "bn-BD": title["bn-BD"].replace(/\s/g, "-"),
-              "en-US": translations[0].replace(/\s/g, "-"),
+              "bn-BD": title["bn-BD"].trim().replace(/\s/g, "-"),
+              "en-US": translations[0].trim().replace(/\s/g, "-"),
             },
             title: { "bn-BD": title["bn-BD"], "en-US": translations[0] },
             ques: { "bn-BD": ques["bn-BD"], "en-US": translations[1] },
@@ -77,10 +77,10 @@ router
           ? true
           : false,
       ...(req.body["title.bn-BD"] && {
-        ["link.bn-BD"]: req.body["title.bn-BD"].replace(/\s/g, "-"),
+        ["link.bn-BD"]: req.body["title.bn-BD"].trim().replace(/\s/g, "-"),
       }),
       ...(req.body["title.en-US"] && {
-        ["link.en-US"]: req.body["title.en-US"].replace(/\s/g, "-"),
+        ["link.en-US"]: req.body["title.en-US"].trim().replace(/\s/g, "-"),
       }),
       ...req.body,
       status: "pending",
@@ -234,10 +234,10 @@ router
           ? true
           : false,
       ...(req.body["title.bn-BD"] && {
-        ["link.bn-BD"]: req.body["title.bn-BD"].replace(/\s/g, "-"),
+        ["link.bn-BD"]: req.body["title.bn-BD"].trim().replace(/\s/g, "-"),
       }),
       ...(req.body["title.en-US"] && {
-        ["link.en-US"]: req.body["title.en-US"].replace(/\s/g, "-"),
+        ["link.en-US"]: req.body["title.en-US"].trim().replace(/\s/g, "-"),
       }),
       ...req.body,
       status: req.user.verified ? "live" : "pendingEdit",
