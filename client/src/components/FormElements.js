@@ -816,23 +816,13 @@ export const MultipleInput = ({ inputs, refInput, id }) => {
       } else if (currentValue.length === 0) {
         if (e.maxLength === 100) {
           setFinal((prev) => {
-            const newFinal = [...prev];
-            const indecies = [];
-            for (var i = 0; i < newGroup.length; i++) {
-              const value = newGroup[i].split(":")[1];
-              if (value === "") {
-                indecies.push(i);
+            const newRef = [];
+            newGroup.forEach((item, i) => {
+              if (!!item.split(":")[1] || e.id === item.split(":")[0]) {
+                newRef.push(prev[i]);
               }
-              // if (value === "" && i < current) {
-              //   newFinal.splice(i, 1);
-              // } else if (value === "" && i > current) {
-              //   newFinal.splice(i, 1);
-              // }
-            }
-            const filtered = newFinal.filter(
-              (item, i) => !indecies.includes(i)
-            );
-            return filtered.length === 0 ? newFinal : filtered;
+            });
+            return newRef;
           });
         }
       }
@@ -888,13 +878,13 @@ const Group = ({ id, inputs, clone, setGroupCount }) => {
             warning={input.type === "number" && "0-9, ০-৯"}
             defaultValue={input.value}
             required={input.clone ? false : !(input.id === "part")}
-            strict={input.type === "number" && /^[০-৯0-9]+$/g}
+            strict={input.type === "number" && /^[০-৯0-9]+$/}
             max={input.clone ? 100 : 12}
             label={input.label}
             id={input.clone ? id : id + i}
             onChange={(e) => {
               clone(e);
-              setValue(e.value);
+              input.clone && setValue(e.value);
             }}
             disabled={input.clone ? false : input.value ? false : value === ""}
           />

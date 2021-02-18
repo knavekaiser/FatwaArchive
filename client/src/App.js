@@ -32,8 +32,9 @@ const AdminPanel = lazy(() => import("./components/AdminPanel"));
 const JamiaProfile = lazy(() => import("./components/JamiaProfile"));
 
 function App() {
-  const { setUser, setIsAuthenticated } = useContext(SiteContext);
-  const { locale, setLocale } = useContext(SiteContext);
+  const { locale, setLocale, setUser, setIsAuthenticated } = useContext(
+    SiteContext
+  );
   const history = useHistory();
   const link = useRef(window.location.href.replace(window.location.origin, ""));
   const setLan = () => {

@@ -80,53 +80,6 @@ router
         });
     }
   });
-router
-  .route("/admin/editFatwa/:_id")
-  .patch(passport.authenticate("AdminAuth"), (req, res) => {
-    const newData = {
-      translation:
-        req.body["title.en-US"] &&
-        req.body["ques.en-US"] &&
-        req.body["ans.en-US"]
-          ? true
-          : false,
-      ...(req.body["title.bn-BD"] && {
-        ["link.bn-BD"]: req.body["title.bn-BD"].trim().replace(/\s/g, "-"),
-      }),
-      ...(req.body["title.en-US"] && {
-        ["link.en-US"]: req.body["title.en-US"].trim().replace(/\s/g, "-"),
-      }),
-      ...req.body,
-      status: "live",
-    };
-    if (ObjectID.isValid(req.params._id)) {
-      Fatwa.findByIdAndUpdate(req.params._id, newData)
-        .then(() =>
-          Promise.all([
-            Source.updateFatwaCount(req.body.source),
-            Source.updateFatwaCount(req.body.oldSource),
-          ])
-        )
-        .then(() => {
-          res.json({ code: "ok", message: "updated" });
-        })
-        .catch((err) => {
-          if (err.code === 11000) {
-            res.status(400).json({
-              code: err.code,
-              field: Object.keys(err.keyValue)[0],
-            });
-          } else {
-            console.log(err);
-            res
-              .status(500)
-              .json({ code: 500, message: "something went wrong" });
-          }
-        });
-    } else {
-      res.status(400).json({ code: 400, message: "invalid id" });
-    }
-  });
 
 //----------------------------------FATWA
 router
@@ -197,6 +150,53 @@ router
       });
   });
 router
+  .route("/admin/editFatwa/:_id")
+  .patch(passport.authenticate("AdminAuth"), (req, res) => {
+    const newData = {
+      translation:
+        req.body["title.en-US"] &&
+        req.body["ques.en-US"] &&
+        req.body["ans.en-US"]
+          ? true
+          : false,
+      ...(req.body["title.bn-BD"] && {
+        ["link.bn-BD"]: req.body["title.bn-BD"].trim().replace(/\s/g, "-"),
+      }),
+      ...(req.body["title.en-US"] && {
+        ["link.en-US"]: req.body["title.en-US"].trim().replace(/\s/g, "-"),
+      }),
+      ...req.body,
+      status: "live",
+    };
+    if (ObjectID.isValid(req.params._id)) {
+      Fatwa.findByIdAndUpdate(req.params._id, newData)
+        .then(() =>
+          Promise.all([
+            Source.updateFatwaCount(req.body.source),
+            Source.updateFatwaCount(req.body.oldSource),
+          ])
+        )
+        .then(() => {
+          res.json({ code: "ok", message: "updated" });
+        })
+        .catch((err) => {
+          if (err.code === 11000) {
+            res.status(400).json({
+              code: err.code,
+              field: Object.keys(err.keyValue)[0],
+            });
+          } else {
+            console.log(err);
+            res
+              .status(500)
+              .json({ code: 500, message: "something went wrong" });
+          }
+        });
+    } else {
+      res.status(400).json({ code: 400, message: "invalid id" });
+    }
+  });
+router
   .route("/admin/fatwa/")
   .delete(passport.authenticate("AdminAuth"), (req, res) => {
     Fatwa.findByIdAndDelete(req.body.fatwa)
@@ -204,6 +204,7 @@ router
       .then(() => res.status(200).json("Item Deleted!"))
       .catch((err) => res.status(400).json("Error: " + err));
   });
+
 router
   .route("/admin/fatwaSubmissions/filter")
   .get(passport.authenticate("AdminAuth"), (req, res) => {
@@ -248,7 +249,6 @@ router
 router
   .route("/admin/fatwaSubmissions/accept/:_id")
   .post(passport.authenticate("AdminAuth"), (req, res) => {
-    if (req.user.role !== "admin") return res.status(403).json("forbidden");
     if (ObjectID.isValid(req.params._id)) {
       Fatwa.findByIdAndUpdate(req.params._id, { status: "live" })
         .then((fatwa) => Source.updateFatwaCount(fatwa.source))

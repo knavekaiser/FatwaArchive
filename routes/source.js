@@ -142,15 +142,17 @@ router
         res.status(500).json({ code: 500, message: "something went wrong" })
       );
   });
-router.route("/fatwaSubmissions/:_id").delete((req, res) => {
-  if (ObjectID.isValid(req.params._id)) {
-    Fatwa.findByIdAndDelete(req.params._id)
-      .then(() => res.json("successfully deleted"))
-      .catch((err) => res.status(400).json("Error: " + err));
-  } else {
-    res.status(400).json("invalid id");
-  }
-});
+router
+  .route("/fatwaSubmissions/:_id")
+  .delete(passport.authenticate("SourceAuth"), (req, res) => {
+    if (ObjectID.isValid(req.params._id)) {
+      Fatwa.findByIdAndDelete(req.params._id)
+        .then(() => res.json("successfully deleted"))
+        .catch((err) => res.status(400).json("Error: " + err));
+    } else {
+      res.status(400).json("invalid id");
+    }
+  });
 
 //----------------------------------------------ALL FATWA
 router
