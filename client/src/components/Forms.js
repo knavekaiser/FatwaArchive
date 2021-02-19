@@ -2666,7 +2666,7 @@ export const ScrappedFawtaForm = ({ data, fetchData }) => {
         {Object.keys(preFill.meta).map((key) => {
           return (
             <li key={key}>
-              {key}: {preFill.meta[key]}
+              {key}: {decodeURI(preFill.meta[key])}
             </li>
           );
         })}
