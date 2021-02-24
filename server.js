@@ -9,7 +9,6 @@ global.JwtStrategy = require("passport-jwt").Strategy;
 global.ExtractJwt = require("passport-jwt").ExtractJwt;
 global.jwt = require("jsonwebtoken");
 global.jwt_decode = require("jwt-decode");
-const isBot = require("isbot-fast");
 
 global.genCode = (n) => {
   code = "";
@@ -26,17 +25,49 @@ global.getLan = (sentence, i) => {
     return !i ? "bn-BD" : "en-US";
   }
 };
+function getMonth() {
+  const date = new Date();
+  const month = date.getMonth() + 1;
+  const year = date.getFullYear().toString().substr(2);
+  return `${month < 10 ? "0" + month : month}-${year}`;
+}
 global.TranslateAll = async function (arr, salt) {
-  const allTrans = Promise.all(
-    arr.map((item) =>
-      translate.translate(item, getLan(item) === "en-US" ? "bn" : "en")
-    )
-  )
-    .then((res) => res.map((item) => item[0] + (salt ? ` ${genCode(10)}` : "")))
-    .catch((err) => {
-      throw err;
+  return GCloud.findOne({ month: getMonth() })
+    .then((report) => {
+      if (report) {
+        return report;
+      } else {
+        return new GCloud({
+          month: getMonth(),
+          usage: { translate: 0 },
+        }).save();
+      }
+    })
+    .then(async (report) => {
+      const allTrans = Promise.all([
+        ...arr.map((item) =>
+          translate.translate(item, getLan(item) === "en-US" ? "bn" : "en")
+        ),
+        GCloud.findByIdAndUpdate(report._id, {
+          "usage.translate": report.usage.translate + arr.join().length,
+        }),
+      ]);
+      if (arr.join().length + report.usage.translate < 499000) {
+        return await allTrans.then((res) => {
+          return (res.map((item) => item[0] + (salt ? ` ${genCode(10)}` : ""))[
+            res.length
+          ] = report.usage.translate);
+        });
+      } else {
+        return [
+          ...arr.map(
+            (item) =>
+              `Something went wrong with google translate. ${genCode(10)}`
+          ),
+          report.usage.translate,
+        ];
+      }
     });
-  return await allTrans;
 };
 
 global.ObjectID = require("mongodb").ObjectID;
@@ -53,19 +84,13 @@ const cookieParser = require("cookie-parser");
 const path = require("path");
 const app = express();
 
-//---------------------------------------------- dev stuff -
-
 require("dotenv").config();
-// const morgan = require("morgan");
-// app.use(morgan("dev"));
-
-//----------------------------------------------------------
 
 const PORT = process.env.PORT || 3001;
 const URI = process.env.ATLAS_URI;
 
 const CREDENTIALS = JSON.parse(process.env.GOOGLE_API_CREDENTIAL);
-global.translate = new Translate({
+translate = new Translate({
   credentials: CREDENTIALS,
   project_id: CREDENTIALS.project_id,
 });
@@ -89,91 +114,6 @@ app.use(passport.initialize());
 app.use("/api", require("./routes/general"));
 app.use("/api/source", require("./routes/source"));
 app.use("/api/admin", require("./routes/admin"));
-
-const puppeteer = require("puppeteer-core");
-const got = require("got");
-const jsdom = require("jsdom");
-const { JSDOM } = jsdom;
-
-async function bot(req, res, next) {
-  const ua = req.headers["user-agent"] || "";
-  if (
-    req.headers.ssr === "on" ||
-    req.originalUrl.startsWith("/static") ||
-    req.originalUrl.startsWith("/api") ||
-    req.originalUrl.startsWith("/fatwaArchive_favicon") ||
-    req.originalUrl.startsWith("/favicon.ico")
-  ) {
-    next();
-  } else {
-    if (isBot(ua) || true) {
-      console.log("this was a bot", req.originalUrl);
-      const url = `http://${req.get("host")}${req.originalUrl}`;
-      // const fullUrl = `http://${req.get("host")}${req.originalUrl}`;
-      try {
-        let launchOptions = {
-          headless: true,
-          executablePath: "../GoogleChromePortable/App/Chrome-bin/chrome.exe",
-        };
-        const browser = await puppeteer.launch(launchOptions);
-        const [page] = await browser.pages();
-
-        // await page.setUserAgent(
-        //   "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"
-        // );
-        await page.setExtraHTTPHeaders({ ssr: "on" });
-
-        await page.goto(url, {
-          waitUntil: "networkidle0",
-        });
-
-        const data = await page.evaluate(() => {
-          document.querySelectorAll("script").forEach((scr) => scr.remove());
-          document.querySelectorAll("link").forEach((link) => link.remove());
-          document.querySelector("noscript").remove();
-          return document.querySelector("*").outerHTML;
-        });
-        res.writeHeader(200, { "Content-Type": "text/html" });
-        res.write(data);
-        res.end();
-        await browser.close();
-        console.log("successfully served");
-      } catch (err) {
-        console.log(err);
-        next();
-      }
-      // got(url, { headers: { ssr: "on" } })
-      //   .then((response) => {
-      //     const window = new JSDOM(response.body, {
-      //       url: url,
-      //       reference: url,
-      //       includeNodeLocations: true,
-      //       resources: "usable",
-      //       runScripts: "dangerously",
-      //     }).window;
-      //     window.fetch = fetch;
-      //     window.location.href = fullUrl;
-      //     const document = window.document;
-      //
-      //     setTimeout(() => {
-      //       document
-      //         .querySelectorAll("link[rel='stylesheet']")
-      //         .forEach((el) => el.remove());
-      //       document.querySelectorAll("script").forEach((el) => el.remove());
-      //       document.querySelector("noscript").remove();
-      //       const html = document.documentElement.outerHTML;
-      //       res.send(html);
-      //     }, 3000);
-      //   })
-      //   .catch((err) => {
-      //     console.log(135, err);
-      //     next();
-      //   });
-    } else {
-      next();
-    }
-  }
-}
 
 app.use(express.static(path.join(__dirname, "client/build")));
 

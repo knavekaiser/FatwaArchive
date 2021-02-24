@@ -10,5 +10,15 @@ const userModel = new Schema({
 });
 
 const User = mongoose.model("User", userModel);
-
 global.User = User;
+
+const gCloud = new Schema(
+  {
+    month: { type: String, required: true, unique: true },
+    usage: {
+      translate: { type: Number, default: 0 },
+    },
+  },
+  { timestamps: true }
+);
+global.GCloud = mongoose.model("GCloud", gCloud);
