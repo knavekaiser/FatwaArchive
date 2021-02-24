@@ -90,7 +90,11 @@ const PORT = process.env.PORT || 3001;
 const URI = process.env.ATLAS_URI;
 
 const CREDENTIALS = JSON.parse(process.env.GOOGLE_API_CREDENTIAL);
+<<<<<<< HEAD
 const translate = new Translate({
+=======
+translate = new Translate({
+>>>>>>> 02e85cef978b07b86d4d2766166053608695351a
   credentials: CREDENTIALS,
   project_id: CREDENTIALS.project_id,
 });
